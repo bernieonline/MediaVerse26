@@ -62,90 +62,9 @@ ApplicationWindow {
             radius: 20
             border.width: 0
 
-            ListView {
-                id: fileView
+            Loader {
                 anchors.fill: parent
-                anchors.topMargin: 20
-                anchors.bottomMargin: 80
-                clip: true
-                model: 50
-                delegate: Item {
-                    width: fileView.width
-                    height: 40
-                    Text {
-                        text: "Folder or File " + (index + 1)
-                        color: "white"
-                        font.pixelSize: 16
-                        anchors.verticalCenter: parent.verticalCenter
-                        anchors.left: parent.left
-                        anchors.leftMargin: 20
-                    }
-                }
-            }
-
-            Timer {
-                id: scrollTimer
-                interval: 50
-                repeat: true
-                property int scrollStep: 0
-                onTriggered: {
-                    fileView.contentY += scrollStep;
-                }
-            }
-
-            Row {
-                anchors.bottom: parent.bottom
-                anchors.horizontalCenter: parent.horizontalCenter
-                anchors.bottomMargin: 15
-                spacing: 10
-
-                Loader {
-                    sourceComponent: scrollButtonComponent
-                    onLoaded: {
-                        item.text = "▲";
-                        item.scrollAmount = -10;
-                    }
-                }
-                Loader {
-                    sourceComponent: scrollButtonComponent
-                    onLoaded: {
-                        item.text = "▼";
-                        item.scrollAmount = 10;
-                    }
-                }
-            }
-
-            Component {
-                id: scrollButtonComponent
-                Rectangle {
-                    property string text
-                    property int scrollAmount
-
-                    width: 80
-                    height: 50
-                    color: "#333"
-                    radius: 8
-                    border.color: "#555"
-
-                    Text {
-                        anchors.centerIn: parent
-                        text: parent.text
-                        color: "white"
-                        font.pixelSize: 24
-                    }
-
-                    MouseArea {
-                        anchors.fill: parent
-                        hoverEnabled: true
-                        onEntered: {
-                            scrollTimer.scrollStep = scrollAmount;
-                            scrollTimer.start();
-                        }
-                        onExited: {
-                            scrollTimer.stop();
-                        }
-                    }
-                }
+                source: "FileSystem.qml"
             }
         }
     }
