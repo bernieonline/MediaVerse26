@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<MPL Version="2.0" Title="JRSidecar" PathSeparator="\">
+<Item>
+<Field Name="Filename">W:\Collection\War Movies\Allied (2016).mkv</Field>
+<Field Name="Track Transition Duration">-1</Field>
+<Field Name="Replay Gain">6.47</Field>
+<Field Name="MPAA Rating">R</Field>
+<Field Name="Producer">Robert Zemeckis;Steve Starkey;Graham King</Field>
+<Field Name="Peak Level (Sample)">+1.0 dB;-0.1 Left;-0.8 Right;+1.0 Centre;-2.6 Sub;-6.0 SL;-7.1 SR</Field>
+<Field Name="Color Depth">8</Field>
+<Field Name="Audio Sample Rate">48000;48000;48000;48000</Field>
+<Field Name="Audio Title">Surround 5.1;Surround 5.1;Surround 5.1;Surround 5.1</Field>
+<Field Name="Audio Bitrate">448;448;448;448</Field>
+<Field Name="Subtitle Codec">VobSub;VobSub;VobSub;VobSub;VobSub;VobSub;VobSub;VobSub;VobSub;VobSub;VobSub;VobSub</Field>
+<Field Name="Date Tagged">1616868859</Field>
+<Field Name="Volume Level (R128)">1.4664900302886963</Field>
+<Field Name="Compression">mkv video (video: mpeg2, audio: ac3)</Field>
+<Field Name="Bitrate">6965</Field>
+<Field Name="Bit Depth">32</Field>
+<Field Name="Color Space">BT.601 (PAL)</Field>
+<Field Name="Subtitle Title">;;;;;;;;;;;</Field>
+<Field Name="Audio Streams">4</Field>
+<Field Name="Peak Level">1.122</Field>
+<Field Name="Dynamic Range (DR)">23</Field>
+<Field Name="Genre">War</Field>
+<Field Name="IMDb ID">tt3640424</Field>
+<Field Name="Aspect Ratio">1.78</Field>
+<Field Name="Actors">Brad Pitt;Marion Cotillard;Jared Harris;Simon McBurney;Lizzy Caplan;Daniel Betts;Matthew Goode;Camille Cottin;August Diehl;Thierry Frémont;Vincent Ebrahim;Michael McKell;Vincent Latorre;Fleur Poad;Miryam Hayward;Iselle Rifat;Aysha Kaneyo;Sally Messham;Anton Blake;Charlotte Hope;Anton Lesser;Marion Bailey;Raffey Cassidy;Xavier de Guillebon;Raphael Acloque;Christian Rubeck;Russell Balogh;Paul Longley;Freddie Stewart;Celeste Dodwell;Phillipe Spall;Raphael Desprez;Eric Théobald;Ami Metcalf;Iain Batchelor;Angus Kennedy;Angelique Joan;Lukas Johne;Chris Reilly;Josh Dylan;Maggie O'Brien;Billy Burke;Jonathan Cass;Laraine Dix;Vikki Edwards;Sternkiker François;Sorcha Garavan;Cecilia Gragnani;Jason Grangier;Roman Green;Shane Griffin;Michael Haydon;Richard Hills Jr.;Ty Hurley;Sophie Karl;Ben Laumann;Saif Lone;Tiar Lounis;Jason Matthewson;Christopher McMullen;Peter Meyer;Claire Richardson;Sophie Shad;Marinelly Vaslon;Evie Wray;Jake Wyatt;Miroslav Zaruba</Field>
+<Field Name="Audio Language">English;English;Spanish;French</Field>
+<Field Name="FPS">25</Field>
+<Field Name="Director">Robert Zemeckis</Field>
+<Field Name="Tool Name">Media Center</Field>
+<Field Name="Video Codec">MPEG-2 Main</Field>
+<Field Name="Subtitle Streams">12</Field>
+<Field Name="Stack Top">-1</Field>
+<Field Name="Peak Level (R128)">+1.1 dBTP;+0.3 Left;-0.7 Right;+1.1 Centre;-2.6 Sub;-6.0 SL;-7.0 SR</Field>
+<Field Name="BPM">95</Field>
+<Field Name="Dynamic Range (R128)">22.9815502166748046</Field>
+<Field Name="Channels">6</Field>
+<Field Name="Video Bitrate">5136</Field>
+<Field Name="Description">In 1942, an intelligence officer in North Africa encounters a female French Resistance fighter on a deadly mission behind enemy lines. When they reunite in London, their relationship is tested by the pressures of war.</Field>
+<Field Name="Keywords">Spy;Resistance;World War II;Nazi;Past;Love;Couple;North Africa;1940s;French Woman</Field>
+<Field Name="Tool Version">31.0.84</Field>
+<Field Name="Audio Channels">6;6;6;6</Field>
+<Field Name="Media Sub Type">Movie</Field>
+<Field Name="Stack View">0</Field>
+<Field Name="Gross Revenue">$119,520,023</Field>
+<Field Name="Playable">1</Field>
+<Field Name="Subtitle Language">Danish;English;Spanish;French;Dutch;Norwegian;Finnish;Swedish;English;English;Spanish;French</Field>
+<Field Name="Volume Level (ReplayGain)">6.4664897918701172</Field>
+<Field Name="Budget">$85,000,000</Field>
+<Field Name="Date">42370</Field>
+<Field Name="Name">Allied</Field>
+<Field Name="Trailer">webmedia://YouTube/qsjQlGNs3BY</Field>
+<Field Name="Sample Rate">48000</Field>
+<Field Name="Critic Rating">TMDb 6.7 / 10</Field>
+<Field Name="Audio Codec">AC-3;AC-3;AC-3;AC-3</Field>
+<Field Name="Duration">7169</Field>
+<Field Name="Video Scan">Progressive</Field>
+</Item>
+</MPL>

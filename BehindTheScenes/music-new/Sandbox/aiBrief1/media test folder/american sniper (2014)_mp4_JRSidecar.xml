@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<MPL Version="2.0" Title="JRSidecar" PathSeparator="\">
+<Item>
+<Field Name="Filename">W:\War Movies\american sniper (2014).mp4</Field>
+<Field Name="MPAA Rating">R</Field>
+<Field Name="Producer">Clint Eastwood; Robert Lorenz; Peter Morgan; Andrew Lazar; Bradley Cooper</Field>
+<Field Name="Date Tagged">1588499310</Field>
+<Field Name="Compression">mp4 video (video: h264, audio: aac)</Field>
+<Field Name="Bitrate">8531</Field>
+<Field Name="Bit Depth">16</Field>
+<Field Name="Genre">War; Action</Field>
+<Field Name="IMDb ID">tt2179136</Field>
+<Field Name="Aspect Ratio">16:9</Field>
+<Field Name="Actors">Bradley Cooper; Sienna Miller; Kyle Gallner; Cole Konis; Ben Reed; Elise Robertson; Luke Sunshine; Troy Vincent; Brandon Salgado Telis; Chance Kelly; Keir O'Donnell; Marnette Patterson; Billy Miller; Leonard Roberts; Reynaldo Gallegos; Kevin Lacz; Jake McDorman; Cory Hardrict; Eric Ladin; Brando Eaton; James Ryen; Luke Grimes; Sammy Sheik; Evan Gamble; Tim Griffin; Brian Hallisay; Navid Negahban; Fehd Benchemsi; Eric Close; Zack Duhame; Mido Hamada; Kathe Mazur; Sam Jaeger; Assaf Cohen; Fahim Fazli; Hector Bucio; Jonathan Groff; Melissa Hayden; Pamela Denise Weaver; James D. Dever; Owain Yeoman; Greg Duke; Max Charles; Robert Clotworthy; Anthony Jennings; Vincent Selhorst-Jones; Emerson Brooks; E.R. Ruiz; Amber Alexander; Jason Hall; Jason Walsh; Jonathan Kowalsky; Shane Habberstad; Kevin Ryan; Benjamin Mathes; Luis Jose Lopez; Had Mhidi Senhaji; Ryan Sadaghiani; Ayman Samman; Salah Salea; Aidan McGraw; Ferguson Reid; Mark Thomason; Amie Farrell; Quay Terry; Tami Goveia; Leon Farmer; Paul Meixner; Victoria Reina Sigloch; Joel Lambert; Tony Nevada; Brett Edwards; Nick Salter; Ricky Ryba; Jet Jurgensmeyer; Madeleine McGraw; Elizabeth Schmidt; Bryan Anderson; Jacob Schick; Wade White; Clint Eastwood; Erik Audé</Field>
+<Field Name="FPS">30.000030517578125</Field>
+<Field Name="Tool Name">Media Center</Field>
+<Field Name="Director">Clint Eastwood</Field>
+<Field Name="Stack Top">-1</Field>
+<Field Name="Channels">2</Field>
+<Field Name="Description">U.S. Navy SEAL Chris Kyle takes his sole mission—protect his comrades—to heart and becomes one of the most lethal snipers in American history. His pinpoint accuracy not only saves countless lives but also makes him a prime target of insurgents. Despite grave danger and his struggle to be a good husband and father to his family back in the States, Kyle serves four tours of duty in Iraq. However, when he finally returns home, he finds that he cannot leave the war behind.</Field>
+<Field Name="Tool Version">26.0.30</Field>
+<Field Name="Keywords">Based On Novel Or Book; Sniper; Biography; Iraq; War; Navy Seal; Iraq War; U.S. Soldier; U.S. Marine</Field>
+<Field Name="Stack View">0</Field>
+<Field Name="Media Sub Type">Movie</Field>
+<Field Name="Gross Revenue">$542,307,423</Field>
+<Field Name="Playable">1</Field>
+<Field Name="Budget">$58,800,000</Field>
+<Field Name="Date">41984</Field>
+<Field Name="Name">American Sniper</Field>
+<Field Name="Trailer">webmedia://YouTube/cRbAXWfthtA</Field>
+<Field Name="Sample Rate">44100</Field>
+<Field Name="Critic Rating">TMDb 7.4 / 10</Field>
+<Field Name="Duration">7740.0700221999995847</Field>
+</Item>
+</MPL>

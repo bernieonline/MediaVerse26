@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<MPL Version="2.0" Title="JRSidecar" PathSeparator="\">
+<Item>
+<Field Name="Filename">W:\Collection\War Movies\633  squadron (1964).mp4</Field>
+<Field Name="Track Transition Duration">-1</Field>
+<Field Name="Replay Gain">0.94</Field>
+<Field Name="MPAA Rating">PG</Field>
+<Field Name="Producer">Cecil F. Ford</Field>
+<Field Name="Last Skipped">1592857013</Field>
+<Field Name="Peak Level (Sample)">-3.3 dB;-3.3 Left;-3.3 Right</Field>
+<Field Name="Color Depth">8</Field>
+<Field Name="Audio Sample Rate">48000;48000</Field>
+<Field Name="Audio Title">;</Field>
+<Field Name="Audio Bitrate">160;192</Field>
+<Field Name="Date Tagged">1592857061</Field>
+<Field Name="Volume Level (R128)">-4.0590200424194336</Field>
+<Field Name="Compression">mp4 video (video: h264, audio: aac)</Field>
+<Field Name="Bitrate">2840</Field>
+<Field Name="Bit Depth">16</Field>
+<Field Name="Color Space">BT.601 (PAL)</Field>
+<Field Name="Audio Streams">2</Field>
+<Field Name="Peak Level">0.684</Field>
+<Field Name="Dynamic Range (DR)">12</Field>
+<Field Name="Genre">War</Field>
+<Field Name="IMDb ID">tt0057811</Field>
+<Field Name="Aspect Ratio">2.3</Field>
+<Field Name="Actors">Cliff Robertson;George Chakiris;Maria Perschy;Harry Andrews;Donald Houston;Michael Goodliffe;John Meillon;John Bonney;Angus Lennie;Scott Finch;John Church;Barbara Archer;Sean Kelly;Julian Sherrier;Geoffrey Frederick;Johnny Briggs;Suzan Farmer;Anne Ridler;Peter Kriss;Cavan Malone;Richard Shaw</Field>
+<Field Name="Audio Language">;</Field>
+<Field Name="FPS">25</Field>
+<Field Name="Director">Walter Grauman</Field>
+<Field Name="Tool Name">Media Center</Field>
+<Field Name="Video Codec">H264 High L3.1</Field>
+<Field Name="Date Last Opened">1592857008</Field>
+<Field Name="Stack Top">-1</Field>
+<Field Name="Peak Level (R128)">-3.2 dBTP;-3.2 Left;-3.2 Right</Field>
+<Field Name="BPM">95</Field>
+<Field Name="Dynamic Range (R128)">19.1117000579833984</Field>
+<Field Name="Channels">2</Field>
+<Field Name="Video Bitrate">2488</Field>
+<Field Name="Description">When Norwegian resistance leader Lieutenant Erik Bergman reports the location of a German V-2 rocket fuel plant, the Royal Air Force's 633 Squadron is assigned the mission to destroy it. The plant is in a seemingly-impregnable location beneath an overhanging cliff at the end of a long, narrow fjord lined with anti-aircraft guns. The only way to destroy the plant is by collapsing the cliff on top of it.</Field>
+<Field Name="Keywords">Norway;Air Raid;Norwegian Resistance;WW2;DVD</Field>
+<Field Name="Tool Version">31.0.84</Field>
+<Field Name="Bookmark">193390</Field>
+<Field Name="Audio Channels">2;2</Field>
+<Field Name="Stack View">0</Field>
+<Field Name="Media Sub Type">Movie</Field>
+<Field Name="Zone Last Opened">Player</Field>
+<Field Name="Playable">1</Field>
+<Field Name="Volume Level (ReplayGain)">0.9409800171852112</Field>
+<Field Name="Skip Count">6</Field>
+<Field Name="Date">22012</Field>
+<Field Name="Name">633 Squadron</Field>
+<Field Name="Trailer">webmedia://YouTube/I6_u9kVjUNQ</Field>
+<Field Name="Sample Rate">48000</Field>
+<Field Name="Critic Rating">TMDb 6.2 / 10</Field>
+<Field Name="Audio Codec">AAC LC;AC-3</Field>
+<Field Name="Duration">5453.8800000000001091</Field>
+<Field Name="Video Scan">Progressive</Field>
+</Item>
+</MPL>

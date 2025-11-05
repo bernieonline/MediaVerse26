@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<MPL Version="2.0" Title="JRSidecar" PathSeparator="\">
+<Item>
+<Field Name="Filename">W:\Collection\War Movies\American Sniper (2014).m2ts</Field>
+<Field Name="Track Transition Duration">-1</Field>
+<Field Name="Replay Gain">5.02</Field>
+<Field Name="MPAA Rating">R</Field>
+<Field Name="Producer">Clint Eastwood;Robert Lorenz;Andrew Lazar;Bradley Cooper;Peter Morgan</Field>
+<Field Name="Peak Level (Sample)">-3.2 dB;-4.0 Left;-3.9 Right;-3.2 Centre;-8.5 Sub;-3.4 SL;-4.0 SR</Field>
+<Field Name="Color Depth">8</Field>
+<Field Name="Audio Sample Rate">48000</Field>
+<Field Name="Audio Bitrate">384</Field>
+<Field Name="Date Tagged">1610394112</Field>
+<Field Name="Volume Level (R128)">0.0172000005841255</Field>
+<Field Name="Compression">m2ts video (video: h264, audio: ac3)</Field>
+<Field Name="Bitrate">11297</Field>
+<Field Name="Bit Depth">32</Field>
+<Field Name="Color Space">BT.709</Field>
+<Field Name="Audio Streams">1</Field>
+<Field Name="Peak Level">0.692</Field>
+<Field Name="Dynamic Range (DR)">19</Field>
+<Field Name="Genre">War</Field>
+<Field Name="IMDb ID">tt2179136</Field>
+<Field Name="Aspect Ratio">1.78</Field>
+<Field Name="Actors">Bradley Cooper;Sienna Miller;Kyle Gallner;Cole Konis;Ben Reed;Elise Robertson;Keir O'Donnell;Luke Sunshine;Kevin Lacz;Troy Vincent;Brandon Salgado Telis;Chance Kelly;Marnette Patterson;Billy Miller;Leonard Roberts;Reynaldo Gallegos;Jake McDorman;Cory Hardrict;Eric Ladin;Brando Eaton;James Ryen;Luke Grimes;Sammy Sheik;Evan Gamble;Tim Griffin;Brian Hallisay;Navid Negahban;Fehd Benchemsi;Eric Close;Zack Duhame;Mido Hamada;Kathe Mazur;Sam Jaeger;Assaf Cohen;Fahim Fazli;Hector Bucio;Jonathan Groff;Melissa Hayden;Pamela Denise Weaver;James D. Dever;Owain Yeoman;Greg Duke;Max Charles;Robert Clotworthy;Anthony Jennings;Vincent Selhorst-Jones;Emerson Brooks;E.R. Ruiz;Amber Alexander;Jason Hall;Jason Walsh;Jonathan Kowalsky;Shane Habberstad;Kevin Ryan;Benjamin Mathes;Luis Jose Lopez;Had Mhidi Senhaji;Ryan Sadaghiani;Ayman Samman;Salah Salea;Aidan McGraw;Ferguson Reid;Mark Thomason;Amie Farrell;Quay Terry;Tami Goveia;Leon Farmer;Paul Meixner;Victoria Reina Sigloch;Joel Lambert;Tony Nevada;Brett Edwards;Nick Salter;Ricky Ryba;Jet Jurgensmeyer;Madeleine McGraw;Elizabeth Schmidt;Bryan Anderson;Jacob Schick;Wade White;Clint Eastwood;Erik Audé</Field>
+<Field Name="FPS">50</Field>
+<Field Name="Director">Clint Eastwood</Field>
+<Field Name="Tool Name">Media Center</Field>
+<Field Name="Video Codec">H264 High L4.0</Field>
+<Field Name="Stack Top">-1</Field>
+<Field Name="Peak Level (R128)">-3.0 dBTP;-3.7 Left;-3.7 Right;-3.0 Centre;-8.5 Sub;-3.4 SL;-3.9 SR</Field>
+<Field Name="BPM">98</Field>
+<Field Name="Dynamic Range (R128)">21.8628196716308594</Field>
+<Field Name="Channels">6</Field>
+<Field Name="Video Bitrate">0</Field>
+<Field Name="Description">U.S. Navy SEAL Chris Kyle takes his sole mission—protect his comrades—to heart and becomes one of the most lethal snipers in American history. His pinpoint accuracy not only saves countless lives but also makes him a prime target of insurgents. Despite grave danger and his struggle to be a good husband and father to his family back in the States, Kyle serves four tours of duty in Iraq. However, when he finally returns home, he finds that he cannot leave the war behind.</Field>
+<Field Name="Keywords">Based On Novel Or Book;Sniper;Biography;Iraq;U.S. Navy Seal;Iraq War;U.S. Soldier;U.S. Marine;Pack;Guns</Field>
+<Field Name="Tool Version">31.0.84</Field>
+<Field Name="Audio Channels">6</Field>
+<Field Name="Media Sub Type">Movie</Field>
+<Field Name="Stack View">0</Field>
+<Field Name="Gross Revenue">$542,307,423</Field>
+<Field Name="Playable">1</Field>
+<Field Name="Volume Level (ReplayGain)">5.0171999931335449</Field>
+<Field Name="Budget">$58,800,000</Field>
+<Field Name="Date">41640</Field>
+<Field Name="Name">American Sniper</Field>
+<Field Name="Trailer">webmedia://YouTube/cRbAXWfthtA</Field>
+<Field Name="Sample Rate">48000</Field>
+<Field Name="Critic Rating">TMDb 7.4 / 10</Field>
+<Field Name="Audio Codec">AC-3</Field>
+<Field Name="Duration">7739</Field>
+<Field Name="Video Scan">Interlaced</Field>
+</Item>
+</MPL>

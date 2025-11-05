@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>936</width>
+    <height>611</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Behind The Scenes</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QHBoxLayout" name="horizontalLayout_2">
+    <item>
+     <widget class="QWidget" name="widget" native="true">
+      <layout class="QHBoxLayout" name="horizontalLayout">
+       <item>
+        <layout class="QVBoxLayout" name="verticalLayout"/>
+       </item>
+      </layout>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>936</width>
+     <height>22</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>File</string>
+    </property>
+   </widget>
+   <widget class="QMenu" name="menuActions">
+    <property name="title">
+     <string>Actions</string>
+    </property>
+    <addaction name="actionBuild_Master"/>
+    <addaction name="actionPlay_a_Movie"/>
+    <addaction name="actionRemove_File_s"/>
+    <addaction name="actionExcess_Copies"/>
+    <addaction name="actionFolder_Synch_Check"/>
+    <addaction name="actionAdd_New_File"/>
+   </widget>
+   <widget class="QMenu" name="menuInformation">
+    <property name="title">
+     <string>Information</string>
+    </property>
+    <addaction name="actionDrive_Utilisation"/>
+   </widget>
+   <widget class="QMenu" name="menuSearch">
+    <property name="title">
+     <string>Search</string>
+    </property>
+    <addaction name="actionFind_Copies"/>
+    <addaction name="actionGet_IMBD_Data"/>
+    <addaction name="actionRotten_Tomatoes"/>
+   </widget>
+   <widget class="QMenu" name="menuFFMPEG">
+    <property name="title">
+     <string>FFMPEG</string>
+    </property>
+    <addaction name="actionReformat"/>
+   </widget>
+   <widget class="QMenu" name="menuMusic">
+    <property name="title">
+     <string>Music</string>
+    </property>
+    <addaction name="separator"/>
+    <addaction name="separator"/>
+    <addaction name="actionFind_Content"/>
+    <addaction name="actionReports"/>
+    <addaction name="actionUtilities"/>
+   </widget>
+   <addaction name="menuFile"/>
+   <addaction name="menuActions"/>
+   <addaction name="menuInformation"/>
+   <addaction name="menuSearch"/>
+   <addaction name="menuFFMPEG"/>
+   <addaction name="menuMusic"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <widget class="QToolBar" name="toolBar">
+   <property name="windowTitle">
+    <string>toolBar</string>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="actionRename_Files"/>
+   <addaction name="actionBuild_Master"/>
+   <addaction name="separator"/>
+   <addaction name="actionDistribute_Copies"/>
+   <addaction name="actionFFMpeg_Actions"/>
+   <addaction name="actionFile_Group_Analysis"/>
+  </widget>
+  <action name="actionBuild_Master">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset>
+     <normaloff>B:/OneDrive/dropboxEx/GAming/PythonProjects2021/pythonProject/Icons/icons-shadowless/database.png</normaloff>B:/OneDrive/dropboxEx/GAming/PythonProjects2021/pythonProject/Icons/icons-shadowless/database.png</iconset>
+   </property>
+   <property name="text">
+    <string>Build Master</string>
+   </property>
+   <property name="toolTip">
+    <string>Build Mastefile</string>
+   </property>
+   <property name="shortcut">
+    <string>Shift+M</string>
+   </property>
+  </action>
+  <action name="actionRename_Similar_Files">
+   <property name="text">
+    <string>Rename Similar Files</string>
+   </property>
+  </action>
+  <action name="actionPlay_a_Movie">
+   <property name="text">
+    <string>Play a Movie</string>
+   </property>
+  </action>
+  <action name="actionMove_File_s">
+   <property name="text">
+    <string>Move File(s)</string>
+   </property>
+  </action>
+  <action name="actionRemove_File_s">
+   <property name="text">
+    <string>Remove File(s)</string>
+   </property>
+  </action>
+  <action name="actionExcess_Copies">
+   <property name="text">
+    <string>Excess Copies</string>
+   </property>
+  </action>
+  <action name="actionFolder_Synch_Check">
+   <property name="text">
+    <string>Folder Synch Check</string>
+   </property>
+  </action>
+  <action name="actionAdd_New_File">
+   <property name="text">
+    <string>Add New File</string>
+   </property>
+  </action>
+  <action name="actionDrive_Utilisation">
+   <property name="text">
+    <string>Drive Utilisation</string>
+   </property>
+  </action>
+  <action name="actionFind_Copies">
+   <property name="text">
+    <string>Find Copies</string>
+   </property>
+  </action>
+  <action name="actionGet_IMBD_Data">
+   <property name="text">
+    <string>Get IMBD Data</string>
+   </property>
+  </action>
+  <action name="actionRotten_Tomatoes">
+   <property name="text">
+    <string>Rotten Tomatoes</string>
+   </property>
+  </action>
+  <action name="actionReformat">
+   <property name="text">
+    <string>Reformat</string>
+   </property>
+  </action>
+  <action name="actionTest_for_Damage">
+   <property name="text">
+    <string>Test for Damage</string>
+   </property>
+  </action>
+  <action name="actionRename_Files">
+   <property name="text">
+    <string>Rename Files</string>
+   </property>
+  </action>
+  <action name="actionFFMpeg_Actions">
+   <property name="text">
+    <string>FFMpeg Actions</string>
+   </property>
+  </action>
+  <action name="actionDistribute_Copies">
+   <property name="text">
+    <string>Distribute Copies</string>
+   </property>
+  </action>
+  <action name="actionFile_Group_Analysis">
+   <property name="text">
+    <string>File Group Analysis</string>
+   </property>
+  </action>
+  <action name="actionFind_Content">
+   <property name="text">
+    <string>Find Content</string>
+   </property>
+  </action>
+  <action name="actionReports">
+   <property name="text">
+    <string>Reports</string>
+   </property>
+  </action>
+  <action name="actionUtilities">
+   <property name="text">
+    <string>Utilities</string>
+   </property>
+  </action>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

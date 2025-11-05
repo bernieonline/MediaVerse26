@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<MPL Version="2.0" Title="JRSidecar" PathSeparator="\">
+<Item>
+<Field Name="Filename">W:\Collection\War Movies\Battle of Britain (1969).mp4</Field>
+<Field Name="Track Transition Duration">-1</Field>
+<Field Name="Replay Gain">6.89</Field>
+<Field Name="MPAA Rating">G</Field>
+<Field Name="Producer">Harry Saltzman;Benjamin Fisz</Field>
+<Field Name="Last Skipped">1588616605</Field>
+<Field Name="Peak Level (Sample)">-5.7 dB;-8.7 Left;-8.0 Right;-5.7 Centre;-15.3 Sub;-11.1 SL;-11.7 SR</Field>
+<Field Name="Color Depth">8</Field>
+<Field Name="Audio Sample Rate">48000</Field>
+<Field Name="Audio Bitrate">319</Field>
+<Field Name="Date Tagged">1589305080</Field>
+<Field Name="Volume Level (R128)">1.8940600156784058</Field>
+<Field Name="Compression">mp4 video (video: h264, audio: aac)</Field>
+<Field Name="Bitrate">4303</Field>
+<Field Name="Bit Depth">16</Field>
+<Field Name="Audio Streams">1</Field>
+<Field Name="Peak Level">0.519</Field>
+<Field Name="Dynamic Range (DR)">17</Field>
+<Field Name="Genre">War</Field>
+<Field Name="IMDb ID">tt0064072</Field>
+<Field Name="Aspect Ratio">2.4</Field>
+<Field Name="Actors">Harry Andrews;Michael Caine;Trevor Howard;Curd Jürgens;Ian McShane;Laurence Olivier;Christopher Plummer;Kenneth More;Nigel Patrick;Michael Redgrave;Ralph Richardson;Robert Shaw;Patrick Wymark;Susannah York;Michael Bates;Robert Flemyng;Edward Fox;W.G. Foxley;Barry Foster;James Cosmo;Jack Gwillim;Wilfried von Aacken;Karl-Otto Alberty;Helmut Kircher;Paul Neuhaus;Dietrich Frauboes;Malte Petzel;Peter Hager;Hein Riess;Rolf Stiefel;Manfred Reddemann;Alexander Allerson;Alf Jungermann;Jean Wladon;Philip Ettington</Field>
+<Field Name="Audio Language">English</Field>
+<Field Name="FPS">25</Field>
+<Field Name="Director">Guy Hamilton</Field>
+<Field Name="Tool Name">Media Center</Field>
+<Field Name="Video Codec">H264 Main L4.2</Field>
+<Field Name="Date Last Opened">1588616597</Field>
+<Field Name="Stack Top">-1</Field>
+<Field Name="Peak Level (R128)">-5.7 dBTP;-8.7 Left;-8.0 Right;-5.7 Centre;-15.3 Sub;-11.1 SL;-11.7 SR</Field>
+<Field Name="BPM">94</Field>
+<Field Name="Dynamic Range (R128)">13.7555198669433594</Field>
+<Field Name="Channels">6</Field>
+<Field Name="Video Bitrate">3983</Field>
+<Field Name="Description">In 1940, the Royal Air Force fights a desperate battle against the might of the Luftwaffe for control of the skies over Britain, thus preventing the Nazi invasion of Britain.</Field>
+<Field Name="Keywords">Royal Air Force (Raf);WW2;Based On A True Story;Aerial Combat;British History;1940s;Battle Of Britain;Luftwaffe;DVD</Field>
+<Field Name="Tool Version">31.0.84</Field>
+<Field Name="Bookmark">6331</Field>
+<Field Name="Audio Channels">6</Field>
+<Field Name="Stack View">0</Field>
+<Field Name="Media Sub Type">Movie</Field>
+<Field Name="Zone Last Opened">Player</Field>
+<Field Name="Playable">1</Field>
+<Field Name="Volume Level (ReplayGain)">6.8940601348876953</Field>
+<Field Name="Budget">$12,000,000</Field>
+<Field Name="Skip Count">1</Field>
+<Field Name="Date">25461</Field>
+<Field Name="Name">Battle of Britain</Field>
+<Field Name="Trailer">webmedia://YouTube/O71FJDkfngY</Field>
+<Field Name="Sample Rate">48000</Field>
+<Field Name="Critic Rating">TMDb 6.9 / 10</Field>
+<Field Name="Audio Codec">AAC LC</Field>
+<Field Name="Duration">7616.0853332999995473</Field>
+<Field Name="Video Scan">Progressive</Field>
+</Item>
+</MPL>

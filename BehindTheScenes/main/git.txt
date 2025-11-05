@@ -1,0 +1,25 @@
+Which branch am I in - git branch
+Switch to a different branch - git checkout your_desired_branch
+to see all branches - git branch -a
+To see your changes since yesterday - git log --since="yesterday" - make sure you are in the desired branch when you run it
+to see the actual changes  - git diff master@{yesterday}..master
+
+sp by step 
+
+git branch - kust to be sure
+git checkout your_branch_name if you need to changes
+Open the source control panel to view the changes
+click + on the selected files to be added
+add a message to the message box
+click the tick to commit the changes to git
+Then Push changes to github
+to Push to github, select the repository in thetop left 
+then the three dots
+
+
+go to github and double check
+
+when using vs code in source controlat the top you see repositories list
+click the one you want to commit before checking the files + sign to make sure that you are working in the right area
+
+when using the git branch command - it lists the branches and highlights the branch you are in

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>MediaManager - Utilities Operations</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h1 {
+            color: #2c3e50;
+            /*font-size: 20px; /* Adjust the font size as needed */
+
+        }
+        p {
+            line-height: 1.6;
+        }
+        .highlight {
+            background-color: #f0f8ff;
+            padding: 5px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h2  style="color: #2c3e50; font-size: 30px;"><strong>Welcome to the MediaManager Utilities Section</strong></h2>
+    <p>This is where you can manage your collections. Remove - Delete - Move - Transfer</p>
+    
+    <p><strong>Here's how it works:</strong></p>
+    
+    <ul>
+        <li>The Menu provides these facilities Remove - Delete - Move  </li>
+        <li>The Left Pane shows a list of collections  </li>
+        <li>The actions taken when you click on a row largely determine what happens when you click on a collection row</li>
+        <li>The exception is the <strong>Transfer</strong> option. This is achieved by Right Click on a row</li>
+        <li>This provides a choice of moving a collection from the Mediafiledetail to the Masterfiledetail, or the reverse, it does not move actual media files only the records</li>
+        <li>The <strong>Remove</strong> option will delete all of the rows in the database related to the chosen collection, again the media files will be unaffected only the collection records are removed</li>
+        <li>They can be updated by recreating the collection. This is aften needed because any changes made to the location of media files made after creating a collection will require you to delete the old collection records and recreate the modified set</li>
+        <li>The <strong>Delete</strong> and <strong>Move</strong> options are identical in the way that they operate</li>
+        <li>These are manual transactions. The objective is to<span style="color: red;"> Delete or Move the underlying<strong> DATA</strong> </span>so care must be taken as the process can't be reversed</li>
+    </ul>
+    
+    <p class="highlight">When you choose to Delete or Move a collection, a File Explorer Window opens at the location of the collection, you must make the changes manually</p>
+    
+    <h2>What's this for</h2>
+    <p>Once you have established a set of Master Files, the remaining collections should probably be removed otherwise you are wasting storage space</p>
+    
+    <p><strong>Delete</strong> those collections no longer needed in order to save space or time in maintaining synchronicity with the master sets</p>
+
+    <p>The alternative is to <strong>Move</strong> the files to an archive folder such as a NAS storage system. </p>
+   
+    <p>And as we said earlier, if you move individual records, perhaps into a master set to update it, you will need to remove the old master set records and rebuild the set in order to incorporate the new data.</p>
+    <p>It's the same with any media files that you delete, you will need to remove the records from the database by Removing a collection and re creating it to reflect the changes</p>
+</body>
+</html>

@@ -1,0 +1,119 @@
+# master creation combo box selects type of master to create, defaults are Master, Clone, Secondary
+#To add a new category add a row below
+#single words only comma separated
+#MasterCategory:Add:catA, catB
+#MasterCategory:Remove:Secondary
+
+#To Add a new <Media Type such as Video, Music, Photo
+#MediaType:Add:PDF,Docx
+#MediaType:Remove:Photo
+
+
+#The database has a list of default file extensions to identify media files
+#  e.g. Music   .mp3
+# to add a new extension add a new row below like.... Extensions-Music:.xrv, .xyz ........
+# Extensions:Add:Docs:.abc
+#Docs is the category and .abc is the file extension
+# To create a new media group add Extension:Add:Manuals:.pdf, .doc, .docx
+
+
+#Note that this is also how a new category can be added
+# to remove an item from the list add a new row below 
+
+# Extensions:Remove:.abc, .pdf   # note you can omit the category here
+
+# no multi row required just comma separated list of extensions, no line breaks
+#to start a new line begin with Extensions keyword and follow the format
+
+
+
+''' These are the defaults
+ID,Type,Ext
+120,Images,.heic
+112,Images,.jpeg
+111,Images,.jpg
+121,Images,.raw
+71,Music,.aac
+75,Music,.aiff
+74,Music,.alac
+70,Music,.flac
+76,Music,.m4a
+134,Music,.m4p
+68,Music,.mp3
+72,Music,.ogg
+73,Music,.wma
+110,Video,.avchd
+83,Video,.avi
+102,Video,.dvd
+87,Video,.flv
+106,Video,.h264
+107,Video,.h265
+109,Video,.hdr
+108,Video,.hevc
+97,Video,.m2ts
+103,Video,.m2v
+93,Video,.m4v
+85,Video,.mkv
+84,Video,.mov
+82,Video,.mp4
+104,Video,.mpe
+88,Video,.mpeg
+89,Video,.mpg
+105,Video,.mpv
+98,Video,.mts
+101,Video,.svcd
+99,Video,.ts
+100,Video,.vcd
+94,Video,.vob
+90,Video,.webm
+86,Video,.wmv
+'''
+
+
+#There is a built in list of excluded folders for the search you can add or remove folders
+# to remove a folder from the list add a row below like this Folder:Ignore:bin, boot, ......
+#to add a folder to the list Folder:Add:folder Name A, Folder Name B, ........
+#note the use of speech marke where a folder name has spaces
+Folder:Add:folder1, "folder2 programs"
+Folder:Remove:AppData
+
+
+
+__pycache__
+AppData
+Application Support
+Applications
+bin
+boot
+bower_components
+build
+cores
+dev
+dist
+etc
+jails
+lib
+lib64
+Library
+Local
+Network
+node_modules
+private
+proc
+"Program Files"
+"Program Files (x86)"
+run
+sbin
+srv
+sys
+System
+System32
+Temp
+Thumbnails
+tmp
+Users
+usr
+var
+venv
+Volumes
+Windows

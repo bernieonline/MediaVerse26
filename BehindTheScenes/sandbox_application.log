@@ -1,0 +1,89 @@
+2025-10-29 12:49:18,432 [INFO] CarouselViewWidget: Dynamically loaded 60 image files from directory.
+2025-10-29 12:49:18,449 [INFO] CarouselViewWidget: CarouselViewWidget initialized. Total images loaded: 60
+2025-10-29 12:49:18,775 [INFO] ContentPanel: ContentPanel initialized with Matrix and Carousel views.
+2025-10-29 12:49:33,782 [INFO] MainApp: Application initialized with carousel, grid, and single-image pages.
+2025-10-29 12:49:35,869 [WARNING] CarouselViewWidget: Could not load QPixmap from: W:/Collection/War Movies/Inception.jpg
+2025-10-29 12:49:37,245 [WARNING] CarouselViewWidget: Could not load QPixmap from: W:/Collection/War Movies/Inception.jpg
+2025-10-29 12:50:36,379 [INFO] CarouselViewWidget: Dynamically loaded 60 image files from directory.
+2025-10-29 12:50:36,379 [INFO] CarouselViewWidget: CarouselViewWidget initialized. Total images loaded: 60
+2025-10-29 12:50:36,598 [INFO] ContentPanel: ContentPanel initialized with Matrix and Carousel views.
+2025-10-29 12:50:55,267 [INFO] MainApp: Application initialized with carousel, grid, and single-image pages.
+2025-10-29 12:50:57,146 [WARNING] CarouselViewWidget: Could not load QPixmap from: W:/Collection/War Movies/Inception.jpg
+2025-10-29 12:51:11,663 [WARNING] CarouselViewWidget: Could not load QPixmap from: W:/Collection/War Movies/Inception.jpg
+2025-10-29 12:51:21,419 [INFO] GridView: Card clicked: W:\Collection\War Movies\The Train (1964).jpg
+2025-10-29 12:51:21,428 [INFO] AboutTab: Found XML sidecar: W:\Collection\War Movies\The Train (1964)_m2ts_JRSidecar.xml
+2025-10-29 12:58:35,722 [INFO] CarouselViewWidget: Dynamically loaded 60 image files from directory.
+2025-10-29 12:58:35,724 [INFO] CarouselViewWidget: CarouselViewWidget initialized. Total images loaded: 60
+2025-10-29 12:58:35,933 [INFO] ContentPanel: ContentPanel initialized with Matrix and Carousel views.
+2025-10-29 12:58:38,180 [INFO] MainApp: Application initialized with carousel, grid, and single-image pages.
+2025-10-29 12:58:38,206 [WARNING] CarouselViewWidget: Could not load QPixmap from: W:/Collection/War Movies/Inception.jpg
+2025-10-29 12:58:38,259 [WARNING] CarouselViewWidget: Could not load QPixmap from: W:/Collection/War Movies/Inception.jpg
+2025-10-29 12:58:46,306 [INFO] GridView: Card clicked: W:\Collection\War Movies\Guns of Navarone (1961).jpg
+2025-10-29 12:58:46,326 [INFO] AboutTab: Found XML sidecar: W:\Collection\War Movies\Guns of Navarone (1961)_mp4_JRSidecar.xml
+2025-10-29 12:58:57,376 [INFO] AboutTab: Found XML sidecar: W:\Collection\War Movies\Emporer (2012)_m2ts_JRSidecar.xml
+2025-10-29 12:58:57,419 [WARNING] CarouselViewWidget: Could not load QPixmap from: W:/Collection/War Movies/Inception.jpg
+2025-10-29 12:58:57,420 [INFO] CarouselViewWidget: Side media selected (Label 3): Emitting XML path for W:\Collection\War Movies\Emporer (2012)_m2ts_JRSidecar.xml
+2025-10-29 12:58:57,445 [WARNING] CarouselViewWidget: Could not load QPixmap from: W:/Collection/War Movies/Inception.jpg
+2025-10-29 13:00:01,867 [INFO] CarouselViewWidget: Dynamically loaded 60 image files from directory.
+2025-10-29 13:00:01,869 [INFO] CarouselViewWidget: CarouselViewWidget initialized. Total images loaded: 60
+2025-10-29 13:00:02,116 [INFO] ContentPanel: ContentPanel initialized with Matrix and Carousel views.
+2025-10-29 13:00:04,384 [INFO] MainApp: Application initialized with carousel, grid, and single-image pages.
+2025-10-29 13:00:04,415 [WARNING] CarouselViewWidget: Could not load QPixmap from: W:/Collection/War Movies/Inception.jpg
+2025-10-29 13:00:04,480 [WARNING] CarouselViewWidget: Could not load QPixmap from: W:/Collection/War Movies/Inception.jpg
+2025-10-29 13:00:07,486 [WARNING] CarouselViewWidget: Could not load QPixmap from: W:/Collection/War Movies/Inception.jpg
+2025-10-29 13:00:10,377 [INFO] CarouselViewWidget: Move Right: New center index 3
+2025-10-29 13:00:10,408 [WARNING] CarouselViewWidget: Could not load QPixmap from: W:/Collection/War Movies/Inception.jpg
+2025-10-29 13:00:24,798 [INFO] GridView: Card clicked: W:\Collection\War Movies\In Harms Way.jpg
+2025-10-29 13:00:24,813 [INFO] AboutTab: Found XML sidecar: W:\Collection\War Movies\In Harms Way_mp4_JRSidecar.xml
+2025-10-29 13:00:36,355 [INFO] AboutTab: Found XML sidecar: W:\Collection\War Movies\In Harms Way_mp4_JRSidecar.xml
+2025-10-29 13:00:36,381 [WARNING] CarouselViewWidget: Could not load QPixmap from: W:/Collection/War Movies/Inception.jpg
+2025-10-29 13:00:36,391 [INFO] CarouselViewWidget: Side media selected (Label 1): Emitting XML path for W:\Collection\War Movies\In Harms Way_mp4_JRSidecar.xml
+2025-10-29 13:02:21,006 [INFO] CarouselViewWidget: Dynamically loaded 60 image files from directory.
+2025-10-29 13:02:21,008 [INFO] CarouselViewWidget: CarouselViewWidget initialized. Total images loaded: 60
+2025-10-29 13:02:21,214 [INFO] ContentPanel: ContentPanel initialized with Matrix and Carousel views.
+2025-10-29 13:02:23,498 [INFO] MainApp: Application initialized with carousel, grid, and single-image pages.
+2025-10-29 13:02:23,526 [WARNING] CarouselViewWidget: Could not load QPixmap from: W:/Collection/War Movies/Inception.jpg
+2025-10-29 13:02:23,582 [WARNING] CarouselViewWidget: Could not load QPixmap from: W:/Collection/War Movies/Inception.jpg
+2025-10-29 13:02:31,829 [INFO] GridView: Card clicked: W:\Collection\War Movies\In Harms Way.jpg
+2025-10-29 13:02:31,845 [INFO] AboutTab: Found XML sidecar: W:\Collection\War Movies\In Harms Way_mp4_JRSidecar.xml
+2025-10-29 13:02:42,389 [INFO] AboutTab: Found XML sidecar: W:\Collection\War Movies\Emporer (2012)_m2ts_JRSidecar.xml
+2025-10-29 13:02:42,415 [WARNING] CarouselViewWidget: Could not load QPixmap from: W:/Collection/War Movies/Inception.jpg
+2025-10-29 13:02:42,416 [INFO] CarouselViewWidget: Side media selected (Label 3): Emitting XML path for W:\Collection\War Movies\Emporer (2012)_m2ts_JRSidecar.xml
+2025-10-29 13:02:42,445 [WARNING] CarouselViewWidget: Could not load QPixmap from: W:/Collection/War Movies/Inception.jpg
+2025-10-29 13:02:46,927 [INFO] GridView: Card clicked: W:\Collection\War Movies\Emporer (2012).jpg
+2025-10-29 13:02:46,941 [INFO] AboutTab: Found XML sidecar: W:\Collection\War Movies\Emporer (2012)_m2ts_JRSidecar.xml
+2025-10-29 13:17:37,664 [INFO] CarouselViewWidget: Dynamically loaded 60 image files from directory.
+2025-10-29 13:17:37,666 [INFO] CarouselViewWidget: CarouselViewWidget initialized. Total images loaded: 60
+2025-10-29 13:17:37,869 [INFO] ContentPanel: ContentPanel initialized with Matrix and Carousel views.
+2025-10-29 13:17:40,084 [INFO] MainApp: Application initialized with carousel, grid, and single-image pages.
+2025-10-29 13:17:40,116 [WARNING] CarouselViewWidget: Could not load QPixmap from: W:/Collection/War Movies/Inception.jpg
+2025-10-29 13:17:40,177 [WARNING] CarouselViewWidget: Could not load QPixmap from: W:/Collection/War Movies/Inception.jpg
+2025-10-29 13:17:48,493 [WARNING] CarouselViewWidget: Could not load QPixmap from: W:/Collection/War Movies/Inception.jpg
+2025-10-29 13:18:27,004 [INFO] AboutTab: Found XML sidecar: W:\Collection\War Movies\In Harms Way_mp4_JRSidecar.xml
+2025-10-29 13:18:27,042 [WARNING] CarouselViewWidget: Could not load QPixmap from: W:/Collection/War Movies/Inception.jpg
+2025-10-29 13:18:27,044 [INFO] CarouselViewWidget: Side media selected (Label 2): Emitting XML path for W:\Collection\War Movies\In Harms Way_mp4_JRSidecar.xml
+2025-10-29 13:18:47,644 [INFO] CarouselViewWidget: Dynamically loaded 60 image files from directory.
+2025-10-29 13:18:47,644 [INFO] CarouselViewWidget: CarouselViewWidget initialized. Total images loaded: 60
+2025-10-29 13:18:47,876 [INFO] ContentPanel: ContentPanel initialized with Matrix and Carousel views.
+2025-10-29 13:18:50,079 [INFO] MainApp: Application initialized with carousel, grid, and single-image pages.
+2025-10-29 13:18:50,105 [WARNING] CarouselViewWidget: Could not load QPixmap from: W:/Collection/War Movies/Inception.jpg
+2025-10-29 13:18:50,161 [WARNING] CarouselViewWidget: Could not load QPixmap from: W:/Collection/War Movies/Inception.jpg
+2025-10-29 13:18:52,699 [WARNING] CarouselViewWidget: Could not load QPixmap from: W:/Collection/War Movies/Inception.jpg
+2025-10-29 13:20:00,841 [INFO] CarouselViewWidget: Dynamically loaded 60 image files from directory.
+2025-10-29 13:20:00,841 [INFO] CarouselViewWidget: CarouselViewWidget initialized. Total images loaded: 60
+2025-10-29 13:20:01,061 [INFO] ContentPanel: ContentPanel initialized with Matrix and Carousel views.
+2025-10-29 13:20:20,071 [INFO] MainApp: Application initialized with carousel, grid, and single-image pages.
+2025-10-29 13:20:22,762 [WARNING] CarouselViewWidget: Could not load QPixmap from: W:/Collection/War Movies/Inception.jpg
+2025-10-29 13:20:36,646 [WARNING] CarouselViewWidget: Could not load QPixmap from: W:/Collection/War Movies/Inception.jpg
+2025-10-29 13:24:47,287 [INFO] CarouselViewWidget: Dynamically loaded 60 image files from directory.
+2025-10-29 13:24:47,287 [INFO] CarouselViewWidget: CarouselViewWidget initialized. Total images loaded: 60
+2025-10-29 13:24:47,501 [INFO] ContentPanel: ContentPanel initialized with Matrix and Carousel views.
+2025-10-29 13:25:05,216 [INFO] MainApp: Application initialized with carousel, grid, and single-image pages.
+2025-10-29 13:25:11,729 [WARNING] CarouselViewWidget: Could not load QPixmap from: W:/Collection/War Movies/Inception.jpg
+2025-10-29 13:25:46,185 [WARNING] CarouselViewWidget: Could not load QPixmap from: W:/Collection/War Movies/Inception.jpg
+2025-10-29 13:26:03,414 [INFO] GridView: Card clicked: W:\Collection\War Movies\Emporer (2012).jpg
+2025-10-29 13:26:03,429 [INFO] AboutTab: Found XML sidecar: W:\Collection\War Movies\Emporer (2012)_m2ts_JRSidecar.xml
+2025-10-29 13:26:11,360 [INFO] AboutTab: Found XML sidecar: W:\Collection\War Movies\Emporer (2012)_m2ts_JRSidecar.xml
+2025-10-29 13:26:11,394 [WARNING] CarouselViewWidget: Could not load QPixmap from: W:/Collection/War Movies/Inception.jpg
+2025-10-29 13:26:11,394 [INFO] CarouselViewWidget: Side media selected (Label 3): Emitting XML path for W:\Collection\War Movies\Emporer (2012)_m2ts_JRSidecar.xml
+2025-10-29 13:26:11,422 [WARNING] CarouselViewWidget: Could not load QPixmap from: W:/Collection/War Movies/Inception.jpg

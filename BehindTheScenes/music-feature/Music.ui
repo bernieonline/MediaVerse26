@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>849</width>
+    <height>603</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QGridLayout" name="gridLayout">
+    <item row="0" column="0">
+     <layout class="QGridLayout" name="gridLayout_2"/>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>849</width>
+     <height>22</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuEdit">
+    <property name="title">
+     <string>View</string>
+    </property>
+    <addaction name="separator"/>
+    <addaction name="actionView_Collection"/>
+    <addaction name="actionView_Track"/>
+    <addaction name="actionView_Artist"/>
+   </widget>
+   <widget class="QMenu" name="menuAppearance">
+    <property name="title">
+     <string>Utilities</string>
+    </property>
+    <addaction name="actionRemove_collection"/>
+    <addaction name="actionMove_Collection"/>
+    <addaction name="actionCompare_Collections"/>
+    <addaction name="actionTest_Collections"/>
+   </widget>
+   <widget class="QMenu" name="menuSearch">
+    <property name="title">
+     <string>Search</string>
+    </property>
+    <addaction name="actionSelect_a_Drive"/>
+   </widget>
+   <widget class="QMenu" name="menuReports">
+    <property name="title">
+     <string>Reports</string>
+    </property>
+    <addaction name="actionView_Database"/>
+    <addaction name="actionView_Details"/>
+   </widget>
+   <addaction name="menuEdit"/>
+   <addaction name="menuAppearance"/>
+   <addaction name="menuSearch"/>
+   <addaction name="menuReports"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <action name="actionNew">
+   <property name="text">
+    <string>New</string>
+   </property>
+  </action>
+  <action name="actionSave">
+   <property name="text">
+    <string>Save</string>
+   </property>
+  </action>
+  <action name="actionSave_As">
+   <property name="text">
+    <string>Save As</string>
+   </property>
+  </action>
+  <action name="actionOpen">
+   <property name="text">
+    <string>Open</string>
+   </property>
+  </action>
+  <action name="actionOpen_2">
+   <property name="text">
+    <string>Open</string>
+   </property>
+  </action>
+  <action name="actionSave_2">
+   <property name="text">
+    <string>Save</string>
+   </property>
+  </action>
+  <action name="actionSave_As_2">
+   <property name="text">
+    <string>Save As</string>
+   </property>
+  </action>
+  <action name="actionUndo">
+   <property name="text">
+    <string>Undo</string>
+   </property>
+  </action>
+  <action name="actionReDo">
+   <property name="text">
+    <string>ReDo</string>
+   </property>
+  </action>
+  <action name="actionCopy">
+   <property name="text">
+    <string>Copy</string>
+   </property>
+  </action>
+  <action name="actionCut">
+   <property name="text">
+    <string>Cut</string>
+   </property>
+  </action>
+  <action name="actionPaste">
+   <property name="text">
+    <string>Paste</string>
+   </property>
+  </action>
+  <action name="actiondark">
+   <property name="text">
+    <string>Dark</string>
+   </property>
+  </action>
+  <action name="actionLight">
+   <property name="text">
+    <string>Light</string>
+   </property>
+  </action>
+  <action name="actionSelect_a_Drive">
+   <property name="text">
+    <string>Select a Drive</string>
+   </property>
+  </action>
+  <action name="actionView_Database">
+   <property name="text">
+    <string>View Collection Summary</string>
+   </property>
+  </action>
+  <action name="actionView_Details">
+   <property name="text">
+    <string>View Collection Details</string>
+   </property>
+  </action>
+  <action name="actionRemove_collection">
+   <property name="text">
+    <string>Remove Collection</string>
+   </property>
+  </action>
+  <action name="actionMove_Collection">
+   <property name="text">
+    <string>Move Collection</string>
+   </property>
+  </action>
+  <action name="actionCompare_Collections">
+   <property name="text">
+    <string>Compare Collections</string>
+   </property>
+  </action>
+  <action name="actionTest_Collections">
+   <property name="text">
+    <string>Test Collection</string>
+   </property>
+  </action>
+  <action name="actionView_Collection">
+   <property name="text">
+    <string>View Collection</string>
+   </property>
+  </action>
+  <action name="actionView_Track">
+   <property name="text">
+    <string>View Track</string>
+   </property>
+  </action>
+  <action name="actionView_Artist">
+   <property name="text">
+    <string>View Artist</string>
+   </property>
+  </action>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

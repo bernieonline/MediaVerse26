@@ -1,0 +1,69 @@
+
+progress bar not working for conversion
+
+
+
+change error progress bar label text as needed
+
+
+TO DO LIST
+create some boiler plate code
+
+use mediainfo to place more file details in the error file on the server
+
+Video processing has become very slow can only think its the checksum activity
+
+PRIORITIES
+
+Improve what gets displayed on Footer
+
+image keeps going missing for logo
+Also need to make more use of heading space
+
+use markdown files for program notes see folder
+
+create a cron job for mysql dump
+
+Deal with dvds
+
+limit image file sizes
+
+search for duplicate locations, remember that drive letter D: exists on 2 computers etc.so if w: runs on different computers its
+its the same location but D: is local not networked. I could list all networked drives and use that in my analysis
+
+remember I created a collection field in mediafiledetail records to help
+
+
+find a way to prevent application log from building up
+
+I can switch between info and CRITICAL level of reporting
+info when developing else CRITICAL
+
+if i want to change the name of a media type such as Image to Photo how will I associate all extensions with that type
+create a change type option From - To - What complications?
+
+
+message when a collection is made showing location
+
+document how to create a new collection type eg publishing for PDF
+
+
+compare collection could return a lot of files. how can I use the output to manage collections
+could I colour code items that are listed that only have a file type difference
+this would be good because if not a file type difference, its a missing file
+
+
+incorporate behind the scenes
+
+discog application
+
+
+
+database backup done through workbench till I can sort out the code
+
+
+
+
+
+
+

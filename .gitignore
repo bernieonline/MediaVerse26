@@ -1,0 +1,6 @@
+# Ignore the entire virtual environment folder
+BehindTheScenes/MMenv2/
+
+# Standard Python ignores
+__pycache__/
+*.pyc

@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<MPL Version="2.0" Title="JRSidecar" PathSeparator="\">
+<Item>
+<Field Name="Filename">W:\Collection\War Movies\A Bridge too Far (1977).mp4</Field>
+<Field Name="Track Transition Duration">-1</Field>
+<Field Name="Replay Gain">18.29</Field>
+<Field Name="MPAA Rating">PG</Field>
+<Field Name="Producer">Joseph E. Levine;Richard P. Levine</Field>
+<Field Name="Peak Level (Sample)">-17.3 dB;-19.1 Left;-17.3 Right</Field>
+<Field Name="Color Depth">8</Field>
+<Field Name="Audio Sample Rate">44100</Field>
+<Field Name="Audio Bitrate">224</Field>
+<Field Name="Date Tagged">1704461236</Field>
+<Field Name="Volume Level (R128)">13.2868099212646484</Field>
+<Field Name="Compression">mp4 video (video: mpeg2, audio: mp2)</Field>
+<Field Name="Bitrate">10150</Field>
+<Field Name="Bit Depth">16</Field>
+<Field Name="Audio Streams">1</Field>
+<Field Name="Peak Level">0.136</Field>
+<Field Name="Dynamic Range (DR)">14</Field>
+<Field Name="Genre">Drama;History;War</Field>
+<Field Name="IMDb ID">tt0075784</Field>
+<Field Name="Aspect Ratio">1.78</Field>
+<Field Name="Actors">Dirk Bogarde;James Caan;Michael Caine;Sean Connery;Edward Fox;Elliott Gould;Anthony Hopkins;Gene Hackman;Hardy Krüger;Laurence Olivier;Ryan O'Neal;Robert Redford;Maximilian Schell;Liv Ullmann;Siem Vroom;Marlies van Alcmaer;Erik van 't Wout;Wolfgang Preiss;Hans von Borsody;Josephine Peeper;Paul Maxwell;Walter Kohut;Peter Faber;Hartmut Becker;Frank Grimes;Jeremy Kemp;Donald Pickering;Donald Douglas;Peter Settelen;Stephen Moore;Michael Byrne;Paul Copley;Nicholas Campbell;Gerald Sim;Harry Ditson;Erik Chitty;Brian Hawksley;Colin Farrell;Christopher Good;Norman Gregory;Alun Armstrong;Anthony Milner;Barry McCarthy;Lex van Delden;Michael Wolf;Sean Mathias;Tim Beekman;Edward Seckerson;Tom van Beek;Bertus Botterman;Henny Alma;Ray Jewers;Geoffrey Hinsliff;Keith Drinkel;Mary Smithuysen;Hans Croiset;Fred Williams;John Peel;John Judd;Ben Cross;Hilary Minster;David English;Ben Howard;Michael Graham Cox;Johan te Slaa;Georgette Reyevski;Pieter Groenier;Adrienne Kleiweg;Denholm Elliott;Peter Gordon;Arthur Hill;Garrick Hagon;Brian Gwaspari;Stephen Rayment;Timothy Morand;James Wardroper;Neil Kennedy;John Salthouse;Jonathan Hackett;Stanley Lebor;Jack Galloway;Milton Cadman;David Auker;Richard Kane;Toby Salaman;Michael Bangerter;Philip Raymond;Myles Reithermann;Anthony Pullen Shaw;John Morton;John Ratzenberger;Patrick Ryecart;Dick Rienstra;Ian Liston;Paul Rattee;Mark Sheridan;George Innes;John Stride;Niall Padden;Michael Graves;Simon Chandler;Edward Kalinski;Shaun Curry;Sebastian Abineri;Chris Williams;Andrew Branch;Anthony Garner;Feliks Arons;Stephen Churchett;Richard Attenborough;Marcel van Roosmalen</Field>
+<Field Name="FPS">25</Field>
+<Field Name="Video Codec">MPEG-2 Main</Field>
+<Field Name="Director">Richard Attenborough</Field>
+<Field Name="Tool Name">Media Center</Field>
+<Field Name="Stack Top">-1</Field>
+<Field Name="Peak Level (R128)">-17.2 dBTP;-19.1 Left;-17.2 Right</Field>
+<Field Name="BPM">95</Field>
+<Field Name="Dynamic Range (R128)">20.2302799224853516</Field>
+<Field Name="Channels">2</Field>
+<Field Name="Video Bitrate">0</Field>
+<Field Name="Description">The story of Operation Market Garden—a failed attempt by the allies in the latter stages of WWII to end the war quickly by securing three bridges in Holland allowing access over the Rhine into Germany. A combination of poor allied intelligence and the presence of two crack German panzer divisions meant that the final part of this operation (the bridge in Arnhem over the Rhine) was doomed to failure.</Field>
+<Field Name="Keywords">Mission;Army;Allies;World War II;Netherlands;Bridge;Tank;Based On True Story;Operation Market Garden;Soldier;Arnhem;Military Operation;1940s;Historical Battle</Field>
+<Field Name="Tool Version">31.0.84</Field>
+<Field Name="Audio Channels">2</Field>
+<Field Name="Media Sub Type">Movie</Field>
+<Field Name="Stack View">0</Field>
+<Field Name="Gross Revenue">$50,750,000</Field>
+<Field Name="Playable">1</Field>
+<Field Name="Volume Level (ReplayGain)">18.2868099212646484</Field>
+<Field Name="Budget">$22,000,000</Field>
+<Field Name="Date">28126</Field>
+<Field Name="Name">A Bridge too Far</Field>
+<Field Name="Trailer">webmedia://YouTube/yPPycZo8H7c</Field>
+<Field Name="Sample Rate">44100</Field>
+<Field Name="Audio Codec">MP2</Field>
+<Field Name="Get Metadata Info">&lt;XMLPH version="1.0"&gt;
+&lt;Item Name="LastFailedDate"/&gt;
+&lt;Item Name="LastTryDate"&gt;45296.56059&lt;/Item&gt;
+&lt;/XMLPH&gt;</Field>
+<Field Name="Critic Rating">TMDb 7.2 / 10</Field>
+<Field Name="Duration">10123</Field>
+<Field Name="Video Scan">Interlaced</Field>
+</Item>
+</MPL>

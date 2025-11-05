@@ -1,0 +1,39 @@
+id,folder_name
+4,__pycache__
+13,AppData
+8,"Application Support"
+30,Applications
+16,bin
+17,boot
+2,bower_components
+6,build
+36,cores
+18,dev
+5,dist
+19,etc
+37,jails
+20,lib
+21,lib64
+7,Library
+14,Local
+31,Network
+1,node_modules
+35,private
+22,proc
+9,"Program Files"
+10,"Program Files (x86)"
+23,run
+24,sbin
+25,srv
+26,sys
+32,System
+12,System32
+15,Temp
+39,Thumbnails
+27,tmp
+33,Users
+28,usr
+29,var
+3,venv
+34,Volumes
+11,Windows

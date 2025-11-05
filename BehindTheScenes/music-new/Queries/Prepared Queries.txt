@@ -1,0 +1,32 @@
+select count(*) from MediaFileDetail;''
+
+select * from mediafiledetail ;
+
+delete from  mediafiledetail; 
+
+select * from mediatypes order by Ext;
+
+select * from excluded_folders;
+
+SELECT location, COUNT(*) AS record_count, SUM(file_size) AS total_file_size
+FROM mediafiledetail
+GROUP BY location
+order by record_count desc;
+
+
+-- slight differences in filename will not be easily identihed with this order of listing
+SELECT SUBSTRING(file_name, 4) AS adjusted_filename, COUNT(*) AS filename_count
+FROM mediafiledetail
+GROUP BY adjusted_filename
+ORDER BY filename_count desc;
+
+SELECT *
+FROM mediafiledetail
+WHERE file_name LIKE CONCAT('%', 'stand by me', '%')
+order by file_creation_date;
+
+SELECT file_path, COUNT(*) AS path_count
+FROM mediafiledetail
+GROUP BY file_path
+HAVING path_count > 1;
+

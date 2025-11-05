@@ -1,0 +1,389 @@
+[
+    {
+        "Audio Coding Format": "Royalty-free format created for HTML5 video.",
+        "Container Format": "VP8. VP9. AV1",
+        "ID": 1,
+        "Name": ".webm",
+        "Notes": "",
+        "Type": ".matroska",
+        "Video coding Format": "Vorbis. Opus"
+    },
+    {
+        "Audio Coding Format": "any",
+        "Container Format": "Matroska",
+        "ID": 2,
+        "Name": "Matroska",
+        "Notes": "",
+        "Type": ".mkv",
+        "Video coding Format": "any"
+    },
+    {
+        "Audio Coding Format": "MP3. ADPCM. Nellymoser. Speex. AAC",
+        "Container Format": "FLV",
+        "ID": 3,
+        "Name": "Flash Video (FLV)",
+        "Notes": "Use of the H.264 and AAC compression formats in the FLV file format has some limitations and authors of Flash Player strongly encourage everyone to embrace the new standard F4V file format[2] de facto standard for web-based streaming video (over RTMP).",
+        "Type": ".flv",
+        "Video coding Format": "VP6. Sorenson Spark. Screen video. Screen video 2. H.264"
+    },
+    {
+        "Audio Coding Format": "MP3. AAC",
+        "Container Format": "MPEG-4 Part 12",
+        "ID": 4,
+        "Name": "F4V",
+        "Notes": "Replacement for FLV.",
+        "Type": ".flv",
+        "Video coding Format": "H.264"
+    },
+    {
+        "Audio Coding Format": "PCM. DTS. MPEG-1. Audio Layer II (MP2). or Dolby Digital (AC-3)",
+        "Container Format": "VOB",
+        "ID": 5,
+        "Name": "Vob",
+        "Notes": "Files in VOB format have .vob filename extension and are typically stored in the VIDEO_TS folder at the root of a DVD. The VOB format is based on the MPEG program stream format.",
+        "Type": ".vob",
+        "Video coding Format": "H.262/MPEG-2 Part 2 or MPEG-1 Part 2"
+    },
+    {
+        "Audio Coding Format": "Vorbis. FLAC",
+        "Container Format": "Ogg",
+        "ID": 6,
+        "Name": "Ogg Video",
+        "Notes": "",
+        "Type": ".ogv",
+        "Video coding Format": "Theora. Dirac"
+    },
+    {
+        "Audio Coding Format": "Vorbis. FLAC",
+        "Container Format": "Ogg",
+        "ID": 7,
+        "Name": "Ogg Video",
+        "Notes": "",
+        "Type": ".ogg",
+        "Video coding Format": "Theora. Dirac"
+    },
+    {
+        "Audio Coding Format": "?",
+        "Container Format": "?",
+        "ID": 8,
+        "Name": "Dirac",
+        "Notes": "",
+        "Type": ".drc",
+        "Video coding Format": "Dirac"
+    },
+    {
+        "Audio Coding Format": "none",
+        "Container Format": "HTML",
+        "ID": 10,
+        "Name": "Video alternative to GIF",
+        "Notes": "Not standardized. and not a real video file in the classical meaning since it merely references the real video file (e.g. a .webm file). which has to exist separately elsewhere. A .gifv \"file\" is simply a HTML webpage which includes a HTML5 video tag. where the video has no sound. As there were large communities online which create art using the medium of short soundless videos in GIF format. GIFV was created as a functionally similar replacement with vastly smaller filesizes than the inefficient GIF format.",
+        "Type": ".gifv",
+        "Video coding Format": "any"
+    },
+    {
+        "Audio Coding Format": "none",
+        "Container Format": "N/A",
+        "ID": 11,
+        "Name": "Multiple-image Network Graphics",
+        "Notes": "Inefficient. not widely used.",
+        "Type": ".mng",
+        "Video coding Format": "N/A"
+    },
+    {
+        "Audio Coding Format": "any",
+        "Container Format": "AVI",
+        "ID": 12,
+        "Name": "AVI",
+        "Notes": "Uses RIFF",
+        "Type": ".avi",
+        "Video coding Format": "any"
+    },
+    {
+        "Audio Coding Format": "Dolby AC-3 or uncompressed linear PCM",
+        "Container Format": "AVCHD",
+        "ID": 13,
+        "Name": "MPEG Transport Stream",
+        "Notes": "The standard video format used by many Sony and Panasonic HD camcorders. It is also used for storing high definition video on Blu-ray discs.",
+        "Type": ".mts",
+        "Video coding Format": "AVCHD (MPEG-4 / H.264 )"
+    },
+    {
+        "Audio Coding Format": "Dolby AC-3 or uncompressed linear PCM",
+        "Container Format": "AVCHD",
+        "ID": 14,
+        "Name": "MPEG Transport Stream",
+        "Notes": "The standard video format used by many Sony and Panasonic HD camcorders. It is also used for storing high definition video on Blu-ray discs.",
+        "Type": ".m2ts",
+        "Video coding Format": "AVCHD (MPEG-4 / H.264 )"
+    },
+    {
+        "Audio Coding Format": "Dolby AC-3 or uncompressed linear PCM",
+        "Container Format": "AVCHD",
+        "ID": 15,
+        "Name": "MPEG Transport Stream",
+        "Notes": "The standard video format used by many Sony and Panasonic HD camcorders. It is also used for storing high definition video on Blu-ray discs.",
+        "Type": ".ts",
+        "Video coding Format": "AVCHD (MPEG-4 / H.264 )"
+    },
+    {
+        "Audio Coding Format": "AAC. MP3. others[3]",
+        "Container Format": "QuickTime",
+        "ID": 16,
+        "Name": "QuickTime File Format",
+        "Notes": "",
+        "Type": ".mov",
+        "Video coding Format": "many[3]"
+    },
+    {
+        "Audio Coding Format": "AAC. MP3. others[3]",
+        "Container Format": "QuickTime",
+        "ID": 17,
+        "Name": "QuickTime File Format",
+        "Notes": "",
+        "Type": ".qt",
+        "Video coding Format": "many[3]"
+    },
+    {
+        "Audio Coding Format": "Windows Media Audio. Sipro ACELP.net",
+        "Container Format": "ASF",
+        "ID": 18,
+        "Name": "Windows Media Video",
+        "Notes": "",
+        "Type": ".wmv",
+        "Video coding Format": "Windows Media Video. Windows Media Video Screen. Windows Media Video Image"
+    },
+    {
+        "Audio Coding Format": "Doesn't apply",
+        "Container Format": "Further documentation needed",
+        "ID": 19,
+        "Name": "Raw video format",
+        "Notes": "Supports all resolutions. sampling structures. and frame rates",
+        "Type": ".yuv",
+        "Video coding Format": "Doesn't apply"
+    },
+    {
+        "Audio Coding Format": "RealAudio",
+        "Container Format": "RealMedia",
+        "ID": 20,
+        "Name": "RealMedia (RM)",
+        "Notes": "Made for RealPlayer",
+        "Type": ".rm",
+        "Video coding Format": "RealVideo"
+    },
+    {
+        "Audio Coding Format": "RealAudio",
+        "Container Format": "RealMedia Variable Bitrate",
+        "ID": 21,
+        "Name": "RealMedia Variable Bitrate (RMVB)",
+        "Notes": "Made for RealPlayer",
+        "Type": ".rmvb",
+        "Video coding Format": "RealVideo"
+    },
+    {
+        "Audio Coding Format": "G.723 ADPCM audio (not the G.723.1 speech codec)",
+        "Container Format": "VIV",
+        "ID": 22,
+        "Name": "VivoActive (VIV)",
+        "Notes": "Made for VivoActive Player",
+        "Type": ".viv",
+        "Video coding Format": "based upon H.263 video"
+    },
+    {
+        "Audio Coding Format": "any",
+        "Container Format": "ASF",
+        "ID": 23,
+        "Name": "Advanced Systems Format (ASF)",
+        "Notes": "",
+        "Type": ".asf",
+        "Video coding Format": "any"
+    },
+    {
+        "Audio Coding Format": "Variant of IMA. ADPCM",
+        "Container Format": "Modified version of AVI[4]",
+        "ID": 24,
+        "Name": "AMV video format",
+        "Notes": "Proprietary video file format produced for MP4 players and S1 MP3 players with video playback",
+        "Type": ".amv",
+        "Video coding Format": "Variant of Motion JPEG"
+    },
+    {
+        "Audio Coding Format": "Advanced Audio Coding. MP3. others",
+        "Container Format": "MPEG-4 Part 12",
+        "ID": 25,
+        "Name": "MPEG-4 Part 14 (MP4)",
+        "Notes": "",
+        "Type": ".mp4",
+        "Video coding Format": "H.264. MPEG-4 Part 2. MPEG-2. MPEG-1"
+    },
+    {
+        "Audio Coding Format": "Advanced Audio Coding. MP3. others",
+        "Container Format": "MPEG-4 Part 13",
+        "ID": 26,
+        "Name": "MPEG-4 Part 14 (MP4)",
+        "Notes": "",
+        "Type": ".mv4",
+        "Video coding Format": "H.264. MPEG-4 Part 2. MPEG-2. MPEG-2"
+    },
+    {
+        "Audio Coding Format": "MPEG-1 Audio Layer I. MPEG-1 Audio Layer I. MPEG-1 Audio Layer III (MP3)",
+        "Container Format": "MPEG-1 part 1",
+        "ID": 27,
+        "Name": "MPEG-1",
+        "Notes": "Old. but very widely used due to installed base.",
+        "Type": ".mpg",
+        "Video coding Format": "MPEG-1 part 2"
+    },
+    {
+        "Audio Coding Format": "MPEG-1 Audio Layer I. MPEG-1 Audio Layer I. MPEG-1 Audio Layer III (MP3)",
+        "Container Format": "MPEG-1 part 1",
+        "ID": 28,
+        "Name": "MPEG-1",
+        "Notes": "Old. but very widely used due to installed base.",
+        "Type": ".mp2",
+        "Video coding Format": "MPEG-1 part 2"
+    },
+    {
+        "Audio Coding Format": "MPEG-1 Audio Layer I. MPEG-1 Audio Layer I. MPEG-1 Audio Layer III (MP3)",
+        "Container Format": "MPEG-1 part 1",
+        "ID": 29,
+        "Name": "MPEG-1",
+        "Notes": "Old. but very widely used due to installed base.",
+        "Type": ".mpeg",
+        "Video coding Format": "MPEG-1 part 2"
+    },
+    {
+        "Audio Coding Format": "MPEG-1 Audio Layer I. MPEG-1 Audio Layer I. MPEG-1 Audio Layer III (MP3)",
+        "Container Format": "MPEG-1 part 1",
+        "ID": 30,
+        "Name": "MPEG-1",
+        "Notes": "Old. but very widely used due to installed base.",
+        "Type": ".mpe",
+        "Video coding Format": "MPEG-1 part 2"
+    },
+    {
+        "Audio Coding Format": "MPEG-1 Audio Layer I. MPEG-1 Audio Layer I. MPEG-1 Audio Layer III (MP3)",
+        "Container Format": "MPEG-1 part 1",
+        "ID": 31,
+        "Name": "MPEG-1",
+        "Notes": "Old. but very widely used due to installed base.",
+        "Type": ".mpv",
+        "Video coding Format": "MPEG-1 part 2"
+    },
+    {
+        "Audio Coding Format": "AAC. MP3. MPEG-2 Part 3. others",
+        "Container Format": "?",
+        "ID": 32,
+        "Name": "MPEG-2 – Video",
+        "Notes": "",
+        "Type": ".m2v",
+        "Video coding Format": "H.262"
+    },
+    {
+        "Audio Coding Format": "AAC. Dolby Digital",
+        "Container Format": "MPEG-4 Part 12",
+        "ID": 33,
+        "Name": "M4V ",
+        "Notes": "Developed by Apple. used in iTunes. Very similar to MP4 format. but may optionally have DRM.– (file format for videos for iPods and PlayStation Portables developed by Apple)",
+        "Type": ".m4v",
+        "Video coding Format": "H.264"
+    },
+    {
+        "Audio Coding Format": "?",
+        "Container Format": "MPEG-4 utilising a special header",
+        "ID": 34,
+        "Name": "SVI",
+        "Notes": "Samsung video format for portable players",
+        "Type": ".svi",
+        "Video coding Format": "?"
+    },
+    {
+        "Audio Coding Format": "AMR-NB. AMR-WB. AMR-WB+. AAC-LC. HE-AAC v1 or Enhanced aacPlus (HE-AAC v2)",
+        "Container Format": "MPEG-4 Part 12",
+        "ID": 35,
+        "Name": "3GPP",
+        "Notes": "Common video format for cell phones",
+        "Type": ".3gp",
+        "Video coding Format": "MPEG-4 Part 2. H.263. H.264"
+    },
+    {
+        "Audio Coding Format": "AMR-NB. AMR-WB. AMR-WB+. AAC-LC. HE-AAC v1 or Enhanced aacPlus (HE-AAC v2). EVRC. SMV or VMR-WB",
+        "Container Format": "MPEG-4 Part 12",
+        "ID": 36,
+        "Name": "3GPP2",
+        "Notes": "Common video format for cell phones",
+        "Type": ".3g2",
+        "Video coding Format": "MPEG-4 Part 2. H.263. H.264"
+    },
+    {
+        "Audio Coding Format": "?",
+        "Container Format": "MXF",
+        "ID": 37,
+        "Name": "Material Exchange Format (MXF)",
+        "Notes": "",
+        "Type": ".mxf",
+        "Video coding Format": "?"
+    },
+    {
+        "Audio Coding Format": "?",
+        "Container Format": "?",
+        "ID": 38,
+        "Name": "ROQ",
+        "Notes": "used by Quake 3[5]",
+        "Type": ".roq",
+        "Video coding Format": "?"
+    },
+    {
+        "Audio Coding Format": "?",
+        "Container Format": "NSV",
+        "ID": 39,
+        "Name": "Nullsoft Streaming Video (NSV)",
+        "Notes": "For streaming video content over the Internet",
+        "Type": ".nsv",
+        "Video coding Format": "?"
+    },
+    {
+        "Audio Coding Format": "SWF. F4V. ISO base media file format",
+        "Container Format": "Audio. video. text. data",
+        "ID": 40,
+        "Name": "Flash Video (FLV)",
+        "Notes": "Developed by the Adobe Flash Platform",
+        "Type": ".flv ",
+        "Video coding Format": "Adobe Flash Platform"
+    },
+    {
+        "Audio Coding Format": "SWF. F4V. ISO base media file format",
+        "Container Format": "Audio. video. text. data",
+        "ID": 41,
+        "Name": "Flash Video (FLV)",
+        "Notes": "Developed by the Adobe Flash Platform",
+        "Type": ".f4v",
+        "Video coding Format": "Adobe Flash Platform"
+    },
+    {
+        "Audio Coding Format": "SWF. F4V. ISO base media file format",
+        "Container Format": "Audio. video. text. data",
+        "ID": 42,
+        "Name": "Flash Video (FLV)",
+        "Notes": "Developed by the Adobe Flash Platform",
+        "Type": ".f4p",
+        "Video coding Format": "Adobe Flash Platform"
+    },
+    {
+        "Audio Coding Format": "SWF. F4V. ISO base media file format",
+        "Container Format": "Audio. video. text. data",
+        "ID": 43,
+        "Name": "Flash Video (FLV)",
+        "Notes": "Developed by the Adobe Flash Platform",
+        "Type": ".f4a",
+        "Video coding Format": "Adobe Flash Platform"
+    },
+    {
+        "Audio Coding Format": "SWF. F4V. ISO base media file format",
+        "Container Format": "Audio. video. text. data",
+        "ID": 44,
+        "Name": "Flash Video (FLV)",
+        "Notes": "Developed by the Adobe Flash Platform",
+        "Type": ".f4b",
+        "Video coding Format": "Adobe Flash Platform"
+    }
+]

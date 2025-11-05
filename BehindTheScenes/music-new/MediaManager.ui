@@ -1,0 +1,2322 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>2538</width>
+    <height>1341</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Media Manager 2.0</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <property name="minimumSize">
+    <size>
+     <width>1200</width>
+     <height>0</height>
+    </size>
+   </property>
+   <layout class="QGridLayout" name="gridLayout">
+    <item row="0" column="0">
+     <layout class="QVBoxLayout" name="verticalLayout">
+      <item>
+       <widget class="QFrame" name="frame">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>250</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>250</height>
+         </size>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">background-color: rgb(255, 170, 255);</string>
+        </property>
+        <property name="frameShape">
+         <enum>QFrame::StyledPanel</enum>
+        </property>
+        <property name="frameShadow">
+         <enum>QFrame::Plain</enum>
+        </property>
+        <widget class="QLCDNumber" name="cpu_lcd">
+         <property name="geometry">
+          <rect>
+           <x>100</x>
+           <y>90</y>
+           <width>200</width>
+           <height>100</height>
+          </rect>
+         </property>
+        </widget>
+        <widget class="QLCDNumber" name="ram_lcd">
+         <property name="geometry">
+          <rect>
+           <x>310</x>
+           <y>90</y>
+           <width>200</width>
+           <height>100</height>
+          </rect>
+         </property>
+        </widget>
+        <widget class="QLCDNumber" name="lan_lcd">
+         <property name="geometry">
+          <rect>
+           <x>510</x>
+           <y>90</y>
+           <width>200</width>
+           <height>100</height>
+          </rect>
+         </property>
+        </widget>
+        <widget class="QLCDNumber" name="filecount_lcd">
+         <property name="geometry">
+          <rect>
+           <x>720</x>
+           <y>90</y>
+           <width>200</width>
+           <height>100</height>
+          </rect>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_10">
+         <property name="geometry">
+          <rect>
+           <x>100</x>
+           <y>70</y>
+           <width>131</width>
+           <height>16</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>CPU Load %</string>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_11">
+         <property name="geometry">
+          <rect>
+           <x>320</x>
+           <y>70</y>
+           <width>161</width>
+           <height>16</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Available RAM GB</string>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_12">
+         <property name="geometry">
+          <rect>
+           <x>510</x>
+           <y>70</y>
+           <width>171</width>
+           <height>16</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>LAN Load 5 Secs MB/sec</string>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_13">
+         <property name="geometry">
+          <rect>
+           <x>730</x>
+           <y>70</y>
+           <width>121</width>
+           <height>16</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>File Count</string>
+         </property>
+        </widget>
+        <widget class="QFrame" name="frame_2">
+         <property name="geometry">
+          <rect>
+           <x>940</x>
+           <y>90</y>
+           <width>221</width>
+           <height>101</height>
+          </rect>
+         </property>
+         <property name="frameShape">
+          <enum>QFrame::StyledPanel</enum>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Plain</enum>
+         </property>
+         <widget class="QLabel" name="StartTime">
+          <property name="geometry">
+           <rect>
+            <x>10</x>
+            <y>20</y>
+            <width>81</width>
+            <height>16</height>
+           </rect>
+          </property>
+          <property name="frameShape">
+           <enum>QFrame::NoFrame</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Plain</enum>
+          </property>
+          <property name="text">
+           <string>Start Time</string>
+          </property>
+         </widget>
+         <widget class="QLabel" name="EndTime">
+          <property name="geometry">
+           <rect>
+            <x>10</x>
+            <y>60</y>
+            <width>81</width>
+            <height>16</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>End Time</string>
+          </property>
+         </widget>
+         <widget class="QLabel" name="Started">
+          <property name="geometry">
+           <rect>
+            <x>100</x>
+            <y>20</y>
+            <width>81</width>
+            <height>21</height>
+           </rect>
+          </property>
+          <property name="frameShape">
+           <enum>QFrame::Box</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Plain</enum>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+         </widget>
+         <widget class="QLabel" name="Ended">
+          <property name="geometry">
+           <rect>
+            <x>100</x>
+            <y>60</y>
+            <width>81</width>
+            <height>21</height>
+           </rect>
+          </property>
+          <property name="frameShape">
+           <enum>QFrame::Box</enum>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+         </widget>
+        </widget>
+        <widget class="QLabel" name="logo_label">
+         <property name="geometry">
+          <rect>
+           <x>1630</x>
+           <y>10</y>
+           <width>251</width>
+           <height>231</height>
+          </rect>
+         </property>
+         <property name="frameShape">
+          <enum>QFrame::Box</enum>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Raised</enum>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="pixmap">
+          <pixmap>C:/Users/berna/.designer/backup/images/ai logo.jpg</pixmap>
+         </property>
+         <property name="scaledContents">
+          <bool>true</bool>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_28">
+         <property name="geometry">
+          <rect>
+           <x>20</x>
+           <y>10</y>
+           <width>261</width>
+           <height>16</height>
+          </rect>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">font: 75 10pt &quot;MS Shell Dlg 2&quot;;
+font: 12pt &quot;Verdana&quot;;
+color: rgb(255, 255, 255);
+font: 75 12pt &quot;MS Shell Dlg 2&quot;;
+color: rgb(44, 72, 255);</string>
+         </property>
+         <property name="text">
+          <string>Media Manager Version 1.1.0</string>
+         </property>
+        </widget>
+       </widget>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_2">
+        <item>
+         <widget class="QTextEdit" name="LeftColumn">
+          <property name="html">
+           <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:12pt; font-weight:600;&quot;&gt;ToDo List&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QStackedWidget" name="stackedWidget">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+            <horstretch>1</horstretch>
+            <verstretch>1</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">background-color: rgb(255, 170, 0);
+background-color: rgb(229, 255, 228);
+</string>
+          </property>
+          <property name="currentIndex">
+           <number>7</number>
+          </property>
+          <widget class="QWidget" name="Home">
+           <layout class="QVBoxLayout" name="verticalLayout_8">
+            <item>
+             <widget class="QLabel" name="homeImageContainer">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">background-color: rgb(226, 255, 238);</string>
+              </property>
+              <property name="text">
+               <string/>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+          <widget class="QWidget" name="Utils">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+             <horstretch>1</horstretch>
+             <verstretch>1</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="autoFillBackground">
+            <bool>false</bool>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">background-color: rgb(0, 0, 0);</string>
+           </property>
+           <layout class="QHBoxLayout" name="horizontalLayout_10">
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_9" stretch="1,1">
+              <item>
+               <widget class="QFrame" name="Util_list">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                  <horstretch>1</horstretch>
+                  <verstretch>1</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="styleSheet">
+                 <string notr="true">background-color: rgb(170, 255, 255);</string>
+                </property>
+                <property name="frameShape">
+                 <enum>QFrame::StyledPanel</enum>
+                </property>
+                <property name="frameShadow">
+                 <enum>QFrame::Plain</enum>
+                </property>
+                <layout class="QVBoxLayout" name="verticalLayout_6">
+                 <item>
+                  <widget class="QFrame" name="frame_5">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+                     <horstretch>1</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
+                   <property name="minimumSize">
+                    <size>
+                     <width>0</width>
+                     <height>75</height>
+                    </size>
+                   </property>
+                   <property name="maximumSize">
+                    <size>
+                     <width>16777215</width>
+                     <height>75</height>
+                    </size>
+                   </property>
+                   <property name="styleSheet">
+                    <string notr="true">background-color: rgb(255, 255, 127);</string>
+                   </property>
+                   <property name="frameShape">
+                    <enum>QFrame::StyledPanel</enum>
+                   </property>
+                   <property name="frameShadow">
+                    <enum>QFrame::Plain</enum>
+                   </property>
+                   <widget class="QLabel" name="label_15">
+                    <property name="geometry">
+                     <rect>
+                      <x>10</x>
+                      <y>10</y>
+                      <width>141</width>
+                      <height>16</height>
+                     </rect>
+                    </property>
+                    <property name="font">
+                     <font>
+                      <pointsize>12</pointsize>
+                     </font>
+                    </property>
+                    <property name="text">
+                     <string>Select a Collection</string>
+                    </property>
+                   </widget>
+                   <widget class="QRadioButton" name="radioButton">
+                    <property name="geometry">
+                     <rect>
+                      <x>170</x>
+                      <y>10</y>
+                      <width>111</width>
+                      <height>17</height>
+                     </rect>
+                    </property>
+                    <property name="text">
+                     <string>Master Collections</string>
+                    </property>
+                   </widget>
+                   <widget class="QRadioButton" name="radioButton_2">
+                    <property name="geometry">
+                     <rect>
+                      <x>170</x>
+                      <y>40</y>
+                      <width>111</width>
+                      <height>17</height>
+                     </rect>
+                    </property>
+                    <property name="text">
+                     <string>Media Collections</string>
+                    </property>
+                   </widget>
+                   <widget class="QPushButton" name="pushButton">
+                    <property name="geometry">
+                     <rect>
+                      <x>350</x>
+                      <y>10</y>
+                      <width>221</width>
+                      <height>61</height>
+                     </rect>
+                    </property>
+                    <property name="styleSheet">
+                     <string notr="true">background-color: rgb(234, 255, 252);</string>
+                    </property>
+                    <property name="text">
+                     <string>Action</string>
+                    </property>
+                   </widget>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QFrame" name="frame_6">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                     <horstretch>1</horstretch>
+                     <verstretch>1</verstretch>
+                    </sizepolicy>
+                   </property>
+                   <property name="styleSheet">
+                    <string notr="true">background-color: rgb(192, 220, 255);</string>
+                   </property>
+                   <property name="frameShape">
+                    <enum>QFrame::StyledPanel</enum>
+                   </property>
+                   <property name="frameShadow">
+                    <enum>QFrame::Plain</enum>
+                   </property>
+                   <layout class="QGridLayout" name="gridLayout_3">
+                    <item row="0" column="0">
+                     <widget class="QTableWidget" name="coll_table">
+                      <property name="sizePolicy">
+                       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                        <horstretch>1</horstretch>
+                        <verstretch>1</verstretch>
+                       </sizepolicy>
+                      </property>
+                      <property name="styleSheet">
+                       <string notr="true">background-color: rgb(255, 237, 221);</string>
+                      </property>
+                     </widget>
+                    </item>
+                   </layout>
+                  </widget>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+              <item>
+               <widget class="QFrame" name="Util_help">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                  <horstretch>1</horstretch>
+                  <verstretch>1</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="styleSheet">
+                 <string notr="true">background-color: rgb(170, 255, 127);</string>
+                </property>
+                <property name="frameShape">
+                 <enum>QFrame::StyledPanel</enum>
+                </property>
+                <property name="frameShadow">
+                 <enum>QFrame::Plain</enum>
+                </property>
+                <layout class="QVBoxLayout" name="verticalLayout_5">
+                 <item>
+                  <widget class="QFrame" name="frame_7">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+                     <horstretch>1</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
+                   <property name="minimumSize">
+                    <size>
+                     <width>0</width>
+                     <height>76</height>
+                    </size>
+                   </property>
+                   <property name="maximumSize">
+                    <size>
+                     <width>16777215</width>
+                     <height>75</height>
+                    </size>
+                   </property>
+                   <property name="styleSheet">
+                    <string notr="true">background-color: rgb(215, 244, 255);</string>
+                   </property>
+                   <property name="frameShape">
+                    <enum>QFrame::StyledPanel</enum>
+                   </property>
+                   <property name="frameShadow">
+                    <enum>QFrame::Plain</enum>
+                   </property>
+                   <widget class="QLabel" name="label_14">
+                    <property name="geometry">
+                     <rect>
+                      <x>140</x>
+                      <y>40</y>
+                      <width>261</width>
+                      <height>20</height>
+                     </rect>
+                    </property>
+                    <property name="font">
+                     <font>
+                      <pointsize>14</pointsize>
+                      <weight>75</weight>
+                      <bold>true</bold>
+                     </font>
+                    </property>
+                    <property name="text">
+                     <string>Utilities Noticeboard</string>
+                    </property>
+                    <property name="textFormat">
+                     <enum>Qt::RichText</enum>
+                    </property>
+                   </widget>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QFrame" name="frame_8">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                     <horstretch>1</horstretch>
+                     <verstretch>1</verstretch>
+                    </sizepolicy>
+                   </property>
+                   <property name="styleSheet">
+                    <string notr="true">background-color: rgb(170, 251, 255);</string>
+                   </property>
+                   <property name="frameShape">
+                    <enum>QFrame::StyledPanel</enum>
+                   </property>
+                   <property name="frameShadow">
+                    <enum>QFrame::Plain</enum>
+                   </property>
+                   <layout class="QHBoxLayout" name="horizontalLayout_11">
+                    <item>
+                     <widget class="QTextEdit" name="utilNotice">
+                      <property name="sizePolicy">
+                       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                        <horstretch>1</horstretch>
+                        <verstretch>1</verstretch>
+                       </sizepolicy>
+                      </property>
+                      <property name="frameShadow">
+                       <enum>QFrame::Plain</enum>
+                      </property>
+                      <property name="lineWidth">
+                       <number>3</number>
+                      </property>
+                     </widget>
+                    </item>
+                   </layout>
+                  </widget>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+             </layout>
+            </item>
+           </layout>
+          </widget>
+          <widget class="QWidget" name="EditPanel">
+           <property name="styleSheet">
+            <string notr="true">background-color: rgb(85, 170, 255);</string>
+           </property>
+           <layout class="QHBoxLayout" name="horizontalLayout_14">
+            <item>
+             <widget class="QWidget" name="widget" native="true">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+                <horstretch>1</horstretch>
+                <verstretch>1</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">background-color: rgb(170, 255, 255);</string>
+              </property>
+              <layout class="QHBoxLayout" name="horizontalLayout_13">
+               <item>
+                <layout class="QHBoxLayout" name="horizontalLayout_12">
+                 <item>
+                  <widget class="QWidget" name="MediaTypeWidget" native="true">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+                     <horstretch>1</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
+                   <property name="minimumSize">
+                    <size>
+                     <width>0</width>
+                     <height>1</height>
+                    </size>
+                   </property>
+                   <property name="styleSheet">
+                    <string notr="true">background-color: rgb(202, 202, 255);</string>
+                   </property>
+                   <widget class="QLabel" name="label_16">
+                    <property name="geometry">
+                     <rect>
+                      <x>10</x>
+                      <y>10</y>
+                      <width>211</width>
+                      <height>16</height>
+                     </rect>
+                    </property>
+                    <property name="text">
+                     <string>Add a Media Type, Video, Music, Image</string>
+                    </property>
+                   </widget>
+                   <widget class="QLineEdit" name="mediaTypeEdit">
+                    <property name="geometry">
+                     <rect>
+                      <x>10</x>
+                      <y>30</y>
+                      <width>171</width>
+                      <height>20</height>
+                     </rect>
+                    </property>
+                    <property name="styleSheet">
+                     <string notr="true">background-color: rgb(255, 255, 255);</string>
+                    </property>
+                   </widget>
+                   <widget class="QPushButton" name="addMediaTypeButton">
+                    <property name="geometry">
+                     <rect>
+                      <x>190</x>
+                      <y>30</y>
+                      <width>75</width>
+                      <height>23</height>
+                     </rect>
+                    </property>
+                    <property name="text">
+                     <string>ADD</string>
+                    </property>
+                   </widget>
+                   <widget class="QLabel" name="label_17">
+                    <property name="geometry">
+                     <rect>
+                      <x>10</x>
+                      <y>80</y>
+                      <width>111</width>
+                      <height>16</height>
+                     </rect>
+                    </property>
+                    <property name="text">
+                     <string>Remove Media Type</string>
+                    </property>
+                   </widget>
+                   <widget class="QComboBox" name="removeMediaTypeCombo">
+                    <property name="geometry">
+                     <rect>
+                      <x>10</x>
+                      <y>100</y>
+                      <width>181</width>
+                      <height>22</height>
+                     </rect>
+                    </property>
+                    <property name="styleSheet">
+                     <string notr="true">
+background-color: rgb(255, 255, 255);</string>
+                    </property>
+                   </widget>
+                   <widget class="QPushButton" name="removeMediaTypeButton">
+                    <property name="geometry">
+                     <rect>
+                      <x>200</x>
+                      <y>100</y>
+                      <width>75</width>
+                      <height>23</height>
+                     </rect>
+                    </property>
+                    <property name="text">
+                     <string>REMOVE</string>
+                    </property>
+                   </widget>
+                   <widget class="QLabel" name="mediaTypeEditError">
+                    <property name="geometry">
+                     <rect>
+                      <x>10</x>
+                      <y>60</y>
+                      <width>171</width>
+                      <height>16</height>
+                     </rect>
+                    </property>
+                    <property name="frameShape">
+                     <enum>QFrame::StyledPanel</enum>
+                    </property>
+                    <property name="text">
+                     <string>.</string>
+                    </property>
+                   </widget>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QWidget" name="widget_4" native="true">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+                     <horstretch>1</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
+                   <property name="minimumSize">
+                    <size>
+                     <width>1</width>
+                     <height>1</height>
+                    </size>
+                   </property>
+                   <property name="styleSheet">
+                    <string notr="true">background-color: rgb(202, 255, 208);</string>
+                   </property>
+                   <widget class="QLabel" name="label_20">
+                    <property name="geometry">
+                     <rect>
+                      <x>20</x>
+                      <y>10</y>
+                      <width>171</width>
+                      <height>16</height>
+                     </rect>
+                    </property>
+                    <property name="text">
+                     <string>Add an Excluded Folder Name</string>
+                    </property>
+                   </widget>
+                   <widget class="QLineEdit" name="excludeFoldersEdit">
+                    <property name="geometry">
+                     <rect>
+                      <x>20</x>
+                      <y>30</y>
+                      <width>171</width>
+                      <height>20</height>
+                     </rect>
+                    </property>
+                    <property name="styleSheet">
+                     <string notr="true">background-color: rgb(255, 255, 255);</string>
+                    </property>
+                   </widget>
+                   <widget class="QPushButton" name="addFoldersButton">
+                    <property name="geometry">
+                     <rect>
+                      <x>200</x>
+                      <y>30</y>
+                      <width>75</width>
+                      <height>23</height>
+                     </rect>
+                    </property>
+                    <property name="text">
+                     <string>ADD</string>
+                    </property>
+                   </widget>
+                   <widget class="QComboBox" name="removeFoldersCombo">
+                    <property name="geometry">
+                     <rect>
+                      <x>20</x>
+                      <y>110</y>
+                      <width>171</width>
+                      <height>22</height>
+                     </rect>
+                    </property>
+                    <property name="styleSheet">
+                     <string notr="true">background-color: rgb(255, 255, 255);</string>
+                    </property>
+                   </widget>
+                   <widget class="QLabel" name="label_21">
+                    <property name="geometry">
+                     <rect>
+                      <x>20</x>
+                      <y>90</y>
+                      <width>131</width>
+                      <height>16</height>
+                     </rect>
+                    </property>
+                    <property name="text">
+                     <string>Remove Excluded Folder</string>
+                    </property>
+                   </widget>
+                   <widget class="QPushButton" name="removeFoldersButton">
+                    <property name="geometry">
+                     <rect>
+                      <x>200</x>
+                      <y>110</y>
+                      <width>75</width>
+                      <height>23</height>
+                     </rect>
+                    </property>
+                    <property name="text">
+                     <string>REMOVE</string>
+                    </property>
+                   </widget>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QWidget" name="widget_3" native="true">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+                     <horstretch>1</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
+                   <property name="styleSheet">
+                    <string notr="true">background-color: rgb(255, 201, 254);</string>
+                   </property>
+                   <widget class="QLabel" name="label_18">
+                    <property name="geometry">
+                     <rect>
+                      <x>30</x>
+                      <y>10</y>
+                      <width>281</width>
+                      <height>16</height>
+                     </rect>
+                    </property>
+                    <property name="text">
+                     <string>Add a Master Collection Type Master, Clone, Secondary</string>
+                    </property>
+                   </widget>
+                   <widget class="QLineEdit" name="addMasterTypeEdit">
+                    <property name="geometry">
+                     <rect>
+                      <x>30</x>
+                      <y>30</y>
+                      <width>171</width>
+                      <height>20</height>
+                     </rect>
+                    </property>
+                    <property name="styleSheet">
+                     <string notr="true">background-color: rgb(255, 255, 255);</string>
+                    </property>
+                   </widget>
+                   <widget class="QPushButton" name="addMasterTypeButton">
+                    <property name="geometry">
+                     <rect>
+                      <x>210</x>
+                      <y>30</y>
+                      <width>75</width>
+                      <height>23</height>
+                     </rect>
+                    </property>
+                    <property name="text">
+                     <string>ADD</string>
+                    </property>
+                   </widget>
+                   <widget class="QLabel" name="label_19">
+                    <property name="geometry">
+                     <rect>
+                      <x>30</x>
+                      <y>80</y>
+                      <width>171</width>
+                      <height>16</height>
+                     </rect>
+                    </property>
+                    <property name="text">
+                     <string>Remove Master Collection Type</string>
+                    </property>
+                   </widget>
+                   <widget class="QComboBox" name="removeMasterTypeCombo">
+                    <property name="geometry">
+                     <rect>
+                      <x>30</x>
+                      <y>100</y>
+                      <width>171</width>
+                      <height>22</height>
+                     </rect>
+                    </property>
+                    <property name="styleSheet">
+                     <string notr="true">background-color: rgb(255, 255, 255);</string>
+                    </property>
+                   </widget>
+                   <widget class="QPushButton" name="removeMasterTypeButton">
+                    <property name="geometry">
+                     <rect>
+                      <x>210</x>
+                      <y>100</y>
+                      <width>75</width>
+                      <height>23</height>
+                     </rect>
+                    </property>
+                    <property name="text">
+                     <string>REMOVE</string>
+                    </property>
+                   </widget>
+                   <widget class="QLabel" name="addMasterTypeEditError">
+                    <property name="geometry">
+                     <rect>
+                      <x>30</x>
+                      <y>60</y>
+                      <width>171</width>
+                      <height>16</height>
+                     </rect>
+                    </property>
+                    <property name="frameShape">
+                     <enum>QFrame::StyledPanel</enum>
+                    </property>
+                    <property name="text">
+                     <string>TextLabel</string>
+                    </property>
+                   </widget>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QWidget" name="widget_5" native="true">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+                     <horstretch>2</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
+                   <property name="styleSheet">
+                    <string notr="true">background-color: rgb(240, 242, 255);</string>
+                   </property>
+                   <widget class="QLabel" name="label_22">
+                    <property name="geometry">
+                     <rect>
+                      <x>10</x>
+                      <y>30</y>
+                      <width>171</width>
+                      <height>16</height>
+                     </rect>
+                    </property>
+                    <property name="text">
+                     <string>Add a File Extension eg  .jpeg</string>
+                    </property>
+                   </widget>
+                   <widget class="QLineEdit" name="addFileExtEdit">
+                    <property name="geometry">
+                     <rect>
+                      <x>10</x>
+                      <y>50</y>
+                      <width>141</width>
+                      <height>20</height>
+                     </rect>
+                    </property>
+                    <property name="styleSheet">
+                     <string notr="true">background-color: rgb(255, 255, 255);</string>
+                    </property>
+                   </widget>
+                   <widget class="QComboBox" name="selectMediaTypeCombo">
+                    <property name="geometry">
+                     <rect>
+                      <x>180</x>
+                      <y>50</y>
+                      <width>151</width>
+                      <height>22</height>
+                     </rect>
+                    </property>
+                    <property name="styleSheet">
+                     <string notr="true">background-color: rgb(255, 255, 255);</string>
+                    </property>
+                   </widget>
+                   <widget class="QLabel" name="label_23">
+                    <property name="geometry">
+                     <rect>
+                      <x>180</x>
+                      <y>30</y>
+                      <width>151</width>
+                      <height>16</height>
+                     </rect>
+                    </property>
+                    <property name="text">
+                     <string>Select Associated Media Type</string>
+                    </property>
+                   </widget>
+                   <widget class="QPushButton" name="addExtButton">
+                    <property name="geometry">
+                     <rect>
+                      <x>330</x>
+                      <y>50</y>
+                      <width>75</width>
+                      <height>23</height>
+                     </rect>
+                    </property>
+                    <property name="text">
+                     <string>ADD</string>
+                    </property>
+                   </widget>
+                   <widget class="QLabel" name="label_24">
+                    <property name="geometry">
+                     <rect>
+                      <x>10</x>
+                      <y>10</y>
+                      <width>431</width>
+                      <height>16</height>
+                     </rect>
+                    </property>
+                    <property name="text">
+                     <string>If adding a new media type, do it first then addthis  extensions</string>
+                    </property>
+                   </widget>
+                   <widget class="QLabel" name="label_25">
+                    <property name="geometry">
+                     <rect>
+                      <x>10</x>
+                      <y>100</y>
+                      <width>121</width>
+                      <height>16</height>
+                     </rect>
+                    </property>
+                    <property name="text">
+                     <string>Remove an Extension</string>
+                    </property>
+                   </widget>
+                   <widget class="QComboBox" name="removeExtCombo">
+                    <property name="geometry">
+                     <rect>
+                      <x>10</x>
+                      <y>120</y>
+                      <width>181</width>
+                      <height>22</height>
+                     </rect>
+                    </property>
+                    <property name="styleSheet">
+                     <string notr="true">background-color: rgb(255, 255, 255);</string>
+                    </property>
+                   </widget>
+                   <widget class="QPushButton" name="removeExtButton">
+                    <property name="geometry">
+                     <rect>
+                      <x>200</x>
+                      <y>120</y>
+                      <width>75</width>
+                      <height>23</height>
+                     </rect>
+                    </property>
+                    <property name="text">
+                     <string>REMOVE</string>
+                    </property>
+                   </widget>
+                   <widget class="QLabel" name="label_26">
+                    <property name="geometry">
+                     <rect>
+                      <x>10</x>
+                      <y>80</y>
+                      <width>131</width>
+                      <height>16</height>
+                     </rect>
+                    </property>
+                    <property name="frameShape">
+                     <enum>QFrame::StyledPanel</enum>
+                    </property>
+                    <property name="text">
+                     <string>TextLabel</string>
+                    </property>
+                   </widget>
+                  </widget>
+                 </item>
+                </layout>
+               </item>
+              </layout>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+          <widget class="QWidget" name="page">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+             <horstretch>1</horstretch>
+             <verstretch>1</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">background-color: rgb(85, 170, 255);</string>
+           </property>
+           <layout class="QHBoxLayout" name="horizontalLayout_7">
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,1">
+              <property name="sizeConstraint">
+               <enum>QLayout::SetNoConstraint</enum>
+              </property>
+              <item>
+               <widget class="QFrame" name="pi_collections">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                  <horstretch>1</horstretch>
+                  <verstretch>1</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="frameShape">
+                 <enum>QFrame::Box</enum>
+                </property>
+                <property name="frameShadow">
+                 <enum>QFrame::Raised</enum>
+                </property>
+                <layout class="QHBoxLayout" name="horizontalLayout_8">
+                 <item>
+                  <layout class="QVBoxLayout" name="verticalLayout_2">
+                   <item>
+                    <widget class="QFrame" name="control_frame1">
+                     <property name="sizePolicy">
+                      <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+                       <horstretch>1</horstretch>
+                       <verstretch>0</verstretch>
+                      </sizepolicy>
+                     </property>
+                     <property name="minimumSize">
+                      <size>
+                       <width>0</width>
+                       <height>75</height>
+                      </size>
+                     </property>
+                     <property name="maximumSize">
+                      <size>
+                       <width>16777215</width>
+                       <height>75</height>
+                      </size>
+                     </property>
+                     <property name="frameShape">
+                      <enum>QFrame::Box</enum>
+                     </property>
+                     <property name="frameShadow">
+                      <enum>QFrame::Raised</enum>
+                     </property>
+                     <widget class="QWidget" name="layoutWidget">
+                      <property name="geometry">
+                       <rect>
+                        <x>10</x>
+                        <y>10</y>
+                        <width>291</width>
+                        <height>45</height>
+                       </rect>
+                      </property>
+                      <layout class="QGridLayout" name="gridLayout_2">
+                       <item row="0" column="0">
+                        <widget class="QLabel" name="dev_label">
+                         <property name="text">
+                          <string>Device</string>
+                         </property>
+                        </widget>
+                       </item>
+                       <item row="0" column="1">
+                        <widget class="QLabel" name="cat_label">
+                         <property name="text">
+                          <string>Category</string>
+                         </property>
+                        </widget>
+                       </item>
+                       <item row="1" column="0">
+                        <widget class="QComboBox" name="dev_combo">
+                         <property name="styleSheet">
+                          <string notr="true">background-color: rgb(255, 255, 255);</string>
+                         </property>
+                        </widget>
+                       </item>
+                       <item row="1" column="1">
+                        <widget class="QComboBox" name="cat_combo">
+                         <property name="styleSheet">
+                          <string notr="true">background-color: rgb(255, 255, 255);</string>
+                         </property>
+                        </widget>
+                       </item>
+                      </layout>
+                     </widget>
+                     <widget class="QRadioButton" name="masterRadio">
+                      <property name="geometry">
+                       <rect>
+                        <x>320</x>
+                        <y>20</y>
+                        <width>82</width>
+                        <height>17</height>
+                       </rect>
+                      </property>
+                      <property name="text">
+                       <string>Master</string>
+                      </property>
+                     </widget>
+                     <widget class="QRadioButton" name="collRadio">
+                      <property name="geometry">
+                       <rect>
+                        <x>320</x>
+                        <y>40</y>
+                        <width>82</width>
+                        <height>17</height>
+                       </rect>
+                      </property>
+                      <property name="text">
+                       <string>Collection</string>
+                      </property>
+                     </widget>
+                     <widget class="QPushButton" name="chartButton">
+                      <property name="geometry">
+                       <rect>
+                        <x>460</x>
+                        <y>20</y>
+                        <width>171</width>
+                        <height>41</height>
+                       </rect>
+                      </property>
+                      <property name="text">
+                       <string>Chart</string>
+                      </property>
+                     </widget>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QFrame" name="canvas_frame">
+                     <property name="sizePolicy">
+                      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                       <horstretch>1</horstretch>
+                       <verstretch>0</verstretch>
+                      </sizepolicy>
+                     </property>
+                     <property name="frameShape">
+                      <enum>QFrame::Box</enum>
+                     </property>
+                     <property name="frameShadow">
+                      <enum>QFrame::Raised</enum>
+                     </property>
+                    </widget>
+                   </item>
+                  </layout>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+              <item>
+               <widget class="QFrame" name="coll_frame_table">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                  <horstretch>1</horstretch>
+                  <verstretch>1</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="styleSheet">
+                 <string notr="true">background-color: rgb(170, 255, 127);</string>
+                </property>
+                <property name="frameShape">
+                 <enum>QFrame::Box</enum>
+                </property>
+                <property name="frameShadow">
+                 <enum>QFrame::Raised</enum>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+           </layout>
+          </widget>
+          <widget class="QWidget" name="Comparisons">
+           <property name="styleSheet">
+            <string notr="true">background-color: rgb(255, 255, 127);</string>
+           </property>
+           <layout class="QHBoxLayout" name="horizontalLayout_3">
+            <item>
+             <layout class="QVBoxLayout" name="verticalLayout_3">
+              <item>
+               <widget class="QFrame" name="Heading">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+                  <horstretch>1</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>150</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>16777215</width>
+                  <height>75</height>
+                 </size>
+                </property>
+                <property name="styleSheet">
+                 <string notr="true">background-color: rgb(238, 238, 255);</string>
+                </property>
+                <property name="frameShape">
+                 <enum>QFrame::StyledPanel</enum>
+                </property>
+                <property name="frameShadow">
+                 <enum>QFrame::Plain</enum>
+                </property>
+                <widget class="QLabel" name="label">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>10</y>
+                   <width>151</width>
+                   <height>16</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>Compare Collections</string>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="label_2">
+                 <property name="geometry">
+                  <rect>
+                   <x>570</x>
+                   <y>10</y>
+                   <width>71</width>
+                   <height>16</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>Collection A</string>
+                 </property>
+                </widget>
+                <widget class="QComboBox" name="combo_compareA">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>30</y>
+                   <width>631</width>
+                   <height>22</height>
+                  </rect>
+                 </property>
+                 <property name="styleSheet">
+                  <string notr="true">background-color: rgb(255, 255, 255);</string>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="label_3">
+                 <property name="geometry">
+                  <rect>
+                   <x>1200</x>
+                   <y>10</y>
+                   <width>81</width>
+                   <height>16</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>Collection B</string>
+                 </property>
+                </widget>
+                <widget class="QComboBox" name="combo_compareB">
+                 <property name="geometry">
+                  <rect>
+                   <x>650</x>
+                   <y>30</y>
+                   <width>621</width>
+                   <height>22</height>
+                  </rect>
+                 </property>
+                 <property name="styleSheet">
+                  <string notr="true">background-color: rgb(255, 255, 255);</string>
+                 </property>
+                </widget>
+                <widget class="QComboBox" name="combo_compareType">
+                 <property name="geometry">
+                  <rect>
+                   <x>1270</x>
+                   <y>30</y>
+                   <width>301</width>
+                   <height>22</height>
+                  </rect>
+                 </property>
+                 <property name="styleSheet">
+                  <string notr="true">background-color: rgb(255, 255, 255);</string>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="label_4">
+                 <property name="geometry">
+                  <rect>
+                   <x>1450</x>
+                   <y>10</y>
+                   <width>121</width>
+                   <height>16</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>Comparison Method</string>
+                 </property>
+                </widget>
+                <widget class="QPushButton" name="compare_btn">
+                 <property name="geometry">
+                  <rect>
+                   <x>1580</x>
+                   <y>10</y>
+                   <width>201</width>
+                   <height>101</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>Compare</string>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="label_5">
+                 <property name="geometry">
+                  <rect>
+                   <x>514</x>
+                   <y>60</y>
+                   <width>121</width>
+                   <height>20</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>Select Data Source</string>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="label_6">
+                 <property name="geometry">
+                  <rect>
+                   <x>1160</x>
+                   <y>50</y>
+                   <width>121</width>
+                   <height>20</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>Select Data Source</string>
+                 </property>
+                </widget>
+                <widget class="QComboBox" name="comboBox_table1">
+                 <property name="geometry">
+                  <rect>
+                   <x>420</x>
+                   <y>80</y>
+                   <width>221</width>
+                   <height>22</height>
+                  </rect>
+                 </property>
+                </widget>
+                <widget class="QComboBox" name="comboBox_table2">
+                 <property name="geometry">
+                  <rect>
+                   <x>1042</x>
+                   <y>80</y>
+                   <width>221</width>
+                   <height>22</height>
+                  </rect>
+                 </property>
+                </widget>
+               </widget>
+              </item>
+              <item>
+               <widget class="QFrame" name="Display">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                  <horstretch>1</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>1000</width>
+                  <height>60</height>
+                 </size>
+                </property>
+                <property name="styleSheet">
+                 <string notr="true">background-color: rgb(255, 170, 255);</string>
+                </property>
+                <property name="frameShape">
+                 <enum>QFrame::StyledPanel</enum>
+                </property>
+                <property name="frameShadow">
+                 <enum>QFrame::Plain</enum>
+                </property>
+                <layout class="QHBoxLayout" name="horizontalLayout_4">
+                 <item>
+                  <layout class="QVBoxLayout" name="verticalLayout_4">
+                   <item>
+                    <widget class="QTableView" name="tableView">
+                     <property name="styleSheet">
+                      <string notr="true">background-color: rgb(196, 255, 242);</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QFrame" name="frame_3">
+                     <property name="sizePolicy">
+                      <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+                       <horstretch>1</horstretch>
+                       <verstretch>0</verstretch>
+                      </sizepolicy>
+                     </property>
+                     <property name="minimumSize">
+                      <size>
+                       <width>0</width>
+                       <height>75</height>
+                      </size>
+                     </property>
+                     <property name="styleSheet">
+                      <string notr="true">background-color: rgb(170, 255, 0);
+background-color: rgb(255, 243, 239);</string>
+                     </property>
+                     <property name="frameShape">
+                      <enum>QFrame::StyledPanel</enum>
+                     </property>
+                     <property name="frameShadow">
+                      <enum>QFrame::Plain</enum>
+                     </property>
+                    </widget>
+                   </item>
+                  </layout>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+             </layout>
+            </item>
+           </layout>
+          </widget>
+          <widget class="QWidget" name="splash">
+           <layout class="QHBoxLayout" name="horizontalLayout_15">
+            <item>
+             <widget class="QFrame" name="frame_9">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                <horstretch>1</horstretch>
+                <verstretch>1</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">background-color: rgb(170, 255, 255);</string>
+              </property>
+              <property name="frameShape">
+               <enum>QFrame::StyledPanel</enum>
+              </property>
+              <property name="frameShadow">
+               <enum>QFrame::Plain</enum>
+              </property>
+              <layout class="QVBoxLayout" name="verticalLayout_7">
+               <item>
+                <widget class="QWidget" name="widget_6" native="true">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+                   <horstretch>1</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="minimumSize">
+                  <size>
+                   <width>0</width>
+                   <height>100</height>
+                  </size>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>16777215</width>
+                   <height>100</height>
+                  </size>
+                 </property>
+                 <property name="styleSheet">
+                  <string notr="true">background-color: rgb(255, 255, 255);</string>
+                 </property>
+                 <widget class="QLabel" name="label_27">
+                  <property name="geometry">
+                   <rect>
+                    <x>20</x>
+                    <y>30</y>
+                    <width>201</width>
+                    <height>31</height>
+                   </rect>
+                  </property>
+                  <property name="text">
+                   <string>Search for Text</string>
+                  </property>
+                 </widget>
+                 <widget class="QLineEdit" name="searchEdit">
+                  <property name="geometry">
+                   <rect>
+                    <x>20</x>
+                    <y>60</y>
+                    <width>461</width>
+                    <height>31</height>
+                   </rect>
+                  </property>
+                 </widget>
+                 <widget class="QPushButton" name="searchButton">
+                  <property name="geometry">
+                   <rect>
+                    <x>490</x>
+                    <y>60</y>
+                    <width>75</width>
+                    <height>23</height>
+                   </rect>
+                  </property>
+                  <property name="text">
+                   <string>Search</string>
+                  </property>
+                 </widget>
+                </widget>
+               </item>
+               <item>
+                <widget class="QTableWidget" name="searchTableWidget">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                   <horstretch>1</horstretch>
+                   <verstretch>1</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="styleSheet">
+                  <string notr="true">background-color: rgb(255, 242, 230);</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+          <widget class="QWidget" name="HelpScreen">
+           <layout class="QHBoxLayout" name="horizontalLayout_16">
+            <item>
+             <widget class="QTextEdit" name="helpPanel">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                <horstretch>1</horstretch>
+                <verstretch>1</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">background-color: rgb(252, 239, 255);</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+          <widget class="QWidget" name="FFMPEG">
+           <layout class="QVBoxLayout" name="verticalLayout_10">
+            <item>
+             <widget class="QFrame" name="frameFFMPEG">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                <horstretch>1</horstretch>
+                <verstretch>1</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">background-color: rgb(255, 238, 221);</string>
+              </property>
+              <property name="frameShape">
+               <enum>QFrame::Box</enum>
+              </property>
+              <property name="frameShadow">
+               <enum>QFrame::Raised</enum>
+              </property>
+              <layout class="QVBoxLayout" name="verticalLayout_11">
+               <item>
+                <layout class="QVBoxLayout" name="verticalLayout_9">
+                 <item>
+                  <widget class="QWidget" name="widget_2" native="true">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                     <horstretch>1</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
+                   <property name="minimumSize">
+                    <size>
+                     <width>0</width>
+                     <height>100</height>
+                    </size>
+                   </property>
+                   <property name="maximumSize">
+                    <size>
+                     <width>16777215</width>
+                     <height>100</height>
+                    </size>
+                   </property>
+                   <property name="toolTipDuration">
+                    <number>-2</number>
+                   </property>
+                   <property name="styleSheet">
+                    <string notr="true">background-color: rgb(193, 255, 253);</string>
+                   </property>
+                   <widget class="QLabel" name="label_29">
+                    <property name="geometry">
+                     <rect>
+                      <x>10</x>
+                      <y>10</y>
+                      <width>161</width>
+                      <height>16</height>
+                     </rect>
+                    </property>
+                    <property name="styleSheet">
+                     <string notr="true">font: 75 14pt &quot;MS Shell Dlg 2&quot;;</string>
+                    </property>
+                    <property name="text">
+                     <string>FFMPEG Activities</string>
+                    </property>
+                   </widget>
+                   <widget class="QLabel" name="label_30">
+                    <property name="geometry">
+                     <rect>
+                      <x>20</x>
+                      <y>40</y>
+                      <width>181</width>
+                      <height>16</height>
+                     </rect>
+                    </property>
+                    <property name="text">
+                     <string>Select an Activity</string>
+                    </property>
+                   </widget>
+                   <widget class="QProgressBar" name="progressBarFF">
+                    <property name="geometry">
+                     <rect>
+                      <x>1670</x>
+                      <y>70</y>
+                      <width>281</width>
+                      <height>23</height>
+                     </rect>
+                    </property>
+                    <property name="value">
+                     <number>24</number>
+                    </property>
+                   </widget>
+                   <widget class="QLabel" name="label_31">
+                    <property name="geometry">
+                     <rect>
+                      <x>1670</x>
+                      <y>50</y>
+                      <width>241</width>
+                      <height>16</height>
+                     </rect>
+                    </property>
+                    <property name="text">
+                     <string>Error Check Progress Bar</string>
+                    </property>
+                   </widget>
+                   <widget class="QPushButton" name="videoProcButton">
+                    <property name="geometry">
+                     <rect>
+                      <x>850</x>
+                      <y>60</y>
+                      <width>221</width>
+                      <height>23</height>
+                     </rect>
+                    </property>
+                    <property name="styleSheet">
+                     <string notr="true">background-color: rgb(85, 170, 255);
+color: rgb(255, 255, 255);</string>
+                    </property>
+                    <property name="text">
+                     <string>Use VideoProc</string>
+                    </property>
+                   </widget>
+                   <widget class="QWidget" name="layoutWidget">
+                    <property name="geometry">
+                     <rect>
+                      <x>20</x>
+                      <y>60</y>
+                      <width>807</width>
+                      <height>25</height>
+                     </rect>
+                    </property>
+                    <layout class="QHBoxLayout" name="horizontalLayout_17" stretch="2,2,2,2,2,2">
+                     <property name="spacing">
+                      <number>5</number>
+                     </property>
+                     <item>
+                      <widget class="QPushButton" name="testFFFileButton">
+                       <property name="minimumSize">
+                        <size>
+                         <width>130</width>
+                         <height>0</height>
+                        </size>
+                       </property>
+                       <property name="styleSheet">
+                        <string notr="true">background-color: rgb(170, 255, 127);</string>
+                       </property>
+                       <property name="text">
+                        <string>Test a File</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QPushButton" name="testFFFolderButton">
+                       <property name="minimumSize">
+                        <size>
+                         <width>130</width>
+                         <height>0</height>
+                        </size>
+                       </property>
+                       <property name="text">
+                        <string>Test a Folder</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QPushButton" name="repairFFButton">
+                       <property name="minimumSize">
+                        <size>
+                         <width>130</width>
+                         <height>0</height>
+                        </size>
+                       </property>
+                       <property name="styleSheet">
+                        <string notr="true">background-color: rgb(170, 255, 127);</string>
+                       </property>
+                       <property name="text">
+                        <string>Repair a File</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QPushButton" name="convertFFButton">
+                       <property name="minimumSize">
+                        <size>
+                         <width>130</width>
+                         <height>0</height>
+                        </size>
+                       </property>
+                       <property name="styleSheet">
+                        <string notr="true">background-color: rgb(85, 255, 127);
+background-color: rgb(170, 255, 127);</string>
+                       </property>
+                       <property name="text">
+                        <string>Convert a File</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QPushButton" name="playFFButton">
+                       <property name="minimumSize">
+                        <size>
+                         <width>130</width>
+                         <height>0</height>
+                        </size>
+                       </property>
+                       <property name="styleSheet">
+                        <string notr="true">background-color: rgb(170, 255, 127);</string>
+                       </property>
+                       <property name="text">
+                        <string>Play a File</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QPushButton" name="viewFFFileButton">
+                       <property name="minimumSize">
+                        <size>
+                         <width>130</width>
+                         <height>0</height>
+                        </size>
+                       </property>
+                       <property name="styleSheet">
+                        <string notr="true">background-color: rgb(170, 255, 127);</string>
+                       </property>
+                       <property name="text">
+                        <string>View File Details</string>
+                       </property>
+                      </widget>
+                     </item>
+                    </layout>
+                   </widget>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QTextEdit" name="error_textpane">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                     <horstretch>1</horstretch>
+                     <verstretch>1</verstretch>
+                    </sizepolicy>
+                   </property>
+                   <property name="styleSheet">
+                    <string notr="true">background-color: rgb(245, 255, 240);</string>
+                   </property>
+                   <property name="frameShape">
+                    <enum>QFrame::Box</enum>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </item>
+              </layout>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </widget>
+        </item>
+        <item>
+         <widget class="QTextEdit" name="RightColumn">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <widget class="QScrollArea" name="scrollArea">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+          <horstretch>1</horstretch>
+          <verstretch>1</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>200</height>
+         </size>
+        </property>
+        <property name="widgetResizable">
+         <bool>true</bool>
+        </property>
+        <widget class="QWidget" name="scrollAreaWidgetContents">
+         <property name="geometry">
+          <rect>
+           <x>0</x>
+           <y>0</y>
+           <width>2516</width>
+           <height>198</height>
+          </rect>
+         </property>
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>16777215</width>
+           <height>200</height>
+          </size>
+         </property>
+         <layout class="QHBoxLayout" name="horizontalLayout_6">
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_5">
+            <item>
+             <widget class="QTextEdit" name="Footer">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                <horstretch>1</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>16777215</width>
+                <height>16777215</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QFrame" name="frame_4">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+                <horstretch>1</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>200</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>200</width>
+                <height>16777215</height>
+               </size>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">background-color: rgb(247, 255, 170);</string>
+              </property>
+              <property name="frameShape">
+               <enum>QFrame::StyledPanel</enum>
+              </property>
+              <property name="frameShadow">
+               <enum>QFrame::Plain</enum>
+              </property>
+              <widget class="QProgressBar" name="media_thread_progress">
+               <property name="geometry">
+                <rect>
+                 <x>10</x>
+                 <y>10</y>
+                 <width>118</width>
+                 <height>23</height>
+                </rect>
+               </property>
+               <property name="value">
+                <number>24</number>
+               </property>
+              </widget>
+              <widget class="QLabel" name="label_7">
+               <property name="geometry">
+                <rect>
+                 <x>10</x>
+                 <y>40</y>
+                 <width>141</width>
+                 <height>16</height>
+                </rect>
+               </property>
+               <property name="text">
+                <string>Media Thread</string>
+               </property>
+              </widget>
+              <widget class="QProgressBar" name="master_thread_progress">
+               <property name="geometry">
+                <rect>
+                 <x>10</x>
+                 <y>60</y>
+                 <width>118</width>
+                 <height>23</height>
+                </rect>
+               </property>
+               <property name="value">
+                <number>24</number>
+               </property>
+              </widget>
+              <widget class="QLabel" name="label_8">
+               <property name="geometry">
+                <rect>
+                 <x>10</x>
+                 <y>90</y>
+                 <width>121</width>
+                 <height>16</height>
+                </rect>
+               </property>
+               <property name="text">
+                <string>Master Thread</string>
+               </property>
+              </widget>
+              <widget class="QProgressBar" name="move_thread_progress">
+               <property name="geometry">
+                <rect>
+                 <x>10</x>
+                 <y>110</y>
+                 <width>118</width>
+                 <height>23</height>
+                </rect>
+               </property>
+               <property name="value">
+                <number>24</number>
+               </property>
+              </widget>
+              <widget class="QLabel" name="label_9">
+               <property name="geometry">
+                <rect>
+                 <x>10</x>
+                 <y>140</y>
+                 <width>81</width>
+                 <height>16</height>
+                </rect>
+               </property>
+               <property name="text">
+                <string>Moving</string>
+               </property>
+              </widget>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
+       </widget>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>2538</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuDatabase">
+    <property name="title">
+     <string>Database</string>
+    </property>
+    <addaction name="actionEdit_Types"/>
+    <addaction name="actionSearch"/>
+    <addaction name="actionBackup"/>
+   </widget>
+   <widget class="QMenu" name="menuSearching">
+    <property name="title">
+     <string>Creating</string>
+    </property>
+    <addaction name="actionChoose_Local_Drive"/>
+    <addaction name="actionselect_Master_Location"/>
+    <addaction name="actionMedia_to_Master"/>
+   </widget>
+   <widget class="QMenu" name="menuReport">
+    <property name="title">
+     <string>Reporting</string>
+    </property>
+    <addaction name="actionCollections_2"/>
+   </widget>
+   <widget class="QMenu" name="menuHelp">
+    <property name="title">
+     <string>Utilities</string>
+    </property>
+    <addaction name="actionCompare_Sets"/>
+    <addaction name="actionRemove_Sets"/>
+    <addaction name="actionDelete_Sets"/>
+    <addaction name="actionMove_Sets"/>
+    <addaction name="actionTransfer_Sets_3"/>
+   </widget>
+   <widget class="QMenu" name="menuHelp_2">
+    <property name="title">
+     <string>Help</string>
+    </property>
+    <addaction name="actionRead_Mer"/>
+    <addaction name="separator"/>
+    <addaction name="actionSystem_Overview"/>
+   </widget>
+   <widget class="QMenu" name="menuExit">
+    <property name="title">
+     <string>Exit</string>
+    </property>
+    <addaction name="actionQuit"/>
+   </widget>
+   <widget class="QMenu" name="menuFFMPEG">
+    <property name="title">
+     <string>FFMPEG</string>
+    </property>
+    <addaction name="actionTesting"/>
+    <addaction name="actionPlaying"/>
+   </widget>
+   <addaction name="menuDatabase"/>
+   <addaction name="menuSearching"/>
+   <addaction name="menuReport"/>
+   <addaction name="menuHelp"/>
+   <addaction name="menuHelp_2"/>
+   <addaction name="menuFFMPEG"/>
+   <addaction name="menuExit"/>
+  </widget>
+  <action name="actionChoose_Local_Drive">
+   <property name="text">
+    <string>Select location</string>
+   </property>
+  </action>
+  <action name="actionChoose_NAS_Drive">
+   <property name="text">
+    <string>Choose NAS Drive -</string>
+   </property>
+  </action>
+  <action name="actionMain">
+   <property name="text">
+    <string>Main</string>
+   </property>
+  </action>
+  <action name="actionCollections">
+   <property name="text">
+    <string>Collections</string>
+   </property>
+  </action>
+  <action name="actionComparisons">
+   <property name="text">
+    <string>Comparisons</string>
+   </property>
+  </action>
+  <action name="actionDuplications">
+   <property name="text">
+    <string>Duplications</string>
+   </property>
+  </action>
+  <action name="actionFinding_Collections">
+   <property name="text">
+    <string>Finding Collections</string>
+   </property>
+  </action>
+  <action name="actionAnalysing_Collections">
+   <property name="text">
+    <string>Analysing Collections</string>
+   </property>
+  </action>
+  <action name="actionFile_Extension_List">
+   <property name="text">
+    <string>File Extension list</string>
+   </property>
+  </action>
+  <action name="actionQuit">
+   <property name="text">
+    <string>Quit</string>
+   </property>
+  </action>
+  <action name="actionCollections_2">
+   <property name="text">
+    <string>Collections</string>
+   </property>
+  </action>
+  <action name="actionselect_Master_Location">
+   <property name="text">
+    <string>Select Master Location</string>
+   </property>
+  </action>
+  <action name="actionCompare_Sets">
+   <property name="text">
+    <string>Compare Sets</string>
+   </property>
+  </action>
+  <action name="actionSearching">
+   <property name="text">
+    <string>Searching</string>
+   </property>
+   <property name="toolTip">
+    <string>Create Collections</string>
+   </property>
+  </action>
+  <action name="actionRemove_Sets">
+   <property name="text">
+    <string>Remove Sets</string>
+   </property>
+  </action>
+  <action name="actionDelete_Sets">
+   <property name="text">
+    <string>Delete Sets</string>
+   </property>
+  </action>
+  <action name="actionMove_Sets">
+   <property name="text">
+    <string>Move Sets</string>
+   </property>
+  </action>
+  <action name="actionConfig">
+   <property name="text">
+    <string>Configuration</string>
+   </property>
+  </action>
+  <action name="actionRead_Mer">
+   <property name="text">
+    <string>Read Me</string>
+   </property>
+  </action>
+  <action name="actionEdit_Types">
+   <property name="text">
+    <string>Edit Types</string>
+   </property>
+  </action>
+  <action name="actionSearch">
+   <property name="text">
+    <string>Search</string>
+   </property>
+  </action>
+  <action name="actionBackup">
+   <property name="text">
+    <string>Backup</string>
+   </property>
+  </action>
+  <action name="actionMedia_to_Master">
+   <property name="text">
+    <string>Media to Master</string>
+   </property>
+  </action>
+  <action name="actionTransfer_Sets">
+   <property name="text">
+    <string>Transfer Sets</string>
+   </property>
+  </action>
+  <action name="actionTransfer_Sets_2">
+   <property name="text">
+    <string>Transfer Sets</string>
+   </property>
+  </action>
+  <action name="actionTransfer_Sets_3">
+   <property name="text">
+    <string>Transfer Sets</string>
+   </property>
+  </action>
+  <action name="actionSystem_Overview">
+   <property name="text">
+    <string>System Overview</string>
+   </property>
+  </action>
+  <action name="actionTesting">
+   <property name="text">
+    <string>FF Actions</string>
+   </property>
+  </action>
+  <action name="actionConverting">
+   <property name="text">
+    <string>Converting</string>
+   </property>
+  </action>
+  <action name="actionRepairing">
+   <property name="text">
+    <string>Repairing</string>
+   </property>
+  </action>
+  <action name="actionPlaying">
+   <property name="text">
+    <string>Playing</string>
+   </property>
+  </action>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

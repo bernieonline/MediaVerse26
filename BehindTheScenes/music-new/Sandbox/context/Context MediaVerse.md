@@ -1,0 +1,15 @@
+
+
+| Item | Details |
+| :---- | :---- |
+| **Goal** | Creating an additional module working as a **front-end media player** for a video collection, and to **merge it with an earlier media files utility project**. The general design will provide a system for browsing the library of movie files by displaying images of movie posters stored in my JRiver dataset on my TrueNAS server at home.   |
+| **Target Users** | A **Personal Home Project** to develop skills and use a movie collection for **best satisfaction**. |
+| **Key Features** | 1\. **High Quality Media Player Style Front End** (Visual/UX Focus) |
+|  | 2\. **Scalability for a wide variety of High Resolution Displays** (Responsive Design) |
+|  | 3\. **Integration with data on a TrueNAS server** |
+|  | 4\. **Integration with a JRiver movie collection** (Data Source/API Integration) |
+| **Design Statemen**t | I have a clear idea of the Look and Feel of the program interface. Previous development was Python 3.9 and PyQt5 for the GUI.I want to move to using PySide6 \+ QML of which I have no previous experience |
+| **Technology** | Windows 11, VS Code IDE, Python 3.9, PyQt5, Pyside 6, QML |
+| **Current Status** | Inside my current project I have a sandbox folder for development. I have designed a system of browsing for movies using a rotating carousel that takes input as a folder location and allows the user to scroll through the images provided. I can switch to a grid view for a fast search. In the carousel view, which is full screen, when an image is clicked, a hidden panel is revealed to the right of the carousel view .This is a tabbed panel each tab holding a topic related to the movie, this needs further development. When this second panel is revealed the panel displaying the carousel reduces its width and the carousel images are replaced by a single selected image of the movie poster. Similarly in the grid view, clicking the image generate the same two panels. This functionality now works and I need to develop the GUI. I have to experience of pyside6 or QML will begin with experimentation inside the sandbox. |
+| **Important Project Files and Folders** | Main Project folder Path: "D:\\PythonMusic\\pythonproject2026" Current Module Development Folder:"D:\\PythonMusic\\pythonproject2026\\BehindTheScenes\\music-new" Sandbox development folder:"D:\\PythonMusic\\pythonproject2026\\BehindTheScenes\\music-new\\Sandbox" QML Development Folder:"D:\\PythonMusic\\pythonproject2026\\BehindTheScenes\\music-new\\Sandbox\\MediaPlayerQML" Main py file to run the browsing interface: "D:\\PythonMusic\\pythonproject2026\\BehindTheScenes\\music-new\\Sandbox\\main\_app.py" Py file holding carousel view code:"D:\\PythonMusic\\pythonproject2026\\BehindTheScenes\\music-new\\Sandbox\\carousel\_content.py" Py file holding Grid View Code:"D:\\PythonMusic\\pythonproject2026\\BehindTheScenes\\music-new\\Sandbox\\grid\_view.py" Py File for Tabbed Pane which presents movie details:"D:\\PythonMusic\\pythonproject2026\\BehindTheScenes\\music-new\\Sandbox\\detail\_panel.py"  |
+
