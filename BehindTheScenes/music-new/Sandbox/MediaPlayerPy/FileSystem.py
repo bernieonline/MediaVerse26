@@ -1,13 +1,41 @@
 import sys
-from PySide6.QtCore import QObject, Signal, Property, Slot
+import psutil
+import wmi
+import os
+import logging
+from PySide6.QtCore import QObject, Signal, Property, Slot, QThread
+
+class Worker(QObject):
+    finished = Signal(list)
+
+    def __init__(self, path):
+        super().__init__()
+        self.path = path
+
+    @Slot()
+    def run(self):
+        folders = []
+        try:
+            if self.path == "W:\\":
+                self.path = "W:\\Collections"
+
+            if os.path.isdir(self.path):
+                for item in os.listdir(self.path):
+                    item_path = os.path.join(self.path, item)
+                    if os.path.isdir(item_path):
+                        folders.append(item_path)
+        except Exception as e:
+            logging.exception(f"Error listing folders in {self.path}:")
+        
+        self.finished.emit(folders)
 
 class FileSystem(QObject):
     def __init__(self, parent=None):
         super().__init__(parent)
         self._drives = []
         self._folders = []
+        self.thread = None
         self.update_drives()
-        self.update_folders("W:\\Collections") # Default path
 
     drivesChanged = Signal()
     foldersChanged = Signal()
@@ -22,19 +50,47 @@ class FileSystem(QObject):
 
     @Slot()
     def update_drives(self):
-        # In the future, this will be populated with actual network drives
-        self._drives = ["W:", "Y:", "Z:"]
+        drives = []
+        # Get local drives
+        for partition in psutil.disk_partitions():
+            drives.append(partition.device)
+
+        # Get network drives
+        c = wmi.WMI()
+        for drive in c.Win32_MappedLogicalDisk():
+            drives.append(drive.DeviceID + "\\")
+
+        self._drives = sorted(list(set(drives)))
         self.drivesChanged.emit()
 
     @Slot(str)
     def update_folders(self, path):
-        # In the future, this will be populated with actual folders from the path
-        self._folders = [f"Folder {i+1} from {path}" for i in range(5)]
+        if self.thread and self.thread.isRunning():
+            return
+
+        logging.info(f"Updating folders for path: {path}")
+        self.thread = QThread()
+        self.worker = Worker(path)
+        self.worker.moveToThread(self.thread)
+
+        self.thread.started.connect(self.worker.run)
+        self.worker.finished.connect(self.on_worker_finished)
+        self.worker.finished.connect(self.thread.quit)
+        self.worker.finished.connect(self.worker.deleteLater)
+        self.thread.finished.connect(self.thread.deleteLater)
+        self.thread.finished.connect(self.on_thread_finished)
+
+        self.thread.start()
+
+    def on_worker_finished(self, folders):
+        self._folders = folders
         self.foldersChanged.emit()
+        logging.info(f"Found {len(folders)} folders.")
+
+    def on_thread_finished(self):
+        self.thread = None
 
 if __name__ == '__main__':
-    fs = FileSystem()
-    print("Drives:", fs.drives)
-    print("Folders:", fs.folders)
-    fs.update_folders("Y:\\Movies")
-    print("Folders:", fs.folders)
+    # This part is for direct testing of the script and will not run in the QML app
+    # It needs to be adapted to work with the threaded version if direct testing is needed
+    pass

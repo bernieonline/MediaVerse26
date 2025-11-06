@@ -40,8 +40,8 @@ Item {
     Repeater {
         model: 20
         delegate: Rectangle {
-            width: glowRoot.width + index * 4
-            height: glowRoot.height + index * 4
+            width: glowRoot.width + index * 6
+            height: glowRoot.height + index * 6
             anchors.centerIn: parent
             radius: (target && target.radius) ? target.radius + index * 0.5 : index * 0.5
             color: "transparent"
@@ -52,7 +52,7 @@ Item {
                     return t * t * (3 - 2 * t);
                 }
 
-                var color1 = Qt.color("#B18737");
+                var color1 = Qt.color("#FFC107");
                 var color2 = Qt.color("#785c2a");
                 var color3 = Qt.color("#382f1f");
 
