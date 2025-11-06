@@ -1,5 +1,6 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
+import QtQuick.Controls.Material 2.15
 import QtQuick
 import QtQuick.Controls
 //version 1.0.1 border edge added to left panel
@@ -12,6 +13,9 @@ ApplicationWindow {
     id: window
     visibility: ApplicationWindow.FullScreen
     title: "MediaVerse"
+
+    Material.theme: Material.Dark
+    Material.accent: Material.Yellow
 
     // The colors used in this file are standard hex color codes.
     // If your editor is highlighting them as invalid, it might be a linter configuration issue.
@@ -237,9 +241,16 @@ ApplicationWindow {
             text: "Close"
             width: 320
             height: 120
+
+            contentItem: Text {
+                text: parent.text
+                font: parent.font
+                color: "white"
+                horizontalAlignment: Text.AlignHCenter
+                verticalAlignment: Text.AlignVCenter
+            }
+
             background: Rectangle {
-                implicitWidth: 320
-                implicitHeight: 120
                 radius: 8
                 color: "#333"
                 border.color: "yellow"
