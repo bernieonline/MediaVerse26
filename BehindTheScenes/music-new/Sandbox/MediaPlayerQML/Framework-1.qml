@@ -30,16 +30,6 @@ ApplicationWindow {
     }
 
     Rectangle {
-        id: mainDisplayPanel
-        color: "#2e2e2e"
-        anchors.top: toolbar.bottom
-        anchors.bottom: parent.bottom
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.margins: 20
-    }
-
-    Rectangle {
         id: sidePanel
         width: 300
         height: parent.height * 2 / 3
@@ -62,9 +52,90 @@ ApplicationWindow {
             radius: 20
             border.width: 0
 
-            Loader {
+            ListView {
+                id: fileView
                 anchors.fill: parent
-                source: "FileSystem.qml"
+                anchors.topMargin: 20
+                anchors.bottomMargin: 80
+                clip: true
+                model: 50
+                delegate: Item {
+                    width: fileView.width
+                    height: 40
+                    Text {
+                        text: "Folder or File " + (index + 1)
+                        color: "white"
+                        font.pixelSize: 16
+                        anchors.verticalCenter: parent.verticalCenter
+                        anchors.left: parent.left
+                        anchors.leftMargin: 20
+                    }
+                }
+            }
+
+            Timer {
+                id: scrollTimer
+                interval: 50
+                repeat: true
+                property int scrollStep: 0
+                onTriggered: {
+                    fileView.contentY += scrollStep;
+                }
+            }
+
+            Row {
+                anchors.bottom: parent.bottom
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.bottomMargin: 15
+                spacing: 10
+
+                Loader {
+                    sourceComponent: scrollButtonComponent
+                    onLoaded: {
+                        item.text = "▲";
+                        item.scrollAmount = -10;
+                    }
+                }
+                Loader {
+                    sourceComponent: scrollButtonComponent
+                    onLoaded: {
+                        item.text = "▼";
+                        item.scrollAmount = 10;
+                    }
+                }
+            }
+
+            Component {
+                id: scrollButtonComponent
+                Rectangle {
+                    property string text
+                    property int scrollAmount
+
+                    width: 80
+                    height: 50
+                    color: "#333"
+                    radius: 8
+                    border.color: "#555"
+
+                    Text {
+                        anchors.centerIn: parent
+                        text: parent.text
+                        color: "white"
+                        font.pixelSize: 24
+                    }
+
+                    MouseArea {
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        onEntered: {
+                            scrollTimer.scrollStep = scrollAmount;
+                            scrollTimer.start();
+                        }
+                        onExited: {
+                            scrollTimer.stop();
+                        }
+                    }
+                }
             }
         }
     }
@@ -106,7 +177,6 @@ ApplicationWindow {
     property bool isVideoPanelVisible: false
 
     Row {
-        id: toolbar
         anchors.left: parent.left
         anchors.top: parent.top
         anchors.margins: 20

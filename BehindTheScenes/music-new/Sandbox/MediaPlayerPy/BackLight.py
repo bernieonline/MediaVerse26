@@ -35,7 +35,7 @@ if __name__ == "__main__":
         file_system = FileSystem()
         engine.rootContext().setContextProperty("fileSystemManager", file_system)
 
-        engine.load(QUrl.fromLocalFile(str(Path(__file__).parent.parent / "MediaPlayerQML" / "Framework-1.qml")))
+        engine.load(QUrl.fromLocalFile(str(Path(__file__).parent.parent / "MediaPlayerQML" / "BackLight.qml")))
 
         if not engine.rootObjects():
             logging.error("QML FAILED to load")
