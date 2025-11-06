@@ -92,7 +92,7 @@ ApplicationWindow {
                 anchors.topMargin: 20
                 
                 width: parent.width -40
-                model: ["All Files", "Images", "Videos", "Documents"]
+                model: ["Select", "Images", "Videos", "Documents"]
                     currentIndex: 0
                 }  
 
@@ -100,8 +100,11 @@ ApplicationWindow {
 
             ListView {
                 id: fileView
+                anchors.top: categoryCombo.bottom
+                anchors.horizontalCenter: parent.horizontalCenter   
+                anchors.topMargin: 150
                 anchors.fill: parent
-                anchors.topMargin: 100
+                
                 anchors.bottomMargin: 80
                 clip: true
                 model: 50
