@@ -69,16 +69,46 @@ ApplicationWindow {
             radius: 20
             border.width: 0
 
+            Label {
+                id: chooseLocationLabel
+                text: "Choose a Location"
+                color: white
+                font.pixelSize: 20
+                anchors.top: parent.top
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.topMargin: 10
+                padding: 10
+                background: Rectangle {
+                    color: "white"
+                    border.color: "yellow"
+                    border.width: 1
+                    radius: 5
+                }
+
+            ComboBox {
+                id: categoryCombo
+                anchors.top: chooseLocationLabel.bottom
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.topMargin: 20
+                
+                width: parent.width -40
+                model: ["All Files", "Images", "Videos", "Documents"]
+                    currentIndex: 0
+                }  
+
+            }
+
             ListView {
                 id: fileView
                 anchors.fill: parent
-                anchors.topMargin: 20
+                anchors.topMargin: 100
                 anchors.bottomMargin: 80
                 clip: true
                 model: 50
                 delegate: Item {
                     width: fileView.width
                     height: 40
+                    //populates side panel with demo
                     Text {
                         text: "Folder or File " + (index + 1)
                         color: "white"
