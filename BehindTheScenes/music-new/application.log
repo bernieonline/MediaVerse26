@@ -88,3 +88,19 @@
 2025-02-05 18:17:31,771 - INFO - Created QApplication instance
 2025-02-05 18:17:32,180 - INFO - Running populate_combo_boxes
 2025-02-05 18:17:32,282 - INFO - Created QApplication instance
+2025-11-05 18:20:31,160 - INFO - Updating folders for path: 
+2025-11-05 18:20:31,161 - INFO - Found 0 folders.
+2025-11-05 18:20:31,161 - INFO - Updating folders for path: C:\
+2025-11-05 18:20:40,838 - INFO - Found 45731 folders.
+2025-11-05 18:21:05,369 - INFO - Updating folders for path: 
+2025-11-05 18:21:05,369 - INFO - Found 0 folders.
+2025-11-05 18:21:05,370 - INFO - Updating folders for path: C:\
+2025-11-05 18:21:14,030 - INFO - Found 45731 folders.
+2025-11-05 18:25:58,235 - INFO - Updating folders for path: 
+2025-11-05 18:25:58,237 - INFO - Updating folders for path: C:\
+2025-11-05 18:29:03,830 - INFO - Updating folders for path: 
+2025-11-05 18:29:04,029 - INFO - Found 0 folders.
+2025-11-05 18:33:27,402 - INFO - Updating folders for path: 
+2025-11-05 18:33:27,601 - INFO - Found 0 folders.
+2025-11-06 10:26:32,633 - ERROR - QML FAILED to load
+2025-11-06 11:01:12,565 - ERROR - QML FAILED to load

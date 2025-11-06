@@ -5,6 +5,9 @@ import QtQuick.Controls
 //version 1.0.1 border edge added to left panel
 //1.o.2 sliding video panel added
 //1.0.3 centre button moved to toolbar
+//1.0.4 final adjustments made before applying styling to panels
+//1.0.5 Glow effects added to main window
+
 ApplicationWindow {
     id: window
     visibility: ApplicationWindow.FullScreen
@@ -19,14 +22,23 @@ ApplicationWindow {
         color: "#1e1e1e"
     }
 
+    GlowStyling {
+        target: border
+    }
+
     Rectangle {
         id: border
         anchors.fill: parent
         anchors.margins: 10
         radius: 25
         color: "transparent"
-        border.color: "#f1ba54"
-        border.width: 5
+        border.color: "yellow"
+        border.width: 1
+        z: 2
+    }
+
+    GlowStyling {
+        target: sidePanel
     }
 
     Rectangle {
@@ -35,10 +47,11 @@ ApplicationWindow {
         height: parent.height * 2 / 3
         anchors.verticalCenter: parent.verticalCenter
         x: -width
+        z: 2
         color: "transparent"
         radius: 25
-        border.color: "#f1ba54"
-        border.width: 5
+        border.color: "yellow"
+        border.width: 1
 
         Behavior on x {
             NumberAnimation { duration: 300; easing.type: Easing.OutCubic }
@@ -140,17 +153,22 @@ ApplicationWindow {
         }
     }
 
+    GlowStyling {
+        target: videoPanel
+    }
+
     Rectangle {
         id: videoPanel
         height: parent.height * 0.25
         width: height * 16 / 9
         anchors.horizontalCenter: parent.horizontalCenter
         y: isVideoPanelVisible ? parent.height - height : parent.height
+        z: 2
 
         color: "transparent"
         radius: 25
-        border.color: "#f1ba54"
-        border.width: 5
+        border.color: "yellow"
+        border.width: 1
 
         Behavior on y {
             NumberAnimation { duration: 1500; easing.type: Easing.OutCubic }
@@ -177,25 +195,56 @@ ApplicationWindow {
     property bool isVideoPanelVisible: false
 
     Row {
-        anchors.left: parent.left
+        id: buttonRow
+        anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: parent.top
-        anchors.margins: 20
-        spacing: 10
+        anchors.topMargin: 80
+        spacing: 40
 
         Button {
             id: menuButton
             text: "Menu"
+            width: 320
+            height: 120
+            background: Rectangle {
+                implicitWidth: 320
+                implicitHeight: 120
+                radius: 8
+                color: "#333"
+                border.color: "yellow"
+                border.width: 1
+            }
             onClicked: sidePanel.x = (sidePanel.x === 0) ? -sidePanel.width : 0
         }
 
         Button {
             id: videoButton
             text: "Video"
+            width: 320
+            height: 120
+            background: Rectangle {
+                implicitWidth: 320
+                implicitHeight: 120
+                radius: 8
+                color: "#333"
+                border.color: "yellow"
+                border.width: 1
+            }
             onClicked: isVideoPanelVisible = !isVideoPanelVisible
         }
 
         Button {
             text: "Close"
+            width: 320
+            height: 120
+            background: Rectangle {
+                implicitWidth: 320
+                implicitHeight: 120
+                radius: 8
+                color: "#333"
+                border.color: "yellow"
+                border.width: 1
+            }
             onClicked: Qt.quit()
         }
     }
