@@ -20,7 +20,7 @@ ApplicationWindow {
     // The colors used in this file are standard hex color codes.
     // If your editor is highlighting them as invalid, it might be a linter configuration issue.
 
-    Rectangle {
+    Rectangle { //sets theme colour
         id: background
         anchors.fill: parent
         color: "#1e1e1e"
@@ -30,7 +30,7 @@ ApplicationWindow {
         target: border
     }
 
-    Rectangle {
+    Rectangle { //subdued glow
         id: border
         anchors.fill: parent
         anchors.margins: 10
@@ -45,7 +45,7 @@ ApplicationWindow {
         target: sidePanel
     }
 
-    Rectangle {
+    Rectangle { //sliding panel on left
         id: sidePanel
         width: 300
         height: parent.height * 2 / 3
@@ -61,7 +61,7 @@ ApplicationWindow {
             NumberAnimation { duration: 300; easing.type: Easing.OutCubic }
         }
 
-        Rectangle {
+        Rectangle {//background to sliding panel
             // This is the background
             anchors.fill: parent
             anchors.margins: 5
@@ -69,36 +69,67 @@ ApplicationWindow {
             radius: 20
             border.width: 0
 
-            Label {
+            Label {//refers to combobox
                 id: chooseLocationLabel
                 text: "Choose a Location"
-                color: white
+                color: "white"
                 font.pixelSize: 20
                 anchors.top: parent.top
                 anchors.horizontalCenter: parent.horizontalCenter
                 anchors.topMargin: 10
                 padding: 10
                 background: Rectangle {
-                    color: "white"
+                    color: "transparent"
                     border.color: "yellow"
                     border.width: 1
                     radius: 5
                 }
 
-            ComboBox {
+            ComboBox {//sets up combobox for receiving data from .py
                 id: categoryCombo
                 anchors.top: chooseLocationLabel.bottom
                 anchors.horizontalCenter: parent.horizontalCenter
                 anchors.topMargin: 20
                 
-                width: parent.width -40
-                model: ["Select", "Images", "Videos", "Documents"]
-                    currentIndex: 0
-                }  
+                width: parent.width
+                model: []
+                textRole: "Name"
+
+                onActivated: {
+                    let selectedPath = model.get(index).path
+                    console.log("Selected path:", selectedPath)
+                    // You can now pass this path to another component or backend
+                }
+
+                background: Rectangle {
+                    color: "transparent"
+                    border.color: "yellow"
+                    border.width: 1
+                    radius: 5
+                }
+
+                contentItem: Text {
+                    text: parent.displayText
+                    color: "white"
+                    font: parent.font
+                    verticalAlignment: Text.AlignVCenter
+                    leftPadding: 10
+                    elide: Text.ElideRight
+                }
+
+                indicator: Text {
+                    text: "▼"
+                    color: "yellow"
+                    font.pixelSize: 16
+                    anchors.verticalCenter: parent.verticalCenter
+                    anchors.right: parent.right
+                    anchors.rightMargin: 10
+                }
+            } // combobox
 
             }
 
-            ListView {
+            ListView { //hopefully stores the folders to be displayed on sidepanel
                 id: fileView
                 anchors.top: categoryCombo.bottom
                 anchors.horizontalCenter: parent.horizontalCenter   
@@ -107,13 +138,15 @@ ApplicationWindow {
                 
                 anchors.bottomMargin: 80
                 clip: true
-                model: 50
+                model: [] // Ready to accept a model from Python
                 delegate: Item {
                     width: fileView.width
                     height: 40
-                    //populates side panel with demo
+
                     Text {
-                        text: "Folder or File " + (index + 1)
+                        // This will display each item from the model.
+                        // It assumes the model is a list of strings (e.g., file names).
+                        text: modelData
                         color: "white"
                         font.pixelSize: 16
                         anchors.verticalCenter: parent.verticalCenter
@@ -123,7 +156,7 @@ ApplicationWindow {
                 }
             }
 
-            Timer {
+            Timer {//used by sliding objects
                 id: scrollTimer
                 interval: 50
                 repeat: true
@@ -133,13 +166,15 @@ ApplicationWindow {
                 }
             }
 
-            Row {
+            Row {//used for top row of buttons and icons
                 anchors.bottom: parent.bottom
                 anchors.horizontalCenter: parent.horizontalCenter
                 anchors.bottomMargin: 15
                 spacing: 10
 
-                Loader {
+                Loader {//below is a Component being created which is a button in this case, it has a number of features built in
+                //Loader takes a copy of it and modifies and runs it
+                //its a way of creating bespoke buttons that are usable within a single file. To use it throughout the project you would create it in its own qml file
                     sourceComponent: scrollButtonComponent
                     onLoaded: {
                         item.text = "▲";
@@ -155,7 +190,7 @@ ApplicationWindow {
                 }
             }
 
-            Component {
+            Component {// This creates a bespoke component, in this case a special button we use for scrolling, it is the modifies and used by Loader above
                 id: scrollButtonComponent
                 Rectangle {
                     property string text
@@ -165,7 +200,8 @@ ApplicationWindow {
                     height: 50
                     color: "#333"
                     radius: 8
-                    border.color: "#555"
+                    border.color: "yellow"
+                    border.width: 1
 
                     Text {
                         anchors.centerIn: parent
