@@ -406,7 +406,7 @@ ApplicationWindow {
         }
     }
 
-    Rectangle {
+    Rectangle { //this rectangle is a container for the image browser
         id: contentContainer
         anchors.top: buttonRow.bottom
         anchors.bottom: parent.bottom
@@ -419,10 +419,12 @@ ApplicationWindow {
         border.color: "#2566c2"
         border.width: 1
 
+
         Image {
             anchors.fill: parent
             source: "file:///D:/PythonMusic/pythonproject2026/BehindTheScenes/music-new/images/Lucid_Origin.jpg"
             fillMode: Image.PreserveAspectCrop
+
         }
     }
 }
