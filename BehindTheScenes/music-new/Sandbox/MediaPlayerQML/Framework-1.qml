@@ -149,9 +149,17 @@ ApplicationWindow {
                 anchors.bottomMargin: 80
                 clip: true
                 model: fileSystemManager.folders // Ready to accept a model from Python
+                property int currentIndex: -1
                 delegate: Item {
                     width: fileView.width
                     height: 40
+
+                    Rectangle {
+                        id: background
+                        anchors.fill: parent
+                        color: fileView.currentIndex === index ? "#555555" : "transparent" //dark grey colour
+                        radius: 5
+                    }
 
                     Image {
                         id: folderIcon
@@ -177,6 +185,7 @@ ApplicationWindow {
                     MouseArea {
                         anchors.fill: parent
                         onClicked: {
+                            fileView.currentIndex = index
                             var folderPath = modelData.folderPath // Get full pathname when folder is clicked
                             console.log("Clicked folder:", folderPath)
                             fileSystemManager.list_image_files_in_folder(folderPath)

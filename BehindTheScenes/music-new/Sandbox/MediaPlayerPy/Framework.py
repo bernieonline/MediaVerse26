@@ -71,8 +71,8 @@ if __name__ == "__main__":
             sys.exit(-1)
         
         
-        print("getting folders from path")
-        get_subfolder_names_test()
+        #print("getting folders from path")
+        #get_subfolder_names_test()
 
 
         sys.exit(app.exec())
