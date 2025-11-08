@@ -94,7 +94,7 @@ class FileSystem(QObject):
         self.thread = None
 
     @Slot(str)
-    def get_image_files(self, folder_path):
+    def list_image_files_in_folder(self, folder_path):
         image_files = []
         image_extensions = ('.png', '.jpg', '.jpeg', '.gif', '.bmp', '.webp')
         try:
