@@ -104,3 +104,81 @@
 2025-11-05 18:33:27,601 - INFO - Found 0 folders.
 2025-11-06 10:26:32,633 - ERROR - QML FAILED to load
 2025-11-06 11:01:12,565 - ERROR - QML FAILED to load
+2025-11-06 15:01:56,646 - INFO - Updating folders for path: W:\Collection
+2025-11-06 15:01:56,772 - INFO - Found 25 folders.
+2025-11-06 15:22:38,439 - INFO - Updating folders for path: W:\Collection
+2025-11-06 15:22:38,504 - INFO - Found 25 folders.
+2025-11-06 15:48:02,395 - INFO - Updating folders for path: W:\Collection
+2025-11-06 15:48:02,441 - INFO - Found 25 folders.
+2025-11-06 15:49:33,609 - ERROR - QML FAILED to load
+2025-11-06 15:51:42,799 - ERROR - QML FAILED to load
+2025-11-06 15:52:50,067 - ERROR - QML FAILED to load
+2025-11-06 17:20:08,497 - ERROR - QML FAILED to load
+2025-11-06 18:06:22,862 - ERROR - QML FAILED to load
+2025-11-06 18:21:42,545 - ERROR - QML FAILED to load
+2025-11-06 18:23:13,275 - ERROR - QML FAILED to load
+2025-11-06 18:23:49,832 - ERROR - QML FAILED to load
+2025-11-06 18:28:01,784 - ERROR - QML FAILED to load
+2025-11-07 15:45:35,533 - ERROR - An unhandled exception occurred:
+Traceback (most recent call last):
+  File "D:\PythonMusic\pythonproject2026\behindTheScenes\music-new\sandbox\MediaPlayerPy\Framework.py", line 66, in <module>
+    for lib in myLibrary:
+TypeError: 'bool' object is not iterable
+2025-11-07 17:30:20,362 - ERROR - QML FAILED to load
+2025-11-08 10:54:37,046 - INFO - Updating folders for path: W:\Collection
+2025-11-08 10:54:37,102 - INFO - Found 25 folders.
+2025-11-08 11:16:30,106 - INFO - Updating folders for path: W:\Collection
+2025-11-08 11:16:30,168 - INFO - Found 25 folders.
+2025-11-08 11:50:03,278 - INFO - Updating folders for path: W:\Collection
+2025-11-08 11:50:03,341 - INFO - Found 25 folders.
+2025-11-08 11:54:00,358 - INFO - Updating folders for path: W:\Collection
+2025-11-08 11:54:00,416 - INFO - Found 25 folders.
+2025-11-08 12:00:36,164 - INFO - Updating folders for path: W:\Collection
+2025-11-08 12:00:36,206 - INFO - Found 25 folders.
+2025-11-08 13:25:45,483 - INFO - Updating folders for path: W:\Collection
+2025-11-08 13:25:45,528 - INFO - Found 25 folders.
+2025-11-08 13:32:34,722 - INFO - Updating folders for path: W:\Collection
+2025-11-08 13:32:34,774 - INFO - Found 25 folders.
+2025-11-08 14:20:51,541 - INFO - Updating folders for path: W:\Collection
+2025-11-08 14:20:51,601 - INFO - Found 25 folders.
+2025-11-08 14:26:26,662 - INFO - Updating folders for path: W:\Collection
+2025-11-08 14:26:26,722 - INFO - Found 25 folders.
+2025-11-08 15:06:49,443 - INFO - Updating folders for path: W:\Collection
+2025-11-08 15:06:49,512 - INFO - Found 25 folders.
+2025-11-08 16:36:47,372 - INFO - Updating folders for path: W:\Collection
+2025-11-08 16:36:47,416 - INFO - Found 25 folders.
+2025-11-08 16:45:11,257 - ERROR - An unhandled exception occurred:
+Traceback (most recent call last):
+  File "D:\PythonMusic\pythonproject2026\behindTheScenes\music-new\sandbox\MediaPlayerPy\Framework.py", line 75, in <module>
+    get_subfolder_names_test()
+TypeError: get_subfolder_names_test() missing 1 required positional argument: 'path'
+2025-11-08 16:45:27,281 - ERROR - An unhandled exception occurred:
+Traceback (most recent call last):
+  File "D:\PythonMusic\pythonproject2026\behindTheScenes\music-new\sandbox\MediaPlayerPy\Framework.py", line 75, in <module>
+    get_subfolder_names_test()
+TypeError: get_subfolder_names_test() missing 1 required positional argument: 'path'
+2025-11-08 16:47:42,785 - ERROR - An unhandled exception occurred:
+Traceback (most recent call last):
+  File "D:\PythonMusic\pythonproject2026\behindTheScenes\music-new\sandbox\MediaPlayerPy\Framework.py", line 75, in <module>
+    get_subfolder_names_test()
+TypeError: get_subfolder_names_test() missing 1 required positional argument: 'path'
+2025-11-08 16:48:28,597 - ERROR - An unhandled exception occurred:
+Traceback (most recent call last):
+  File "D:\PythonMusic\pythonproject2026\behindTheScenes\music-new\sandbox\MediaPlayerPy\Framework.py", line 75, in <module>
+    get_subfolder_names_test()
+TypeError: get_subfolder_names_test() missing 1 required positional argument: 'path'
+2025-11-08 16:49:06,203 - ERROR - An unhandled exception occurred:
+Traceback (most recent call last):
+  File "D:\PythonMusic\pythonproject2026\behindTheScenes\music-new\sandbox\MediaPlayerPy\Framework.py", line 75, in <module>
+    get_subfolder_names_test()
+TypeError: get_subfolder_names_test() missing 1 required positional argument: 'path'
+2025-11-08 16:54:02,834 - INFO - Updating folders for path: W:\Collection
+2025-11-08 16:54:02,886 - INFO - Found 25 folders.
+2025-11-08 16:58:20,713 - INFO - Updating folders for path: W:\Collection
+2025-11-08 16:58:20,759 - INFO - Found 25 folders.
+2025-11-08 17:01:23,302 - INFO - Updating folders for path: W:\Collection
+2025-11-08 17:01:23,367 - INFO - Found 25 folders.
+2025-11-08 17:06:17,228 - INFO - Updating folders for path: W:\Collection
+2025-11-08 17:06:17,271 - INFO - Found 25 folders.
+2025-11-08 17:07:58,978 - INFO - Updating folders for path: W:\Collection
+2025-11-08 17:07:59,021 - INFO - Found 25 folders.

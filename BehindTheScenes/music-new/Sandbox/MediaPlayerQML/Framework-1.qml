@@ -346,6 +346,44 @@ ApplicationWindow {
         }
 
         Button {
+            id: carouselButton
+            text: "Carousel"
+            width: 320
+            height: 120
+            background: Rectangle {
+                implicitWidth: 320
+                implicitHeight: 120
+                radius: 8
+                color: "#333"
+                border.color: "yellow"
+                border.width: 1
+            }
+            onClicked: {
+                // To be implemented
+                console.log("Carousel button clicked")
+            }
+        }
+
+        Button {
+            id: gridViewButton
+            text: "Grid View"
+            width: 320
+            height: 120
+            background: Rectangle {
+                implicitWidth: 320
+                implicitHeight: 120
+                radius: 8
+                color: "#333"
+                border.color: "yellow"
+                border.width: 1
+            }
+            onClicked: {
+                // To be implemented
+                console.log("Grid View button clicked")
+            }
+        }
+
+        Button {
             text: "Close"
             width: 320
             height: 120
@@ -365,6 +403,26 @@ ApplicationWindow {
                 border.width: 1
             }
             onClicked: Qt.quit()
+        }
+    }
+
+    Rectangle {
+        id: contentContainer
+        anchors.top: buttonRow.bottom
+        anchors.bottom: parent.bottom
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.margins: 100
+        
+        radius: 25
+        color: "transparent"
+        border.color: "#2566c2"
+        border.width: 1
+
+        Image {
+            anchors.fill: parent
+            source: "file:///D:/PythonMusic/pythonproject2026/BehindTheScenes/music-new/images/Lucid_Origin.jpg"
+            fillMode: Image.PreserveAspectCrop
         }
     }
 }
