@@ -23,11 +23,13 @@ class Worker(QObject):
                 for item in os.listdir(self.path):
                     item_path = os.path.join(self.path, item)
                     if os.path.isdir(item_path):
-                        folders.append(item_path)
+                        folders.append({'folderName': item, 'folderPath': item_path})
         except Exception as e:
-            logging.exception(f"Error listing folders in {self.path}:")
+            logging.info(f"Error listing folders in {self.path}:")
         
+        print(f"Folders found: {folders}")
         self.finished.emit(folders)
+    
 
 class FileSystem(QObject):
     def __init__(self, parent=None):
@@ -39,6 +41,7 @@ class FileSystem(QObject):
 
     drivesChanged = Signal()
     foldersChanged = Signal()
+    imageFilesFound = Signal(list)
 
     @Property('QVariantList', notify=drivesChanged)
     def drives(self):
@@ -89,6 +92,23 @@ class FileSystem(QObject):
 
     def on_thread_finished(self):
         self.thread = None
+
+    @Slot(str)
+    def get_image_files(self, folder_path):
+        image_files = []
+        image_extensions = ('.png', '.jpg', '.jpeg', '.gif', '.bmp', '.webp')
+        try:
+            if os.path.isdir(folder_path):
+                for item in os.listdir(folder_path):
+                    item_path = os.path.join(folder_path, item)
+                    if os.path.isfile(item_path) and item.lower().endswith(image_extensions):
+                        image_files.append({'fileName': item, 'filePath': item_path})
+        except Exception as e:
+            logging.error(f"Error listing image files in {folder_path}: {e}")
+        
+        print(f"Image files found in {folder_path}: {image_files}")
+        self.imageFilesFound.emit(image_files)
+    
 
 if __name__ == '__main__':
     # This part is for direct testing of the script and will not run in the QML app

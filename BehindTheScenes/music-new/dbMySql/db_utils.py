@@ -11,14 +11,25 @@ from tkinter import messagebox
 # Load environment variables 
 #from .env file load_dotenv()
 #use my credentials file as environment variables
-load_dotenv(dotenv_path='sqlCreds.env')
+#load_dotenv(dotenv_path='sqlCreds.env')
 
+
+
+
+from pathlib import Path
+load_dotenv(dotenv_path=Path(__file__).parent.parent / "sqlCreds.env")
 
 #Access environment variables 
 host = os.getenv('MYSQL_HOST') 
 user = os.getenv('MYSQL_USER') 
 password = os.getenv('MYSQL_PASSWORD') 
 database = os.getenv('MYSQL_DB')
+
+
+
+print("Host from .env:", repr(host))
+
+
 
 def test_mysql_connection():
     #print("inside create_mysql_connection")
@@ -1835,3 +1846,34 @@ def transfer_records_to_master(collection_name, category, master_type_name):
             cursor.close()
             connection.close()
 
+def getLibraryList():
+    
+    connection = create_db_connection()
+    
+    if connection is None:
+        print("Failed to connect to the database for transferring records.")
+        return False
+    
+    try:
+        cursor = connection.cursor()
+        
+        # Step 1: Select records from medialibrarylist
+        select_query = """
+            SELECT LibraryName, Pathname FROM medialibrarylist 
+            order by LibraryName asc
+        """
+        cursor.execute(select_query, ())
+
+        records = cursor.fetchall()
+
+        return [{"name": row[0], "path": row[1]} for row in records]
+
+
+    except Error as e:
+        print(f"Error while retrirving library records: {e}")
+        return False
+    
+    finally:
+        if connection.is_connected():
+            cursor.close()
+            connection.close()

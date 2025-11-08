@@ -84,6 +84,7 @@ ApplicationWindow {
                     border.width: 1
                     radius: 5
                 }
+            }
 
             ComboBox {//sets up combobox for receiving data from .py
                 id: categoryCombo
@@ -92,13 +93,24 @@ ApplicationWindow {
                 anchors.topMargin: 20
                 
                 width: parent.width
-                model: []
-                textRole: "Name"
+                model: myLibraryModel
+                textRole: "name"
 
-                onActivated: {
-                    let selectedPath = model.get(index).path
-                    console.log("Selected path:", selectedPath)
-                    // You can now pass this path to another component or backend
+                onModelChanged: {
+                    for (var i = 0; i < model.length; i++) {
+                        if (model[i].name === "JRiver Library") {
+                            currentIndex = i;
+                            break;
+                        }
+                    }
+                }
+
+                onActivated: function(index) {
+                    if (model[index]) {
+                        let selectedPath = model[index].path
+                        console.log("Selected path:", selectedPath)
+                        fileSystemManager.update_folders(selectedPath)
+                    }
                 }
 
                 background: Rectangle {
@@ -127,31 +139,49 @@ ApplicationWindow {
                 }
             } // combobox
 
-            }
-
             ListView { //hopefully stores the folders to be displayed on sidepanel
                 id: fileView
                 anchors.top: categoryCombo.bottom
-                anchors.horizontalCenter: parent.horizontalCenter   
-                anchors.topMargin: 150
-                anchors.fill: parent
-                
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.bottom: parent.bottom
+                anchors.topMargin: 20
                 anchors.bottomMargin: 80
                 clip: true
-                model: [] // Ready to accept a model from Python
+                model: fileSystemManager.folders // Ready to accept a model from Python
                 delegate: Item {
                     width: fileView.width
                     height: 40
 
+                    Image {
+                        id: folderIcon
+                        source: "file:///D:/PythonMusic/pythonproject2026/BehindTheScenes/music-new/images/icons/icons8-movie-liquid-glass-color/icons8-movie-32.png"
+                        width: 24 // Adjust size as needed
+                        height: 24 // Adjust size as needed
+                        anchors.verticalCenter: parent.verticalCenter
+                        anchors.left: parent.left
+                        anchors.leftMargin: 10
+                        fillMode: Image.PreserveAspectFit
+                    }
+
                     Text {
-                        // This will display each item from the model.
-                        // It assumes the model is a list of strings (e.g., file names).
-                        text: modelData
+                        id: folderNameText
+                        text: modelData.folderName // Display folder name only
                         color: "white"
                         font.pixelSize: 16
                         anchors.verticalCenter: parent.verticalCenter
-                        anchors.left: parent.left
-                        anchors.leftMargin: 20
+                        anchors.left: folderIcon.right
+                        anchors.leftMargin: 10 // Adjust margin between icon and text
+                    }
+
+                    MouseArea {
+                        anchors.fill: parent
+                        onClicked: {
+                            var folderPath = modelData.folderPath // Get full pathname when folder is clicked
+                            console.log("Clicked folder:", folderPath)
+                            fileSystemManager.list_image_files_in_folder(folderPath)
+                            // Do something with the folder path
+                        }
                     }
                 }
             }
