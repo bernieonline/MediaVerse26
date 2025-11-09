@@ -5,7 +5,7 @@ from pathlib import Path
 from myPyForQMLFunctions import get_subfolder_names_test
 
 
-from PySide6.QtGui import QGuiApplication
+from PySide6.QtWidgets import QApplication, QMessageBox
 from PySide6.QtCore import QCoreApplication, QUrl
 from PySide6.QtQml import QQmlApplicationEngine
 from PySide6.QtCore import QLibraryInfo
@@ -40,7 +40,20 @@ logging.basicConfig(filename=log_file, level=logging.DEBUG,
 
 if __name__ == "__main__":
     try:
-        app = QGuiApplication(sys.argv)
+        app = QApplication(sys.argv)
+
+        #pass list of medial library object back to Framework-1.qml for display taken from query function
+        myLibrary = getLibraryList()
+        if not myLibrary:
+            error_message = "Server not running or no libraries found."
+            logging.error(error_message)
+            msg_box = QMessageBox()
+            msg_box.setIcon(QMessageBox.Icon.Critical)
+            msg_box.setText(error_message)
+            msg_box.setWindowTitle("Database Connection Error")
+            msg_box.exec()
+            sys.exit(-1)
+
 
         QCoreApplication.addLibraryPath(str(Path(sys.modules["PySide6"].__file__).parent / "plugins"))
 
@@ -61,8 +74,6 @@ if __name__ == "__main__":
         #makes fileSystemManager directly accessible from QML
         engine.rootContext().setContextProperty("fileSystemManager", file_system)
 
-        #pass list of medial library object back to Framework-1.qml for display taken from query function
-        myLibrary = getLibraryList()
         engine.rootContext().setContextProperty("myLibraryModel", myLibrary)
 
         engine.load(QUrl.fromLocalFile(str(Path(__file__).parent.parent / "MediaPlayerQML" / "Framework-1.qml")))
