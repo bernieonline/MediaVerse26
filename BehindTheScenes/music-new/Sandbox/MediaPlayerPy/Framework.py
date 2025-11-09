@@ -58,6 +58,7 @@ if __name__ == "__main__":
         # Register the FileSystem class with QML
         from FileSystem import FileSystem
         file_system = FileSystem()
+        #makes fileSystemManager directly accessible from QML
         engine.rootContext().setContextProperty("fileSystemManager", file_system)
 
         #pass list of medial library object back to Framework-1.qml for display taken from query function
