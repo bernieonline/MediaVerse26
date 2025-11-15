@@ -198,8 +198,7 @@ ApplicationWindow {
                                 contentLoader.source = "ImageGridView.qml"
                             } else {
                                 console.log("Auto-loading Carousel View")
-                                // Placeholder for carousel view
-                                contentLoader.source = "" 
+                                contentLoader.source = "CarouselView.qml"
                             }
                         }
                     }
@@ -400,6 +399,11 @@ ApplicationWindow {
             }
             onClicked: {
                 isGridView = !isGridView;
+                if (isGridView) {
+                    contentLoader.source = "ImageGridView.qml";
+                } else {
+                    contentLoader.source = "CarouselView.qml";
+                }
             }
         }
 
@@ -443,6 +447,7 @@ ApplicationWindow {
     Loader {
         id: contentLoader
         anchors.fill: parent
+        source: "ImageGridView.qml" // Set initial view
     }
 }
 }
