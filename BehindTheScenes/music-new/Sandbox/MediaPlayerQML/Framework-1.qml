@@ -396,6 +396,25 @@ ApplicationWindow {
         }
 
         Button {
+            id: viewToggleButton
+            property bool isGridView: false
+            text: isGridView ? "Grid View" : "Carousel View"
+            width: 320
+            height: 120
+            background: Rectangle {
+                implicitWidth: 320
+                implicitHeight: 120
+                radius: 8
+                color: "#333"
+                border.color: "yellow"
+                border.width: 1
+            }
+            onClicked: {
+                isGridView = !isGridView;
+            }
+        }
+
+        Button {
             text: "Close"
             width: 320
             height: 120
