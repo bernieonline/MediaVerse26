@@ -182,3 +182,116 @@ TypeError: get_subfolder_names_test() missing 1 required positional argument: 'p
 2025-11-08 17:06:17,271 - INFO - Found 25 folders.
 2025-11-08 17:07:58,978 - INFO - Updating folders for path: W:\Collection
 2025-11-08 17:07:59,021 - INFO - Found 25 folders.
+2025-11-08 17:40:32,482 - ERROR - QML FAILED to load
+2025-11-08 17:40:43,286 - ERROR - QML FAILED to load
+2025-11-08 17:43:20,400 - INFO - Updating folders for path: W:\Collection
+2025-11-08 17:43:20,453 - INFO - Found 25 folders.
+2025-11-09 11:36:33,127 - INFO - Updating folders for path: W:\Collection
+2025-11-09 11:36:33,233 - INFO - Found 25 folders.
+2025-11-09 11:38:15,838 - INFO - Updating folders for path: W:\Collection
+2025-11-09 11:38:15,901 - INFO - Found 25 folders.
+2025-11-09 11:44:38,674 - INFO - Updating folders for path: W:\Collection
+2025-11-09 11:44:38,778 - INFO - Found 25 folders.
+2025-11-09 12:29:25,937 - INFO - Updating folders for path: W:\Collection
+2025-11-09 12:29:26,012 - INFO - Found 25 folders.
+2025-11-09 12:34:36,610 - INFO - Updating folders for path: W:\Collection
+2025-11-09 12:34:36,654 - INFO - Found 25 folders.
+2025-11-09 12:37:26,690 - INFO - Updating folders for path: W:\Collection
+2025-11-09 12:37:26,727 - INFO - Found 25 folders.
+2025-11-09 12:39:52,187 - INFO - Updating folders for path: W:\Collection
+2025-11-09 12:39:52,228 - INFO - Found 25 folders.
+2025-11-09 12:47:43,934 - INFO - Updating folders for path: W:\Collection
+2025-11-09 12:47:43,981 - INFO - Found 25 folders.
+2025-11-09 14:41:28,102 - INFO - Updating folders for path: W:\Collection
+2025-11-09 14:41:28,162 - INFO - Found 25 folders.
+2025-11-09 14:42:37,537 - INFO - Updating folders for path: W:\Collection
+2025-11-09 14:42:37,569 - INFO - Found 25 folders.
+2025-11-09 14:45:17,680 - INFO - Updating folders for path: W:\Collection
+2025-11-09 14:45:17,713 - INFO - Found 25 folders.
+2025-11-09 14:46:20,778 - INFO - Updating folders for path: W:\Collection
+2025-11-09 14:46:20,816 - INFO - Found 25 folders.
+2025-11-09 14:47:04,937 - INFO - Updating folders for path: W:\Collection
+2025-11-09 14:47:04,977 - INFO - Found 25 folders.
+2025-11-09 14:48:22,087 - INFO - Updating folders for path: W:\Collection
+2025-11-09 14:48:22,131 - INFO - Found 25 folders.
+2025-11-09 14:51:38,686 - INFO - Updating folders for path: W:\Collection
+2025-11-09 14:51:38,740 - INFO - Found 25 folders.
+2025-11-09 14:53:49,300 - INFO - Updating folders for path: W:\Collection
+2025-11-09 14:53:49,356 - INFO - Found 25 folders.
+2025-11-09 14:54:20,181 - INFO - Updating folders for path: W:\Collection
+2025-11-09 14:54:20,225 - INFO - Found 25 folders.
+2025-11-09 14:55:11,130 - INFO - Updating folders for path: W:\Collection
+2025-11-09 14:55:11,178 - INFO - Found 25 folders.
+2025-11-09 14:56:05,312 - INFO - Updating folders for path: W:\Collection
+2025-11-09 14:56:05,354 - INFO - Found 25 folders.
+2025-11-09 14:57:20,235 - INFO - Updating folders for path: W:\Collection
+2025-11-09 14:57:20,277 - INFO - Found 25 folders.
+2025-11-09 14:59:11,562 - INFO - Updating folders for path: W:\Collection
+2025-11-09 14:59:11,603 - INFO - Found 25 folders.
+2025-11-09 15:07:04,221 - INFO - Updating folders for path: W:\Collection
+2025-11-09 15:07:04,270 - INFO - Found 25 folders.
+2025-11-09 15:09:16,981 - INFO - Updating folders for path: W:\Collection
+2025-11-09 15:09:17,026 - INFO - Found 25 folders.
+2025-11-09 16:32:05,061 - INFO - Updating folders for path: W:\Collection
+2025-11-09 16:32:05,105 - INFO - Found 25 folders.
+2025-11-09 16:32:51,183 - INFO - Updating folders for path: W:\Collection
+2025-11-09 16:32:51,225 - INFO - Found 25 folders.
+2025-11-09 16:36:46,275 - INFO - Updating folders for path: W:\Collection
+2025-11-09 16:36:46,315 - INFO - Found 25 folders.
+2025-11-09 16:37:30,333 - INFO - Updating folders for path: W:\Collection
+2025-11-09 16:37:30,381 - INFO - Found 25 folders.
+2025-11-09 16:39:05,581 - INFO - Updating folders for path: W:\Collection
+2025-11-09 16:39:05,630 - INFO - Found 25 folders.
+2025-11-09 16:43:43,500 - INFO - Updating folders for path: W:\Collection
+2025-11-09 16:43:43,539 - INFO - Found 25 folders.
+2025-11-09 16:46:58,749 - INFO - Updating folders for path: W:\Collection
+2025-11-09 16:46:58,786 - INFO - Found 25 folders.
+2025-11-09 16:47:30,975 - INFO - Updating folders for path: W:\Collection
+2025-11-09 16:47:31,015 - INFO - Found 25 folders.
+2025-11-09 16:57:54,599 - INFO - Updating folders for path: W:\Collection
+2025-11-09 16:57:54,638 - INFO - Found 25 folders.
+2025-11-09 17:00:06,394 - INFO - Updating folders for path: W:\Collection
+2025-11-09 17:00:06,430 - INFO - Found 25 folders.
+2025-11-09 17:01:39,299 - INFO - Updating folders for path: W:\Collection
+2025-11-09 17:01:39,346 - INFO - Found 25 folders.
+2025-11-14 15:49:12,991 - ERROR - QML FAILED to load
+2025-11-14 15:50:14,227 - ERROR - QML FAILED to load
+2025-11-14 15:57:13,714 - ERROR - QML FAILED to load
+2025-11-14 16:00:32,859 - ERROR - QML FAILED to load
+2025-11-14 16:01:06,781 - INFO - Updating folders for path: W:\Collection
+2025-11-14 16:01:06,840 - INFO - Found 25 folders.
+2025-11-14 16:01:07,076 - INFO - Updating folders for path: W:\Collection
+2025-11-14 16:01:07,132 - INFO - Found 25 folders.
+2025-11-14 16:17:01,992 - ERROR - QML FAILED to load
+2025-11-14 16:18:21,579 - ERROR - QML FAILED to load
+2025-11-14 16:19:06,773 - ERROR - QML FAILED to load
+2025-11-14 16:23:29,370 - INFO - Updating folders for path: W:\Collection
+2025-11-14 16:23:29,413 - INFO - Found 25 folders.
+2025-11-15 11:29:37,488 - INFO - Updating folders for path: W:\Collection
+2025-11-15 11:29:37,617 - INFO - Found 25 folders.
+2025-11-15 11:32:08,355 - INFO - Updating folders for path: W:\Collection
+2025-11-15 11:32:08,390 - INFO - Found 25 folders.
+2025-11-15 11:40:24,685 - INFO - Updating folders for path: W:\Collection
+2025-11-15 11:40:24,744 - INFO - Found 25 folders.
+2025-11-15 11:41:29,127 - INFO - Updating folders for path: W:\Collection
+2025-11-15 11:41:29,169 - INFO - Found 25 folders.
+2025-11-15 11:48:17,830 - INFO - Updating folders for path: W:\Collection
+2025-11-15 11:48:17,868 - INFO - Found 25 folders.
+2025-11-15 11:48:41,947 - INFO - Updating folders for path: W:\Collection
+2025-11-15 11:48:41,992 - INFO - Found 25 folders.
+2025-11-15 11:51:53,197 - INFO - Updating folders for path: W:\Collection
+2025-11-15 11:51:53,232 - INFO - Found 25 folders.
+2025-11-15 11:57:48,142 - INFO - Updating folders for path: W:\Collection
+2025-11-15 11:57:48,168 - INFO - Found 25 folders.
+2025-11-15 11:58:05,523 - INFO - Updating folders for path: W:\Collection
+2025-11-15 11:58:05,568 - INFO - Found 25 folders.
+2025-11-15 12:10:17,271 - INFO - Updating folders for path: W:\Collection
+2025-11-15 12:10:17,323 - INFO - Found 25 folders.
+2025-11-15 12:32:29,761 - INFO - Updating folders for path: W:\Collection
+2025-11-15 12:32:29,820 - INFO - Found 25 folders.
+2025-11-15 12:32:38,579 - INFO - Updating folders for path: W:\Collection
+2025-11-15 12:32:38,608 - INFO - Found 25 folders.
+2025-11-15 12:33:05,594 - INFO - Updating folders for path: W:\Collection
+2025-11-15 12:33:05,643 - INFO - Found 25 folders.
+2025-11-15 14:28:41,091 - INFO - Updating folders for path: W:\Collection
+2025-11-15 14:28:41,386 - INFO - Found 25 folders.

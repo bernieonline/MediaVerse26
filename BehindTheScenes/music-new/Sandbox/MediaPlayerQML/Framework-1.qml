@@ -100,6 +100,7 @@ ApplicationWindow {
                     for (var i = 0; i < model.length; i++) {
                         if (model[i].name === "JRiver Library") {
                             currentIndex = i;
+                            categoryCombo.activated(i)
                             break;
                         }
                     }
@@ -190,6 +191,7 @@ ApplicationWindow {
                             var folderPath = modelData.folderPath // Get full pathname when folder is clicked
                             console.log("Clicked folder:", folderPath)
                             fileSystemManager.list_image_files_in_folder(folderPath)
+                            sidePanel.x = -sidePanel.width
                             // Do something with the folder path
                         }
                     }
@@ -329,6 +331,9 @@ ApplicationWindow {
             }
             onClicked: {
                 sidePanel.x = (sidePanel.x === 0) ? -sidePanel.width : 0
+                if (sidePanel.x === 0 && categoryCombo.currentIndex !== -1) {
+                    categoryCombo.activated(categoryCombo.currentIndex)
+                }
                 contentLoader.source = ""
             }
         }
