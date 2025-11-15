@@ -385,25 +385,6 @@ ApplicationWindow {
         }
 
         Button {
-            id: gridViewButton
-            text: "Grid View"
-            width: 320
-            height: 120
-            background: Rectangle {
-                implicitWidth: 320
-                implicitHeight: 120
-                radius: 8
-                color: "#333"
-                border.color: "yellow"
-                border.width: 1
-            }
-            onClicked: {
-                console.log("Grid View button clicked")
-                contentLoader.source = "ImageGridView.qml"
-            }
-        }
-
-        Button {
             id: viewToggleButton
             property bool isGridView: true
             text: isGridView ? "Carousel View" : "Grid View"
