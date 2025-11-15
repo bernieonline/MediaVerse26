@@ -54,6 +54,9 @@ if __name__ == "__main__":
             msg_box.exec()
             sys.exit(-1)
 
+        # ADDED FOR DEBUGGING: Print the data being sent to QML
+        print("Data being passed to QML as myLibraryModel:", myLibrary)
+
 
         QCoreApplication.addLibraryPath(str(Path(sys.modules["PySide6"].__file__).parent / "plugins"))
 

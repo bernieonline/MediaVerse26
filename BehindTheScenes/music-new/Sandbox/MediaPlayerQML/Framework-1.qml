@@ -185,6 +185,7 @@ ApplicationWindow {
                     MouseArea {
                         anchors.fill: parent
                         onClicked: {
+                            print("i just clicked an image folder")
                             fileView.currentIndex = index
                             var folderPath = modelData.folderPath // Get full pathname when folder is clicked
                             console.log("Clicked folder:", folderPath)
@@ -326,7 +327,10 @@ ApplicationWindow {
                 border.color: "yellow"
                 border.width: 1
             }
-            onClicked: sidePanel.x = (sidePanel.x === 0) ? -sidePanel.width : 0
+            onClicked: {
+                sidePanel.x = (sidePanel.x === 0) ? -sidePanel.width : 0
+                contentLoader.source = ""
+            }
         }
 
         Button {
@@ -342,7 +346,10 @@ ApplicationWindow {
                 border.color: "yellow"
                 border.width: 1
             }
-            onClicked: isVideoPanelVisible = !isVideoPanelVisible
+            onClicked: {
+                isVideoPanelVisible = !isVideoPanelVisible
+                contentLoader.source = ""
+            }
         }
 
         Button {
@@ -359,8 +366,8 @@ ApplicationWindow {
                 border.width: 1
             }
             onClicked: {
-                // To be implemented
                 console.log("Carousel button clicked")
+                contentLoader.source = "" 
             }
         }
 
@@ -378,8 +385,8 @@ ApplicationWindow {
                 border.width: 1
             }
             onClicked: {
-                // To be implemented
                 console.log("Grid View button clicked")
+                contentLoader.source = "ImageGridView.qml"
             }
         }
 
@@ -406,25 +413,23 @@ ApplicationWindow {
         }
     }
 
-    Rectangle { //this rectangle is a container for the image browser
-        id: contentContainer
-        anchors.top: buttonRow.bottom
-        anchors.bottom: parent.bottom
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.margins: 100
-        
-        radius: 25
-        color: "transparent"
-        border.color: "#2566c2"
-        border.width: 1
+    Rectangle {
+    id: contentContainer
+    anchors.top: buttonRow.bottom
+    anchors.bottom: parent.bottom
+    anchors.left: parent.left
+    anchors.right: parent.right
+    anchors.margins: 100
 
+    radius: 25
+    color: "transparent"
+    border.color: "#2566c2"
+    border.width: 1
 
-        Image {
-            anchors.fill: parent
-            source: "file:///D:/PythonMusic/pythonproject2026/BehindTheScenes/music-new/images/Lucid_Origin.jpg"
-            fillMode: Image.PreserveAspectCrop
-
-        }
+    // Loader for dynamically loading content like the GridView
+    Loader {
+        id: contentLoader
+        anchors.fill: parent
     }
+}
 }

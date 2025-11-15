@@ -3,6 +3,7 @@ import psutil
 import wmi
 import os
 import logging
+from pathlib import Path
 from PySide6.QtCore import QObject, Signal, Property, Slot, QThread
 
 class Worker(QObject):
@@ -41,7 +42,7 @@ class FileSystem(QObject):
 
     drivesChanged = Signal()
     foldersChanged = Signal()
-    imageFilesFound = Signal(list)
+    imageFilesChanged = Signal()
 
     @Property('QVariantList', notify=drivesChanged)
     def drives(self):
@@ -50,6 +51,11 @@ class FileSystem(QObject):
     @Property('QVariantList', notify=foldersChanged)
     def folders(self):
         return self._folders
+
+    _imageFiles = []
+    @Property('QVariantList', notify=imageFilesChanged)
+    def imageFiles(self):
+        return self._imageFiles
 
     @Slot()
     def update_drives(self):
@@ -100,14 +106,15 @@ class FileSystem(QObject):
         try:
             if os.path.isdir(folder_path):
                 for item in os.listdir(folder_path):
-                    item_path = os.path.join(folder_path, item)
+                    item_path = os.path.join(folder_path, item).replace('\\', '/')
                     if os.path.isfile(item_path) and item.lower().endswith(image_extensions):
-                        image_files.append({'fileName': item, 'filePath': item_path})
+                        image_files.append({'fileName': item, 'filePath': 'file:///' + item_path})
         except Exception as e:
             logging.error(f"Error listing image files in {folder_path}: {e}")
         
         print(f"Image files found in {folder_path}: {image_files}")
-        self.imageFilesFound.emit(image_files)
+        self._imageFiles = image_files
+        self.imageFilesChanged.emit()
     
 
 if __name__ == '__main__':
