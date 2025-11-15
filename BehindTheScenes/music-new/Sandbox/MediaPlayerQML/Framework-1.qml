@@ -192,7 +192,15 @@ ApplicationWindow {
                             console.log("Clicked folder:", folderPath)
                             fileSystemManager.list_image_files_in_folder(folderPath)
                             sidePanel.x = -sidePanel.width
-                            // Do something with the folder path
+                            // Automatically load the view based on the toggle button state
+                            if (viewToggleButton.isGridView) {
+                                console.log("Auto-loading Grid View")
+                                contentLoader.source = "ImageGridView.qml"
+                            } else {
+                                console.log("Auto-loading Carousel View")
+                                // Placeholder for carousel view
+                                contentLoader.source = "" 
+                            }
                         }
                     }
                 }
@@ -397,8 +405,8 @@ ApplicationWindow {
 
         Button {
             id: viewToggleButton
-            property bool isGridView: false
-            text: isGridView ? "Grid View" : "Carousel View"
+            property bool isGridView: true
+            text: isGridView ? "Carousel View" : "Grid View"
             width: 320
             height: 120
             background: Rectangle {
