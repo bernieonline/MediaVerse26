@@ -151,7 +151,7 @@ ApplicationWindow {
                 anchors.topMargin: 20
                 anchors.bottomMargin: 80
                 clip: true
-                model: fileSystemManager.folders // Ready to accept a model from Python
+                model: fileSystemManager ? fileSystemManager.folders : []
                 property int currentIndex: -1
                 delegate: Item {
                     width: fileView.width
@@ -419,23 +419,34 @@ ApplicationWindow {
     }
 
     Rectangle {
-    id: contentContainer
-    anchors.top: buttonRow.bottom
-    anchors.bottom: parent.bottom
-    anchors.left: parent.left
-    anchors.right: parent.right
-    anchors.margins: 100
+        id: contentContainer
+        anchors.top: buttonRow.bottom
+        anchors.bottom: parent.bottom
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.margins: 100
 
-    radius: 25
-    color: "transparent"
-    border.color: "#2566c2"
-    border.width: 1
+        radius: 25
+        color: "transparent"
+        border.color: "#2566c2"
+   
+        border.width: 1
 
-    // Loader for dynamically loading content like the GridView
-    Loader {
-        id: contentLoader
-        anchors.fill: parent
-        source: "ImageGridView.qml" // Set initial view
+        // Loader for dynamically loading content like the GridView
+        Loader {
+            id: contentLoader
+            anchors.fill: parent
+            source: "ImageGridView.qml" // Set initial view
+
+            onLoaded: {
+                if (contentLoader.item && contentLoader.item.imageClicked) {
+                    contentLoader.item.imageClicked.connect(function(path) {
+                        contentLoader.setSource("Detail_View.qml", { imagePath: path })
+                    })
+                }
+            }
+
+
+        }
     }
-}
 }
