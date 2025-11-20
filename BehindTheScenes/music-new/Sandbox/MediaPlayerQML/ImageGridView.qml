@@ -10,7 +10,7 @@ Rectangle {
     id: root
 
     color: "transparent"
-
+    signal imageClicked(string filePath)
 
     GridView {
 
@@ -41,8 +41,12 @@ Rectangle {
                 anchors.fill: parent
 
                 onClicked: {
+                   
+                    onClicked: {
+                        root.imageClicked(modelData.filePath)
+                    }
 
-                    console.log("Image clicked:", modelData.filePath)
+                    //console.log("Image clicked need to save it:", modelData.filePath)
 
                 }
 

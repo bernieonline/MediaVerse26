@@ -17,21 +17,23 @@ Rectangle {
         anchors.fill: parent
         anchors.margins: 50
         spacing: 50
+        
 
         // LEFT PANEL: IMAGE VIEW
-        SoftGlowFrame {
+        Rectangle {
             id: leftPanel
             Layout.fillHeight: true
-            Layout.fillWidth: true
-            Layout.preferredWidth: parent.width * 0.55
-            //color: "transparent"
+            Layout.preferredWidth: leftPanel.height * 2 / 3 // Maintain 2:3 aspect ratio
+            Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
+            radius: 15
+            //clip: true
+            color: "transparent"
 
             Image {
                 id: posterImage
                 anchors.fill: parent
-                //anchors.margins: 20
                 source: detailViewRoot.imagePath
-                //fillMode: Image.PreserveAspectFit
+                fillMode: Image.PreserveAspectCrop
                 smooth: true
             }
         }
@@ -58,6 +60,9 @@ Rectangle {
                     TabButton { text: "Actors" }
                     TabButton { text: "Director" }
                     TabButton { text: "Filming" }
+                    //TabButton { text: "IMDB" }
+                    //TabButton { text: "Rotten Tomatoes" }
+                    //TabButton { text: "WIKI" }
                 }
 
                 // Content stack
@@ -67,28 +72,48 @@ Rectangle {
                     Layout.fillHeight: true
                     currentIndex: tabBar.currentIndex
 
-                    Rectangle {
+                   Rectangle {
                         color: "transparent"
-                        anchors.fill: parent
-                        Text { anchors.centerIn: parent; text: "Details content"; color: "white" }
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+                        Text {
+                            anchors.centerIn: parent
+                            text: "Details content"
+                            color: "white"
+                        } 
                     }
 
                     Rectangle {
                         color: "transparent"
-                        anchors.fill: parent
-                        Text { anchors.centerIn: parent; text: "Actors content"; color: "white" }
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+                        Text {
+                            anchors.centerIn: parent
+                            text: "Actors content"
+                            color: "white"
+                        } 
                     }
 
                     Rectangle {
                         color: "transparent"
-                        anchors.fill: parent
-                        Text { anchors.centerIn: parent; text: "Director content"; color: "white" }
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+                        Text {
+                            anchors.centerIn: parent
+                            text: "Director content"
+                            color: "white"
+                        } 
                     }
 
                     Rectangle {
                         color: "transparent"
-                        anchors.fill: parent
-                        Text { anchors.centerIn: parent; text: "Filming content"; color: "white" }
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+                        Text {
+                            anchors.centerIn: parent
+                            text: "Filming content"
+                            color: "white"
+                        } 
                     }
                 }
             }
