@@ -3,6 +3,8 @@ import QtQuick.Controls 2.15
 import QtQuick.Controls.Material 2.15
 import QtQuick
 import QtQuick.Controls
+//import "CinemaButton.qml" as Custom
+
 //version 1.0.1 border edge added to left panel
 //1.o.2 sliding video panel added
 //1.0.3 centre button moved to toolbar
@@ -345,6 +347,9 @@ ApplicationWindow {
             }
         }
 
+       
+
+
         Button {
             id: videoButton
             text: "Video"
@@ -364,24 +369,7 @@ ApplicationWindow {
             }
         }
 
-        Button {
-            id: carouselButton
-            text: "Carousel"
-            width: 320
-            height: 120
-            background: Rectangle {
-                implicitWidth: 320
-                implicitHeight: 120
-                radius: 8
-                color: "#333"
-                border.color: "yellow"
-                border.width: 1
-            }
-            onClicked: {
-                console.log("Carousel button clicked")
-                contentLoader.source = "" 
-            }
-        }
+       
 
         Button {
             id: viewToggleButton
