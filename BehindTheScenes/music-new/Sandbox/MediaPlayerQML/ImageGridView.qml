@@ -34,6 +34,7 @@ Rectangle {
 
             source: modelData.filePath
 
+            
 
 
             MouseArea {

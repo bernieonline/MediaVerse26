@@ -1,0 +1,64 @@
+#this file is where we define the variables that will represent the relative pathnames of assets like images
+#they are critical in order to avoid hard coded locations for eexample we can reference any file inside music-new without hard coding a path name
+# we create the variables her
+#we import into main.py or its equivalent
+#main.py passes the variable pathnames into QML
+#The variables can then be used inside QML as a pathname
+#such as mypath.images.mylogo.png no drive letter involved
+#This means that as long as i keep the file structure below BehindTheScenes I can use the same code in any location
+
+#here is the logic as a reminder for me
+
+
+# project_paths.py
+
+from pathlib import Path
+
+# Define project root relative to this file
+project_root = Path(__file__).resolve().parents[1] / "music-new"
+#[1]is 1 level down from BehindTheScenes
+
+# Common paths
+assets_path = project_root / "images"
+py_path = project_root / "Sandbox" / "MediaPlayerPy"
+qml_path = project_root / "Sandbox" / "MediaPlayerQML"
+db_path = project_root / "dbMySql"
+log_path = project_root / "application.log"
+req_path = project_root / "requirements.txt"
+
+#D:\PythonMusic\pythonproject2026\BehindTheScenes\music-new\requirements.txt
+
+#- stead of juggling multiple variables (project_root, assets_path, etc.), you collect them into a single dictionary called paths.
+# - Each key ("assets", "qml", etc.) is a label, and each value is the corresponding Path object.
+
+# How to Use It in Python
+# print(paths["assets"])   # prints the full path to your images folder
+
+
+# Optional: expose as dictionary
+paths = {
+    "project_root": project_root,
+    "assets": assets_path,
+    "qml": qml_path,
+    "db": db_path,
+    "log": log_path
+}
+
+
+#using this inside main.py
+#    from pathlib import Path
+
+# Define project_root relative to this script
+#    project_root = Path(__file__).resolve().parents[1] / "music-new"
+
+# Define image folder path
+# image_folder = project_root / "images" / "icons" / "icons8-movie-liquid-glass-color"
+
+# Expose to QML
+# engine.rootContext().setContextProperty("imageFolderPath", str(image_folder.as_posix()))
+
+#there is no dot notation in QML but you can use concatenation to refer to a sub folder
+#so perhaps set up the higher level folder in main.py then andd a further path like this
+#Image {
+    #source: imagesPath + "/icons/icons8-movie-liquid-glass-color/play.png"
+#}
