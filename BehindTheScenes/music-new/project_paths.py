@@ -15,7 +15,7 @@
 from pathlib import Path
 
 # Define project root relative to this file
-project_root = Path(__file__).resolve().parents[1] / "music-new"
+project_root = Path(__file__).resolve().parent
 #[1]is 1 level down from BehindTheScenes
 
 # Common paths
@@ -41,18 +41,21 @@ paths = {
     "assets": assets_path,
     "qml": qml_path,
     "db": db_path,
-    "log": log_path
-}
+    "log": log_path,
+    "req":req_path
+    }
 
 
 #using this inside main.py
 #    from pathlib import Path
 
 # Define project_root relative to this script
+#not needed now its in this file
 #    project_root = Path(__file__).resolve().parents[1] / "music-new"
 
 # Define image folder path
-# image_folder = project_root / "images" / "icons" / "icons8-movie-liquid-glass-color"
+#not needed now its in this file
+# assets_path = project_root / "images"/
 
 # Expose to QML
 # engine.rootContext().setContextProperty("imageFolderPath", str(image_folder.as_posix()))
