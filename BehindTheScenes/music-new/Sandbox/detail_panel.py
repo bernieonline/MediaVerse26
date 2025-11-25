@@ -47,7 +47,8 @@ class AboutTab(QWidget):
         #result = media_file_path = W:\Collection\War Movies\Guns of Navarone (1961)_mp4_JRSidecar.xml
         #xml_path = self._find_sidecar_xml(media_file_path)
         #the use of xml path was not required
-        xml_path = media_file_path
+        #xml_path = media_file_path
+        xml_path = self._find_sidecar_xml(media_file_path)
         print ("gggggg",xml_path)
         
         if xml_path:

@@ -17,8 +17,8 @@ Item {
         width: parent.width + 20
         height: parent.height + 20
         radius: 20
-        color: "#FFD700"
-        opacity: 0.55
+        color: "transparent"
+        opacity: 0.15
     }
 
     // Image with fallback
