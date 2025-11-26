@@ -6,6 +6,9 @@ FocusScope {
     width: parent.width
     height: parent.height
 
+    signal imageClicked(string filePath)
+
+
     property var imageList: fileSystemManager.imageFiles
     property int currentIndex: 0
 
@@ -57,11 +60,20 @@ FocusScope {
                     MouseArea {
                         anchors.fill: parent
                         enabled: valid
+
                         onClicked: {
-                            currentIndex = imageIndex
-                            console.log("Clicked image:", imageList[imageIndex]?.filePath)
+                            if (!valid) return
+
+                            // take a snapshot BEFORE currentIndex changes
+                            let idx = imageIndex
+
+                            currentIndex = idx   // update carousel
+
+                            console.log("Clicked image:", imageList[idx].filePath)
+                            root.imageClicked(imageList[idx].filePath)
                         }
                     }
+
                 }
             }
         }

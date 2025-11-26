@@ -14,6 +14,7 @@ Item {
     SoftGlowFrame {
         id: frame
         anchors.fill: parent
+        anchors.margins: 10  // <-- add margin for border
         imageSource: root.loadFailed ? root.fallbackSource : root.source
     }
 
@@ -34,6 +35,6 @@ Item {
 
     MouseArea {
         anchors.fill: parent
-        onClicked: root.clicked()
+        //onClicked: root.clicked()
     }
 }

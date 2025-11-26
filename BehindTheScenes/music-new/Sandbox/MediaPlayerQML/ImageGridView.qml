@@ -20,6 +20,20 @@ Rectangle {
 
         clip: true
 
+        flickableDirection: Flickable.VerticalFlick
+
+        ScrollBar.vertical: ScrollBar {
+            policy: ScrollBar.AlwaysOn
+            anchors.right: parent.right
+            anchors.top: parent.top
+            anchors.bottom: parent.bottom
+        
+        }
+        //spacing: 10
+
+        anchors.margins: 10   // space around the entire grid
+
+
         model: fileSystemManager.imageFiles
 
         cellWidth: imageGridView.width / 6
@@ -43,13 +57,15 @@ Rectangle {
 
                 onClicked: {
                    
-                    onClicked: {
+                    //onClicked: {
+                        print("i just clicked this yes?", modelData.filePath)
                         root.imageClicked(modelData.filePath)
-                    }
+                    //}
 
-                    //console.log("Image clicked need to save it:", modelData.filePath)
+                    console.log("Image clicked need to save it:", modelData.filePath)
 
                 }
+                //propagateComposedEvents: true  // allows the GridView to process vertical drags
 
             }
 

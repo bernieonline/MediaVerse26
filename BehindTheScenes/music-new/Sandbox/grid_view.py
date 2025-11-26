@@ -121,7 +121,9 @@ class GridView(QWidget):
         height = height or int(width * self.ASPECT_RATIO)
 
         card = ClickableFrame(file_path, parent=self.grid_container)
-        card.clicked.connect(self._card_clicked)
+        #i am clicking 
+        
+        #card.clicked.connect(self._card_clicked)
         card.setCursor(Qt.PointingHandCursor)
         card.setObjectName("grid_card")
         card.setStyleSheet("""
