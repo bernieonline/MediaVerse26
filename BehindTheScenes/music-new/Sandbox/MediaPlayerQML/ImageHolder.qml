@@ -24,6 +24,7 @@ Item {
         source: root.source
         visible: false
         asynchronous: true
+        cache:true
 
         onStatusChanged: {
             if (status === Image.Error)
