@@ -10,6 +10,8 @@ from PySide6.QtCore import QCoreApplication, QUrl
 from PySide6.QtQml import QQmlApplicationEngine
 from PySide6.QtCore import QLibraryInfo
 
+from XML_Details import GetXMLDetails
+
 #db_path = Path("D:/PythonMusic/pythonproject2026/BehindTheScenes/music-new")
 #sys.path.append(str(db_path))
 
@@ -79,7 +81,20 @@ if __name__ == "__main__":
 
         engine.rootContext().setContextProperty("myLibraryModel", myLibrary)
 
+
+        #these expose the xml deta in the detail view after clicking an image
+        xml_provider = GetXMLDetails()
+        engine.rootContext().setContextProperty("xmlDetails", xml_provider)
+
         engine.load(QUrl.fromLocalFile(str(Path(__file__).parent.parent / "MediaPlayerQML" / "Framework-1.qml")))
+
+        root_objs = engine.rootObjects()
+        if root_objs:
+            root = root_objs[0]
+            root.setProperty("xmlDetails", xml_provider)
+        
+       
+
 
         if not engine.rootObjects():
             logging.error("QML FAILED to load")

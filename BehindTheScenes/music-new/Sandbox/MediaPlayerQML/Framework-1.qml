@@ -15,6 +15,10 @@ ApplicationWindow {
     id: window
     visibility: ApplicationWindow.FullScreen
     title: "MediaVerse"
+    //property var xmlDetails  // will be set by Python as a dynamic property
+    property var xmlDetails: xmlDetails   // bind the context property into the window’s property
+
+
 
     Material.theme: Material.Dark
     Material.accent: Material.Yellow
@@ -197,7 +201,12 @@ ApplicationWindow {
                             // Automatically load the view based on the toggle button state
                             if (viewToggleButton.isGridView) {
                                 console.log("Auto-loading Grid View")
-                                contentLoader.source = "ImageGridView.qml"
+                                //contentLoader.source = "ImageGridView.qml"
+                                contentLoader.setSource("ImageGridView.qml", { xmlDetails: xmlDetails })
+                                //reverse
+
+
+
                             } else {
                                 console.log("Auto-loading Carousel View")
                                 contentLoader.source = "CarouselView.qml"
@@ -388,7 +397,9 @@ ApplicationWindow {
             onClicked: {
                 isGridView = !isGridView;
                 if (isGridView) {
-                    contentLoader.source = "ImageGridView.qml";
+                    //contentLoader.source = "ImageGridView.qml";
+                    contentLoader.setSource("ImageGridView.qml", { xmlDetails: xmlDetails })
+
                 } else {
                     contentLoader.source = "CarouselView.qml";
                 }
@@ -441,7 +452,13 @@ ApplicationWindow {
             onLoaded: {
                 if (contentLoader.item && contentLoader.item.imageClicked) {
                     contentLoader.item.imageClicked.connect(function(path) {
-                        contentLoader.setSource("Detail_View.qml", { imagePath: path })
+                        //contentLoader.setSource("Detail_View.qml", { imagePath: path })
+
+                        contentLoader.setSource("Detail_View.qml", {
+                            imagePath: path,
+                                xmlDetails: xmlDetails
+                        })
+
                     })
                 }
             }

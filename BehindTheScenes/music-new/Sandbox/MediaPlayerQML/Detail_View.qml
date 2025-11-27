@@ -1,32 +1,49 @@
 import QtQuick 6.5
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 6.5
-import QtQuick.Window 6.5
-import "."
 
 Rectangle {
     id: detailViewRoot
     anchors.fill: parent
     color: "transparent"
 
-    // Path of selected image, passed in externally
+    // Properties assigned by Loader
     property string imagePath: ""
+    property var xmlDetails
+
+    // --- NEW: call Python slot when view loads ---
+    Component.onCompleted: {
+        if (xmlDetails) {
+            console.log("Detail_View: calling xmlDetails.loadXML with", imagePath)
+            xmlDetails.loadXML(imagePath)
+        } else {
+            console.warn("Detail_View: xmlDetails is undefined")
+        }
+    }
+
+    // --- NEW: listen for Python signal and update TextArea ---
+    Connections {
+        target: xmlDetails
+        function onXml_detail_view(text) {
+            console.log("Detail_View received XML text")
+            xmlTextArea.text = text
+        }
+    }
 
     RowLayout {
-        id: mainLayout
         anchors.fill: parent
         anchors.margins: 50
         spacing: 50
-        
 
-        // LEFT PANEL: IMAGE VIEW
+        // -----------------------
+        // LEFT PANEL: IMAGE
+        // -----------------------
         Rectangle {
             id: leftPanel
             Layout.fillHeight: true
-            Layout.preferredWidth: leftPanel.height * 2 / 3 // Maintain 2:3 aspect ratio
+            Layout.preferredWidth: leftPanel.height * 2 / 3
             Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
             radius: 15
-            //clip: true
             color: "transparent"
 
             Image {
@@ -38,83 +55,76 @@ Rectangle {
             }
         }
 
+        // -----------------------
         // RIGHT PANEL: TAB BAR + STACK
-        SoftGlowFrame {
-            id: rightPanel
-            Layout.fillHeight: true
+        // -----------------------
+        ColumnLayout {
             Layout.fillWidth: true
-            Layout.preferredWidth: parent.width * 0.45
-            //color: "transparent"
+            Layout.fillHeight: true
+            spacing: 10
 
-            ColumnLayout {
-                anchors.fill: parent
-                anchors.margins: 20
-                spacing: 10
+            TabBar {
+                id: tabBar
+                Layout.fillWidth: true
+                TabButton { text: "Details"; checked: true }
+                TabButton { text: "Actors" }
+                TabButton { text: "Director" }
+                TabButton { text: "Filming" }
+            }
 
-                // Tab buttons
-                TabBar {
-                    id: tabBar
-                    Layout.fillWidth: true
+            StackLayout {
+                id: stack
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                currentIndex: tabBar.currentIndex
 
-                    TabButton { text: "Details"; checked: true }
-                    TabButton { text: "Actors" }
-                    TabButton { text: "Director" }
-                    TabButton { text: "Filming" }
-                    //TabButton { text: "IMDB" }
-                    //TabButton { text: "Rotten Tomatoes" }
-                    //TabButton { text: "WIKI" }
-                }
-
-                // Content stack
-                StackLayout {
-                    id: stack
+                // -----------------------
+                // DETAILS TAB
+                // -----------------------
+                Rectangle {
+                    color: "transparent"
                     Layout.fillWidth: true
                     Layout.fillHeight: true
-                    currentIndex: tabBar.currentIndex
 
-                   Rectangle {
-                        color: "transparent"
-                        Layout.fillWidth: true
-                        Layout.fillHeight: true
-                        Text {
-                            anchors.centerIn: parent
-                            text: "Details content"
-                            color: "white"
-                        } 
+                    TextArea {
+                        id: xmlTextArea
+                        anchors.fill: parent
+                        readOnly: true
+                        wrapMode: Text.Wrap
+                        text: "No details available"
+                        color: "black"
+                        font.pixelSize: 16
                     }
+                }
 
-                    Rectangle {
-                        color: "transparent"
-                        Layout.fillWidth: true
-                        Layout.fillHeight: true
-                        Text {
-                            anchors.centerIn: parent
-                            text: "Actors content"
-                            color: "white"
-                        } 
-                    }
+                // -----------------------
+                // ACTORS TAB
+                // -----------------------
+                Rectangle {
+                    color: "transparent"
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                    Text { anchors.centerIn: parent; text: "Actors content"; color: "white" }
+                }
 
-                    Rectangle {
-                        color: "transparent"
-                        Layout.fillWidth: true
-                        Layout.fillHeight: true
-                        Text {
-                            anchors.centerIn: parent
-                            text: "Director content"
-                            color: "white"
-                        } 
-                    }
+                // -----------------------
+                // DIRECTOR TAB
+                // -----------------------
+                Rectangle {
+                    color: "transparent"
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                    Text { anchors.centerIn: parent; text: "Director content"; color: "white" }
+                }
 
-                    Rectangle {
-                        color: "transparent"
-                        Layout.fillWidth: true
-                        Layout.fillHeight: true
-                        Text {
-                            anchors.centerIn: parent
-                            text: "Filming content"
-                            color: "white"
-                        } 
-                    }
+                // -----------------------
+                // FILMING TAB
+                // -----------------------
+                Rectangle {
+                    color: "transparent"
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                    Text { anchors.centerIn: parent; text: "Filming content"; color: "white" }
                 }
             }
         }
