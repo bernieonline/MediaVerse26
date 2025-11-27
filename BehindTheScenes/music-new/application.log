@@ -1,56 +1,84 @@
-2025-11-23 11:48:54,391 - INFO - Updating folders for path: W:\Collection
-2025-11-23 11:48:54,700 - INFO - Found 25 folders.
-2025-11-23 11:50:36,707 - INFO - Updating folders for path: W:\Collection
-2025-11-23 11:50:37,030 - INFO - Found 25 folders.
-2025-11-23 11:54:40,096 - INFO - Updating folders for path: W:\Collection
-2025-11-23 11:54:40,404 - INFO - Found 25 folders.
-2025-11-23 11:55:00,095 - INFO - Updating folders for path: W:\Collection
-2025-11-23 11:55:00,399 - INFO - Found 25 folders.
-2025-11-23 12:21:10,994 - INFO - Updating folders for path: W:\Collection
-2025-11-23 12:21:11,290 - INFO - Found 25 folders.
-2025-11-23 12:22:04,256 - INFO - Updating folders for path: W:\Collection
-2025-11-23 12:22:04,560 - INFO - Found 25 folders.
-2025-11-23 12:24:41,360 - INFO - Updating folders for path: W:\Collection
-2025-11-23 12:24:41,689 - INFO - Found 25 folders.
-2025-11-23 12:25:44,277 - INFO - Updating folders for path: W:\Collection
-2025-11-23 12:25:44,597 - INFO - Found 25 folders.
-2025-11-23 12:32:22,173 - INFO - Updating folders for path: W:\Collection
-2025-11-23 12:32:22,478 - INFO - Found 25 folders.
-2025-11-23 12:33:38,424 - INFO - Updating folders for path: W:\Collection
-2025-11-23 12:33:38,736 - INFO - Found 25 folders.
-2025-11-23 12:33:57,044 - INFO - Updating folders for path: W:\Collection
-2025-11-23 12:33:57,356 - INFO - Found 25 folders.
-2025-11-23 12:49:37,396 - INFO - Updating folders for path: W:\Collection
-2025-11-23 12:49:37,706 - INFO - Found 25 folders.
-2025-11-23 12:59:13,936 - INFO - Updating folders for path: W:\Collection
-2025-11-23 12:59:14,227 - INFO - Found 25 folders.
-2025-11-23 13:04:06,776 - INFO - Updating folders for path: W:\Collection
-2025-11-23 13:04:07,084 - INFO - Found 25 folders.
-2025-11-23 13:06:41,980 - INFO - Updating folders for path: W:\Collection
-2025-11-23 13:06:42,307 - INFO - Found 25 folders.
-2025-11-23 13:07:12,362 - INFO - Updating folders for path: W:\Collection
-2025-11-23 13:07:12,694 - INFO - Found 25 folders.
-2025-11-23 13:10:04,988 - INFO - Updating folders for path: W:\Collection
-2025-11-23 13:10:05,300 - INFO - Found 25 folders.
-2025-11-23 13:12:15,614 - INFO - Updating folders for path: W:\Collection
-2025-11-23 13:12:15,927 - INFO - Found 25 folders.
-2025-11-23 13:12:38,022 - INFO - Updating folders for path: W:\Collection
-2025-11-23 13:12:38,336 - INFO - Found 25 folders.
-2025-11-23 13:14:31,346 - INFO - Updating folders for path: W:\Collection
-2025-11-23 13:14:31,665 - INFO - Found 25 folders.
-2025-11-23 13:54:37,963 - INFO - Updating folders for path: W:\Collection
-2025-11-23 13:54:38,255 - INFO - Found 25 folders.
-2025-11-23 16:02:09,212 - INFO - Updating folders for path: W:\Collection
-2025-11-23 16:02:09,516 - INFO - Found 25 folders.
-2025-11-23 16:02:49,430 - INFO - Updating folders for path: W:\Collection
-2025-11-23 16:02:49,739 - INFO - Found 25 folders.
-2025-11-23 16:06:05,076 - INFO - Updating folders for path: W:\Collection
-2025-11-23 16:06:05,391 - INFO - Found 25 folders.
-2025-11-25 17:19:53,733 - INFO - Updating folders for path: W:\Collection
-2025-11-25 17:19:54,076 - INFO - Found 25 folders.
-2025-11-25 17:21:37,189 - INFO - Updating folders for path: W:\Collection
-2025-11-25 17:21:37,513 - INFO - Found 25 folders.
-2025-11-25 17:22:14,420 - INFO - Updating folders for path: W:\Collection
-2025-11-25 17:22:14,763 - INFO - Found 25 folders.
-2025-11-25 17:22:28,771 - INFO - Updating folders for path: W:\Collection
-2025-11-25 17:22:29,101 - INFO - Found 25 folders.
+2025-11-25 17:51:59,827 - ERROR - An unhandled exception occurred:
+Traceback (most recent call last):
+  File "C:\Users\berna\pythonproject2026\BehindTheScenes\BehindTheScenes\music-new\Sandbox\MediaPlayerPy\Framework.py", line 75, in <module>
+    from FileSystem import FileSystem
+  File "C:\Users\berna\pythonproject2026\BehindTheScenes\BehindTheScenes\music-new\Sandbox\MediaPlayerPy\FileSystem.py", line 2, in <module>
+    import psutil
+ModuleNotFoundError: No module named 'psutil'
+2025-11-25 17:52:56,960 - ERROR - An unhandled exception occurred:
+Traceback (most recent call last):
+  File "C:\Users\berna\pythonproject2026\BehindTheScenes\BehindTheScenes\music-new\Sandbox\MediaPlayerPy\Framework.py", line 75, in <module>
+    from FileSystem import FileSystem
+  File "C:\Users\berna\pythonproject2026\BehindTheScenes\BehindTheScenes\music-new\Sandbox\MediaPlayerPy\FileSystem.py", line 3, in <module>
+    import wmi
+ModuleNotFoundError: No module named 'wmi'
+2025-11-25 17:55:07,101 - INFO - Updating folders for path: W:\Collection
+2025-11-25 17:55:07,838 - INFO - Found 25 folders.
+2025-11-25 18:14:42,033 - INFO - Updating folders for path: W:\Collection
+2025-11-25 18:14:42,355 - INFO - Found 25 folders.
+2025-11-26 16:43:43,816 - INFO - Updating folders for path: W:\Collection
+2025-11-26 16:43:44,306 - INFO - Found 25 folders.
+2025-11-26 17:29:11,223 - INFO - Updating folders for path: W:\Collection
+2025-11-26 17:29:11,848 - INFO - Found 25 folders.
+2025-11-26 17:29:50,856 - INFO - Updating folders for path: W:\Collection
+2025-11-26 17:29:51,196 - INFO - Found 25 folders.
+2025-11-26 17:30:30,170 - INFO - Updating folders for path: W:\Collection
+2025-11-26 17:30:30,742 - INFO - Found 25 folders.
+2025-11-26 17:32:36,279 - INFO - Updating folders for path: W:\Collection
+2025-11-26 17:32:36,579 - INFO - Found 25 folders.
+2025-11-26 17:40:11,082 - INFO - Updating folders for path: W:\Collection
+2025-11-26 17:40:11,469 - INFO - Found 25 folders.
+2025-11-26 17:41:04,684 - INFO - Updating folders for path: W:\Collection
+2025-11-26 17:41:05,073 - INFO - Found 25 folders.
+2025-11-26 17:42:24,699 - INFO - Updating folders for path: W:\Collection
+2025-11-26 17:42:25,042 - INFO - Found 25 folders.
+2025-11-26 18:27:05,380 - INFO - Updating folders for path: W:\Collection
+2025-11-26 18:27:05,807 - INFO - Found 25 folders.
+2025-11-26 18:54:58,549 - INFO - Updating folders for path: W:\Collection
+2025-11-26 18:54:58,896 - INFO - Found 25 folders.
+2025-11-26 18:55:23,132 - INFO - Updating folders for path: W:\Collection
+2025-11-26 18:55:23,447 - INFO - Found 25 folders.
+2025-11-26 18:57:11,409 - INFO - Updating folders for path: W:\Collection
+2025-11-26 18:57:11,743 - INFO - Found 25 folders.
+2025-11-26 18:57:53,311 - INFO - Updating folders for path: W:\Collection
+2025-11-26 18:57:53,838 - INFO - Found 25 folders.
+2025-11-26 19:01:02,362 - INFO - Updating folders for path: W:\Collection
+2025-11-26 19:01:02,731 - INFO - Found 25 folders.
+2025-11-26 19:02:48,377 - INFO - Updating folders for path: W:\Collection
+2025-11-26 19:02:48,710 - INFO - Found 25 folders.
+2025-11-26 19:03:26,055 - INFO - Updating folders for path: W:\Collection
+2025-11-26 19:03:26,356 - INFO - Found 25 folders.
+2025-11-26 19:06:48,535 - INFO - Updating folders for path: W:\Collection
+2025-11-26 19:06:48,854 - INFO - Found 25 folders.
+2025-11-26 19:11:09,172 - INFO - Updating folders for path: W:\Collection
+2025-11-26 19:11:09,496 - INFO - Found 25 folders.
+2025-11-26 19:12:18,770 - INFO - Updating folders for path: W:\Collection
+2025-11-26 19:12:19,093 - INFO - Found 25 folders.
+2025-11-26 19:17:36,013 - INFO - Updating folders for path: W:\Collection
+2025-11-26 19:17:36,329 - INFO - Found 25 folders.
+2025-11-26 19:27:40,463 - INFO - Updating folders for path: W:\Collection
+2025-11-26 19:27:40,822 - INFO - Found 25 folders.
+2025-11-26 19:29:30,839 - INFO - Updating folders for path: W:\Collection
+2025-11-26 19:29:31,291 - INFO - Found 25 folders.
+2025-11-26 19:30:43,835 - INFO - Updating folders for path: W:\Collection
+2025-11-26 19:30:44,190 - INFO - Found 25 folders.
+2025-11-26 20:47:01,481 - INFO - Updating folders for path: W:\Collection
+2025-11-26 20:47:02,114 - INFO - Found 25 folders.
+2025-11-26 20:49:46,010 - INFO - Updating folders for path: W:\Collection
+2025-11-26 20:49:46,556 - INFO - Found 25 folders.
+2025-11-26 20:50:28,265 - INFO - Updating folders for path: W:\Collection
+2025-11-26 20:50:28,598 - INFO - Found 25 folders.
+2025-11-26 20:54:02,812 - INFO - Updating folders for path: W:\Collection
+2025-11-26 20:54:03,142 - INFO - Found 25 folders.
+2025-11-26 20:54:41,563 - INFO - Updating folders for path: W:\Collection
+2025-11-26 20:54:41,934 - INFO - Found 25 folders.
+2025-11-26 20:57:40,341 - INFO - Updating folders for path: W:\Collection
+2025-11-26 20:57:40,609 - INFO - Found 25 folders.
+2025-11-26 21:00:25,739 - INFO - Updating folders for path: W:\Collection
+2025-11-26 21:00:26,238 - INFO - Found 25 folders.
+2025-11-26 21:31:14,097 - INFO - Updating folders for path: W:\Collection
+2025-11-26 21:31:14,431 - INFO - Found 25 folders.
+2025-11-26 21:40:52,553 - INFO - Updating folders for path: W:\Collection
+2025-11-26 21:40:52,935 - INFO - Found 25 folders.
+2025-11-27 10:06:13,818 - INFO - Updating folders for path: W:\Collection
+2025-11-27 10:06:14,576 - INFO - Found 25 folders.
