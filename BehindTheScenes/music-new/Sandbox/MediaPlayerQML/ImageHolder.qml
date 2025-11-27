@@ -24,6 +24,7 @@ Item {
         source: root.source
         visible: false
         asynchronous: true
+        //is this needed
         cache:true
 
         onStatusChanged: {
