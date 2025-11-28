@@ -4,9 +4,7 @@ import QtQuick.Layouts 1.15
 
 Rectangle {
     id: root
-    //property var xmlDetails
-    property var xmlDetails   // declare here, but DO NOT shadow with a local assignment
-
+    property var xmlDetails   // Python object passed in
     color: "transparent"
 
     signal imageClicked(string filePath)
@@ -23,6 +21,7 @@ Rectangle {
             id: imageGridView
             Layout.fillWidth: true
             Layout.fillHeight: true
+            Layout.margins: 10
             clip: true
             flickableDirection: Flickable.VerticalFlick
 
@@ -30,7 +29,6 @@ Rectangle {
                 policy: ScrollBar.AlwaysOn
             }
 
-            anchors.margins: 10
             model: fileSystemManager.imageFiles
             cellWidth: imageGridView.width / 6
             cellHeight: (imageGridView.width / 6) * 1.5
@@ -81,18 +79,6 @@ Rectangle {
 
                 console.log("Assigned xmlDetails to detail view")
                 console.log("Detail view imagePath:", item.imagePath)
-
-                // Connect signal dynamically
-                xmlDetails.xml_detail_view.connect(function(text) {
-                    console.log("Received XML text from Python signal")
-
-                    if (item.xmlTextArea) {
-                        item.xmlTextArea.text = text
-                        console.log("Updated xmlTextArea text:", text)
-                    } else {
-                        console.log("Warning: item.xmlTextArea not found")
-                    }
-                })
 
                 // Trigger XML load
                 console.log("Calling xmlDetails.loadXML with:", root._pendingImagePath)
