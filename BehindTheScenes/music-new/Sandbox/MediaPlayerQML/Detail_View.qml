@@ -11,21 +11,17 @@ Rectangle {
     property string imagePath: ""
     property var xmlDetails
 
-    // --- NEW: call Python slot when view loads ---
+    // Call Python slot when view loads
     Component.onCompleted: {
-        if (xmlDetails) {
-            console.log("Detail_View: calling xmlDetails.loadXML with", imagePath)
+        if (xmlDetails && imagePath) {
             xmlDetails.loadXML(imagePath)
-        } else {
-            console.warn("Detail_View: xmlDetails is undefined")
         }
     }
 
-    // --- NEW: listen for Python signal and update TextArea ---
+    // Listen for Python signal and update TextArea
     Connections {
         target: xmlDetails
         function onXml_detail_view(text) {
-            console.log("Detail_View received XML text")
             xmlTextArea.text = text
         }
     }
@@ -35,9 +31,6 @@ Rectangle {
         anchors.margins: 50
         spacing: 50
 
-        // -----------------------
-        // LEFT PANEL: IMAGE
-        // -----------------------
         Rectangle {
             id: leftPanel
             Layout.fillHeight: true
@@ -55,9 +48,6 @@ Rectangle {
             }
         }
 
-        // -----------------------
-        // RIGHT PANEL: TAB BAR + STACK
-        // -----------------------
         ColumnLayout {
             Layout.fillWidth: true
             Layout.fillHeight: true
@@ -78,9 +68,6 @@ Rectangle {
                 Layout.fillHeight: true
                 currentIndex: tabBar.currentIndex
 
-                // -----------------------
-                // DETAILS TAB
-                // -----------------------
                 Rectangle {
                     color: "transparent"
                     Layout.fillWidth: true
@@ -97,35 +84,14 @@ Rectangle {
                     }
                 }
 
-                // -----------------------
-                // ACTORS TAB
-                // -----------------------
-                Rectangle {
-                    color: "transparent"
-                    Layout.fillWidth: true
-                    Layout.fillHeight: true
-                    Text { anchors.centerIn: parent; text: "Actors content"; color: "white" }
-                }
+                Rectangle { color: "transparent"; Layout.fillWidth: true; Layout.fillHeight: true
+                    Text { anchors.centerIn: parent; text: "Actors content"; color: "white" } }
 
-                // -----------------------
-                // DIRECTOR TAB
-                // -----------------------
-                Rectangle {
-                    color: "transparent"
-                    Layout.fillWidth: true
-                    Layout.fillHeight: true
-                    Text { anchors.centerIn: parent; text: "Director content"; color: "white" }
-                }
+                Rectangle { color: "transparent"; Layout.fillWidth: true; Layout.fillHeight: true
+                    Text { anchors.centerIn: parent; text: "Director content"; color: "white" } }
 
-                // -----------------------
-                // FILMING TAB
-                // -----------------------
-                Rectangle {
-                    color: "transparent"
-                    Layout.fillWidth: true
-                    Layout.fillHeight: true
-                    Text { anchors.centerIn: parent; text: "Filming content"; color: "white" }
-                }
+                Rectangle { color: "transparent"; Layout.fillWidth: true; Layout.fillHeight: true
+                    Text { anchors.centerIn: parent; text: "Filming content"; color: "white" } }
             }
         }
     }
