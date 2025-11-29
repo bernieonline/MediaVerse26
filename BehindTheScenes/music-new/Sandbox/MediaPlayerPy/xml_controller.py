@@ -86,18 +86,23 @@ class XmlController(QObject):
         try:
             print(f"🔎 loadXML called with image_path: {image_path}")
             img_fs_path = self._file_url_to_path(image_path)
-            print(f"🔎 Image filesystem path: {img_fs_path}")
+            stem = img_fs_path.stem
+            folder = img_fs_path.parent
 
-            # Construct expected JR sidecar filename: <stem>_mp4_JRSidecar.xml
-            xml_path = img_fs_path.parent / f"{img_fs_path.stem}_mp4_JRSidecar.xml"
-            print(f"🔎 Resolved sidecar candidate: {xml_path}")
+            print(f"🔎 Looking for XML sidecar in {folder} with stem '{stem}'")
 
-            if not xml_path.exists():
-                print(f"❌ Sidecar not found on disk: {xml_path}")
+            # Find any .xml file in the folder that starts with the image stem
+            matches = list(folder.glob(f"{stem}*.xml"))
+
+            if not matches:
+                print(f"❌ No XML sidecar found for {image_path}")
                 self._xml_fields = {}
                 return
 
+            # Take the first match
+            xml_path = matches[0]
             print(f"✅ Sidecar found: {xml_path}")
+
             tree = ET.parse(xml_path)
             root = tree.getroot()
 
