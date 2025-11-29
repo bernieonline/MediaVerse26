@@ -32,15 +32,6 @@ Rectangle {
         target: xmlController
         function onCategoryContentUpdated(category, lines) {
             xmlTextArea.text = lines.join("\n\n") // add spacing between lines
-
-            // Font styling
-            //font.pixelSize: detailViewRoot.tenFootMode ? 48 : 16
-            //font.bold: true        // <--- makes text bold
-            //padding: 20
-
-
-
-
         }
     }
 
@@ -90,27 +81,62 @@ Rectangle {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
 
-                TextArea {
-                    id: xmlTextArea
+                // Scrollable text area
+                ScrollView {
+                    id: scrollArea
                     anchors.fill: parent
-                    readOnly: true
-                    wrapMode: Text.Wrap
-                    text: "No details available"
+                    clip: true
 
-                    // Dark theme adjustments
-                    background: null
-                    color: "white"
+                    // Ensure LTR layout to keep scrollbar on the right
+                    LayoutMirroring.enabled: false
 
-                    // Font styling
-                    font.pixelSize: detailViewRoot.tenFootMode ? 48 : 16
-                    font.bold: true        // <--- makes text bold
-                    padding: 20
+                    TextArea {
+                        id: xmlTextArea
+                        width: scrollArea.width
+                        readOnly: true
+                        wrapMode: Text.Wrap
+                        text: "No details available"
 
+                        // Dark theme adjustments
+                        background: null
+                        color: "white"
 
-                    // Font scaling for 10ft mode
-                    //font.pixelSize: detailViewRoot.tenFootMode ? 48 : 16
+                        // Font styling
+                        font.pixelSize: detailViewRoot.tenFootMode ? 48 : 16
+                        font.bold: true
+                        padding: 20
 
-                    //padding: 20
+                        // Reserve space so text doesn't sit under the scrollbar
+                        rightPadding: vbar.width + 10
+                    }
+
+                    // Right-side, draggable, dark-themed vertical scrollbar
+                    ScrollBar.vertical: ScrollBar {
+                        id: vbar
+                        policy: ScrollBar.AlwaysOn
+                        interactive: true
+                        width: detailViewRoot.tenFootMode ? 30 : 14
+
+                        // Place on the right so it doesn't cover text
+                        anchors.right: scrollArea.right
+                        anchors.top: scrollArea.top
+                        anchors.bottom: scrollArea.bottom
+                        z: 10
+
+                        // Dark track to blend with ~#1e1e1e background
+                        background: Rectangle {
+                            color: "#262626" // track
+                            radius: 6
+                        }
+
+                        // Visible but subtle thumb
+                        contentItem: Rectangle {
+                            implicitWidth: vbar.width
+                            implicitHeight: 100
+                            radius: 6
+                            color: "#3a3a3a"  // thumb, slightly lighter than track
+                        }
+                    }
                 }
             }
         }
