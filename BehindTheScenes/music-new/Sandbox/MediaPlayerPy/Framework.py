@@ -29,6 +29,7 @@ from dbMySql.db_utils import getLibraryList
 
 import sys
 from pathlib import Path
+from xml_controller import XmlController
 
 # Ensure the current script's folder is in sys.path
 sys.path.append(str(Path(__file__).resolve().parent))
@@ -72,6 +73,17 @@ if __name__ == "__main__":
         # Use QLibraryInfo to get the built-in QML import path
         qml_import_path = QLibraryInfo.path(QLibraryInfo.LibraryPath.Qml2ImportsPath)
         engine.addImportPath(qml_import_path)
+
+
+        #xml processing
+        # Create controller instance
+        xmlController = XmlController()
+        # Expose to QML
+        engine.rootContext().setContextProperty("xmlController", xmlController)
+
+
+
+
 
         # Register the FileSystem class with QML
         from FileSystem import FileSystem

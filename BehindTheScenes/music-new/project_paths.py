@@ -26,6 +26,11 @@ db_path = project_root / "dbMySql"
 log_path = project_root / "application.log"
 req_path = project_root / "requirements.txt"
 
+# NEW: JSON categories file path
+json_path = project_root / "Assets" / "XMLCategories.json"
+
+
+
 #D:\PythonMusic\pythonproject2026\BehindTheScenes\music-new\requirements.txt
 
 #- stead of juggling multiple variables (project_root, assets_path, etc.), you collect them into a single dictionary called paths.
@@ -42,7 +47,8 @@ paths = {
     "qml": qml_path,
     "db": db_path,
     "log": log_path,
-    "req":req_path
+    "req":req_path,
+    "json": json_path
     }
 
 
