@@ -94,3 +94,182 @@ ModuleNotFoundError: No module named 'wmi'
 2025-11-28 13:04:13,681 - INFO - Found 25 folders.
 2025-11-28 13:14:49,610 - INFO - Updating folders for path: W:\Collection
 2025-11-28 13:14:49,979 - INFO - Found 25 folders.
+2025-11-28 13:27:25,592 - INFO - Updating folders for path: W:\Collection
+2025-11-28 13:27:25,961 - INFO - Found 25 folders.
+2025-11-28 14:01:39,613 - INFO - Updating folders for path: W:\Collection
+2025-11-28 14:01:39,989 - INFO - Found 25 folders.
+2025-11-28 15:44:28,086 - ERROR - An unhandled exception occurred:
+Traceback (most recent call last):
+  File "D:\PythonMusic\pythonproject2026\behindTheScenes\music-new\sandbox\MediaPlayerPy\Framework.py", line 80, in <module>
+    xmlController = XmlController()
+  File "D:\PythonMusic\pythonproject2026\behindTheScenes\music-new\sandbox\MediaPlayerPy\xml_controller.py", line 19, in __init__
+    with asset_path.open("r", encoding="utf-8") as f:
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.9_3.9.3568.0_x64__qbz5n2kfra8p0\lib\pathlib.py", line 1252, in open
+    return io.open(self, mode, buffering, encoding, errors, newline,
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.9_3.9.3568.0_x64__qbz5n2kfra8p0\lib\pathlib.py", line 1120, in _opener
+    return self._accessor.open(self, flags, mode)
+FileNotFoundError: [Errno 2] No such file or directory: 'D:\\PythonMusic\\pythonproject2026\\behindTheScenes\\music-new\\sandbox\\MediaPlayerPy\\Assets\\XMLCategories.json'
+2025-11-28 15:51:25,925 - INFO - Updating folders for path: W:\Collection
+2025-11-28 15:51:26,311 - INFO - Found 25 folders.
+2025-11-28 15:55:41,474 - INFO - Updating folders for path: W:\Collection
+2025-11-28 15:55:41,828 - INFO - Found 25 folders.
+2025-11-28 15:59:14,206 - INFO - Updating folders for path: W:\Collection
+2025-11-28 15:59:14,531 - ERROR - An unhandled exception occurred:
+Traceback (most recent call last):
+  File "D:\PythonMusic\pythonproject2026\behindTheScenes\music-new\sandbox\MediaPlayerPy\Framework.py", line 102, in <module>
+    root.setProperty("xmlDetails", xml_provider)
+NameError: name 'xml_provider' is not defined
+2025-11-28 15:59:29,620 - INFO - Updating folders for path: W:\Collection
+2025-11-28 15:59:29,955 - ERROR - An unhandled exception occurred:
+Traceback (most recent call last):
+  File "D:\PythonMusic\pythonproject2026\behindTheScenes\music-new\sandbox\MediaPlayerPy\Framework.py", line 102, in <module>
+    root.setProperty("xmlDetails", xml_provider)
+NameError: name 'xml_provider' is not defined
+2025-11-28 16:08:37,241 - INFO - Updating folders for path: W:\Collection
+2025-11-28 16:08:37,605 - INFO - Found 25 folders.
+2025-11-28 16:12:53,953 - INFO - Updating folders for path: W:\Collection
+2025-11-28 16:12:54,344 - INFO - Found 25 folders.
+2025-11-28 16:18:32,449 - INFO - Updating folders for path: W:\Collection
+2025-11-28 16:18:32,802 - INFO - Found 25 folders.
+2025-11-28 17:25:17,649 - INFO - Updating folders for path: W:\Collection
+2025-11-28 17:25:18,024 - INFO - Found 25 folders.
+2025-11-28 17:29:06,699 - INFO - Updating folders for path: W:\Collection
+2025-11-28 17:29:07,066 - INFO - Found 25 folders.
+2025-11-28 17:30:46,012 - INFO - Updating folders for path: W:\Collection
+2025-11-28 17:30:46,384 - INFO - Found 25 folders.
+2025-11-28 17:31:36,258 - INFO - Updating folders for path: W:\Collection
+2025-11-28 17:31:36,619 - INFO - Found 25 folders.
+2025-11-28 17:33:53,139 - INFO - Updating folders for path: W:\Collection
+2025-11-28 17:33:53,499 - INFO - Found 25 folders.
+2025-11-28 17:36:21,634 - INFO - Updating folders for path: W:\Collection
+2025-11-28 17:36:22,002 - INFO - Found 25 folders.
+2025-11-28 17:43:25,220 - ERROR - Unhandled exception:
+Traceback (most recent call last):
+  File "D:\PythonMusic\pythonproject2026\behindTheScenes\music-new\sandbox\MediaPlayerPy\Framework.py", line 62, in <module>
+    xmlController = XmlController()
+  File "D:\PythonMusic\pythonproject2026\behindTheScenes\music-new\sandbox\MediaPlayerPy\xml_controller.py", line 15, in __init__
+    with open(json_path, "r", encoding="utf-8") as f:
+FileNotFoundError: [Errno 2] No such file or directory: 'D:\\PythonMusic\\pythonproject2026\\BehindTheScenes\\music-new\\Sandbox\\MediaPlayerPy\\XMLCategories.json'
+2025-11-28 17:44:34,603 - INFO - Updating folders for path: W:\Collection
+2025-11-28 17:44:34,970 - INFO - Found 25 folders.
+2025-11-28 17:47:04,229 - INFO - Updating folders for path: W:\Collection
+2025-11-28 17:47:04,614 - INFO - Found 25 folders.
+2025-11-28 17:55:45,205 - INFO - Updating folders for path: W:\Collection
+2025-11-28 17:55:45,572 - INFO - Found 25 folders.
+2025-11-28 17:58:58,138 - INFO - Updating folders for path: W:\Collection
+2025-11-28 17:58:58,504 - INFO - Found 25 folders.
+2025-11-28 18:02:43,333 - INFO - Updating folders for path: W:\Collection
+2025-11-28 18:02:43,687 - INFO - Found 25 folders.
+2025-11-28 18:06:04,464 - INFO - Updating folders for path: W:\Collection
+2025-11-28 18:06:04,833 - INFO - Found 25 folders.
+2025-11-29 10:15:17,165 - INFO - Updating folders for path: W:\Collection
+2025-11-29 10:15:17,653 - INFO - Found 25 folders.
+2025-11-29 10:16:16,901 - INFO - Updating folders for path: W:\Collection
+2025-11-29 10:16:17,266 - INFO - Found 25 folders.
+2025-11-29 10:24:17,598 - INFO - Updating folders for path: W:\Collection
+2025-11-29 10:24:17,936 - INFO - Found 25 folders.
+2025-11-29 10:33:46,992 - INFO - Updating folders for path: W:\Collection
+2025-11-29 10:33:47,366 - INFO - Found 25 folders.
+2025-11-29 10:45:02,069 - INFO - Updating folders for path: W:\Collection
+2025-11-29 10:45:02,432 - INFO - Found 25 folders.
+2025-11-29 10:45:33,369 - INFO - Updating folders for path: W:\Collection
+2025-11-29 10:45:33,745 - INFO - Found 25 folders.
+2025-11-29 11:28:36,817 - INFO - Updating folders for path: W:\Collection
+2025-11-29 11:28:37,187 - INFO - Found 25 folders.
+2025-11-29 11:45:50,436 - INFO - Updating folders for path: W:\Collection
+2025-11-29 11:45:50,801 - INFO - Found 25 folders.
+2025-11-29 11:48:17,416 - INFO - Updating folders for path: W:\Collection
+2025-11-29 11:48:17,766 - INFO - Found 25 folders.
+2025-11-29 11:49:35,140 - INFO - Updating folders for path: W:\Collection
+2025-11-29 11:49:35,495 - INFO - Found 25 folders.
+2025-11-29 11:55:52,287 - INFO - Updating folders for path: W:\Collection
+2025-11-29 11:55:52,651 - INFO - Found 25 folders.
+2025-11-29 12:01:38,868 - INFO - Updating folders for path: W:\Collection
+2025-11-29 12:01:39,216 - INFO - Found 25 folders.
+2025-11-29 12:02:57,417 - INFO - Updating folders for path: W:\Collection
+2025-11-29 12:02:57,783 - INFO - Found 25 folders.
+2025-11-29 12:07:10,603 - INFO - Updating folders for path: W:\Collection
+2025-11-29 12:07:10,960 - INFO - Found 25 folders.
+2025-11-29 12:09:55,398 - INFO - Updating folders for path: W:\Collection
+2025-11-29 12:09:55,812 - INFO - Found 25 folders.
+2025-11-29 12:10:11,260 - INFO - Updating folders for path: W:\Collection
+2025-11-29 12:10:11,622 - INFO - Found 25 folders.
+2025-11-29 12:11:15,957 - INFO - Updating folders for path: W:\Collection
+2025-11-29 12:11:16,325 - INFO - Found 25 folders.
+2025-11-29 12:15:11,438 - INFO - Updating folders for path: W:\Collection
+2025-11-29 12:15:11,830 - INFO - Found 25 folders.
+2025-11-29 12:17:35,430 - INFO - Updating folders for path: W:\Collection
+2025-11-29 12:17:35,792 - INFO - Found 25 folders.
+2025-11-29 12:26:17,473 - INFO - Updating folders for path: W:\Collection
+2025-11-29 12:26:17,828 - INFO - Found 25 folders.
+2025-11-29 12:33:36,062 - INFO - Updating folders for path: W:\Collection
+2025-11-29 12:33:36,410 - INFO - Found 25 folders.
+2025-11-29 12:36:31,527 - INFO - Updating folders for path: W:\Collection
+2025-11-29 12:36:31,887 - INFO - Found 25 folders.
+2025-11-29 12:42:50,953 - INFO - Updating folders for path: W:\Collection
+2025-11-29 12:42:51,306 - INFO - Found 25 folders.
+2025-11-29 12:43:22,932 - INFO - Updating folders for path: W:\Collection
+2025-11-29 12:43:23,271 - INFO - Found 25 folders.
+2025-11-29 13:09:58,532 - ERROR - Server not running or no libraries found.
+2025-11-29 13:10:11,146 - INFO - Updating folders for path: W:\Collection
+2025-11-29 13:10:11,578 - INFO - Found 25 folders.
+2025-11-29 13:10:32,199 - INFO - Updating folders for path: W:\Collection
+2025-11-29 13:10:32,536 - INFO - Found 25 folders.
+2025-11-29 13:10:50,709 - INFO - Updating folders for path: W:\Collection
+2025-11-29 13:10:51,054 - INFO - Found 25 folders.
+2025-11-29 13:11:14,711 - INFO - Updating folders for path: W:\Collection
+2025-11-29 13:11:15,063 - INFO - Found 25 folders.
+2025-11-29 13:15:36,636 - INFO - Updating folders for path: W:\Collection
+2025-11-29 13:15:36,990 - INFO - Found 25 folders.
+2025-11-29 13:16:46,672 - INFO - Updating folders for path: W:\Collection
+2025-11-29 13:16:47,037 - INFO - Found 25 folders.
+2025-11-29 13:18:55,748 - INFO - Updating folders for path: W:\Collection
+2025-11-29 13:18:56,105 - INFO - Found 25 folders.
+2025-11-29 13:26:48,846 - INFO - Updating folders for path: W:\Collection
+2025-11-29 13:26:49,202 - INFO - Found 25 folders.
+2025-11-29 13:27:26,894 - INFO - Updating folders for path: W:\Collection
+2025-11-29 13:27:27,233 - INFO - Found 25 folders.
+2025-11-29 13:32:30,041 - INFO - Updating folders for path: W:\Collection
+2025-11-29 13:32:30,389 - INFO - Found 25 folders.
+2025-11-29 13:36:00,915 - INFO - Updating folders for path: W:\Collection
+2025-11-29 13:36:01,256 - INFO - Found 25 folders.
+2025-11-29 13:37:48,090 - INFO - Updating folders for path: W:\Collection
+2025-11-29 13:37:48,424 - INFO - Found 25 folders.
+2025-11-29 13:39:14,170 - INFO - Updating folders for path: W:\Collection
+2025-11-29 13:39:14,524 - INFO - Found 25 folders.
+2025-11-29 13:40:30,377 - INFO - Updating folders for path: W:\Collection
+2025-11-29 13:40:30,733 - INFO - Found 25 folders.
+2025-11-29 13:41:17,304 - INFO - Updating folders for path: W:\Collection
+2025-11-29 13:41:17,654 - INFO - Found 25 folders.
+2025-11-29 13:43:27,777 - INFO - Updating folders for path: W:\Collection
+2025-11-29 13:43:28,111 - INFO - Found 25 folders.
+2025-11-29 13:46:20,824 - INFO - Updating folders for path: W:\Collection
+2025-11-29 13:46:21,185 - INFO - Found 25 folders.
+2025-11-29 13:46:46,047 - INFO - Updating folders for path: W:\Collection
+2025-11-29 13:46:46,429 - INFO - Found 25 folders.
+2025-11-29 13:48:15,116 - INFO - Updating folders for path: W:\Collection
+2025-11-29 13:48:15,461 - INFO - Found 25 folders.
+2025-11-29 13:49:02,627 - INFO - Updating folders for path: W:\Collection
+2025-11-29 13:49:02,974 - INFO - Found 25 folders.
+2025-11-29 13:49:30,534 - INFO - Updating folders for path: W:\Collection
+2025-11-29 13:49:30,887 - INFO - Found 25 folders.
+2025-11-29 13:50:12,096 - INFO - Updating folders for path: W:\Collection
+2025-11-29 13:50:12,425 - INFO - Found 25 folders.
+2025-11-29 13:52:03,619 - INFO - Updating folders for path: W:\Collection
+2025-11-29 13:52:03,958 - INFO - Found 25 folders.
+2025-11-29 13:54:29,965 - INFO - Updating folders for path: W:\Collection
+2025-11-29 13:54:30,306 - INFO - Found 25 folders.
+2025-11-29 13:57:55,959 - INFO - Updating folders for path: W:\Collection
+2025-11-29 13:57:56,306 - INFO - Found 25 folders.
+2025-11-29 13:59:57,243 - INFO - Updating folders for path: W:\Collection
+2025-11-29 13:59:57,598 - INFO - Found 25 folders.
+2025-11-29 14:04:32,224 - INFO - Updating folders for path: W:\Collection
+2025-11-29 14:04:32,575 - INFO - Found 25 folders.
+2025-11-29 14:05:43,521 - INFO - Updating folders for path: W:\Collection
+2025-11-29 14:05:43,858 - INFO - Found 25 folders.
+2025-11-29 14:06:53,847 - INFO - Updating folders for path: W:\Collection
+2025-11-29 14:06:54,186 - INFO - Found 25 folders.
+2025-11-30 14:42:57,869 - ERROR - Server not running or no libraries found.
+2025-11-30 14:43:20,890 - INFO - Updating folders for path: W:\Collection
+2025-11-30 14:43:22,350 - INFO - Found 25 folders.
+2025-11-30 14:48:09,352 - ERROR - QML FAILED to load
