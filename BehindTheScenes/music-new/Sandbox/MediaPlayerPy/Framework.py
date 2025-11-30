@@ -3,6 +3,7 @@ import os
 import logging
 from pathlib import Path
 from myPyForQMLFunctions import get_subfolder_names_test
+import PySide6
 
 
 from PySide6.QtWidgets import QApplication, QMessageBox
@@ -27,7 +28,7 @@ sys.path.append(str(Path(__file__).resolve().parent.parent.parent))
 
 from dbMySql.db_utils import getLibraryList 
 
-import sys
+#import sys
 from pathlib import Path
 from xml_controller import XmlController
 
@@ -69,6 +70,17 @@ if __name__ == "__main__":
         os.add_dll_directory(str(pyside6_dir))
 
         engine = QQmlApplicationEngine()
+
+        pyside_qml_path = os.path.join(os.path.dirname(PySide6.__file__), "qml")
+        engine.addImportPath(pyside_qml_path)
+
+        # Verify it worked (optional, for debugging)
+        print("QML Import Paths inc effects:")
+        for path in engine.importPathList():
+            print(f"  {path}")
+
+
+
 
         # Use QLibraryInfo to get the built-in QML import path
         qml_import_path = QLibraryInfo.path(QLibraryInfo.LibraryPath.Qml2ImportsPath)
