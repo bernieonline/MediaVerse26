@@ -4,12 +4,15 @@ import logging
 from pathlib import Path
 from myPyForQMLFunctions import get_subfolder_names_test
 import PySide6
-
-
 from PySide6.QtWidgets import QApplication, QMessageBox
 from PySide6.QtCore import QCoreApplication, QUrl
 from PySide6.QtQml import QQmlApplicationEngine
 from PySide6.QtCore import QLibraryInfo
+from PySide6.QtCore import QUrl
+
+#Import os
+
+
 
 from XML_Details import GetXMLDetails
 
@@ -79,12 +82,14 @@ if __name__ == "__main__":
         for path in engine.importPathList():
             print(f"  {path}")
 
-
-
-
         # Use QLibraryInfo to get the built-in QML import path
         qml_import_path = QLibraryInfo.path(QLibraryInfo.LibraryPath.Qml2ImportsPath)
         engine.addImportPath(qml_import_path)
+
+        # Force Material style
+        os.environ["QT_QUICK_CONTROLS_STYLE"] = "Material"
+
+
 
 
         #xml processing
@@ -92,10 +97,6 @@ if __name__ == "__main__":
         xmlController = XmlController()
         # Expose to QML
         engine.rootContext().setContextProperty("xmlController", xmlController)
-
-
-
-
 
         # Register the FileSystem class with QML
         from FileSystem import FileSystem
@@ -116,21 +117,16 @@ if __name__ == "__main__":
         if root_objs:
             root = root_objs[0]
             root.setProperty("xmlDetails", xml_provider)
-        
-       
-
+    
 
         if not engine.rootObjects():
             logging.error("QML FAILED to load")
             sys.exit(-1)
-        
-        
+         
         #print("getting folders from path")
         #get_subfolder_names_test()
 
-
         sys.exit(app.exec())
-
 
     except Exception as e:
         logging.exception("An unhandled exception occurred:")

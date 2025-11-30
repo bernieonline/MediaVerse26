@@ -4,6 +4,8 @@ import QtQuick.Controls.Material 2.15
 import QtQuick
 import QtQuick.Controls
 //import "CinemaButton.qml" as Custom
+//import QtQuick.Controls 2.15
+
 
 //version 1.0.1 border edge added to left panel
 //1.o.2 sliding video panel added
@@ -289,41 +291,19 @@ ApplicationWindow {
     GlowStyling {
         target: videoPanel
     }
-
-    Rectangle {
+    
+    PlayerPanel {
         id: videoPanel
-        height: parent.height * 0.25
-        width: height * 16 / 9
         anchors.horizontalCenter: parent.horizontalCenter
-        y: isVideoPanelVisible ? parent.height - height : parent.height
+        y: isVideoPanelVisible ? window.height - height : window.height
         z: 2
-
-        color: "transparent"
-        radius: 25
-        border.color: "yellow"
-        border.width: 1
 
         Behavior on y {
             NumberAnimation { duration: 1500; easing.type: Easing.OutCubic }
         }
-
-        Rectangle {
-            // This is the background
-            anchors.fill: parent
-            anchors.margins: 5
-            color: "#1e1e1e"
-            radius: 20
-            border.width: 0
-
-            // In the future, the video player component will go here
-            Text {
-                anchors.centerIn: parent
-                text: "Mini Video Player"
-                color: "white"
-                font.pixelSize: 24
-            }
-        }
     }
+
+    
 
     property bool isVideoPanelVisible: false
 
@@ -374,7 +354,6 @@ ApplicationWindow {
             }
             onClicked: {
                 isVideoPanelVisible = !isVideoPanelVisible
-                contentLoader.source = ""
             }
         }
 
