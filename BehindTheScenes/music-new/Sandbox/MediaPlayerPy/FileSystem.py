@@ -26,23 +26,25 @@ class Worker(QObject):
                     if os.path.isdir(item_path):
                         folders.append({'folderName': item, 'folderPath': item_path})
         except Exception as e:
-            logging.info(f"Error listing folders in {self.path}:")
-        
+            logging.error(f"Error listing folders in {self.path}: {e}")
+
         print(f"Folders found: {folders}")
         self.finished.emit(folders)
-    
+
 
 class FileSystem(QObject):
+    drivesChanged = Signal()
+    foldersChanged = Signal()
+    imageFilesChanged = Signal()
+
     def __init__(self, parent=None):
         super().__init__(parent)
         self._drives = []
         self._folders = []
+        self._imageFiles = []
         self.thread = None
+        self.worker = None
         self.update_drives()
-
-    drivesChanged = Signal()
-    foldersChanged = Signal()
-    imageFilesChanged = Signal()
 
     @Property('QVariantList', notify=drivesChanged)
     def drives(self):
@@ -52,7 +54,6 @@ class FileSystem(QObject):
     def folders(self):
         return self._folders
 
-    _imageFiles = []
     @Property('QVariantList', notify=imageFilesChanged)
     def imageFiles(self):
         return self._imageFiles
@@ -108,16 +109,19 @@ class FileSystem(QObject):
                 for item in os.listdir(folder_path):
                     item_path = os.path.join(folder_path, item).replace('\\', '/')
                     if os.path.isfile(item_path) and item.lower().endswith(image_extensions):
-                        image_files.append({'fileName': item, 'filePath': 'file:///' + item_path})
+                        image_files.append({
+                            'fileName': item,
+                            'filePath': 'file:///' + item_path
+                        })
         except Exception as e:
             logging.error(f"Error listing image files in {folder_path}: {e}")
-        
+
         print(f"Image files found in {folder_path}: {image_files}")
         self._imageFiles = image_files
         self.imageFilesChanged.emit()
-    
+
 
 if __name__ == '__main__':
-    # This part is for direct testing of the script and will not run in the QML app
-    # It needs to be adapted to work with the threaded version if direct testing is needed
-    pass
+    # Direct testing stub
+    fs = FileSystem()
+    fs.update_folders("W:\\Collection")
