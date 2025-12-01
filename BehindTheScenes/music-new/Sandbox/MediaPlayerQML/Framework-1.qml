@@ -172,7 +172,9 @@ ApplicationWindow {
 
                     Image {
                         id: folderIcon
-                        source: "file:///D:/PythonMusic/pythonproject2026/BehindTheScenes/music-new/images/icons/icons8-movie-liquid-glass-color/icons8-movie-32.png"
+                        //source: "file:///D:/PythonMusic/pythonproject2026/BehindTheScenes/music-new/images/icons/icons8-movie-liquid-glass-color/icons8-movie-32.png"
+                        source: "../../images/icons/icons8-movie-liquid-glass-color/icons8-movie-32.png"
+
                         width: 24 // Adjust size as needed
                         height: 24 // Adjust size as needed
                         anchors.verticalCenter: parent.verticalCenter

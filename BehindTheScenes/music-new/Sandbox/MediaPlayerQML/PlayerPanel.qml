@@ -46,11 +46,13 @@ Rectangle {
         onWidthChanged: height = width / aspect
 
         // Idle overlay when not playing
-        ColorOverlay {
+        Rectangle {
             anchors.fill: parent
-            source: videoScreen
-            color: "#00000080"
+            radius: parent.radius
             visible: !playerPanel.isPlaying
+
+            // FINAL FIX:
+            color: "#00000040"    // black with 25% alpha
         }
 
         Text {
@@ -75,14 +77,13 @@ Rectangle {
         }
         height: 120
         radius: 10
-        color: "#333333"
+        color: "#1e1e1e80"
         border.color: "gold"
         border.width: 1
 
-        // RowLayout ensures buttons fill evenly
         RowLayout {
             anchors.fill: parent
-            anchors.margins: 15   // 15px margin inside the bar
+            anchors.margins: 15
             spacing: 15
 
             Button { text: "Play"; Layout.fillWidth: true; Layout.fillHeight: true }
