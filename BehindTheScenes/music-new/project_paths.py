@@ -26,6 +26,11 @@ db_path = project_root / "dbMySql"
 log_path = project_root / "application.log"
 req_path = project_root / "requirements.txt"
 
+# Cache paths
+thumb_dir = project_root / "cache" / "thumbnails"
+display_dir = project_root / "cache" / "display"
+
+
 # NEW: JSON categories file path
 json_path = project_root / "Assets" / "XMLCategories.json"
 
@@ -48,7 +53,10 @@ paths = {
     "db": db_path,
     "log": log_path,
     "req":req_path,
-    "json": json_path
+    "json": json_path,
+    "thumbs": thumb_dir,
+    "display": display_dir
+
     }
 
 
