@@ -35,7 +35,7 @@ ApplicationWindow {
     }
 
     GlowStyling {
-        target: border
+        //target: border
     }
 
     Rectangle { //subdued glow
@@ -50,7 +50,7 @@ ApplicationWindow {
     }
 
     GlowStyling {
-        target: sidePanel
+        //target: sidePanel
     }
 
     Rectangle { //sliding panel on left
@@ -289,7 +289,7 @@ ApplicationWindow {
     }
 
     GlowStyling {
-        target: videoPanel
+        //target: videoPanel
     }
     
     PlayerPanel {
