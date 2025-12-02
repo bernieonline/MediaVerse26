@@ -53,8 +53,22 @@ ApplicationWindow {
         //target: sidePanel
     }
 
+    SlidingPanel {
+        id: libraryPanel
+        libraryModel: myLibraryModel
+        folderModel: fileSystemManager.folders
+
+        onFolderSelected: fileSystemManager.list_image_files_in_folder(folderPath)
+        onViewRequested: {
+            if (viewType === "grid")
+                contentLoader.setSource("ImageGridView.qml", { xmlDetails: xmlDetails })
+            else
+                contentLoader.source = "CarouselView.qml"
+        }
+    }
+
     Rectangle { //sliding panel on left
-        id: sidePanel
+        id: sidePanelOld
         width: 300
         height: parent.height * 2 / 3
         anchors.verticalCenter: parent.verticalCenter
@@ -290,7 +304,7 @@ ApplicationWindow {
                 }
             }
         }
-    }
+    }//end sliding panel
 
     GlowStyling {
         //target: videoPanel
@@ -332,11 +346,21 @@ ApplicationWindow {
                 border.width: 1
             }
             onClicked: {
-                sidePanel.x = (sidePanel.x === 0) ? -sidePanel.width : 0
-                if (sidePanel.x === 0 && categoryCombo.currentIndex !== -1) {
-                    categoryCombo.activated(categoryCombo.currentIndex)
+                libraryPanel.x = (libraryPanel.x === 0) ? -libraryPanel.width : 0
+                if (libraryPanel.x === 0 && libraryPanel.categoryCombo.currentIndex !== -1) {
+                    libraryPanel.categoryCombo.activated(libraryPanel.categoryCombo.currentIndex)
                 }
-                contentLoader.source = ""
+
+
+
+
+
+
+                //sidePanel.x = (sidePanel.x === 0) ? -sidePanel.width : 0
+                //if (sidePanel.x === 0 && categoryCombo.currentIndex !== -1) {
+                    //categoryCombo.activated(categoryCombo.currentIndex)
+                //}
+                //contentLoader.source = ""
             }
         }
 

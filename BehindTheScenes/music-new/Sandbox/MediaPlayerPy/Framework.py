@@ -82,7 +82,7 @@ def main():
         #root = engine.rootObjects()[0]
         #root.show()
         #root.showFullScreen()
-
+        #app.setGeometry(100, 100, 1280, 720)
 
         print("✅ Framework-1.qml loaded successfully.")
         return app.exec()
