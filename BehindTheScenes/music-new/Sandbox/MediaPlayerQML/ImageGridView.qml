@@ -7,7 +7,7 @@ Rectangle {
     property var xmlDetails   // Python object passed in
     color: "transparent"
 
-    signal imageClicked(string filePath)
+    signal imageClicked(string cachePath, string originalPath)
     property string _pendingImagePath: ""
 
     ColumnLayout {
@@ -31,11 +31,14 @@ Rectangle {
             delegate: ImageHolder {
                 width: imageGridView.width / 6
                 height: (imageGridView.width / 6) * 1.5
+
+                // Load thumbnail directly from cache
                 source: modelData.filePath
 
                 MouseArea {
                     anchors.fill: parent
-                    onClicked: root.imageClicked(modelData.filePath)
+                    onClicked: root.imageClicked(modelData.filePath,
+                                                 modelData.originalPath)
                 }
             }
         }
@@ -58,11 +61,17 @@ Rectangle {
 
     Connections {
         target: root
-        function onImageClicked(filePath) {
-            root._pendingImagePath = filePath
+        function onImageClicked(cachePath, originalPath) {
+            root._pendingImagePath = cachePath
+
             detailLoader.active = false
             detailLoader.source = "Detail_View.qml"
             detailLoader.active = true
+
+            detailLoader.item.imagePath = cachePath       // cached image
+            detailLoader.item.originalXmlPath = originalPath // original server path
         }
     }
+
+    
 }

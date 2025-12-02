@@ -103,16 +103,25 @@ class FileSystem(QObject):
     @Slot(str)
     def list_image_files_in_folder(self, folder_path):
         image_files = []
-        image_extensions = ('.png', '.jpg', '.jpeg', '.gif', '.bmp', '.webp')
+        image_extensions = ( '.jpg', '.jpeg', '.bmp', '.webp')
         try:
             if os.path.isdir(folder_path):
+
+                parent_folder = os.path.basename(folder_path)
+
                 for item in os.listdir(folder_path):
                     item_path = os.path.join(folder_path, item).replace('\\', '/')
                     if os.path.isfile(item_path) and item.lower().endswith(image_extensions):
                         image_files.append({
                             'fileName': item,
-                            'filePath': 'file:///' + item_path
+                            'filePath': Path(item_path).as_uri(),          # original server URL
+                            'parentFolder': parent_folder,                 # e.g. "Beatles"
+                            'relativePath': parent_folder + "/" + item     # e.g. "Beatles/A Hard Days Night (1964).jpg"
+                           
+                            #'filePath': 'file:///' + item_path
                         })
+                        if image_files:
+                            print("Sample entry:", image_files[0])
         except Exception as e:
             logging.error(f"Error listing image files in {folder_path}: {e}")
 
