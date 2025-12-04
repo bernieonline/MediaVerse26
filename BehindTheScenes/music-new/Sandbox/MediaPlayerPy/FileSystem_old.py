@@ -4,7 +4,13 @@ import wmi
 import os
 import logging
 from pathlib import Path
+from urllib.parse import quote
+
 from PySide6.QtCore import QObject, Signal, Property, Slot, QThread
+
+
+VIDEO_EXTS = [".avi", ".webm", ".mp4", ".m2ts", ".ts", ".vob", ".mkv"]
+
 
 class Worker(QObject):
     finished = Signal(list)
@@ -26,23 +32,42 @@ class Worker(QObject):
                     if os.path.isdir(item_path):
                         folders.append({'folderName': item, 'folderPath': item_path})
         except Exception as e:
-            logging.info(f"Error listing folders in {self.path}:")
-        
-        print(f"Folders found: {folders}")
+            logging.error(f"Error listing folders in {self.path}: {e}")
+
+        #print(f"Folders found: {folders}")
         self.finished.emit(folders)
-    
+
 
 class FileSystem(QObject):
+    drivesChanged = Signal()
+    foldersChanged = Signal()
+    imageFilesChanged = Signal()
+
+    @Slot(str, result=str)
+    def findVideoForImage(self, image_path):
+        try:
+            p = Path(image_path)
+            folder = p.parent
+            stem = p.stem
+            for ext in VIDEO_EXTS:
+                candidate = folder / f"{stem}{ext}"
+                if candidate.exists():
+                    # Convert to file:/// URL with forward slashes + URL encoding
+                    url = "file:///" + quote(str(candidate).replace("\\", "/"))
+                    return url
+        except Exception as e:
+            logging.error(f"Error finding video for {image_path}: {e}")
+        return ""
+
+
     def __init__(self, parent=None):
         super().__init__(parent)
         self._drives = []
         self._folders = []
+        self._imageFiles = []
         self.thread = None
+        self.worker = None
         self.update_drives()
-
-    drivesChanged = Signal()
-    foldersChanged = Signal()
-    imageFilesChanged = Signal()
 
     @Property('QVariantList', notify=drivesChanged)
     def drives(self):
@@ -52,7 +77,6 @@ class FileSystem(QObject):
     def folders(self):
         return self._folders
 
-    _imageFiles = []
     @Property('QVariantList', notify=imageFilesChanged)
     def imageFiles(self):
         return self._imageFiles
@@ -102,22 +126,34 @@ class FileSystem(QObject):
     @Slot(str)
     def list_image_files_in_folder(self, folder_path):
         image_files = []
-        image_extensions = ('.png', '.jpg', '.jpeg', '.gif', '.bmp', '.webp')
+        image_extensions = ( '.jpg', '.jpeg', '.bmp', '.webp')
         try:
             if os.path.isdir(folder_path):
+
+                parent_folder = os.path.basename(folder_path)
+
                 for item in os.listdir(folder_path):
                     item_path = os.path.join(folder_path, item).replace('\\', '/')
                     if os.path.isfile(item_path) and item.lower().endswith(image_extensions):
-                        image_files.append({'fileName': item, 'filePath': 'file:///' + item_path})
+                        image_files.append({
+                            'fileName': item,
+                            'filePath': Path(item_path).as_uri(),          # original server URL
+                            'parentFolder': parent_folder,                 # e.g. "Beatles"
+                            'relativePath': parent_folder + "/" + item     # e.g. "Beatles/A Hard Days Night (1964).jpg"
+                           
+                            #'filePath': 'file:///' + item_path
+                        })
+                        #if image_files:
+                            #print("Sample entry:", image_files[0])
         except Exception as e:
             logging.error(f"Error listing image files in {folder_path}: {e}")
-        
-        print(f"Image files found in {folder_path}: {image_files}")
+
+        #print(f"Image files found in {folder_path}: {image_files}")
         self._imageFiles = image_files
         self.imageFilesChanged.emit()
-    
+
 
 if __name__ == '__main__':
-    # This part is for direct testing of the script and will not run in the QML app
-    # It needs to be adapted to work with the threaded version if direct testing is needed
-    pass
+    # Direct testing stub
+    fs = FileSystem()
+    fs.update_folders("W:\\Collection")
