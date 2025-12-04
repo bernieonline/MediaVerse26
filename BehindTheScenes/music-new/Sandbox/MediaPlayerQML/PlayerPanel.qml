@@ -33,6 +33,20 @@ Rectangle {
         var parts = decoded.split("/")
         return parts[parts.length - 1]   // just the filename
     }
+    // 🔑 Auto‑play when isPlaying is set true
+    onIsPlayingChanged: {
+        if (isPlaying && videoPath !== "") {
+            console.log("🎥 Auto‑playing video:", videoPath)
+            videoPlayer.play()
+        } else {
+            videoPlayer.pause()
+        }
+    }
+
+    // 🔑 Debug when videoPath changes
+    onVideoPathChanged: {
+        console.log("🎥 PlayerPanel received videoPath:", videoPath)
+    }
 
 
     Rectangle {

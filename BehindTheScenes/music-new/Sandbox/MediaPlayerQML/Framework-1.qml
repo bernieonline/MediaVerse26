@@ -310,8 +310,33 @@ ApplicationWindow {
 
                     })
                 }
-            }
 
+                // Double‑click connection (new)
+                if (contentLoader.item && contentLoader.item.launchVideoRequested) {
+                    console.log("✅ Connected launchVideoRequested from ImageGridView")
+
+                    contentLoader.item.launchVideoRequested.connect(function(cachePath) {
+                        console.log("🎯 Double‑click received cachePath:", cachePath)
+
+                        // Derive filename from cachePath
+                        var filename = window.filenameFromCachePath(cachePath)
+                        window.selectedImageFile = filename
+
+
+                        // ✅ Use the existing Python slot
+
+                        var videoPath = fileSystemManager.findVideoInFolder(window.selectedFolderPath, filename)
+
+                        console.log("🎬 Resolved Video Path:", videoPath)
+
+                        // Launch PlayerPanel
+                        videoPanel.videoPath = videoPath
+                        videoPanel.isPlaying = true
+                        isVideoPanelVisible = true
+                    })
+                }
+
+            }
 
         }
     }

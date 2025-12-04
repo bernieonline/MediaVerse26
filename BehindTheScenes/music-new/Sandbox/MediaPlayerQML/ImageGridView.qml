@@ -6,7 +6,7 @@ Rectangle {
     id: root
     property var xmlDetails   // Python object passed in
     color: "transparent"
-
+    signal launchVideoRequested(string cachePath)//used by double click play video method
     signal imageClicked(string cachePath, string originalPath)
     property string _pendingImagePath: ""
 
@@ -34,15 +34,40 @@ Rectangle {
 
                 // Load thumbnail directly from cache
                 source: modelData.filePath
-
+               
                 MouseArea {
                     anchors.fill: parent
-                    onClicked: root.imageClicked(modelData.filePath,
-                                                 modelData.originalPath)
+                    acceptedButtons: Qt.LeftButton
+
+                    property bool doubleClickActive: false
+                    property var singleClickTimer: null
+
+
+                    onClicked: {
+                        // Start a short timer to decide if it's really a single click
+                        if (singleClickTimer) singleClickTimer.stop()
+                        singleClickTimer = Qt.createQmlObject('import QtQuick 2.15; Timer { interval: 250; repeat: false }',root)
+
+                        singleClickTimer.triggered.connect(function() {
+                            if (!doubleClickActive) {
+                                 console.log("✅ Single click confirmed")
+                                root.imageClicked(modelData.filePath,modelData.originalPath)
+                            }
+                            doubleClickActive = false
+                        })
+                        singleClickTimer.start()
+                    }
+
+                    // Double click launches video
+                    onDoubleClicked: {
+                        console.log("🎯 Double‑clicked in GridView:", modelData.filePath)
+                        doubleClickActive = true
+                        if (singleClickTimer) singleClickTimer.stop()
+                        root.launchVideoRequested(modelData.filePath)
+                    }
                 }
             }
         }
-
         Loader {
             id: detailLoader
             Layout.fillWidth: true
