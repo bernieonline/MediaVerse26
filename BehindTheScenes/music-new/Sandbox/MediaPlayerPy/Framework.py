@@ -61,14 +61,25 @@ def main():
         xml_controller = XmlController()
         xml_provider = GetXMLDetails()
 
+        if myLibrary and "path" in myLibrary[0]:
+            root_path = myLibrary[0]["path"]
+            file_system.update_folders(root_path)
+
+
         ctx = engine.rootContext()
+
+
         ctx.setContextProperty("fileSystemManager", file_system)
+
+        
         ctx.setContextProperty("xmlController", xml_controller)
         ctx.setContextProperty("xmlDetails", xml_provider)
         ctx.setContextProperty("myLibraryModel", myLibrary)
 
         # Expose cache paths
         ctx.setContextProperty("thumbsPath", paths["thumbs"].as_uri())
+        
+        
         ctx.setContextProperty("displayPath", paths["display"].as_uri())
 
         # Load QML

@@ -50,9 +50,9 @@ class XmlController(QObject):
             with Path(path).open("r", encoding="utf-8") as f:
                 self._data = json.load(f)
             self._categories = list(self._data.keys())
-            print(f"✅ XmlController loaded JSON from: {Path(path).resolve()}")
-            print("✅ Categories:", self._categories)
-            print("✅ Category → Fields mapping:", self._data)
+            #print(f"✅ XmlController loaded JSON from: {Path(path).resolve()}")
+            #print("✅ Categories:", self._categories)
+            #print("✅ Category → Fields mapping:", self._data)
             self.categoriesChanged.emit()
         except Exception as e:
             print(f"❌ Error loading JSON at {path}: {e}")
@@ -137,7 +137,7 @@ class XmlController(QObject):
                 values.append(f"{field}: {val}")
             else:
                 values.append(f"{field}: (no value)")
-        print(f"🔎 Emitting values for {category}: {values}")
+        print(f"🔎 BG Emitting values for {category}: {values}")
         self.categoryContentUpdated.emit(category, values)
 
     # ---------------- Tab navigation ----------------

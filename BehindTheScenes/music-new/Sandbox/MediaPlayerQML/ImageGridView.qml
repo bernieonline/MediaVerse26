@@ -62,6 +62,12 @@ Rectangle {
     Connections {
         target: root
         function onImageClicked(cachePath, originalPath) {
+            console.log("📂 imagegridview: connections:Cache Path (thumbnail URI):", cachePath)
+            console.log("🖼️ imagegridview: connections:Original Path (server filename):", originalPath)
+
+
+
+
             root._pendingImagePath = cachePath
 
             detailLoader.active = false
@@ -70,8 +76,14 @@ Rectangle {
 
             detailLoader.item.imagePath = cachePath       // cached image
             detailLoader.item.originalXmlPath = originalPath // original server path
+
+            // ✅ Call Python slot directly when image is clicked
+            var vid = fileSystemManager.findVideoForImage(cachePath)
+
+            detailLoader.item.videoPath = vid
+
+            console.log("Video URL from Python:", vid)
+            //playerPanel.videoPath = vid
         }
     }
-
-    
 }

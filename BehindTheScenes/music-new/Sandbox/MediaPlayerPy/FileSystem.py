@@ -4,7 +4,32 @@ import wmi
 import os
 import logging
 from pathlib import Path
+from urllib.parse import quote, urlparse, unquote
+
 from PySide6.QtCore import QObject, Signal, Property, Slot, QThread
+
+VIDEO_EXTS = [".avi", ".webm", ".mp4", ".m2ts", ".ts", ".vob", ".mkv"]
+
+
+def normalize_path(url_or_path: str) -> str:
+    """
+    Convert a file:/// URL to a Windows filesystem path if needed.
+    If it's already a Windows path, return it unchanged.
+    """
+    try:
+        if url_or_path.startswith("file:///"):
+            parsed = urlparse(url_or_path)
+            fs_path = unquote(parsed.path)
+            # On Windows, strip leading slash and convert to backslashes
+            if fs_path.startswith("/"):
+                fs_path = fs_path[1:]
+            return str(Path(fs_path))
+        else:
+            return url_or_path
+    except Exception as e:
+        logging.error(f"Error normalizing path {url_or_path}: {e}")
+        return url_or_path
+
 
 class Worker(QObject):
     finished = Signal(list)
@@ -28,7 +53,6 @@ class Worker(QObject):
         except Exception as e:
             logging.error(f"Error listing folders in {self.path}: {e}")
 
-        print(f"Folders found: {folders}")
         self.finished.emit(folders)
 
 
@@ -36,6 +60,42 @@ class FileSystem(QObject):
     drivesChanged = Signal()
     foldersChanged = Signal()
     imageFilesChanged = Signal()
+    print("inside filesystem class")
+
+
+
+
+    @Slot(str,str, result=str)
+    def findVideoInFolder(self, folder_path: str, image_filename: str) -> str:
+
+        """
+        Given an image path (possibly a file:/// URL), try to locate the matching video file.
+        Returns a file:/// URL for the video if found, else empty string.
+        """
+        try:
+            print("inside findVideoForImage : ",str)
+
+            stem = Path(image_filename).stem  # strip extension from image
+
+
+            for ext in VIDEO_EXTS:
+                candidate = Path(folder_path) / f"{stem}{ext}"
+
+                if candidate.exists():
+                    # Convert to file:/// URL with forward slashes + URL encoding
+                    url = "file:///" + quote(str(candidate).replace("\\", "/"))
+                    print("🎬 Resolved video path:", url)  # evidence in terminal
+
+
+                    logging.info(f"Resolved video path: {url}")  # ✅ evidence in terminal
+                    print("movie url is :",url)
+                    return url
+            print(f"⚠️ No video found for {image_filename} in {folder_path}")
+
+        except Exception as e:
+            logging.error(f"Error finding video for {image_filename} in {folder_path}: {e}")
+
+        return ""
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -103,10 +163,9 @@ class FileSystem(QObject):
     @Slot(str)
     def list_image_files_in_folder(self, folder_path):
         image_files = []
-        image_extensions = ( '.jpg', '.jpeg', '.bmp', '.webp')
+        image_extensions = ('.jpg', '.jpeg', '.bmp', '.webp')
         try:
             if os.path.isdir(folder_path):
-
                 parent_folder = os.path.basename(folder_path)
 
                 for item in os.listdir(folder_path):
@@ -115,22 +174,15 @@ class FileSystem(QObject):
                         image_files.append({
                             'fileName': item,
                             'filePath': Path(item_path).as_uri(),          # original server URL
+                            'originalPath': item_path, 
+
                             'parentFolder': parent_folder,                 # e.g. "Beatles"
                             'relativePath': parent_folder + "/" + item     # e.g. "Beatles/A Hard Days Night (1964).jpg"
-                           
-                            #'filePath': 'file:///' + item_path
                         })
-                        if image_files:
-                            print("Sample entry:", image_files[0])
         except Exception as e:
             logging.error(f"Error listing image files in {folder_path}: {e}")
 
-        print(f"Image files found in {folder_path}: {image_files}")
         self._imageFiles = image_files
         self.imageFilesChanged.emit()
 
 
-if __name__ == '__main__':
-    # Direct testing stub
-    fs = FileSystem()
-    fs.update_folders("W:\\Collection")

@@ -20,6 +20,11 @@ ApplicationWindow {
     //property var xmlDetails  // will be set by Python as a dynamic property
     property var xmlDetails: xmlDetails   // bind the context property into the window’s property
 
+    // 🔑 Add these two here from signals emitted on clicking a folder
+    property string selectedFolderPath: ""
+    property string selectedImageFile: ""
+
+
 
 
     Material.theme: Material.Dark
@@ -58,253 +63,36 @@ ApplicationWindow {
         libraryModel: myLibraryModel
         folderModel: fileSystemManager.folders
 
-        onFolderSelected: fileSystemManager.list_image_files_in_folder(folderPath)
+        //onFolderSelected: fileSystemManager.list_image_files_in_folder(folderPath)
+        onFolderSelected: function(folderPath) {
+            fileSystemManager.list_image_files_in_folder(folderPath)
+            window.selectedFolderPath = folderPath   // ✅ store selection
+
+        }
+
+        onViewRequested: function(viewType) {
+            if (viewType === "grid") {
+                contentLoader.setSource("ImageGridView.qml", { xmlDetails: xmlDetails })
+            } else {
+                contentLoader.source = "CarouselView.qml"
+            }
+        }
+
+
+
+
+
+
+        /*
         onViewRequested: {
             if (viewType === "grid")
                 contentLoader.setSource("ImageGridView.qml", { xmlDetails: xmlDetails })
             else
                 contentLoader.source = "CarouselView.qml"
         }
+        */
     }
 
-    Rectangle { //sliding panel on left
-        id: sidePanelOld
-        width: 300
-        height: parent.height * 2 / 3
-        anchors.verticalCenter: parent.verticalCenter
-        x: -width
-        z: 2
-        color: "transparent"
-        radius: 25
-        border.color: "yellow"
-        border.width: 1
-
-        Behavior on x {
-            NumberAnimation { duration: 300; easing.type: Easing.OutCubic }
-        }
-
-        Rectangle {//background to sliding panel
-            // This is the background
-            anchors.fill: parent
-            anchors.margins: 5
-            color: "#1e1e1e"
-            radius: 20
-            border.width: 0
-
-            Label {//refers to combobox
-                id: chooseLocationLabel
-                text: "Choose a Location"
-                color: "white"
-                font.pixelSize: 20
-                anchors.top: parent.top
-                anchors.horizontalCenter: parent.horizontalCenter
-                anchors.topMargin: 10
-                padding: 10
-                background: Rectangle {
-                    color: "transparent"
-                    border.color: "yellow"
-                    border.width: 1
-                    radius: 5
-                }
-            }
-
-            ComboBox {//sets up combobox for receiving data from .py
-                id: categoryCombo
-                anchors.top: chooseLocationLabel.bottom
-                anchors.horizontalCenter: parent.horizontalCenter
-                anchors.topMargin: 20
-                
-                width: parent.width
-                model: myLibraryModel
-                textRole: "name"
-
-                onModelChanged: {
-                    for (var i = 0; i < model.length; i++) {
-                        if (model[i].name === "JRiver Library") {
-                            currentIndex = i;
-                            categoryCombo.activated(i)
-                            break;
-                        }
-                    }
-                }
-
-                onActivated: function(index) {
-                    if (model[index]) {
-                        let selectedPath = model[index].path
-                        console.log("Selected path:", selectedPath)
-                        fileSystemManager.update_folders(selectedPath)
-                    }
-                }
-
-                background: Rectangle {
-                    color: "transparent"
-                    border.color: "yellow"
-                    border.width: 1
-                    radius: 5
-                }
-
-                contentItem: Text {
-                    text: parent.displayText
-                    color: "white"
-                    font: parent.font
-                    verticalAlignment: Text.AlignVCenter
-                    leftPadding: 10
-                    elide: Text.ElideRight
-                }
-
-                indicator: Text {
-                    text: "▼"
-                    color: "yellow"
-                    font.pixelSize: 16
-                    anchors.verticalCenter: parent.verticalCenter
-                    anchors.right: parent.right
-                    anchors.rightMargin: 10
-                }
-            } // combobox
-
-            ListView { //hopefully stores the folders to be displayed on sidepanel
-                id: fileView
-                anchors.top: categoryCombo.bottom
-                anchors.left: parent.left
-                anchors.right: parent.right
-                anchors.bottom: parent.bottom
-                anchors.topMargin: 20
-                anchors.bottomMargin: 80
-                clip: true
-                model: fileSystemManager ? fileSystemManager.folders : []
-                property int currentIndex: -1
-                delegate: Item {
-                    width: fileView.width
-                    height: 40
-
-                    Rectangle {
-                        id: background
-                        anchors.fill: parent
-                        color: fileView.currentIndex === index ? "#555555" : "transparent" //dark grey colour
-                        radius: 5
-                    }
-
-                    Image {
-                        id: folderIcon
-                        //source: "file:///D:/PythonMusic/pythonproject2026/BehindTheScenes/music-new/images/icons/icons8-movie-liquid-glass-color/icons8-movie-32.png"
-                        
-                        //relative Path
-                        source: "../../images/icons/icons8-movie-liquid-glass-color/icons8-movie-32.png"
-
-                        width: 24 // Adjust size as needed
-                        height: 24 // Adjust size as needed
-                        anchors.verticalCenter: parent.verticalCenter
-                        anchors.left: parent.left
-                        anchors.leftMargin: 10
-                        fillMode: Image.PreserveAspectFit
-                    }
-
-                    Text {
-                        id: folderNameText
-                        text: modelData.folderName // Display folder name only
-                        color: "white"
-                        font.pixelSize: 16
-                        anchors.verticalCenter: parent.verticalCenter
-                        anchors.left: folderIcon.right
-                        anchors.leftMargin: 10 // Adjust margin between icon and text
-                    }
-
-                    MouseArea {
-                        anchors.fill: parent
-                        onClicked: {
-                            print("i just clicked an image folder")
-                            fileView.currentIndex = index
-                            var folderPath = modelData.folderPath // Get full pathname when folder is clicked
-                            console.log("Clicked folder:", folderPath)
-                            fileSystemManager.list_image_files_in_folder(folderPath)
-                            sidePanel.x = -sidePanel.width
-                            // Automatically load the view based on the toggle button state
-                            if (viewToggleButton.isGridView) {
-                                console.log("Auto-loading Grid View")
-                                //contentLoader.source = "ImageGridView.qml"
-                                contentLoader.setSource("ImageGridView.qml", { xmlDetails: xmlDetails })
-                                //reverse
-
-
-
-                            } else {
-                                console.log("Auto-loading Carousel View")
-                                contentLoader.source = "CarouselView.qml"
-                            }
-                        }
-                    }
-                }
-            }
-
-            Timer {//used by sliding objects
-                id: scrollTimer
-                interval: 50
-                repeat: true
-                property int scrollStep: 0
-                onTriggered: {
-                    fileView.contentY += scrollStep;
-                }
-            }
-
-            Row {//used for top row of buttons and icons
-                anchors.bottom: parent.bottom
-                anchors.horizontalCenter: parent.horizontalCenter
-                anchors.bottomMargin: 15
-                spacing: 10
-
-                Loader {//below is a Component being created which is a button in this case, it has a number of features built in
-                //Loader takes a copy of it and modifies and runs it
-                //its a way of creating bespoke buttons that are usable within a single file. To use it throughout the project you would create it in its own qml file
-                    sourceComponent: scrollButtonComponent
-                    onLoaded: {
-                        item.text = "▲";
-                        item.scrollAmount = -10;
-                    }
-                }
-                Loader {
-                    sourceComponent: scrollButtonComponent
-                    onLoaded: {
-                        item.text = "▼";
-                        item.scrollAmount = 10;
-                    }
-                }
-            }
-
-            Component {// This creates a bespoke component, in this case a special button we use for scrolling, it is the modifies and used by Loader above
-                id: scrollButtonComponent
-                Rectangle {
-                    property string text
-                    property int scrollAmount
-
-                    width: 80
-                    height: 50
-                    color: "#333"
-                    radius: 8
-                    border.color: "yellow"
-                    border.width: 1
-
-                    Text {
-                        anchors.centerIn: parent
-                        text: parent.text
-                        color: "white"
-                        font.pixelSize: 24
-                    }
-
-                    MouseArea {
-                        anchors.fill: parent
-                        hoverEnabled: true
-                        onEntered: {
-                            scrollTimer.scrollStep = scrollAmount;
-                            scrollTimer.start();
-                        }
-                        onExited: {
-                            scrollTimer.stop();
-                        }
-                    }
-                }
-            }
-        }
-    }//end sliding panel
 
     GlowStyling {
         //target: videoPanel
@@ -320,6 +108,21 @@ ApplicationWindow {
             NumberAnimation { duration: 1500; easing.type: Easing.OutCubic }
         }
     }
+
+    function filenameFromCachePath(cachePath) {
+        // Decode %20, %28, etc.
+        var decoded = decodeURIComponent(cachePath)
+
+        // Strip file:/// prefix
+        if (decoded.startsWith("file:///")) {
+            decoded = decoded.substring(8)
+        }
+
+        // Return last path segment
+        var parts = decoded.split("/")
+        return parts[parts.length - 1]
+    }
+
 
     
 
@@ -381,6 +184,26 @@ ApplicationWindow {
                 border.width: 1
             }
             onClicked: {
+                print("video button clicked")
+                //console.log("🔍 displayPath available in QML:", displayPath)
+                // Example: these should come from your UI state
+                let folderPath = window.selectedFolderPath  // from side panel
+ 
+                let imageFile  = window.selectedImageFile // from grid/detail
+
+                // Debug prints to check accuracy
+                console.log("📂 Folder Path passed to Python:", folderPath)
+                console.log("🖼️ new Image File passed to Python:", imageFile)
+
+                // Call Python slot with both values
+                let videoPath = fileSystemManager.findVideoInFolder(folderPath, imageFile)
+                console.log("🎬 Resolved Video Path:", videoPath)
+
+
+                // ✅ Pass to PlayerPanel
+                videoPanel.videoPath = videoPath
+                videoPanel.isPlaying = false   // reset state so Play button works
+
                 isVideoPanelVisible = !isVideoPanelVisible
             }
         }
@@ -458,12 +281,31 @@ ApplicationWindow {
 
             onLoaded: {
                 if (contentLoader.item && contentLoader.item.imageClicked) {
-                    contentLoader.item.imageClicked.connect(function(path) {
+                    // Log that the signal is connected
+                    console.log("✅ Connected imageClicked from ImageGridView")
+
+                    contentLoader.item.imageClicked.connect(function(cachePath, originalPath) {
+                        // Derive filename from cachePath
+                        var decoded = decodeURIComponent(cachePath)
+                        if (decoded.startsWith("file:///")) decoded = decoded.substring(8)
+                        var filename = decoded.split("/").pop()
+
+                        // Store filename for Video button
+                    window.selectedImageFile = filename
+                    console.log("🖼️ Stored filename for Video button:", filename)
+
+                    // Optional: also store folder path from cachePath (redundant if SlidingPanel already sets it)
+                    // window.selectedFolderPath = decoded.split("/").slice(0, -1).join("/")
+
+
+
+
+
                         //contentLoader.setSource("Detail_View.qml", { imagePath: path })
 
                         contentLoader.setSource("Detail_View.qml", {
-                            imagePath: path,
-                                xmlDetails: xmlDetails
+                            imagePath: cachePath,
+                            xmlDetails: xmlDetails
                         })
 
                     })

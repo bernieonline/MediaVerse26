@@ -109,6 +109,8 @@ Rectangle {
             model: folderModel ? folderModel : []
             property int currentIndex: -1
 
+            //Component.onCompleted: console.log("SlidingPanel folderModel contents:", folderModel)
+
             delegate: Item {
                 width: fileView.width
                 height: 40
@@ -129,7 +131,7 @@ Rectangle {
                 }
 
                 Text {
-                    text: modelData.folderName
+                    text: modelData.folderName   // ✅ matches Python backend
                     color: "white"
                     font.pixelSize: 16
                     anchors.verticalCenter: parent.verticalCenter
@@ -141,7 +143,7 @@ Rectangle {
                     anchors.fill: parent
                     onClicked: {
                         fileView.currentIndex = index
-                        folderSelected(modelData.folderPath)
+                        folderSelected(modelData.folderPath)   // ✅ matches Python backend
                         root.x = -root.width
                         viewRequested("grid") // or "carousel"
                     }
