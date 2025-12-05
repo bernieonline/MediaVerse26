@@ -10,7 +10,8 @@ Rectangle {
     property bool isPlaying: false
     property string videoPath: ""   // ✅ dynamic, set by detail_view
 
-    width: parent ? parent.width * 0.5 : 640
+    // ✅ Width reduced by 20%, height unchanged
+    width: parent ? parent.width * 0.5 * 0.8 : 512
     height: parent ? parent.height * 0.5 : 360
 
     anchors.horizontalCenter: parent ? parent.horizontalCenter : undefined
@@ -33,6 +34,7 @@ Rectangle {
         var parts = decoded.split("/")
         return parts[parts.length - 1]   // just the filename
     }
+
     // 🔑 Auto‑play when isPlaying is set true
     onIsPlayingChanged: {
         if (isPlaying && videoPath !== "") {
@@ -47,7 +49,6 @@ Rectangle {
     onVideoPathChanged: {
         console.log("🎥 PlayerPanel received videoPath:", videoPath)
     }
-
 
     Rectangle {
         id: videoScreen
@@ -80,7 +81,7 @@ Rectangle {
         Text {
             anchors.centerIn: parent
             text: playerPanel.videoPath === "" ? "No movie selected"
-                                                : (videoPlayer.hasAudio ? "Ready: " + filenameFromVideoPath(playerPanel.videoPath)
+                                               : (videoPlayer.hasAudio ? "Ready: " + filenameFromVideoPath(playerPanel.videoPath)
                                                                        : "No audio track detected")
             color: "white"
             font.pixelSize: 20
@@ -102,7 +103,6 @@ Rectangle {
 
         onMoved: videoPlayer.seek(value)
 
-        // ✅ Modern Connections syntax
         Connections {
             target: videoPlayer
             function onPositionChanged() {

@@ -7,12 +7,12 @@ Rectangle {
     anchors.fill: parent
     color: "transparent"
 
-    // Properties assigned by Loader
     property string imagePath: ""
     property var xmlDetails
-    property bool tenFootMode: false   // toggle for large display mode
+    property bool tenFootMode: false
 
-    // Call Python slot when view loads
+    signal launchVideoRequested(string cachePath)
+
     Component.onCompleted: {
         if (xmlDetails && imagePath) {
             xmlDetails.loadXML(imagePath)
@@ -27,11 +27,10 @@ Rectangle {
         }
     }
 
-    // Listen for Python signal and update TextArea
     Connections {
         target: xmlController
         function onCategoryContentUpdated(category, lines) {
-            xmlTextArea.text = lines.join("\n\n") // add spacing between lines
+            xmlTextArea.text = lines.join("\n\n")
         }
     }
 
@@ -40,7 +39,6 @@ Rectangle {
         anchors.margins: 50
         spacing: 50
 
-        // --- Left panel: image ---
         Rectangle {
             id: leftPanel
             Layout.fillHeight: true
@@ -56,9 +54,38 @@ Rectangle {
                 fillMode: Image.PreserveAspectCrop
                 smooth: true
             }
+
+            MouseArea {
+                anchors.fill: parent
+                acceptedButtons: Qt.LeftButton
+                property bool doubleClickActive: false
+                property var singleClickTimer: null
+
+                onClicked: {
+                    if (singleClickTimer) singleClickTimer.stop()
+                    singleClickTimer = Qt.createQmlObject(
+                        'import QtQuick 2.15; Timer { interval: 250; repeat: false }',
+                        detailViewRoot
+                    )
+                    singleClickTimer.triggered.connect(function() {
+                        if (!doubleClickActive) {
+                            console.log("✅ Single click confirmed in Detail_View")
+                            // optional: could emit imageClicked here if needed
+                        }
+                        doubleClickActive = false
+                    })
+                    singleClickTimer.start()
+                }
+
+                onDoubleClicked: {
+                    console.log("🎯 Double‑clicked in Detail_View:", detailViewRoot.imagePath)
+                    doubleClickActive = true
+                    if (singleClickTimer) singleClickTimer.stop()
+                    detailViewRoot.launchVideoRequested(detailViewRoot.imagePath)
+                }
+            }
         }
 
-        // --- Right panel: tabbed content ---
         ColumnLayout {
             Layout.fillWidth: true
             Layout.fillHeight: true
@@ -81,13 +108,11 @@ Rectangle {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
 
-                // Scrollable text area
                 ScrollView {
                     id: scrollArea
                     anchors.fill: parent
                     clip: true
 
-                    // Ensure LTR layout to keep scrollbar on the right
                     LayoutMirroring.enabled: false
 
                     TextArea {
@@ -96,45 +121,29 @@ Rectangle {
                         readOnly: true
                         wrapMode: Text.Wrap
                         text: "No details available"
-
-                        // Dark theme adjustments
                         background: null
                         color: "white"
-
-                        // Font styling
                         font.pixelSize: detailViewRoot.tenFootMode ? 48 : 16
                         font.bold: true
                         padding: 20
-
-                        // Reserve space so text doesn't sit under the scrollbar
                         rightPadding: vbar.width + 10
                     }
 
-                    // Right-side, draggable, dark-themed vertical scrollbar
                     ScrollBar.vertical: ScrollBar {
                         id: vbar
                         policy: ScrollBar.AlwaysOn
                         interactive: true
                         width: detailViewRoot.tenFootMode ? 30 : 14
-
-                        // Place on the right so it doesn't cover text
                         anchors.right: scrollArea.right
                         anchors.top: scrollArea.top
                         anchors.bottom: scrollArea.bottom
                         z: 10
-
-                        // Dark track to blend with ~#1e1e1e background
-                        background: Rectangle {
-                            color: "#262626" // track
-                            radius: 6
-                        }
-
-                        // Visible but subtle thumb
+                        background: Rectangle { color: "#262626"; radius: 6 }
                         contentItem: Rectangle {
                             implicitWidth: vbar.width
                             implicitHeight: 100
                             radius: 6
-                            color: "#3a3a3a"  // thumb, slightly lighter than track
+                            color: "#3a3a3a"
                         }
                     }
                 }
