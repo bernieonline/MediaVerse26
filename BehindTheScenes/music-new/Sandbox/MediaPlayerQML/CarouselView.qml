@@ -7,13 +7,16 @@ FocusScope {
     height: parent.height
 
     signal imageClicked(string filePath)
-
+    signal launchVideoRequested(string cachePath)
 
     property var imageList: fileSystemManager.imageFiles
     property int currentIndex: 0
 
     property real baseWidth: root.width / 8
     property real baseHeight: baseWidth * 1.5
+
+    
+
 
     function scrollLeft() {
         if (currentIndex > 0) currentIndex--
@@ -58,6 +61,10 @@ FocusScope {
                     }
 
                     MouseArea {
+
+                        property bool doubleClickActive: false
+                        property var singleClickTimer: null
+                        
                         anchors.fill: parent
                         enabled: valid
 
@@ -67,11 +74,34 @@ FocusScope {
                             // take a snapshot BEFORE currentIndex changes
                             let idx = imageIndex
 
+                            if (singleClickTimer) singleClickTimer.stop()
+                            singleClickTimer = Qt.createQmlObject(
+                                'import QtQuick 2.15; Timer { interval: 250; repeat: false }',
+                                root 
+                            )
+                            singleClickTimer.triggered.connect(function() {
+                                if (!doubleClickActive) {
+                                    console.log("✅ Single click confirmed in CarouselView")
+                                    root.imageClicked(imageList[idx].filePath)
+                                }
+                                doubleClickActive = false
+                            })
+                            singleClickTimer.start()
+
                             currentIndex = idx   // update carousel
 
                             console.log("Clicked image:", imageList[idx].filePath)
-                            root.imageClicked(imageList[idx].filePath)
+                            //root.imageClicked(imageList[idx].filePath)
                         }
+                        onDoubleClicked: {
+                            if (!valid) return
+                            let idx = imageIndex
+                            console.log("🎯 Double‑clicked in CarouselView:", imageList[idx].filePath)
+                            doubleClickActive = true
+                            if (singleClickTimer) singleClickTimer.stop()
+                            root.launchVideoRequested(imageList[idx].filePath)
+                        }
+
                     }
 
                 }
