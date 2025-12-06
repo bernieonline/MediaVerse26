@@ -1,5 +1,8 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
+import "."
+import Qt5Compat.GraphicalEffects 6.0
+//import UltraGlowFrame.qml
 
 FocusScope {
     id: root
@@ -35,7 +38,7 @@ FocusScope {
 
         Row {
             id: imageRow
-            spacing: 20
+            spacing: 100
             anchors.centerIn: parent
 
             Repeater {
@@ -54,17 +57,29 @@ FocusScope {
                     }
                     height: width * 1.5
 
-                    ImageHolder {
+                    /*ImageHolder {
                         anchors.fill: parent
                         source: valid ? imageList[imageIndex].filePath : ""
                         smooth: true
+                    }*/
+
+                    UltraGlowFrame {
+                        anchors.fill: parent
+                        source: valid ? imageList[imageIndex].filePath : ""
+
+                        // optional customisation
+                        glowRadius: (Math.abs(offset) === 0) ? 60 : 30   // center image glowing more
+                        //glowColor: "#AAFFFFFF"
+                        glowColor: "#256c40"
+                        smooth: true
+                        opacity: 0.3
                     }
 
                     MouseArea {
 
                         property bool doubleClickActive: false
                         property var singleClickTimer: null
-                        
+
                         anchors.fill: parent
                         enabled: valid
 

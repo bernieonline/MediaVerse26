@@ -257,6 +257,7 @@ ApplicationWindow {
             }
             onClicked: Qt.quit()
         }
+
     }
 
     Rectangle {
