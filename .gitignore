@@ -1,6 +1,25 @@
 # Ignore the entire virtual environment folder
 BehindTheScenes/MMenv2/
 
+# VS Code settings
+.vscode/
+
+# Logs
+*.log
+
+
+# Cache and generated images
+cache/
+thumbnails/
+*.png
+*.jpg
+*.jpeg
+*.bmp
+*.gif
+*.webp
+
+
+
 # Standard Python ignores
 __pycache__/
 *.pyc
