@@ -18,9 +18,6 @@ FocusScope {
     property real baseWidth: root.width / 8
     property real baseHeight: baseWidth * 1.5
 
-    
-
-
     function scrollLeft() {
         if (currentIndex > 0) currentIndex--
     }
@@ -57,26 +54,16 @@ FocusScope {
                     }
                     height: width * 1.5
 
-                    /*ImageHolder {
-                        anchors.fill: parent
-                        source: valid ? imageList[imageIndex].filePath : ""
-                        smooth: true
-                    }*/
-
                     UltraGlowFrame {
                         anchors.fill: parent
                         source: valid ? imageList[imageIndex].filePath : ""
-
-                        // optional customisation
-                        glowRadius: (Math.abs(offset) === 0) ? 60 : 30   // center image glowing more
-                        //glowColor: "#AAFFFFFF"
+                        glowRadius: (Math.abs(offset) === 0) ? 60 : 30
                         glowColor: "#256c40"
                         smooth: true
                         opacity: 0.3
                     }
 
                     MouseArea {
-
                         property bool doubleClickActive: false
                         property var singleClickTimer: null
 
@@ -85,14 +72,11 @@ FocusScope {
 
                         onClicked: {
                             if (!valid) return
-
-                            // take a snapshot BEFORE currentIndex changes
                             let idx = imageIndex
-
                             if (singleClickTimer) singleClickTimer.stop()
                             singleClickTimer = Qt.createQmlObject(
                                 'import QtQuick 2.15; Timer { interval: 250; repeat: false }',
-                                root 
+                                root
                             )
                             singleClickTimer.triggered.connect(function() {
                                 if (!doubleClickActive) {
@@ -102,11 +86,8 @@ FocusScope {
                                 doubleClickActive = false
                             })
                             singleClickTimer.start()
-
-                            currentIndex = idx   // update carousel
-
+                            currentIndex = idx
                             console.log("Clicked image:", imageList[idx].filePath)
-                            //root.imageClicked(imageList[idx].filePath)
                         }
                         onDoubleClicked: {
                             if (!valid) return
@@ -116,69 +97,64 @@ FocusScope {
                             if (singleClickTimer) singleClickTimer.stop()
                             root.launchVideoRequested(imageList[idx].filePath)
                         }
-
                     }
-
                 }
             }
         }
     }
 
-    // Left scroll button (enlarged and styled)
-    Button {
-        id: leftScrollButton
-        text: "◀"
+    // Scroll buttons wrapped in a Row
+    Row {
+        id: scrollButtonsRow
+        anchors.horizontalCenter: carouselFrame.horizontalCenter
         anchors.verticalCenter: carouselFrame.verticalCenter
-        anchors.verticalCenterOffset: baseHeight * 0.6
-        anchors.right: carouselFrame.horizontalCenter
-        anchors.rightMargin: baseWidth * 1.6 + 20
-        onClicked: scrollLeft()
+        anchors.verticalCenterOffset: baseHeight * 0.9
+        spacing: 50
 
-        width: 300
-        height: 120
+        Button {
+            id: leftScrollButton
+            text: "◀"
+            width: 400
+            height: 60
+            onClicked: scrollLeft()
 
-        background: Rectangle {
-            color: "transparent"
-            border.color: "yellow"
-            border.width: 3
-            radius: 10
+            background: Rectangle {
+                color: "transparent"
+                border.color: "yellow"
+                border.width: 3
+                radius: 10
+            }
+
+            contentItem: Text {
+                text: parent.text
+                color: "white"
+                font.pixelSize: 60
+                verticalAlignment: Text.AlignVCenter
+                horizontalAlignment: Text.AlignHCenter
+            }
         }
 
-        contentItem: Text {
-            text: parent.text
-            color: "white"
-            font.pixelSize: 60
-            verticalAlignment: Text.AlignVCenter
-            horizontalAlignment: Text.AlignHCenter
-        }
-    }
+        Button {
+            id: rightScrollButton
+            text: "▶"
+            width: 400
+            height: 60
+            onClicked: scrollRight()
 
-    // Right scroll button (enlarged and styled)
-    Button {
-        id: rightScrollButton
-        text: "▶"
-        anchors.verticalCenter: carouselFrame.verticalCenter
-        anchors.verticalCenterOffset: baseHeight * 0.6
-        anchors.left: carouselFrame.horizontalCenter
-        anchors.leftMargin: baseWidth * 1.6 + 20
-        onClicked: scrollRight()
+            background: Rectangle {
+                color: "transparent"
+                border.color: "yellow"
+                border.width: 3
+                radius: 10
+            }
 
-        width: 300
-        height: 120
-
-        background: Rectangle {
-            color: "transparent"
-            border.color: "yellow"
-            border.width: 3
-            radius: 10
-        }
-
-        contentItem: Text {
-            text: parent.text
-            color: "white"
-            font.pixelSize: 60
-            verticalAlignment: Text.AlignVCenter
-            horizontalAlignment: Text.AlignHCenter
+            contentItem: Text {
+                text: parent.text
+                color: "white"
+                font.pixelSize: 60
+                verticalAlignment: Text.AlignVCenter
+                horizontalAlignment: Text.AlignHCenter
+            }
         }
     }
 
