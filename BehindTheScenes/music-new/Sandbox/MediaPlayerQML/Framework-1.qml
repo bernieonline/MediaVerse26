@@ -78,11 +78,6 @@ ApplicationWindow {
             }
         }
 
-
-
-
-
-
         /*
         onViewRequested: {
             if (viewType === "grid")
@@ -94,9 +89,7 @@ ApplicationWindow {
     }
 
 
-    GlowStyling {
-        //target: videoPanel
-    }
+    
     
     PlayerPanel {
         id: videoPanel

@@ -4,19 +4,19 @@ import Qt5Compat.GraphicalEffects 6.0
 Item {
     id: root                            // we called it root which is a convention for a top level item
     property url source                // Image path
-    
+    property Item target
     
     property real glowScale: 0      // How far the bloom spreads was 1.8 ie 180% of the image size
     property real blurOne: 0       // First blur radius to soften the glow was 60 zero = hard edge a 60 pixel overlap
     property real blurTwo: 0         // Second blur radius smooths it further was 45 ... pixel overlap
     property real goldOpacity: 0   // Strength of opacity golden colour was o.35 0 is no gold tint
     property color glowColor: "#e5dfc4ff" // NEW: customizable glow color cant set to zero but can be transparent
-    property real glowRadius: 0  // NEW: customizable glow radius, the bigger the radius the further it spreads was 15 0 = no rim 
+    property real glowRadius: 10  // NEW: customizable glow radius, the bigger the radius the further it spreads was 15 0 = no rim 
                                     // glow 15 is a 15 pixel blurring radius
-    property real glowSpread: 0    // how much the glow bleeds outward, high spread = thicker glow band was0.25
+    property real glowSpread: 0.25    // how much the glow bleeds outward, high spread = thicker glow band was0.25
                                     //- Visually, it produces a moderately thin rim glow: 1 is maximum .25 is 25%
 
-    property real glowOpacity: 0   // overall strength of the glow higher = thicker glow  was 0.8
+    property real glowOpacity: 0.4   // overall strength of the glow higher = thicker glow  was 0.8
                                     // 1.0 is solid It will dominate the edges unless balanced with a lighter color or larger blur radius.
 
     //- Instead of hard‑coding values inside UltraGlowFrame.qml, you expose them as properties so you can override
@@ -139,7 +139,7 @@ Item {
                                    
 
 
-        spread: root.glowSpread   //- spread → Controls how tightly the glow hugs the edges (low spread = diffuse, high spread = sharp rim).
+        spread: root.glowSpread  //- spread → Controls how tightly the glow hugs the edges (low spread = diffuse, high spread = sharp rim).
                                     //- Low values (0.0 – 0.3)
                                     //- Glow is very soft, almost mist‑like.
                                     //- Edges blur into the background.

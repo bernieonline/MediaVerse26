@@ -25,7 +25,8 @@ ApplicationWindow {
         //--------------------------------------------------------------------
         Image {
             id: imageSource
-            source: "file:///D:/PythonMusic/pythonproject2026/BehindTheScenes/music-new/cache/display/2000s/The Last Samurai (2003).jpg"
+            //source: "file:///D:/PythonMusic/pythonproject2026/BehindTheScenes/music-new/cache/display/2000s/The Last Samurai (2003).jpg"
+            source: "file:///C:/Users/berna/pythonproject2026/BehindTheScenes/BehindTheScenes/music-new/cache/display/1960s 70s 80s/BEN_HUR_DISC_2 (1959).jpg"
             fillMode: Image.PreserveAspectFit
             smooth: true
             antialiasing: true
