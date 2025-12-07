@@ -28,6 +28,9 @@ Rectangle {
     width: panelWidth
     height: 600   // safe default; parent can override
     x: -width
+
+    y: (parent.height - height) / 2  //sets it centrally on the left
+
     z: 10   // overlays other views
     color: "transparent"
     radius: 25
@@ -53,7 +56,6 @@ Rectangle {
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.topMargin: 10
         }
-
         ComboBox {
             id: categoryCombo
             anchors.top: chooseLocationLabel.bottom
