@@ -35,7 +35,7 @@ FocusScope {
 
         Row {
             id: imageRow
-            spacing: 100
+            spacing: 75
             anchors.centerIn: parent
 
             Repeater {

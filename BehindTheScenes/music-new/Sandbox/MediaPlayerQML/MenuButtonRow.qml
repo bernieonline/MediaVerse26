@@ -12,7 +12,7 @@ Row {
     property int buttonHeight: 60
     property int buttonCount: menuButtonRow.children.length
     property real spacingCalc: (width - (buttonCount * buttonWidth)) / (buttonCount - 1)
-
+    //property real spacingCalc: ((width/4)-200)
     spacing: spacingCalc
 
     // --- Collections button with dropdown menu ---

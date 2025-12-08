@@ -129,7 +129,7 @@ ApplicationWindow {
         anchors.right: parent.right
 
         anchors.top: parent.top
-        anchors.topMargin: 80
+        anchors.topMargin: 30
         spacing: 20   // space between top and bottom rows
         property int sideMargin: 50
 
