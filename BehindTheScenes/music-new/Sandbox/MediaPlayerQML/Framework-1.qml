@@ -121,21 +121,45 @@ ApplicationWindow {
 
     property bool isVideoPanelVisible: false
 
+    Column {
+        id: buttonRows
+        //anchors.horizontalCenter: parent.horizontalCenter
+        //id: buttonRows
+        anchors.left: parent.left
+        anchors.right: parent.right
 
-    RowButton {
-        id: rowButtons
-        anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: parent.top
         anchors.topMargin: 80
-        width: parent.width - 40   // stretch row across window
+        spacing: 20   // space between top and bottom rows
+        property int sideMargin: 50
+
+
+        // Top row: clickable buttons
+        RowButton {
+            id: rowButtons
+            width: parent.width - (2 * buttonRows.sideMargin)
+            //anchors.leftMargin: buttonRows.sideMargin
+            //anchors.rightMargin: buttonRows.sideMargin
+
+
+            //width: parent.width - 40   // stretch row across window
+        }
+        // Bottom row: menu-based buttons
+        MenuButtonRow {
+            id: menuRow
+            width: parent.width - 40   // match styling
+        }
     }
+
     
 
   
 
     Rectangle {
         id: contentContainer
-        anchors.top: rowButtons.bottom   // anchor to the instance
+        anchors.top: buttonRows.bottom   // anchor to the column, not the row
+
+        //anchors.top: rowButtons.bottom   // anchor to the instance
 
         //anchors.top: buttonRow.bottom
         anchors.bottom: parent.bottom

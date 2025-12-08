@@ -1,32 +1,26 @@
-// RowButton.qml
 import QtQuick 2.15
 import QtQuick.Controls 2.15
-import QtQuick.Layouts 1.15
-//new component
 
-RowLayout {
+Row {
     id: buttonRow
-    anchors.horizontalCenter: parent.horizontalCenter
-    anchors.top: parent.top
-    anchors.topMargin: 80
-    spacing: 20
-    width: parent.width - 40   // total available width
 
-    // Shared properties for consistent sizing
+    anchors.left: parent.left
+    anchors.margins: 50   // adds 50px padding left and right
+
+    property int buttonWidth: 150
     property int buttonHeight: 60
+    property int buttonCount: 4
+    property real spacingCalc: (width - (buttonCount * buttonWidth)) / (buttonCount - 1)
+
+    spacing: spacingCalc
 
     // --- Menu Button ---
-    Button {
+    StyledButton {
         id: menuButton
         text: "Menu"
-        Layout.fillWidth: true
-        Layout.preferredHeight: buttonRow.buttonHeight
-        background: Rectangle {
-            radius: 8
-            color: "#333"
-            border.color: "yellow"
-            border.width: 1
-        }
+        fixedWidth: buttonRow.buttonWidth
+        fixedHeight: buttonRow.buttonHeight
+
         onClicked: {
             libraryPanel.x = (libraryPanel.x === 0) ? -libraryPanel.width : 0
             if (libraryPanel.x === 0 && libraryPanel.categoryCombo.currentIndex !== -1) {
@@ -36,17 +30,12 @@ RowLayout {
     }
 
     // --- Video Button ---
-    Button {
+    StyledButton {
         id: videoButton
         text: "Video"
-        Layout.fillWidth: true
-        Layout.preferredHeight: buttonRow.buttonHeight
-        background: Rectangle {
-            radius: 8
-            color: "#333"
-            border.color: "yellow"
-            border.width: 1
-        }
+        fixedWidth: buttonRow.buttonWidth
+        fixedHeight: buttonRow.buttonHeight
+
         onClicked: {
             let folderPath = window.selectedFolderPath
             let imageFile  = window.selectedImageFile
@@ -58,18 +47,13 @@ RowLayout {
     }
 
     // --- View Toggle Button ---
-    Button {
+    StyledButton {
         id: viewToggleButton
         property bool isGridView: true
         text: isGridView ? "Carousel View" : "Grid View"
-        Layout.fillWidth: true
-        Layout.preferredHeight: buttonRow.buttonHeight
-        background: Rectangle {
-            radius: 8
-            color: "#333"
-            border.color: "yellow"
-            border.width: 1
-        }
+        fixedWidth: buttonRow.buttonWidth
+        fixedHeight: buttonRow.buttonHeight
+
         onClicked: {
             isGridView = !isGridView
             if (isGridView) {
@@ -80,66 +64,12 @@ RowLayout {
         }
     }
 
-    // --- Collections Button ---
-    Button {
-        text: "Collections"
-        Layout.fillWidth: true
-        Layout.preferredHeight: buttonRow.buttonHeight
-        background: Rectangle {
-            radius: 8
-            color: "#333"
-            border.color: "yellow"
-            border.width: 1
-        }
-        onClicked: console.log("Collections clicked (no functionality yet)")
-    }
-
-    // --- Utilities Button ---
-    Button {
-        text: "Utilities"
-        Layout.fillWidth: true
-        Layout.preferredHeight: buttonRow.buttonHeight
-        background: Rectangle {
-            radius: 8
-            color: "#333"
-            border.color: "yellow"
-            border.width: 1
-        }
-        onClicked: console.log("Utilities clicked (no functionality yet)")
-    }
-
-    // --- Settings Button ---
-    Button {
-        text: "Settings"
-        Layout.fillWidth: true
-        Layout.preferredHeight: buttonRow.buttonHeight
-        background: Rectangle {
-            radius: 8
-            color: "#333"
-            border.color: "yellow"
-            border.width: 1
-        }
-        onClicked: console.log("Settings clicked (no functionality yet)")
-    }
-
     // --- Close Button ---
-    Button {
+    StyledButton {
         text: "Close"
-        Layout.fillWidth: true
-        Layout.preferredHeight: buttonRow.buttonHeight
-        background: Rectangle {
-            radius: 8
-            color: "#333"
-            border.color: "yellow"
-            border.width: 1
-        }
-        contentItem: Text {
-            text: parent.text
-            font: parent.font
-            color: "white"
-            horizontalAlignment: Text.AlignHCenter
-            verticalAlignment: Text.AlignVCenter
-        }
+        fixedWidth: buttonRow.buttonWidth
+        fixedHeight: buttonRow.buttonHeight
+
         onClicked: Qt.quit()
     }
 }
