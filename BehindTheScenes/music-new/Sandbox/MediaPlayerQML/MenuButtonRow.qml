@@ -3,15 +3,24 @@ import QtQuick.Controls 2.15
 
 Row {
     id: menuButtonRow
-    spacing: 40
-    anchors.horizontalCenter: parent.horizontalCenter
+
+    anchors.left: parent.left
+    anchors.right: parent.right
+    anchors.margins: 50   // padding left/right
+
+    property int buttonWidth: 200
+    property int buttonHeight: 60
+    property int buttonCount: menuButtonRow.children.length
+    property real spacingCalc: (width - (buttonCount * buttonWidth)) / (buttonCount - 1)
+
+    spacing: spacingCalc
 
     // --- Collections button with dropdown menu ---
     StyledButton {
         id: collectionsButton
         text: "Collections"
-        fixedWidth: 200
-        fixedHeight: 60
+        fixedWidth: menuButtonRow.buttonWidth
+        fixedHeight: menuButtonRow.buttonHeight
 
         onClicked: {
             if (collectionsMenu.opened)
@@ -33,8 +42,8 @@ Row {
     StyledButton {
         id: utilitiesButton
         text: "Utilities"
-        fixedWidth: 200
-        fixedHeight: 60
+        fixedWidth: menuButtonRow.buttonWidth
+        fixedHeight: menuButtonRow.buttonHeight
 
         onClicked: {
             if (utilitiesMenu.opened)
@@ -54,8 +63,8 @@ Row {
     StyledButton {
         id: settingsButton
         text: "Settings"
-        fixedWidth: 200
-        fixedHeight: 60
+        fixedWidth: menuButtonRow.buttonWidth
+        fixedHeight: menuButtonRow.buttonHeight
 
         onClicked: {
             if (settingsMenu.opened)
