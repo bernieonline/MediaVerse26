@@ -55,6 +55,10 @@ def main():
         engine = QQmlApplicationEngine()
         engine.addImportPath(os.path.join(os.path.dirname(PySide6.__file__), "qml"))
         engine.addImportPath(QLibraryInfo.path(QLibraryInfo.LibraryPath.Qml2ImportsPath))
+        #engine.rootContext().setContextProperty("imagesPath", str(paths["assets"].as_posix()))
+        engine.rootContext().setContextProperty("imagesPath", Path(paths["assets"]).as_uri())
+
+
 
         # Create persistent Python objects (prevent GC) and expose to QML
         file_system = FileSystem()

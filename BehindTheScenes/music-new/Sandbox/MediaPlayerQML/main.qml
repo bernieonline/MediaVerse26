@@ -24,9 +24,12 @@ ApplicationWindow {
         // 1. The original IMAGE
         //--------------------------------------------------------------------
         Image {
+            //console.log("✅ Connected imageClicked")
             id: imageSource
             //source: "file:///D:/PythonMusic/pythonproject2026/BehindTheScenes/music-new/cache/display/2000s/The Last Samurai (2003).jpg"
-            source: "file:///C:/Users/berna/pythonproject2026/BehindTheScenes/BehindTheScenes/music-new/cache/display/1960s 70s 80s/BEN_HUR_DISC_2 (1959).jpg"
+            //source: "file:///C:/Users/berna/pythonproject2026/BehindTheScenes/BehindTheScenes/music-new/cache/display/1960s 70s 80s/BEN_HUR_DISC_2 (1959).jpg"
+            
+            source:  "File:///J:/MediaVerse 1.0/BehindTheScenes/music-new/images/mediaverse.png"
             fillMode: Image.PreserveAspectFit
             smooth: true
             antialiasing: true

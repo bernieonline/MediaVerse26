@@ -42,6 +42,28 @@ ApplicationWindow {
     GlowStyling {
         //target: border
     }
+    Rectangle {
+        id: logoFrame
+        width: buttonRows.height * 1.5      // make it square
+        height: buttonRows.height * 1.5
+        anchors.top: parent.top
+        anchors.left: parent.left
+        anchors.margins: 20           // margin around the edge
+        color: "transparent"
+        border.color: "transparent"
+        border.width: 2
+
+        Image {
+            anchors.fill: parent
+            anchors.margins: 10       // inner margin inside the frame
+            //source: imagesPath + "/mediaverse.png"
+            source: imagesPath + "/mediaverse.png"
+
+            
+            fillMode: Image.PreserveAspectFit
+            smooth: true
+        }
+}
 
     Rectangle { //subdued glow
         id: border
@@ -123,15 +145,21 @@ ApplicationWindow {
 
     Column {
         id: buttonRows
+        width: parent.width * 0.75
+        anchors.horizontalCenter: parent.horizontalCenter
+
+
         //anchors.horizontalCenter: parent.horizontalCenter
         //id: buttonRows
-        anchors.left: parent.left
-        anchors.right: parent.right
+        //anchors.left: parent.left
+        //anchors.right: parent.right
 
         anchors.top: parent.top
         anchors.topMargin: 30
-        spacing: 20   // space between top and bottom rows
         property int sideMargin: 50
+
+        spacing: 20   // space between top and bottom rows
+        //property int sideMargin: 50
 
 
         // Top row: clickable buttons
