@@ -21,3 +21,26 @@ git clean -fd     This removes untracked items
 
 Just pulls updates
 git pull origin main
+
+
+How to tag a fileSet
+git status
+commit any files that are untracked or waiting final commit
+git add .
+git commit -m "Final changes before tagging Top Level Menu"
+
+git tag -a "TopLevelMenuImplemented" -m "Fallback: Top Level Menu Implemented"
+verify with git tag
+see datails with git show TopLevelMenuImplemented       use q to quit
+push it git push origin TopLevelMenuImplemented
+if something goes badly wrong this is how you go back to it
+git checkout TopLevelMenuImplemented
+
+
+is a file tracked
+git ls-files filename         it will return the filename
+
+
+changes since last committ
+git diff filename → changes since last commit?
+

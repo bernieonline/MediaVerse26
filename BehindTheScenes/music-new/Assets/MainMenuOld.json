@@ -28,13 +28,7 @@
     {
       "label": "Settings",
       "items": [
-        {
-          "label": "Media Apps",
-          "items": [
-            { "label": "VideoProc" },
-            { "label": "FFMPEG" }
-          ]
-        },
+        { "label": "Media Apps" },
         { "label": "MySql" },
         {
           "label": "Media Player",
@@ -42,6 +36,7 @@
             { "label": "Mini Player" },
             { "label": "JRiver" },
             { "label": "PowerDVD" }
+          
           ]
         }
       ]
