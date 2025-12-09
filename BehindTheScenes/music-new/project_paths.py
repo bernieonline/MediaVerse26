@@ -33,6 +33,7 @@ display_dir = project_root / "cache" / "display"
 
 # NEW: JSON categories file path
 json_path = project_root / "Assets" / "XMLCategories.json"
+menu_json_path = project_root / "Assets" / "MainMenu.json"
 
 
 
@@ -54,6 +55,7 @@ paths = {
     "log": log_path,
     "req":req_path,
     "json": json_path,
+    "menu": menu_json_path,
     "thumbs": thumb_dir,
     "display": display_dir
 

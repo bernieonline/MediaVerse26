@@ -1,6 +1,8 @@
 import sys
 import os
 import logging
+import json
+
 from pathlib import Path
 import PySide6
 from PySide6.QtWidgets import QApplication, QMessageBox
@@ -51,13 +53,22 @@ def main():
         QCoreApplication.addLibraryPath(str(Path(sys.modules["PySide6"].__file__).parent / "plugins"))
         os.add_dll_directory(str(Path(sys.modules["PySide6"].__file__).parent))
 
+        #Munu paths
+        with open(paths["menu"], encoding="utf-8") as f:
+            menu_data = json.load(f)
+
+
         # Create QML engine
         engine = QQmlApplicationEngine()
         engine.addImportPath(os.path.join(os.path.dirname(PySide6.__file__), "qml"))
         engine.addImportPath(QLibraryInfo.path(QLibraryInfo.LibraryPath.Qml2ImportsPath))
         #engine.rootContext().setContextProperty("imagesPath", str(paths["assets"].as_posix()))
         engine.rootContext().setContextProperty("imagesPath", Path(paths["assets"]).as_uri())
+        #engine.rootContext().setContextProperty("menuData", menu_data)
+        engine.rootContext().setContextProperty("centralMenuData", menu_data)
 
+
+        print("Data being passed to QML as menuData:", menu_data)
 
 
         # Create persistent Python objects (prevent GC) and expose to QML
