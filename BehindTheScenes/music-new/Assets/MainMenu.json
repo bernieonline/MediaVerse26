@@ -1,0 +1,46 @@
+{
+  "menu": [
+    {
+      "label": "File",
+      "items": [
+        { "label": "Search" },
+        { "label": "Edit" },
+        { "label": "Open" }
+      ]
+    },
+    {
+      "label": "Collections",
+      "items": [
+        { "label": "Create" },
+        { "label": "Show" },
+        { "label": "Delete" },
+        { "label": "Compare" }
+      ]
+    },
+    {
+      "label": "Utilities",
+      "items": [
+        { "label": "Test" },
+        { "label": "Edit" },
+        { "label": "Play" }
+      ]
+    },
+    {
+      "label": "Settings",
+      "items": [
+        { "label": "Media Apps" },
+        { "label": "MySql" },
+        {
+          "label": "Media Player",
+          "items": [
+            { "label": "Mini Player" },
+            { "label": "JRiver" },
+            { "label": "Menu Edit" },
+            { "label": "Theme" }
+
+          ]
+        }
+      ]
+    }
+  ]
+}
