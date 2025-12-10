@@ -6,6 +6,9 @@ Item {
     id: centralMenu
     property var menuData: ({ menu: [] })
     signal menuItemTriggered(string label)
+    //for settings media player
+    property string parentLabel: ""
+
     height: 40
     anchors.horizontalCenter: parent ? parent.horizontalCenter : undefined
     anchors.top: parent.top
@@ -53,7 +56,13 @@ Item {
                             dropdown.items = subItems
                             dropdown.openBelow(topItem)
                         } else {
+                            console.log("Clicked:", modelData.label)
                             centralMenu.menuItemTriggered(modelData.label)
+
+                            dropdown.close()
+
+
+                            //centralMenu.menuItemTriggered(modelData.label)
                         }
                     }
                 }
@@ -118,8 +127,14 @@ Item {
                                             submenu.items = subItems
                                             submenu.openRight(subItem)
                                         } else {
+                                            console.log("Clicked:", modelData.label)
+                                            //centralMenu.menuItemTriggered(dropColumn.children[0].text + ">" + textItem.text + ">" + modelData.label)
                                             centralMenu.menuItemTriggered(modelData.label)
+
+                                            submenu.close()
                                             dropdown.close()
+                                            //centralMenu.menuItemTriggered(modelData.label)
+                                            //dropdown.close()
                                         }
                                     }
                                 }
@@ -177,7 +192,10 @@ Item {
                                                     hoverEnabled: true
 
                                                     onClicked: {
+                                                        console.log("Clicked:", modelData.label)
                                                         centralMenu.menuItemTriggered(modelData.label)
+
+                                                        
                                                         submenu.close()
                                                         dropdown.close()
                                                     }
