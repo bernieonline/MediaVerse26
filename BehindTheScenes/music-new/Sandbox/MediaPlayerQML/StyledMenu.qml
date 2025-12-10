@@ -6,8 +6,6 @@ Item {
     id: centralMenu
     property var menuData: ({ menu: [] })
     signal menuItemTriggered(string label)
-    //for settings media player
-    property string parentLabel: ""
 
     height: 40
     anchors.horizontalCenter: parent ? parent.horizontalCenter : undefined
@@ -30,8 +28,7 @@ Item {
 
                 Rectangle {
                     anchors.fill: parent
-                    color: mouse.containsMouse ? "#303030" : "#2e2e2e"  // dark gray background
-
+                    color: mouse.containsMouse ? "#303030" : "#2e2e2e"
                     radius: 6
                     border.width: 1
                     border.color: "gold"
@@ -56,17 +53,12 @@ Item {
                             dropdown.items = subItems
                             dropdown.openBelow(topItem)
                         } else {
-                            console.log("Clicked:", modelData.label)
                             centralMenu.menuItemTriggered(modelData.label)
-
-                            dropdown.close()
-
-
-                            //centralMenu.menuItemTriggered(modelData.label)
                         }
                     }
                 }
 
+                // Top-level dropdown
                 Popup {
                     id: dropdown
                     property var items: []
@@ -98,7 +90,7 @@ Item {
 
                             delegate: Item {
                                 id: subItem
-                                width: 180
+                                width: 200
                                 height: 32
                                 property var subItems: modelData.items || []
 
@@ -124,21 +116,22 @@ Item {
 
                                     onClicked: {
                                         if (subItems.length > 0) {
-                                            submenu.items = subItems
-                                            submenu.openRight(subItem)
+                                            // Special case for Media Player submenu
+                                            if (modelData.label === "Media Player") {
+                                                mediaPlayerPopup.items = subItems
+                                                mediaPlayerPopup.openBelow(subItem)
+                                            } else {
+                                                submenu.items = subItems
+                                                submenu.openRight(subItem)
+                                            }
                                         } else {
-                                            console.log("Clicked:", modelData.label)
-                                            //centralMenu.menuItemTriggered(dropColumn.children[0].text + ">" + textItem.text + ">" + modelData.label)
                                             centralMenu.menuItemTriggered(modelData.label)
-
-                                            submenu.close()
                                             dropdown.close()
-                                            //centralMenu.menuItemTriggered(modelData.label)
-                                            //dropdown.close()
                                         }
                                     }
                                 }
 
+                                // Submenu for other items
                                 Popup {
                                     id: submenu
                                     property var items: []
@@ -192,10 +185,7 @@ Item {
                                                     hoverEnabled: true
 
                                                     onClicked: {
-                                                        console.log("Clicked:", modelData.label)
                                                         centralMenu.menuItemTriggered(modelData.label)
-
-                                                        
                                                         submenu.close()
                                                         dropdown.close()
                                                     }
@@ -206,6 +196,46 @@ Item {
                                 }
                             }
                         }
+                    }
+                }
+            }
+        }
+    }
+
+    // Media Player horizontal radio buttons
+    Popup {
+        id: mediaPlayerPopup
+        property var items: []
+        modal: false
+        focus: true
+        parent: Overlay.overlay
+
+        background: Rectangle {
+            color: "#202020"
+            radius: 8
+            border.color: "gold"
+            border.width: 1
+        }
+
+        function openBelow(item) {
+            var pos = item.mapToGlobal(0, item.height)
+            x = pos.x
+            y = pos.y
+            open()
+        }
+
+        contentItem: Row {
+            spacing: 12
+            padding: 8
+
+            Repeater {
+                model: mediaPlayerPopup.items
+
+                delegate: RadioButton {
+                    text: modelData.label
+                    checked: index === 0 // first one default
+                    onClicked: {
+                        console.log("Selected Media Player:", modelData.label)
                     }
                 }
             }
