@@ -34,7 +34,7 @@ display_dir = project_root / "cache" / "display"
 # NEW: JSON categories file path
 json_path = project_root / "Assets" / "XMLCategories.json"
 menu_json_path = project_root / "Assets" / "MainMenu.json"
-
+config_json = project_root / "Assets" / "Config.json"
 
 
 #D:\PythonMusic\pythonproject2026\BehindTheScenes\music-new\requirements.txt
@@ -57,7 +57,8 @@ paths = {
     "json": json_path,
     "menu": menu_json_path,
     "thumbs": thumb_dir,
-    "display": display_dir
+    "display": display_dir,
+    "config" : config_json
 
     }
 

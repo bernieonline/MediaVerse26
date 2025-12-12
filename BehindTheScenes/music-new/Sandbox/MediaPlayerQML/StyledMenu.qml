@@ -6,6 +6,8 @@ Item {
     id: centralMenu
     property var menuData: ({ menu: [] })
     signal menuItemTriggered(string label)
+    signal playerSelected(int index)
+
 
     height: 40
     anchors.horizontalCenter: parent ? parent.horizontalCenter : undefined
@@ -235,7 +237,20 @@ Item {
                     text: modelData.label
                     checked: index === 0 // first one default
                     onClicked: {
-                        console.log("Selected Media Player:", modelData.label)
+                        //we need to send the index number to config
+                        //J:\MediaVerse 1.0\BehindTheScenes\music-new\Assets\Config.
+                        //click the option update config
+                        //update Framework.py to read config into memory on startup
+                        //update selected radiobutton option reset
+                        //then a settings option to manage registered players
+                        //add a new player and set its paintedWidth
+                        //remove a player//edit a player
+                        console.log("Selected index:", index)      // prints a number
+
+                        console.log("Selected BG Media Player:", modelData.label)
+                        SettingsManager.update_preferred_player(index)
+
+
                     }
                 }
             }

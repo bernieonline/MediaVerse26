@@ -15,6 +15,8 @@ from XML_Details import GetXMLDetails
 from dbMySql.db_utils import getLibraryList
 from xml_controller import XmlController
 from FileSystem import FileSystem
+from Settings_Manager import SettingsManager
+
 
 # Configure logging
 log_file = paths["log"]
@@ -23,6 +25,11 @@ logging.basicConfig(
     level=logging.DEBUG,
     format='%(asctime)s - %(levelname)s - %(message)s'
 )
+
+
+config_path = paths["config"]   # relative path to Config.json
+
+settings_manager = SettingsManager(config_path)
 
 def main():
     try:
@@ -66,6 +73,9 @@ def main():
         engine.rootContext().setContextProperty("imagesPath", Path(paths["assets"]).as_uri())
         #engine.rootContext().setContextProperty("menuData", menu_data)
         engine.rootContext().setContextProperty("centralMenuData", menu_data)
+        engine.rootContext().setContextProperty("SettingsManager", settings_manager)
+
+
 
 
         print("Data being passed to QML as menuData:", menu_data)
