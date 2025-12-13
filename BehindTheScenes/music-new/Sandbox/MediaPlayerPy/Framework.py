@@ -18,21 +18,42 @@ from FileSystem import FileSystem
 from Settings_Manager import SettingsManager
 
 
-# Configure logging
-log_file = paths["log"]
-logging.basicConfig(
-    filename=log_file,
-    level=logging.DEBUG,
-    format='%(asctime)s - %(levelname)s - %(message)s'
-)
 
 
-config_path = paths["config"]   # relative path to Config.json
 
-settings_manager = SettingsManager(config_path)
+
+
 
 def main():
     try:
+       
+        # Configure logging
+        log_file = paths["log"]
+        logging.basicConfig(
+            filename=log_file,
+            level=logging.DEBUG,
+            format='%(asctime)s - %(levelname)s - %(message)s'
+        )
+
+
+        config_path = paths["config"]   # relative path to Config.json
+
+        settings_manager = SettingsManager(config_path)
+        print(".........................1")
+
+
+        # ✅ Explicit trigger right after creating the object
+        #loads all key value pairs into memory from the cofig file on startup
+        settings_manager.load_settings()
+
+
+
+
+
+
+
+
+
         # Build/refresh cache at startup
         update_cache()
         print("✅ Cache updater finished, launching QML engine...")
