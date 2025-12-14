@@ -5,10 +5,13 @@ import QtQuick.Layouts 1.15
 Rectangle {
     id: root
     property var xmlDetails   // Python object passed in
+    //model: fileSystemManager ? fileSystemManager.imageFiles : []
+
     color: "transparent"
     signal launchVideoRequested(string cachePath)//used by double click play video method
     signal imageClicked(string cachePath, string originalPath)
     property string _pendingImagePath: ""
+    property string currentFolderPath: ""
 
     ColumnLayout {
         anchors.fill: parent
@@ -40,32 +43,44 @@ Rectangle {
                     acceptedButtons: Qt.LeftButton
 
                     property bool doubleClickActive: false
-                    property var singleClickTimer: null
-
-
-                    onClicked: {
-                        // Start a short timer to decide if it's really a single click
-                        if (singleClickTimer) singleClickTimer.stop()
-                        singleClickTimer = Qt.createQmlObject('import QtQuick 2.15; Timer { interval: 250; repeat: false }',root)
-
-                        singleClickTimer.triggered.connect(function() {
+                    property Timer singleClickTimer: Timer {
+                        interval: 250
+                        repeat: false
+                        onTriggered: {
                             if (!doubleClickActive) {
-                                 console.log("✅ Single click confirmed")
-                                root.imageClicked(modelData.filePath,modelData.originalPath)
+                                console.log("✅ Single click confirmed")
+                                root.imageClicked(modelData.filePath, modelData.originalPath)
                             }
                             doubleClickActive = false
-                        })
+                        }
+                    }
+
+                    onClicked: {
+                        // restart the timer each click
+                        singleClickTimer.stop()
                         singleClickTimer.start()
                     }
 
-                    // Double click launches video
                     onDoubleClicked: {
-                        console.log("🎯 Double‑clicked in GridView:", modelData.filePath)
                         doubleClickActive = true
-                        if (singleClickTimer) singleClickTimer.stop()
-                        root.launchVideoRequested(modelData.filePath)
+                        singleClickTimer.stop()   // ✅ cancel pending single‑click
+
+                        console.log("🎯 Image Double‑clicked in GridView:", modelData.fileName)
+
+                        // ✅ Update the selected image file
+                        window.selectedImageFile = modelData.fileName
+                        let imageFile = window.selectedImageFile
+
+                        // ✅ Resolve the actual video path
+                        let folderPath = window.selectedFolderPath
+                        let videoPath  = fileSystemManager.findVideoInFolder(folderPath, imageFile)
+
+                        console.log("➡️ Double‑click resolved videoPath:", videoPath)
+
+                        // ✅ Launch with preferred player using full path
+                        SettingsManager.launch_video_with_preferred_player(videoPath)
                     }
-                }
+                }  
             }
         }
         Loader {

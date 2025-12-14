@@ -54,14 +54,19 @@ ApplicationWindow {
     }
 
     Connections {
-        //deals with actions when a setting is changed
-        //python emits a signal after writing to the config file and this listens for it
-        //its informed that config settings have changed
         target: SettingsManager
-        onSettingsChanged: {
+
+        // Refresh UI when settings change
+        function onSettingsChanged() {
             let settings = SettingsManager.get_settings()
             currentPlayerIndex = settings["Preferred Player"]
             console.log("Settings refreshed, Preferred Player:", currentPlayerIndex)
+        }
+
+        // Play video when Python emits the launch signal
+        function onVideoLaunchRequested(videoPath) {
+            console.log("🎬 MiniPlayer received videoPath:", videoPath)
+            miniPlayer.play(videoPath)   // call your MiniPlayer’s play() method
         }
     }
 

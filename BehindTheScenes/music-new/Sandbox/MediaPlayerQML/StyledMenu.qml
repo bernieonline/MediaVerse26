@@ -205,9 +205,12 @@ Item {
     }
 
     // Media Player horizontal radio buttons
+    
     Popup {
         id: mediaPlayerPopup
-        property var items: []
+        property var items: []                // model for your radio buttons
+        property int currentPlayerIndex: -1   // holds the saved index from JSON
+
         modal: false
         focus: true
         parent: Overlay.overlay
@@ -226,6 +229,23 @@ Item {
             open()
         }
 
+        // ✅ Load settings when the popup is created
+        Component.onCompleted: {
+            let settings = SettingsManager.get_settings()
+            currentPlayerIndex = settings["Preferred Player"]
+            console.log("Startup Preferred Player:", currentPlayerIndex)
+        }
+
+        // ✅ Listen for Python signal whenever settings change
+        Connections {
+            target: SettingsManager
+            onSettingsChanged: {
+                let settings = SettingsManager.get_settings()
+                currentPlayerIndex = settings["Preferred Player"]
+                console.log("Preferred Player refreshed:", currentPlayerIndex)
+            }
+        }
+
         contentItem: Row {
             spacing: 12
             padding: 8
@@ -235,22 +255,16 @@ Item {
 
                 delegate: RadioButton {
                     text: modelData.label
-                    checked: index === 0 // first one default
+
+                    // ✅ checked state bound to saved index
+                    checked: (index === mediaPlayerPopup.currentPlayerIndex)
+
                     onClicked: {
-                        //we need to send the index number to config
-                        //J:\MediaVerse 1.0\BehindTheScenes\music-new\Assets\Config.
-                        //click the option update config
-                        //update Framework.py to read config into memory on startup
-                        //update selected radiobutton option reset
-                        //then a settings option to manage registered players
-                        //add a new player and set its paintedWidth
-                        //remove a player//edit a player
-                        console.log("Selected index:", index)      // prints a number
-
+                        console.log("Selected index:", index)
                         console.log("Selected BG Media Player:", modelData.label)
-                        SettingsManager.update_preferred_player(index)
 
-
+                        // ✅ generic update method in Python
+                        SettingsManager.update_setting("Preferred Player", index)
                     }
                 }
             }

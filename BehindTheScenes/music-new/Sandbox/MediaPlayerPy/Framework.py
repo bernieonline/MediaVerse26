@@ -37,9 +37,16 @@ def main():
 
 
         config_path = paths["config"]   # relative path to Config.json
+        fileSystem = FileSystem()
+        settings_manager = SettingsManager(config_path, fileSystem)
 
-        settings_manager = SettingsManager(config_path)
+
+      
+
         print(".........................1")
+
+     
+
 
 
         # ✅ Explicit trigger right after creating the object
@@ -95,7 +102,8 @@ def main():
         #engine.rootContext().setContextProperty("menuData", menu_data)
         engine.rootContext().setContextProperty("centralMenuData", menu_data)
         engine.rootContext().setContextProperty("SettingsManager", settings_manager)
-
+        engine.rootContext().setContextProperty("fileSystemManager", fileSystem)
+        
 
 
 
@@ -103,19 +111,18 @@ def main():
 
 
         # Create persistent Python objects (prevent GC) and expose to QML
-        file_system = FileSystem()
         xml_controller = XmlController()
         xml_provider = GetXMLDetails()
 
         if myLibrary and "path" in myLibrary[0]:
             root_path = myLibrary[0]["path"]
-            file_system.update_folders(root_path)
+            fileSystem.update_folders(root_path)
 
 
         ctx = engine.rootContext()
 
 
-        ctx.setContextProperty("fileSystemManager", file_system)
+        ctx.setContextProperty("fileSystemManager", fileSystem)
 
         
         ctx.setContextProperty("xmlController", xml_controller)

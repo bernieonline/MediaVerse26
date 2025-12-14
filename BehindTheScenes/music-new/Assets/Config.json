@@ -1,5 +1,10 @@
 {
   "name": "Bernard",
   "_comment": "This file provides persistence for user settings choices",
-  "Preferred Player": 1
+  "Preferred Player": 1,
+  "PlayerPaths": {
+    "MiniPlayer": "",
+    "JRiver": "C:\\Program Files\\J River\\Media Center 34\\MC34.exe",
+    "PowerDVD": "C:\\Program Files\\CyberLink\\PowerDVD20\\PowerDVD.exe"
+  }
 }
