@@ -1,0 +1,190 @@
+here is my project scenario
+I am developing media management software for use in my home.
+
+The basic overview is that I have a movie library on a local server that feeds my JRiver software. I want to replace the jriver interface with my own for browsing and playing
+ although the actual playing will be handed off to jriver. I will use my software on a number of networked Windows PCs.
+
+Software development uses Pyside6 QMLfor interface design.
+
+I have the basic framework running and it works like this. The user clicks a button and a series of top level folders are shown on a sliding panel. These folders have a strict hierarchy as do the contents. Each folder represents a subset of a group of movies eg 1990s, Bond Fils etc.
+The folders typically hold a movie file, an image poster file and an xml jriver sidecar file. When the user clicks a folder the images are displayed in either grid view or carousel view. These images are stored as a cache on each local pc using the software and the cache folder structure 
+mirror the movie library.Caching is there to speed up the display process and the images are thumbnails.
+
+The user has 2 options when viewing the images. The first is a single click that creates a detal_view of the movie, on the left pane the image on the right a tabbed pane fed by the xml from the sidecar file. There is a video button that the user can click to either play the movie full screen
+ through jriver or on a built in mini player. If the user double clicks the image the movie just plays in the default video player. This all works well.
+
+The next requirements creates more complexity
+Requirement 1 - DVD playon: Jriver plays DVS folders happily if passed the folder path so that is my aim, however no image exists in the library folder so none exist
+ in the cach so they are invisible. in this scenario a dvd folder will exist side by side with the images and video file and will be named in the same convention. Ideally
+inside the dvd folder is a video_ts folder that holds the vob files etc. There is also an image file named video_ts.jpg representing the movie image. Its made more complex in that the folders structure may not always be consistent and the image may be further down in the folder hierarch
+Whwn my cache is built i need to add a behaviour that checks for dvd folders, finds the image file, and copies it into the cache, renamed with the name if its move from the top level folder that it exists in. This will then be displayed alongside hd moves etc in a seamless way. When I play the file i pick up the movie name 
+and passit it to jriver on e the folder path is retreived. I'm not sure yet whether I will need to be able to identify the dvd images in case the play command requires a different syntax to pass the folder adderess. I also plan to generate an xml file that will be stored in the same folder as the image.
+
+This describes my first requirement and I would normally pause here to concentrate just on this task but the second tak is related and may affect our design pattern of the first task
+
+The issue is this. There are folders that hold tv series. One folder is named TV Series and inside is another set of folders each named for the series title, inside each of these folders could be another set of folders, one for each season, in each season folders will be a set of files like our movies with video, image and 
+xml, or they could each be dvd folders as previously discussed. We can design our way through the TV series folder I'm sure, but it gets more complicate dwhen a stand alone folder in the top level group also represents a tv series. I need a design pattern that will allow me to drill down and represent the various views in a way that allows images to be used.
+What i can tell you is that the toplevel folders holding a series are not currently dvd folder but follow the format of top level movie folder so can be given a low priority
+
+The TV Series folder nestin is like this
+
+TV Shows Folder Name
+	series folder name 1
+		mkv file
+		jpg file
+		xml file
+
+	Cosmos Folder Name
+		Cosmos Folder Name
+			Cosmos Folder S01E01
+				mp4 file
+				jpg file
+				xml file
+			Cosmos Folder S01E02
+			Cosmos Folder S01E02
+			
+	
+	Luther folder name 
+		flat file with all videos, images and xml file for all series usin S01E01 notation to S04E05
+
+	Jack Taylor Folder Name
+		Folder Season 1
+			mp4
+			jpeg
+			xml
+			
+		Folder Season 2
+
+	Slow Horses Folder
+		Season 1
+			Slow Horses Disk 1
+				BDMV folder
+				CERTIFICATE folder
+				MakeMKV folder
+				
+			Slow horses Disk 2
+			
+		Season 2
+	
+	Wire in the blood folder
+		s01e01 FOLDER NAME
+			VIDEO_TS
+				vob fILES
+				XML FILE
+				NO JPEG DONT KNOW WHERE IT IS
+				
+		
+		
+
+
+
+	Here is the plan
+
+Mediaverse stage 2 master plan
+This plan keeps you in control: small, testable steps, each with explicit terminal outputs. Implement one step at a time; only proceed once the current step is stable.
+
+Groundwork and visibility
+- Goal: Establish deterministic scanning and classification with clear terminal visibility.
+- Step 1: Top-level scan
+- Action: Enumerate top-level folders (groups like “1990s”, “Bond Films”, “TV Shows”).
+- Test output: “Scanned roots: N” and list each root path.
+- Step 2: Folder classification
+- Action: For each folder, detect video files, VIDEO_TS, BDMV.
+- Test output: “Folder: X → kind: movie/episode/disc(dvd/bdmv)”.
+- Step 3: Episode parsing
+- Action: Parse SxxExx and 1x01 tokens where present.
+- Test output: “Parsed series: Title, season: S, episode: E” or “No tokens found”.
+
+Poster discovery and cache optimization
+- Goal: Achieve JRiver-like responsiveness by pre-sizing, flattening, and indexing posters.
+- Step 4: Poster candidate search
+- Action: Search for poster.jpg, cover.jpg, folder.jpg, video_ts.jpg, and title-matching jpgs within 2 levels.
+- Test output: “Poster found: path” or “Poster missing for mediaId”.
+- Step 5: Deterministic thumbnail sizing
+- Action: Pre-generate thumbnails at exact grid size (one target resolution).
+- Test output: “Thumbnail generated: WxH for mediaId”.
+- Step 6: Flattened cache layout
+- Action: Store all thumbnails in a single cache directory with hashed names.
+- Test output: “Cached poster: cache/posters/{mediaId}.jpg”.
+- Step 7: Manifest index
+- Action: Build an in-memory map of mediaId → posterPath, playIntent.
+- Test output: “Manifest loaded: N entries, load time: X ms”.
+- Step 8: Derived poster fallback
+- Action: If missing, mark entity and generate a simple typographic poster.
+- Test output: “Derived poster created for mediaId”.
+
+Asynchronous loading and memory caching
+- Goal: Parallelize disk I/O and decoding; keep hot thumbnails in RAM for instant UI.
+- Step 9: Basic async workers
+- Action: Load thumbnails concurrently.
+- Test output: “Loaded poster mediaId in worker W, time: X ms”.
+- Step 10: Prioritized first row
+- Action: Always load visible grid items first, queue remaining.
+- Test output: “First row ready in X ms; background queue size: Y”.
+- Step 11: Batch processing
+- Action: Process thumbnails in batches (e.g., 20).
+- Test output: “Batch B completed in X ms (items: K)”.
+- Step 12: Prefetch ahead of scroll
+- Action: Preload next two rows when idle.
+- Test output: “Prefetched rows R+1–R+2”.
+- Step 13: LRU RAM cache
+- Action: Maintain decoded image cache (e.g., 500–1000 items).
+- Test output: “Cache hits: H, misses: M, current size: S”.
+
+TV series and disc structures
+- Goal: Normalize mixed hierarchies into consistent, playable entities with posters.
+- Step 14: Flat series folders
+- Action: Emit per-episode entities for SxxExx files in a single folder.
+- Test output: “Series: X, episodes discovered: N”.
+- Step 15: Nested seasons
+- Action: Descend Season N folders, emit episodes or discs.
+- Test output: “Series: X, Season: N → episodes: E, discs: D”.
+- Step 16: Disc per season
+- Action: For Disk M with VIDEO_TS/BDMV, emit disc entities titled with season and disk.
+- Test output: “Disc entity: Title — SNN Disk M (type: dvd/bdmv)”.
+- Step 17: Missing assets handling
+- Action: Log anomalies; ensure derived poster + minimal XML stub exists.
+- Test output: “Warning: No JPEG for mediaId; derived poster and stub XML created”.
+
+JRiver play adapter and manifest emission
+- Goal: Decouple UI from play syntax; produce a clean manifest for QML.
+- Step 18: Assign play intents
+- Action: Map entities to file, dvdFolder, or bdmvFolder with play path.
+- Test output: “Play intent set: type=…, path=…”.
+- Step 19: Minimal XML generation
+- Action: Write mediaId.xml with title, kind, series/season/episode, play path.
+- Test output: “XML written: cache/xml/{mediaId}.xml”.
+- Step 20: Manifest write
+- Action: Append one JSON record per entity to manifest.jsonl.
+- Test output: “Manifest updated: +N records (total: T)”.
+
+Benchmarking, tuning, and guardrails
+- Goal: Validate latency and stability; iterate until grid view feels instant.
+- Step 21: Grid load benchmark
+- Action: Measure time to render first row and 100 thumbnails.
+- Test output: “Grid first-row: X ms; 100 thumbs: Y ms”.
+- Step 22: Thread pool tuning
+- Action: Compare worker counts (4, 8, 12) for throughput vs. disk contention.
+- Test output: “Pool size P → throughput: X MB/s, UI latency: Y ms”.
+- Step 23: Large folder stress test
+- Action: Test with 1000+ posters; monitor memory and scroll smoothness.
+- Test output: “Max memory: M MB; scroll FPS: F; cache hits: H/M”.
+- Step 24: Incremental cache updates
+- Action: Skip unchanged entities via timestamps/hashes.
+- Test output: “Skipped unchanged: N; processed: P”.
+- Step 25: Anomaly logging
+- Action: Centralize warnings for teachable moments.
+- Test output: “Anomalies: K (list paths and reasons)”.
+
+Working rhythm
+- Label: One step per session
+- Action: Implement, run, validate terminal outputs, commit.
+- Label: Gate to next step
+- Action: Proceed only when outputs match expectations and latency improves or stays stable.
+- Label: Recap and adjust
+- Action: After every three steps, re-measure grid latency and RAM usage.
+If you want, I can turn this into a “Day 1–Day 4” pacing plan with the most impactful steps first, focused on hitting JRiver-like instant grid rendering quickly.
+
+
+
+
