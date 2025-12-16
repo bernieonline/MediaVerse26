@@ -4,7 +4,7 @@
   "Preferred Player": 1,
   "PlayerPaths": {
     "MiniPlayer": "",
-    "JRiver": "C:\\Program Files\\J River\\Media Center 34\\MC34.exe",
+    "JRiver": "C:\\Program Files\\VideoLAN\\VLC\\vlc.exe",
     "PowerDVD": "C:\\Program Files\\CyberLink\\PowerDVD20\\PowerDVD.exe"
   }
 }
