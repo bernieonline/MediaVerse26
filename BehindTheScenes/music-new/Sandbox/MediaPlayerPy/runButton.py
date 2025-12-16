@@ -110,7 +110,7 @@ if __name__ == "__main__":
         xml_provider = GetXMLDetails()
         engine.rootContext().setContextProperty("xmlDetails", xml_provider)
 
-        engine.load(QUrl.fromLocalFile(str(Path(__file__).parent.parent / "MediaPlayerQML" / "main.qml")))
+        engine.load(QUrl.fromLocalFile(str(Path(__file__).parent.parent / "MediaPlayerQML" / "StackView.qml")))
 
         root_objs = engine.rootObjects()
         if root_objs:
