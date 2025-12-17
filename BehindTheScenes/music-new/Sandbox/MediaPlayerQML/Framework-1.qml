@@ -54,6 +54,27 @@ ApplicationWindow {
     }
 
     Connections {
+        target: manifestUpdater
+        onRefreshStarted: {
+            console.log("Manifest refresh started")
+            refreshIndicator.visible = true
+        }
+        onRefreshFinished: {
+            console.log("Manifest refresh finished")
+            refreshIndicator.visible = false
+        }
+    }
+    
+    BusyIndicator {
+        id: refreshIndicator
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        anchors.margins: 12   // add a little padding from the edges
+        running: false
+        visible: false
+    }
+
+    Connections {
         target: SettingsManager
 
         // Refresh UI when settings change

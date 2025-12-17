@@ -16,10 +16,8 @@ from dbMySql.db_utils import getLibraryList
 from xml_controller import XmlController
 from FileSystem import FileSystem
 from Settings_Manager import SettingsManager
-
-
-
-
+from Manifest import ManifestUpdater
+import threading
 
 
 
@@ -54,6 +52,8 @@ def main():
         settings_manager.load_settings()
 
 
+        manifest_updater = ManifestUpdater()
+        print(".........................2")
 
 
 
@@ -121,6 +121,7 @@ def main():
 
         ctx = engine.rootContext()
 
+        ctx.setContextProperty("manifestUpdater", manifest_updater)
 
         ctx.setContextProperty("fileSystemManager", fileSystem)
 
@@ -141,6 +142,8 @@ def main():
         if not engine.rootObjects():
             logging.error("QML FAILED to load")
             return -1
+        
+        threading.Thread(target=manifest_updater.update_manifest_background, daemon=False).start()
         
         # Explicitly show the root window
         #root = engine.rootObjects()[0]
