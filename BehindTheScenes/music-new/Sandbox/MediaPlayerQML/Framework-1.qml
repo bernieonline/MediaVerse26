@@ -52,18 +52,20 @@ ApplicationWindow {
         anchors.horizontalCenter: parent.horizontalCenter
         menuData: centralMenuData   // <- bind directly to Python property
     }
-
     Connections {
         target: manifestUpdater
         onRefreshStarted: {
             console.log("Manifest refresh started")
+            refreshIndicator.running = true
             refreshIndicator.visible = true
         }
         onRefreshFinished: {
             console.log("Manifest refresh finished")
+            refreshIndicator.running = false
             refreshIndicator.visible = false
         }
     }
+
     
     BusyIndicator {
         id: refreshIndicator
@@ -73,6 +75,7 @@ ApplicationWindow {
         running: false
         visible: false
     }
+   
 
     Connections {
         target: SettingsManager
