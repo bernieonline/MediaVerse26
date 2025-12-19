@@ -5,13 +5,13 @@ import QtQuick.Layouts 1.15
 Rectangle {
     id: root
     property var xmlDetails   // Python object passed in
-    //model: fileSystemManager ? fileSystemManager.imageFiles : []
-
-    color: "transparent"
-    signal launchVideoRequested(string cachePath)//used by double click play video method
-    signal imageClicked(string cachePath, string originalPath)
     property string _pendingImagePath: ""
     property string currentFolderPath: ""
+
+    color: "transparent"
+
+    signal launchVideoRequested(string cachePath)
+    signal imageClicked(string cachePath, string originalPath)
 
     ColumnLayout {
         anchors.fill: parent
@@ -27,7 +27,9 @@ Rectangle {
 
             ScrollBar.vertical: ScrollBar { policy: ScrollBar.AlwaysOn }
 
-            model: fileSystemManager.imageFiles
+            // Guard against null fileSystemManager
+            model: fileSystemManager ? fileSystemManager.imageFiles : []
+
             cellWidth: imageGridView.width / 6
             cellHeight: (imageGridView.width / 6) * 1.5
 
@@ -35,54 +37,49 @@ Rectangle {
                 width: imageGridView.width / 6
                 height: (imageGridView.width / 6) * 1.5
 
-                // Load thumbnail directly from cache
                 source: modelData.filePath
-               
+
+                // Define doubleClickActive at delegate level
+                property bool doubleClickActive: false
+
                 MouseArea {
                     anchors.fill: parent
                     acceptedButtons: Qt.LeftButton
 
-                    property bool doubleClickActive: false
                     property Timer singleClickTimer: Timer {
                         interval: 250
                         repeat: false
                         onTriggered: {
-                            if (!doubleClickActive) {
+                            if (!parent.doubleClickActive) {
                                 console.log("✅ Single click confirmed")
                                 root.imageClicked(modelData.filePath, modelData.originalPath)
                             }
-                            doubleClickActive = false
+                            parent.doubleClickActive = false
                         }
                     }
 
                     onClicked: {
-                        // restart the timer each click
                         singleClickTimer.stop()
                         singleClickTimer.start()
                     }
 
                     onDoubleClicked: {
-                        doubleClickActive = true
-                        singleClickTimer.stop()   // ✅ cancel pending single‑click
+                        parent.doubleClickActive = true
+                        singleClickTimer.stop()
 
-                        console.log("🎯 Image Double‑clicked in GridView:", modelData.fileName)
+                        console.log("🎯 Image Double‑clicked:", modelData.fileName)
 
-                        // ✅ Update the selected image file
                         window.selectedImageFile = modelData.fileName
-                        let imageFile = window.selectedImageFile
-
-                        // ✅ Resolve the actual video path
                         let folderPath = window.selectedFolderPath
-                        let videoPath  = fileSystemManager.findVideoInFolder(folderPath, imageFile)
+                        let videoPath  = fileSystemManager.findVideoInFolder(folderPath, window.selectedImageFile)
 
                         console.log("➡️ Double‑click resolved videoPath:", videoPath)
-
-                        // ✅ Launch with preferred player using full path
                         SettingsManager.launch_video_with_preferred_player(videoPath)
                     }
-                }  
+                }
             }
         }
+
         Loader {
             id: detailLoader
             Layout.fillWidth: true
@@ -102,11 +99,8 @@ Rectangle {
     Connections {
         target: root
         function onImageClicked(cachePath, originalPath) {
-            console.log("📂 imagegridview: connections:Cache Path (thumbnail URI):", cachePath)
-            console.log("🖼️ imagegridview: connections:Original Path (server filename):", originalPath)
-
-
-
+            console.log("📂 imagegridview: Cache Path:", cachePath)
+            console.log("🖼️ imagegridview: Original Path:", originalPath)
 
             root._pendingImagePath = cachePath
 
@@ -114,16 +108,13 @@ Rectangle {
             detailLoader.source = "Detail_View.qml"
             detailLoader.active = true
 
-            detailLoader.item.imagePath = cachePath       // cached image
-            detailLoader.item.originalXmlPath = originalPath // original server path
+            detailLoader.item.imagePath = cachePath
+            detailLoader.item.originalXmlPath = originalPath
 
-            // ✅ Call Python slot directly when image is clicked
             var vid = fileSystemManager.findVideoForImage(cachePath)
-
             detailLoader.item.videoPath = vid
 
             console.log("Video URL from Python:", vid)
-            //playerPanel.videoPath = vid
         }
     }
 }

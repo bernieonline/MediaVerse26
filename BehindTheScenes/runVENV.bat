@@ -13,6 +13,12 @@ adding a files
 (venv) J:\MediaVerse 1.0\BehindTheScenes\music-new\Sandbox\MediaPlayerQML>git add "StyledMenu.qml"
 
 
+if vs code ever looks scrambled run these three commands from withinn BehindTheScenes
+git branch --show-current        # confirms which branch you're on
+git status                       # shows if working tree matches HEAD
+git ls-tree -r HEAD --name-only  # lists all files tracked in the commit
+
+
 overwrites all local files
 git fetch origin
 git reset --hard origin/main

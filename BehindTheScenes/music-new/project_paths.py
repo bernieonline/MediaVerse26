@@ -31,6 +31,10 @@ thumb_dir = project_root / "cache" / "thumbnails"
 display_dir = project_root / "cache" / "display"
 
 
+
+
+
+
 # NEW: JSON categories file path
 json_path = project_root / "Assets" / "XMLCategories.json"
 menu_json_path = project_root / "Assets" / "MainMenu.json"
@@ -61,6 +65,15 @@ paths = {
     "config" : config_json
 
     }
+
+server_cache_dir = Path(r"W:\MediaVerse\cache")
+manifest_dir = Path(r"W:\MediaVerse\manifest")
+paths.update({
+    "manifest": manifest_dir,
+    "server_cache": server_cache_dir
+})
+
+
 
 
 #using this inside main.py
