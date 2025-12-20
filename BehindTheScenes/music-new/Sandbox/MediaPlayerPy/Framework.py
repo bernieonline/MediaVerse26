@@ -16,16 +16,18 @@ from dbMySql.db_utils import getLibraryList
 from xml_controller import XmlController
 from FileSystem import FileSystem
 from Settings_Manager import SettingsManager
-from Manifest import ManifestUpdater
+
+# NEW: use your v2 wrapper exactly as intended
+from Manifest_v2_wrapper import ManifestUpdater_v2 as ManifestUpdater
+
 import threading
-
-
 
 
 def main():
     try:
-       
-        # Configure logging
+        # ------------------------------------------------------------
+        # Logging
+        # ------------------------------------------------------------
         log_file = paths["log"]
         logging.basicConfig(
             filename=log_file,
@@ -33,44 +35,39 @@ def main():
             format='%(asctime)s - %(levelname)s - %(message)s'
         )
 
-
-        config_path = paths["config"]   # relative path to Config.json
+        # ------------------------------------------------------------
+        # Settings + filesystem
+        # ------------------------------------------------------------
+        config_path = paths["config"]
         fileSystem = FileSystem()
         settings_manager = SettingsManager(config_path, fileSystem)
 
-
-      
-
         print(".........................1")
 
-     
-
-
-
-        # ✅ Explicit trigger right after creating the object
-        #loads all key value pairs into memory from the cofig file on startup
+        # Load settings immediately
         settings_manager.load_settings()
 
-
+        # ------------------------------------------------------------
+        # Manifest updater (v2 wrapper)
+        # ------------------------------------------------------------
         manifest_updater = ManifestUpdater()
         print(".........................2")
 
-
-
-
-
-
-
-        # Build/refresh cache at startup
+        # ------------------------------------------------------------
+        # Cache updater (your existing system)
+        # ------------------------------------------------------------
         update_cache()
         print("✅ Cache updater finished, launching QML engine...")
 
-        # Force Material style before QML loads
+        # ------------------------------------------------------------
+        # Qt setup
+        # ------------------------------------------------------------
         os.environ["QT_QUICK_CONTROLS_STYLE"] = "Material"
-
         app = QApplication(sys.argv)
 
-        # Get media library list
+        # ------------------------------------------------------------
+        # Database library list
+        # ------------------------------------------------------------
         myLibrary = getLibraryList()
         if not myLibrary:
             error_message = "Server not running or no libraries found."
@@ -84,33 +81,29 @@ def main():
 
         print("Data being passed to QML as myLibraryModel:", myLibrary)
 
-        # Add Qt plugin paths
+        # ------------------------------------------------------------
+        # QML engine setup
+        # ------------------------------------------------------------
         QCoreApplication.addLibraryPath(str(Path(sys.modules["PySide6"].__file__).parent / "plugins"))
         os.add_dll_directory(str(Path(sys.modules["PySide6"].__file__).parent))
 
-        #Munu paths
         with open(paths["menu"], encoding="utf-8") as f:
             menu_data = json.load(f)
 
-
-        # Create QML engine
         engine = QQmlApplicationEngine()
         engine.addImportPath(os.path.join(os.path.dirname(PySide6.__file__), "qml"))
         engine.addImportPath(QLibraryInfo.path(QLibraryInfo.LibraryPath.Qml2ImportsPath))
-        #engine.rootContext().setContextProperty("imagesPath", str(paths["assets"].as_posix()))
+
         engine.rootContext().setContextProperty("imagesPath", Path(paths["assets"]).as_uri())
-        #engine.rootContext().setContextProperty("menuData", menu_data)
         engine.rootContext().setContextProperty("centralMenuData", menu_data)
         engine.rootContext().setContextProperty("SettingsManager", settings_manager)
         engine.rootContext().setContextProperty("fileSystemManager", fileSystem)
-        
-
-
 
         print("Data being passed to QML as menuData:", menu_data)
 
-
-        # Create persistent Python objects (prevent GC) and expose to QML
+        # ------------------------------------------------------------
+        # XML + filesystem controllers
+        # ------------------------------------------------------------
         xml_controller = XmlController()
         xml_provider = GetXMLDetails()
 
@@ -118,38 +111,36 @@ def main():
             root_path = myLibrary[0]["path"]
             fileSystem.update_folders(root_path)
 
-
         ctx = engine.rootContext()
 
+        # Expose manifest updater to QML
         ctx.setContextProperty("manifestUpdater", manifest_updater)
 
         ctx.setContextProperty("fileSystemManager", fileSystem)
-
-        
         ctx.setContextProperty("xmlController", xml_controller)
         ctx.setContextProperty("xmlDetails", xml_provider)
         ctx.setContextProperty("myLibraryModel", myLibrary)
 
-        # Expose cache paths
+        # Cache paths
         ctx.setContextProperty("thumbsPath", paths["thumbs"].as_uri())
-        
-        
         ctx.setContextProperty("displayPath", paths["display"].as_uri())
 
+        # ------------------------------------------------------------
         # Load QML
+        # ------------------------------------------------------------
         engine.load(QUrl.fromLocalFile(str(paths["qml"] / "Framework-1.qml")))
 
         if not engine.rootObjects():
             logging.error("QML FAILED to load")
             return -1
-        
-        threading.Thread(target=manifest_updater.update_manifest_background, daemon=False).start()
-        
-        # Explicitly show the root window
-        #root = engine.rootObjects()[0]
-        #root.show()
-        #root.showFullScreen()
-        #app.setGeometry(100, 100, 1280, 720)
+
+        # ------------------------------------------------------------
+        # Start manifest build in background
+        # ------------------------------------------------------------
+        threading.Thread(
+            target=manifest_updater.update_manifest_background,
+            daemon=False
+        ).start()
 
         print("✅ Framework-1.qml loaded successfully.")
         return app.exec()
@@ -157,6 +148,7 @@ def main():
     except Exception:
         logging.exception("An unhandled exception occurred:")
         return -1
+
 
 if __name__ == "__main__":
     sys.exit(main())

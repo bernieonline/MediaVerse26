@@ -9,7 +9,7 @@ git log main..origin/main --oneline
 
 In PowerShell
 .\venv\Scripts\Activate.ps1
-cd music-newcd 
+cd D:\MediaVerse1.0\BehindTheScenes\behindthescenes\music-new\sandbox\MediaPlayerPy> 
 
 overwrites all local files
 git fetch origin
