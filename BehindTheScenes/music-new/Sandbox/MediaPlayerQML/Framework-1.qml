@@ -320,4 +320,37 @@ ApplicationWindow {
 
         }
     }
-}
+
+    // ... [Existing code: contentContainer, videoPanel, etc.] ...
+
+    // ------------------------------------------------------------
+    // 1. UTILITY SIDEBAR INTEGRATION
+    // ------------------------------------------------------------
+    // This sits at the end of the file to ensure it's on top of all other layers
+    UtilitySidebar {
+        id: utilitySidebar
+        anchors.fill: parent
+        // Note: 'fontPathFA' is already available here 
+        // because you set it as a Context Property in main.py
+    }
+
+    // ------------------------------------------------------------
+    // 2. KEYBOARD TESTING SHORTCUT
+    // ------------------------------------------------------------
+    // Since you are using a keyboard, this is the fastest way to 
+    // test the UI without having to "bump" the mouse every time.
+    Shortcut {
+        sequence: "Ctrl+T"
+        onActivated: {
+            utilitySidebar.isOpen = !utilitySidebar.isOpen
+            console.log("MediaVerse: Sidebar toggled via keyboard. State: " + utilitySidebar.isOpen)
+        }
+    }
+
+} // <--- This is the final closing brace of your ApplicationWindow
+
+
+
+
+
+

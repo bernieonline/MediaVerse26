@@ -1,7 +1,7 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 import Qt5Compat.GraphicalEffects
-
+//from sliding panel toolbar
 Item {
     id: navPanel
     width: 350
