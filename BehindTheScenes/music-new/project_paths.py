@@ -31,7 +31,9 @@ thumb_dir = project_root / "cache" / "thumbnails"
 display_dir = project_root / "cache" / "display"
 
 
-
+#Font Awesome Payhs
+# Define the specific font file path
+font_path = project_root / "Fonts" / "fontawesome-free-7.1.0-desktop" / "otfs" / "Font Awesome 7 Free-Solid-900.otf"
 
 
 
@@ -62,8 +64,8 @@ paths = {
     "menu": menu_json_path,
     "thumbs": thumb_dir,
     "display": display_dir,
-    "config" : config_json
-
+    "config" : config_json,
+    "fonts" : font_path
     }
 
 server_cache_dir = Path(r"W:\MediaVerse\cache")

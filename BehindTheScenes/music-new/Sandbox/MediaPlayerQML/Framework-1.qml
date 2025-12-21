@@ -5,7 +5,7 @@ import QtQuick
 import QtQuick.Controls
 //import "CinemaButton.qml" as Custom
 //import QtQuick.Controls 2.15
-
+// adding toolbar
 
 //version 1.0.1 border edge added to left panel
 //1.o.2 sliding video panel added

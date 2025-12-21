@@ -1,7 +1,7 @@
 echo Activating venv...
 cd J:\MediaVerse 1.0\BehindTheScenes
 call venv\Scripts\activate
-cd J:\MediaVerse 1.0\BehindTheScenes\music-new\Sandbox\MediaPlayerPy
+cd D:\MediaVerse1.0\BehindTheScenes\BehindTheScenes\music-new\Sandbox\MediaPlayerPy
 git status
 git fetch origin
 
