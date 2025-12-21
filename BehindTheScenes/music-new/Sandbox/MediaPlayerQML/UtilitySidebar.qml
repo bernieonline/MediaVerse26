@@ -6,23 +6,31 @@ Item {
     id: root
     anchors.fill: parent
 
-    // --- CONFIGURATION ---
     property int sidebarWidth: 225
     property bool isOpen: false
     property int iconSize: 21
-    property color brandColor: "#1E90FF" // ContentWindow Blue
-
-    // --- NOTIFICATION DATA (Mechanisms) ---
+    property color brandColor: "#1E90FF" 
     property int unreadCount: 3
     property bool hasUrgent: true 
 
-    // --- FONT LOADER ---
-    FontLoader {
-        id: faSolid
-        source: fontPathFA
+    FontLoader { id: faSolid; source: fontPathFA }
+
+    // --- 1. THE DISMISSAL SHIELD ---
+    // This covers the entire screen EXCEPT the sidebar when it's open.
+    // Clicking anywhere else on the screen will close the sidebar.
+    MouseArea {
+        id: dismissalShield
+        anchors.fill: parent
+        enabled: root.isOpen
+        onClicked: {
+            root.isOpen = false
+            notificationPanel.isShown = false
+            console.log("🖱️ Sidebar closed via background click")
+        }
+        z: 997 // Sits below the sidebar but above the library
     }
 
-    // --- 1. THE TRIGGER ZONE (BUMP) + PULSING URGENT SIGNAL ---
+    // --- 2. THE TRIGGER ZONE (BUMP) ---
     MouseArea {
         id: bumpArea
         width: 15
@@ -33,13 +41,11 @@ Item {
         onEntered: root.isOpen = true
         z: 999 
 
-        // Subtle Red Pulse (Only visible when sidebar is closed)
         Rectangle {
             anchors.fill: parent
             color: "red"
             visible: root.hasUrgent && !root.isOpen
             opacity: 0.5
-            
             SequentialAnimation on opacity {
                 running: root.hasUrgent && !root.isOpen
                 loops: Animation.Infinite
@@ -49,17 +55,14 @@ Item {
         }
     }
 
-    // --- 2. THE NOTIFICATION PANEL (SUB-COMPONENT) ---
-    // This is the component defined in Notifications.qml
+    // --- 3. THE NOTIFICATION PANEL ---
     Notifications {
         id: notificationPanel
-        // Slide out to the left of the sidebar when active
-        x: root.isOpen && notificationPanel.isShown ? 
-           (parent.width - sidebarBody.width - width) : parent.width
+        x: root.isOpen && notificationPanel.isShown ? (parent.width - sidebarBody.width - width) : parent.width
         z: 998 
     }
 
-    // --- 3. THE SIDEBAR BODY ---
+    // --- 4. THE SIDEBAR BODY ---
     Rectangle {
         id: sidebarBody
         width: root.sidebarWidth
@@ -68,24 +71,20 @@ Item {
         color: "#F2121212" 
         z: 1000
 
-        Behavior on x {
-            NumberAnimation { duration: 350; easing.type: Easing.OutCubic }
-        }
+        Behavior on x { NumberAnimation { duration: 350; easing.type: Easing.OutCubic } }
 
-        // Slim Depth Shadow
-        Rectangle {
-            id: edgeGlow
-            width: 15
-            height: parent.height
-            anchors.right: sidebarBody.left
-            gradient: Gradient {
-                orientation: Gradient.Horizontal
-                GradientStop { position: 0.0; color: "transparent" }
-                GradientStop { position: 1.0; color: "#AA000000" }
+        // --- EMPTY SPACE CLICKER ---
+        // This MouseArea fills the sidebar. Because ToolButtons have their own MouseAreas,
+        // those will catch clicks first. Clicking anywhere else (empty space) closes the bar.
+        MouseArea {
+            anchors.fill: parent
+            onClicked: {
+                root.isOpen = false
+                notificationPanel.isShown = false
+                console.log("🖱️ Sidebar closed via empty space click")
             }
         }
 
-        // Main Tools Layout
         Column {
             anchors.fill: parent
             anchors.topMargin: 40
@@ -94,8 +93,9 @@ Item {
             Text {
                 text: "TOOLS"
                 color: "yellow"
-                font.pixelSize: 18
+                font.pixelSize: 20
                 font.bold: true
+                font.letterSpacing: 1.5
                 anchors.horizontalCenter: parent.horizontalCenter
             }
 
@@ -104,36 +104,14 @@ Item {
                 spacing: 12
 
                 ToolButton {
-                    iconCode: "\uf0f3"
-                    toolName: "Alerts"
-                    unreadBadge: root.unreadCount
-                    isUrgent: root.hasUrgent
+                    iconCode: "\uf0f3"; toolName: "Alerts"
+                    unreadBadge: root.unreadCount; isUrgent: root.hasUrgent
                     onClicked: notificationPanel.isShown = !notificationPanel.isShown
                 }
-
-                ToolButton {
-                    iconCode: "\uf5dc"
-                    toolName: "AI"
-                    onClicked: console.log("AI Assistant Toggle")
-                }
-
-                ToolButton {
-                    iconCode: "\uf002"
-                    toolName: "Search"
-                    onClicked: {
-                        notificationPanel.isShown = false
-                        root.isOpen = false
-                    }
-                }
-
-                ToolButton {
-                    iconCode: "\uf07c"
-                    toolName: "Files"
-                    onClicked: {
-                        notificationPanel.isShown = false
-                        root.isOpen = false
-                    }
-                }
+                
+                ToolButton { iconCode: "\uf5dc"; toolName: "AI"; onClicked: console.log("AI Clicked") }
+                ToolButton { iconCode: "\uf002"; toolName: "Search"; onClicked: console.log("Search Clicked") }
+                ToolButton { iconCode: "\uf07c"; toolName: "Files"; onClicked: console.log("Files Clicked") }
             }
         }
 
@@ -143,103 +121,52 @@ Item {
             anchors.bottomMargin: 30
             anchors.horizontalCenter: parent.horizontalCenter
             spacing: 2
-
             Text {
-                text: "MediaVerse"
-                color: root.brandColor
-                font.pixelSize: 22
-                font.bold: true
-                font.letterSpacing: 1.5
-                anchors.horizontalCenter: parent.horizontalCenter
-                
+                text: "MediaVerse"; color: root.brandColor; font.pixelSize: 22; font.bold: true
+                font.letterSpacing: 1.5; anchors.horizontalCenter: parent.horizontalCenter
                 layer.enabled: true
-                layer.effect: DropShadow {
-                    color: root.brandColor
-                    radius: 4
-                    samples: 8
-                }
+                layer.effect: DropShadow { color: root.brandColor; radius: 4; samples: 8 }
             }
-
-            Text {
-                text: "v1.0"
-                color: "#66FFFFFF"
-                font.pixelSize: 12
-                anchors.horizontalCenter: parent.horizontalCenter
-            }
-        }
-
-        // Auto-Hide Sensor
-        MouseArea {
-            anchors.fill: parent
-            z: -1
-            hoverEnabled: true
-            onExited: {
-                // If we move left, close everything. 
-                // If we move to notification panel, stay open.
-                if (mouseX < 0 && !notificationPanel.isShown) {
-                    root.isOpen = false
-                }
-            }
+            Text { text: "v1.0"; color: "#66FFFFFF"; font.pixelSize: 12; anchors.horizontalCenter: parent.horizontalCenter }
         }
     }
 
-    // --- INTERNAL COMPONENT: ToolButton ---
+    // --- TOOL BUTTON COMPONENT ---
     component ToolButton: Rectangle {
         id: btnRoot
-        property string iconCode: ""
-        property string toolName: ""
-        property int unreadBadge: 0
-        property bool isUrgent: false
+        property string iconCode; property string toolName
+        property int unreadBadge: 0; property bool isUrgent: false
         signal clicked()
 
-        width: parent.width - 20
-        height: 60
-        anchors.horizontalCenter: parent.horizontalCenter
+        width: parent.width - 20; height: 60; anchors.horizontalCenter: parent.horizontalCenter
         color: btnMouse.containsMouse ? "#22FFFFFF" : "transparent"
-        radius: 8
-        border.color: btnMouse.containsMouse ? "yellow" : "transparent"
-        border.width: 1
+        radius: 8; border.color: btnMouse.containsMouse ? "yellow" : "transparent"; border.width: 1
 
         Row {
-            anchors.fill: parent
-            anchors.leftMargin: 15
-            spacing: 15
-
+            anchors.fill: parent; anchors.leftMargin: 15; spacing: 15
             Text {
-                text: btnRoot.iconCode
-                font.family: faSolid.name
-                font.pixelSize: root.iconSize
+                text: btnRoot.iconCode; font.family: faSolid.name; font.pixelSize: root.iconSize
                 color: btnRoot.isUrgent ? "red" : (btnMouse.containsMouse ? "yellow" : "white")
                 anchors.verticalCenter: parent.verticalCenter
             }
-
             Text {
-                text: btnRoot.toolName
-                color: "white"
-                font.pixelSize: 13
-                font.bold: true
+                text: btnRoot.toolName; color: "white"; font.pixelSize: 14; font.bold: true
                 anchors.verticalCenter: parent.verticalCenter
             }
-
-            // Unread Badge Rectangle
             Rectangle {
-                width: 18; height: 18; radius: 9
-                color: btnRoot.isUrgent ? "red" : "yellow"
+                width: 20; height: 20; radius: 10
+                color: btnRoot.isUrgent ? "#D32F2F" : "#FBC02D"
                 visible: btnRoot.unreadBadge > 0
                 anchors.verticalCenter: parent.verticalCenter
                 Text {
-                    text: btnRoot.unreadBadge
-                    color: "black"; font.pixelSize: 10; font.bold: true
-                    anchors.centerIn: parent
+                    text: btnRoot.unreadBadge; color: "white" 
+                    font.pixelSize: 11; font.bold: true; anchors.centerIn: parent
                 }
             }
         }
-
-        MouseArea {
-            id: btnMouse
-            anchors.fill: parent
-            hoverEnabled: true
-            onClicked: btnRoot.clicked()
+        MouseArea { 
+            id: btnMouse; anchors.fill: parent; hoverEnabled: true; 
+            onClicked: btnRoot.clicked() // This "swallows" the click so it doesn't close the sidebar
         }
     }
 }
