@@ -12,6 +12,7 @@ import QtQuick.Controls
 //1.0.3 centre button moved to toolbar
 //1.0.4 final adjustments made before applying styling to panels
 //1.0.5 Glow effects added to main window
+//simple bug fix
 
 ApplicationWindow {
     id: window
