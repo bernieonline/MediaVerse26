@@ -16,7 +16,7 @@ from dbMySql.db_utils import getLibraryList
 from xml_controller import XmlController
 from FileSystem import FileSystem
 from Settings_Manager import SettingsManager
-
+#Adding fonts awesome path
 # NEW: use your v2 wrapper exactly as intended
 from Manifest_v2_wrapper import ManifestUpdater_v2 as ManifestUpdater
 
@@ -43,6 +43,9 @@ def main():
         settings_manager = SettingsManager(config_path, fileSystem)
 
         print(".........................1")
+
+        # Convert the Path object to a string QML can understand
+        font_url = "file:///" + str(paths["fonts"].as_posix())
 
         # Load settings immediately
         settings_manager.load_settings()
@@ -98,6 +101,7 @@ def main():
         engine.rootContext().setContextProperty("centralMenuData", menu_data)
         engine.rootContext().setContextProperty("SettingsManager", settings_manager)
         engine.rootContext().setContextProperty("fileSystemManager", fileSystem)
+        engine.rootContext().setContextProperty("fontPathFA", font_url)
 
         print("Data being passed to QML as menuData:", menu_data)
 

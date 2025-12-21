@@ -5,7 +5,7 @@ import QtQuick
 import QtQuick.Controls
 //import "CinemaButton.qml" as Custom
 //import QtQuick.Controls 2.15
-
+// adding toolbar
 
 //version 1.0.1 border edge added to left panel
 //1.o.2 sliding video panel added
@@ -51,6 +51,47 @@ ApplicationWindow {
         anchors.topMargin: 20        // <-- push it down from the top
         anchors.horizontalCenter: parent.horizontalCenter
         menuData: centralMenuData   // <- bind directly to Python property
+    }
+    Connections {
+        target: manifestUpdater
+        onRefreshStarted: {
+            console.log("Manifest refresh started")
+            refreshIndicator.running = true
+            refreshIndicator.visible = true
+        }
+        onRefreshFinished: {
+            console.log("Manifest refresh finished")
+            refreshIndicator.running = false
+            refreshIndicator.visible = false
+        }
+    }
+
+    
+    BusyIndicator {
+        id: refreshIndicator
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        anchors.margins: 12   // add a little padding from the edges
+        running: false
+        visible: false
+    }
+   
+
+    Connections {
+        target: SettingsManager
+
+        // Refresh UI when settings change
+        function onSettingsChanged() {
+            let settings = SettingsManager.get_settings()
+            currentPlayerIndex = settings["Preferred Player"]
+            console.log("Settings refreshed, Preferred Player:", currentPlayerIndex)
+        }
+
+        // Play video when Python emits the launch signal
+        function onVideoLaunchRequested(videoPath) {
+            console.log("🎬 MiniPlayer received videoPath:", videoPath)
+            miniPlayer.play(videoPath)   // call your MiniPlayer’s play() method
+        }
     }
 
 

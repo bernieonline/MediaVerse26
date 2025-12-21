@@ -1,1371 +1,408 @@
-2025-11-25 17:51:59,827 - ERROR - An unhandled exception occurred:
-Traceback (most recent call last):
-  File "C:\Users\berna\pythonproject2026\BehindTheScenes\BehindTheScenes\music-new\Sandbox\MediaPlayerPy\Framework.py", line 75, in <module>
-    from FileSystem import FileSystem
-  File "C:\Users\berna\pythonproject2026\BehindTheScenes\BehindTheScenes\music-new\Sandbox\MediaPlayerPy\FileSystem.py", line 2, in <module>
-    import psutil
-ModuleNotFoundError: No module named 'psutil'
-2025-11-25 17:52:56,960 - ERROR - An unhandled exception occurred:
-Traceback (most recent call last):
-  File "C:\Users\berna\pythonproject2026\BehindTheScenes\BehindTheScenes\music-new\Sandbox\MediaPlayerPy\Framework.py", line 75, in <module>
-    from FileSystem import FileSystem
-  File "C:\Users\berna\pythonproject2026\BehindTheScenes\BehindTheScenes\music-new\Sandbox\MediaPlayerPy\FileSystem.py", line 3, in <module>
-    import wmi
-ModuleNotFoundError: No module named 'wmi'
-2025-11-25 17:55:07,101 - INFO - Updating folders for path: W:\Collection
-2025-11-25 17:55:07,838 - INFO - Found 25 folders.
-2025-11-25 18:14:42,033 - INFO - Updating folders for path: W:\Collection
-2025-11-25 18:14:42,355 - INFO - Found 25 folders.
-2025-11-26 16:43:43,816 - INFO - Updating folders for path: W:\Collection
-2025-11-26 16:43:44,306 - INFO - Found 25 folders.
-2025-11-26 17:29:11,223 - INFO - Updating folders for path: W:\Collection
-2025-11-26 17:29:11,848 - INFO - Found 25 folders.
-2025-11-26 17:29:50,856 - INFO - Updating folders for path: W:\Collection
-2025-11-26 17:29:51,196 - INFO - Found 25 folders.
-2025-11-26 17:30:30,170 - INFO - Updating folders for path: W:\Collection
-2025-11-26 17:30:30,742 - INFO - Found 25 folders.
-2025-11-26 17:32:36,279 - INFO - Updating folders for path: W:\Collection
-2025-11-26 17:32:36,579 - INFO - Found 25 folders.
-2025-11-26 17:40:11,082 - INFO - Updating folders for path: W:\Collection
-2025-11-26 17:40:11,469 - INFO - Found 25 folders.
-2025-11-26 17:41:04,684 - INFO - Updating folders for path: W:\Collection
-2025-11-26 17:41:05,073 - INFO - Found 25 folders.
-2025-11-26 17:42:24,699 - INFO - Updating folders for path: W:\Collection
-2025-11-26 17:42:25,042 - INFO - Found 25 folders.
-2025-11-26 18:27:05,380 - INFO - Updating folders for path: W:\Collection
-2025-11-26 18:27:05,807 - INFO - Found 25 folders.
-2025-11-26 18:54:58,549 - INFO - Updating folders for path: W:\Collection
-2025-11-26 18:54:58,896 - INFO - Found 25 folders.
-2025-11-26 18:55:23,132 - INFO - Updating folders for path: W:\Collection
-2025-11-26 18:55:23,447 - INFO - Found 25 folders.
-2025-11-26 18:57:11,409 - INFO - Updating folders for path: W:\Collection
-2025-11-26 18:57:11,743 - INFO - Found 25 folders.
-2025-11-26 18:57:53,311 - INFO - Updating folders for path: W:\Collection
-2025-11-26 18:57:53,838 - INFO - Found 25 folders.
-2025-11-26 19:01:02,362 - INFO - Updating folders for path: W:\Collection
-2025-11-26 19:01:02,731 - INFO - Found 25 folders.
-2025-11-26 19:02:48,377 - INFO - Updating folders for path: W:\Collection
-2025-11-26 19:02:48,710 - INFO - Found 25 folders.
-2025-11-26 19:03:26,055 - INFO - Updating folders for path: W:\Collection
-2025-11-26 19:03:26,356 - INFO - Found 25 folders.
-2025-11-26 19:06:48,535 - INFO - Updating folders for path: W:\Collection
-2025-11-26 19:06:48,854 - INFO - Found 25 folders.
-2025-11-26 19:11:09,172 - INFO - Updating folders for path: W:\Collection
-2025-11-26 19:11:09,496 - INFO - Found 25 folders.
-2025-11-26 19:12:18,770 - INFO - Updating folders for path: W:\Collection
-2025-11-26 19:12:19,093 - INFO - Found 25 folders.
-2025-11-26 19:17:36,013 - INFO - Updating folders for path: W:\Collection
-2025-11-26 19:17:36,329 - INFO - Found 25 folders.
-2025-11-26 19:27:40,463 - INFO - Updating folders for path: W:\Collection
-2025-11-26 19:27:40,822 - INFO - Found 25 folders.
-2025-11-26 19:29:30,839 - INFO - Updating folders for path: W:\Collection
-2025-11-26 19:29:31,291 - INFO - Found 25 folders.
-2025-11-26 19:30:43,835 - INFO - Updating folders for path: W:\Collection
-2025-11-26 19:30:44,190 - INFO - Found 25 folders.
-2025-11-26 20:47:01,481 - INFO - Updating folders for path: W:\Collection
-2025-11-26 20:47:02,114 - INFO - Found 25 folders.
-2025-11-26 20:49:46,010 - INFO - Updating folders for path: W:\Collection
-2025-11-26 20:49:46,556 - INFO - Found 25 folders.
-2025-11-26 20:50:28,265 - INFO - Updating folders for path: W:\Collection
-2025-11-26 20:50:28,598 - INFO - Found 25 folders.
-2025-11-26 20:54:02,812 - INFO - Updating folders for path: W:\Collection
-2025-11-26 20:54:03,142 - INFO - Found 25 folders.
-2025-11-26 20:54:41,563 - INFO - Updating folders for path: W:\Collection
-2025-11-26 20:54:41,934 - INFO - Found 25 folders.
-2025-11-26 20:57:40,341 - INFO - Updating folders for path: W:\Collection
-2025-11-26 20:57:40,609 - INFO - Found 25 folders.
-2025-11-26 21:00:25,739 - INFO - Updating folders for path: W:\Collection
-2025-11-26 21:00:26,238 - INFO - Found 25 folders.
-2025-11-26 21:31:14,097 - INFO - Updating folders for path: W:\Collection
-2025-11-26 21:31:14,431 - INFO - Found 25 folders.
-2025-11-26 21:40:52,553 - INFO - Updating folders for path: W:\Collection
-2025-11-26 21:40:52,935 - INFO - Found 25 folders.
-2025-11-27 10:06:13,818 - INFO - Updating folders for path: W:\Collection
-2025-11-27 10:06:14,576 - INFO - Found 25 folders.
-2025-11-28 12:43:20,437 - INFO - Updating folders for path: W:\Collection
-2025-11-28 12:43:20,855 - INFO - Found 25 folders.
-2025-11-28 12:45:05,812 - INFO - Updating folders for path: W:\Collection
-2025-11-28 12:45:06,161 - INFO - Found 25 folders.
-2025-11-28 12:48:13,811 - INFO - Updating folders for path: W:\Collection
-2025-11-28 12:48:14,180 - INFO - Found 25 folders.
-2025-11-28 13:00:57,671 - INFO - Updating folders for path: W:\Collection
-2025-11-28 13:01:01,059 - INFO - Found 25 folders.
-2025-11-28 13:04:13,286 - INFO - Updating folders for path: W:\Collection
-2025-11-28 13:04:13,681 - INFO - Found 25 folders.
-2025-11-28 13:14:49,610 - INFO - Updating folders for path: W:\Collection
-2025-11-28 13:14:49,979 - INFO - Found 25 folders.
-2025-11-28 13:27:25,592 - INFO - Updating folders for path: W:\Collection
-2025-11-28 13:27:25,961 - INFO - Found 25 folders.
-2025-11-28 14:01:39,613 - INFO - Updating folders for path: W:\Collection
-2025-11-28 14:01:39,989 - INFO - Found 25 folders.
-2025-11-28 15:44:28,086 - ERROR - An unhandled exception occurred:
-Traceback (most recent call last):
-  File "D:\PythonMusic\pythonproject2026\behindTheScenes\music-new\sandbox\MediaPlayerPy\Framework.py", line 80, in <module>
-    xmlController = XmlController()
-  File "D:\PythonMusic\pythonproject2026\behindTheScenes\music-new\sandbox\MediaPlayerPy\xml_controller.py", line 19, in __init__
-    with asset_path.open("r", encoding="utf-8") as f:
-  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.9_3.9.3568.0_x64__qbz5n2kfra8p0\lib\pathlib.py", line 1252, in open
-    return io.open(self, mode, buffering, encoding, errors, newline,
-  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.9_3.9.3568.0_x64__qbz5n2kfra8p0\lib\pathlib.py", line 1120, in _opener
-    return self._accessor.open(self, flags, mode)
-FileNotFoundError: [Errno 2] No such file or directory: 'D:\\PythonMusic\\pythonproject2026\\behindTheScenes\\music-new\\sandbox\\MediaPlayerPy\\Assets\\XMLCategories.json'
-2025-11-28 15:51:25,925 - INFO - Updating folders for path: W:\Collection
-2025-11-28 15:51:26,311 - INFO - Found 25 folders.
-2025-11-28 15:55:41,474 - INFO - Updating folders for path: W:\Collection
-2025-11-28 15:55:41,828 - INFO - Found 25 folders.
-2025-11-28 15:59:14,206 - INFO - Updating folders for path: W:\Collection
-2025-11-28 15:59:14,531 - ERROR - An unhandled exception occurred:
-Traceback (most recent call last):
-  File "D:\PythonMusic\pythonproject2026\behindTheScenes\music-new\sandbox\MediaPlayerPy\Framework.py", line 102, in <module>
-    root.setProperty("xmlDetails", xml_provider)
-NameError: name 'xml_provider' is not defined
-2025-11-28 15:59:29,620 - INFO - Updating folders for path: W:\Collection
-2025-11-28 15:59:29,955 - ERROR - An unhandled exception occurred:
-Traceback (most recent call last):
-  File "D:\PythonMusic\pythonproject2026\behindTheScenes\music-new\sandbox\MediaPlayerPy\Framework.py", line 102, in <module>
-    root.setProperty("xmlDetails", xml_provider)
-NameError: name 'xml_provider' is not defined
-2025-11-28 16:08:37,241 - INFO - Updating folders for path: W:\Collection
-2025-11-28 16:08:37,605 - INFO - Found 25 folders.
-2025-11-28 16:12:53,953 - INFO - Updating folders for path: W:\Collection
-2025-11-28 16:12:54,344 - INFO - Found 25 folders.
-2025-11-28 16:18:32,449 - INFO - Updating folders for path: W:\Collection
-2025-11-28 16:18:32,802 - INFO - Found 25 folders.
-2025-11-28 17:25:17,649 - INFO - Updating folders for path: W:\Collection
-2025-11-28 17:25:18,024 - INFO - Found 25 folders.
-2025-11-28 17:29:06,699 - INFO - Updating folders for path: W:\Collection
-2025-11-28 17:29:07,066 - INFO - Found 25 folders.
-2025-11-28 17:30:46,012 - INFO - Updating folders for path: W:\Collection
-2025-11-28 17:30:46,384 - INFO - Found 25 folders.
-2025-11-28 17:31:36,258 - INFO - Updating folders for path: W:\Collection
-2025-11-28 17:31:36,619 - INFO - Found 25 folders.
-2025-11-28 17:33:53,139 - INFO - Updating folders for path: W:\Collection
-2025-11-28 17:33:53,499 - INFO - Found 25 folders.
-2025-11-28 17:36:21,634 - INFO - Updating folders for path: W:\Collection
-2025-11-28 17:36:22,002 - INFO - Found 25 folders.
-2025-11-28 17:43:25,220 - ERROR - Unhandled exception:
-Traceback (most recent call last):
-  File "D:\PythonMusic\pythonproject2026\behindTheScenes\music-new\sandbox\MediaPlayerPy\Framework.py", line 62, in <module>
-    xmlController = XmlController()
-  File "D:\PythonMusic\pythonproject2026\behindTheScenes\music-new\sandbox\MediaPlayerPy\xml_controller.py", line 15, in __init__
-    with open(json_path, "r", encoding="utf-8") as f:
-FileNotFoundError: [Errno 2] No such file or directory: 'D:\\PythonMusic\\pythonproject2026\\BehindTheScenes\\music-new\\Sandbox\\MediaPlayerPy\\XMLCategories.json'
-2025-11-28 17:44:34,603 - INFO - Updating folders for path: W:\Collection
-2025-11-28 17:44:34,970 - INFO - Found 25 folders.
-2025-11-28 17:47:04,229 - INFO - Updating folders for path: W:\Collection
-2025-11-28 17:47:04,614 - INFO - Found 25 folders.
-2025-11-28 17:55:45,205 - INFO - Updating folders for path: W:\Collection
-2025-11-28 17:55:45,572 - INFO - Found 25 folders.
-2025-11-28 17:58:58,138 - INFO - Updating folders for path: W:\Collection
-2025-11-28 17:58:58,504 - INFO - Found 25 folders.
-2025-11-28 18:02:43,333 - INFO - Updating folders for path: W:\Collection
-2025-11-28 18:02:43,687 - INFO - Found 25 folders.
-2025-11-28 18:06:04,464 - INFO - Updating folders for path: W:\Collection
-2025-11-28 18:06:04,833 - INFO - Found 25 folders.
-2025-11-29 10:15:17,165 - INFO - Updating folders for path: W:\Collection
-2025-11-29 10:15:17,653 - INFO - Found 25 folders.
-2025-11-29 10:16:16,901 - INFO - Updating folders for path: W:\Collection
-2025-11-29 10:16:17,266 - INFO - Found 25 folders.
-2025-11-29 10:24:17,598 - INFO - Updating folders for path: W:\Collection
-2025-11-29 10:24:17,936 - INFO - Found 25 folders.
-2025-11-29 10:33:46,992 - INFO - Updating folders for path: W:\Collection
-2025-11-29 10:33:47,366 - INFO - Found 25 folders.
-2025-11-29 10:45:02,069 - INFO - Updating folders for path: W:\Collection
-2025-11-29 10:45:02,432 - INFO - Found 25 folders.
-2025-11-29 10:45:33,369 - INFO - Updating folders for path: W:\Collection
-2025-11-29 10:45:33,745 - INFO - Found 25 folders.
-2025-11-29 11:28:36,817 - INFO - Updating folders for path: W:\Collection
-2025-11-29 11:28:37,187 - INFO - Found 25 folders.
-2025-11-29 11:45:50,436 - INFO - Updating folders for path: W:\Collection
-2025-11-29 11:45:50,801 - INFO - Found 25 folders.
-2025-11-29 11:48:17,416 - INFO - Updating folders for path: W:\Collection
-2025-11-29 11:48:17,766 - INFO - Found 25 folders.
-2025-11-29 11:49:35,140 - INFO - Updating folders for path: W:\Collection
-2025-11-29 11:49:35,495 - INFO - Found 25 folders.
-2025-11-29 11:55:52,287 - INFO - Updating folders for path: W:\Collection
-2025-11-29 11:55:52,651 - INFO - Found 25 folders.
-2025-11-29 12:01:38,868 - INFO - Updating folders for path: W:\Collection
-2025-11-29 12:01:39,216 - INFO - Found 25 folders.
-2025-11-29 12:02:57,417 - INFO - Updating folders for path: W:\Collection
-2025-11-29 12:02:57,783 - INFO - Found 25 folders.
-2025-11-29 12:07:10,603 - INFO - Updating folders for path: W:\Collection
-2025-11-29 12:07:10,960 - INFO - Found 25 folders.
-2025-11-29 12:09:55,398 - INFO - Updating folders for path: W:\Collection
-2025-11-29 12:09:55,812 - INFO - Found 25 folders.
-2025-11-29 12:10:11,260 - INFO - Updating folders for path: W:\Collection
-2025-11-29 12:10:11,622 - INFO - Found 25 folders.
-2025-11-29 12:11:15,957 - INFO - Updating folders for path: W:\Collection
-2025-11-29 12:11:16,325 - INFO - Found 25 folders.
-2025-11-29 12:15:11,438 - INFO - Updating folders for path: W:\Collection
-2025-11-29 12:15:11,830 - INFO - Found 25 folders.
-2025-11-29 12:17:35,430 - INFO - Updating folders for path: W:\Collection
-2025-11-29 12:17:35,792 - INFO - Found 25 folders.
-2025-11-29 12:26:17,473 - INFO - Updating folders for path: W:\Collection
-2025-11-29 12:26:17,828 - INFO - Found 25 folders.
-2025-11-29 12:33:36,062 - INFO - Updating folders for path: W:\Collection
-2025-11-29 12:33:36,410 - INFO - Found 25 folders.
-2025-11-29 12:36:31,527 - INFO - Updating folders for path: W:\Collection
-2025-11-29 12:36:31,887 - INFO - Found 25 folders.
-2025-11-29 12:42:50,953 - INFO - Updating folders for path: W:\Collection
-2025-11-29 12:42:51,306 - INFO - Found 25 folders.
-2025-11-29 12:43:22,932 - INFO - Updating folders for path: W:\Collection
-2025-11-29 12:43:23,271 - INFO - Found 25 folders.
-2025-11-29 13:09:58,532 - ERROR - Server not running or no libraries found.
-2025-11-29 13:10:11,146 - INFO - Updating folders for path: W:\Collection
-2025-11-29 13:10:11,578 - INFO - Found 25 folders.
-2025-11-29 13:10:32,199 - INFO - Updating folders for path: W:\Collection
-2025-11-29 13:10:32,536 - INFO - Found 25 folders.
-2025-11-29 13:10:50,709 - INFO - Updating folders for path: W:\Collection
-2025-11-29 13:10:51,054 - INFO - Found 25 folders.
-2025-11-29 13:11:14,711 - INFO - Updating folders for path: W:\Collection
-2025-11-29 13:11:15,063 - INFO - Found 25 folders.
-2025-11-29 13:15:36,636 - INFO - Updating folders for path: W:\Collection
-2025-11-29 13:15:36,990 - INFO - Found 25 folders.
-2025-11-29 13:16:46,672 - INFO - Updating folders for path: W:\Collection
-2025-11-29 13:16:47,037 - INFO - Found 25 folders.
-2025-11-29 13:18:55,748 - INFO - Updating folders for path: W:\Collection
-2025-11-29 13:18:56,105 - INFO - Found 25 folders.
-2025-11-29 13:26:48,846 - INFO - Updating folders for path: W:\Collection
-2025-11-29 13:26:49,202 - INFO - Found 25 folders.
-2025-11-29 13:27:26,894 - INFO - Updating folders for path: W:\Collection
-2025-11-29 13:27:27,233 - INFO - Found 25 folders.
-2025-11-29 13:32:30,041 - INFO - Updating folders for path: W:\Collection
-2025-11-29 13:32:30,389 - INFO - Found 25 folders.
-2025-11-29 13:36:00,915 - INFO - Updating folders for path: W:\Collection
-2025-11-29 13:36:01,256 - INFO - Found 25 folders.
-2025-11-29 13:37:48,090 - INFO - Updating folders for path: W:\Collection
-2025-11-29 13:37:48,424 - INFO - Found 25 folders.
-2025-11-29 13:39:14,170 - INFO - Updating folders for path: W:\Collection
-2025-11-29 13:39:14,524 - INFO - Found 25 folders.
-2025-11-29 13:40:30,377 - INFO - Updating folders for path: W:\Collection
-2025-11-29 13:40:30,733 - INFO - Found 25 folders.
-2025-11-29 13:41:17,304 - INFO - Updating folders for path: W:\Collection
-2025-11-29 13:41:17,654 - INFO - Found 25 folders.
-2025-11-29 13:43:27,777 - INFO - Updating folders for path: W:\Collection
-2025-11-29 13:43:28,111 - INFO - Found 25 folders.
-2025-11-29 13:46:20,824 - INFO - Updating folders for path: W:\Collection
-2025-11-29 13:46:21,185 - INFO - Found 25 folders.
-2025-11-29 13:46:46,047 - INFO - Updating folders for path: W:\Collection
-2025-11-29 13:46:46,429 - INFO - Found 25 folders.
-2025-11-29 13:48:15,116 - INFO - Updating folders for path: W:\Collection
-2025-11-29 13:48:15,461 - INFO - Found 25 folders.
-2025-11-29 13:49:02,627 - INFO - Updating folders for path: W:\Collection
-2025-11-29 13:49:02,974 - INFO - Found 25 folders.
-2025-11-29 13:49:30,534 - INFO - Updating folders for path: W:\Collection
-2025-11-29 13:49:30,887 - INFO - Found 25 folders.
-2025-11-29 13:50:12,096 - INFO - Updating folders for path: W:\Collection
-2025-11-29 13:50:12,425 - INFO - Found 25 folders.
-2025-11-29 13:52:03,619 - INFO - Updating folders for path: W:\Collection
-2025-11-29 13:52:03,958 - INFO - Found 25 folders.
-2025-11-29 13:54:29,965 - INFO - Updating folders for path: W:\Collection
-2025-11-29 13:54:30,306 - INFO - Found 25 folders.
-2025-11-29 13:57:55,959 - INFO - Updating folders for path: W:\Collection
-2025-11-29 13:57:56,306 - INFO - Found 25 folders.
-2025-11-29 13:59:57,243 - INFO - Updating folders for path: W:\Collection
-2025-11-29 13:59:57,598 - INFO - Found 25 folders.
-2025-11-29 14:04:32,224 - INFO - Updating folders for path: W:\Collection
-2025-11-29 14:04:32,575 - INFO - Found 25 folders.
-2025-11-29 14:05:43,521 - INFO - Updating folders for path: W:\Collection
-2025-11-29 14:05:43,858 - INFO - Found 25 folders.
-2025-11-29 14:06:53,847 - INFO - Updating folders for path: W:\Collection
-2025-11-29 14:06:54,186 - INFO - Found 25 folders.
-2025-11-30 14:42:57,869 - ERROR - Server not running or no libraries found.
-2025-11-30 14:43:20,890 - INFO - Updating folders for path: W:\Collection
-2025-11-30 14:43:22,350 - INFO - Found 25 folders.
-2025-11-30 14:48:09,352 - ERROR - QML FAILED to load
-2025-12-07 12:42:50,059 - DEBUG - Importing BlpImagePlugin
-2025-12-07 12:42:50,059 - DEBUG - Importing BmpImagePlugin
-2025-12-07 12:42:50,059 - DEBUG - Importing BufrStubImagePlugin
-2025-12-07 12:42:50,075 - DEBUG - Importing CurImagePlugin
-2025-12-07 12:42:50,075 - DEBUG - Importing DcxImagePlugin
-2025-12-07 12:42:50,091 - DEBUG - Importing DdsImagePlugin
-2025-12-07 12:42:50,109 - DEBUG - Importing EpsImagePlugin
-2025-12-07 12:42:50,123 - DEBUG - Importing FitsStubImagePlugin
-2025-12-07 12:42:50,139 - DEBUG - Importing FliImagePlugin
-2025-12-07 12:42:50,156 - DEBUG - Importing FpxImagePlugin
-2025-12-07 12:42:50,171 - DEBUG - Importing FtexImagePlugin
-2025-12-07 12:42:50,187 - DEBUG - Importing GbrImagePlugin
-2025-12-07 12:42:50,187 - DEBUG - Importing GifImagePlugin
-2025-12-07 12:42:50,187 - DEBUG - Importing GribStubImagePlugin
-2025-12-07 12:42:50,187 - DEBUG - Importing Hdf5StubImagePlugin
-2025-12-07 12:42:50,187 - DEBUG - Importing IcnsImagePlugin
-2025-12-07 12:42:50,223 - DEBUG - Importing IcoImagePlugin
-2025-12-07 12:42:50,223 - DEBUG - Importing ImImagePlugin
-2025-12-07 12:42:50,234 - DEBUG - Importing ImtImagePlugin
-2025-12-07 12:42:50,234 - DEBUG - Importing IptcImagePlugin
-2025-12-07 12:42:50,250 - DEBUG - Importing JpegImagePlugin
-2025-12-07 12:42:50,250 - DEBUG - Importing Jpeg2KImagePlugin
-2025-12-07 12:42:50,250 - DEBUG - Importing McIdasImagePlugin
-2025-12-07 12:42:50,250 - DEBUG - Importing MicImagePlugin
-2025-12-07 12:42:50,250 - DEBUG - Importing MpegImagePlugin
-2025-12-07 12:42:50,250 - DEBUG - Importing MpoImagePlugin
-2025-12-07 12:42:50,250 - DEBUG - Importing MspImagePlugin
-2025-12-07 12:42:50,266 - DEBUG - Importing PalmImagePlugin
-2025-12-07 12:42:50,266 - DEBUG - Importing PcdImagePlugin
-2025-12-07 12:42:50,266 - DEBUG - Importing PcxImagePlugin
-2025-12-07 12:42:50,266 - DEBUG - Importing PdfImagePlugin
-2025-12-07 12:42:50,283 - DEBUG - Importing PixarImagePlugin
-2025-12-07 12:42:50,298 - DEBUG - Importing PngImagePlugin
-2025-12-07 12:42:50,298 - DEBUG - Importing PpmImagePlugin
-2025-12-07 12:42:50,298 - DEBUG - Importing PsdImagePlugin
-2025-12-07 12:42:50,298 - DEBUG - Importing SgiImagePlugin
-2025-12-07 12:42:50,298 - DEBUG - Importing SpiderImagePlugin
-2025-12-07 12:42:50,315 - DEBUG - Importing SunImagePlugin
-2025-12-07 12:42:50,315 - DEBUG - Importing TgaImagePlugin
-2025-12-07 12:42:50,315 - DEBUG - Importing TiffImagePlugin
-2025-12-07 12:42:50,315 - DEBUG - Importing WebPImagePlugin
-2025-12-07 12:42:50,329 - DEBUG - Importing WmfImagePlugin
-2025-12-07 12:42:50,345 - DEBUG - Importing XbmImagePlugin
-2025-12-07 12:42:50,345 - DEBUG - Importing XpmImagePlugin
-2025-12-07 12:42:50,345 - DEBUG - Importing XVThumbImagePlugin
-2025-12-07 12:42:52,472 - INFO - Updating folders for path: W:\Collection
-2025-12-07 12:42:54,701 - INFO - Found 25 folders.
-2025-12-07 12:43:20,792 - INFO - Resolved video path: file:///W%3A/Collection/1990s/A%20Prayer%20for%20the%20Dying%20%281987%29.m2ts
-2025-12-07 12:44:01,417 - DEBUG - Importing BlpImagePlugin
-2025-12-07 12:44:01,419 - DEBUG - Importing BmpImagePlugin
-2025-12-07 12:44:01,419 - DEBUG - Importing BufrStubImagePlugin
-2025-12-07 12:44:01,420 - DEBUG - Importing CurImagePlugin
-2025-12-07 12:44:01,421 - DEBUG - Importing DcxImagePlugin
-2025-12-07 12:44:01,424 - DEBUG - Importing DdsImagePlugin
-2025-12-07 12:44:01,425 - DEBUG - Importing EpsImagePlugin
-2025-12-07 12:44:01,451 - DEBUG - Importing FitsStubImagePlugin
-2025-12-07 12:44:01,452 - DEBUG - Importing FliImagePlugin
-2025-12-07 12:44:01,454 - DEBUG - Importing FpxImagePlugin
-2025-12-07 12:44:01,458 - DEBUG - Importing FtexImagePlugin
-2025-12-07 12:44:01,459 - DEBUG - Importing GbrImagePlugin
-2025-12-07 12:44:01,461 - DEBUG - Importing GifImagePlugin
-2025-12-07 12:44:01,461 - DEBUG - Importing GribStubImagePlugin
-2025-12-07 12:44:01,462 - DEBUG - Importing Hdf5StubImagePlugin
-2025-12-07 12:44:01,463 - DEBUG - Importing IcnsImagePlugin
-2025-12-07 12:44:01,467 - DEBUG - Importing IcoImagePlugin
-2025-12-07 12:44:01,468 - DEBUG - Importing ImImagePlugin
-2025-12-07 12:44:01,470 - DEBUG - Importing ImtImagePlugin
-2025-12-07 12:44:01,471 - DEBUG - Importing IptcImagePlugin
-2025-12-07 12:44:01,472 - DEBUG - Importing JpegImagePlugin
-2025-12-07 12:44:01,472 - DEBUG - Importing Jpeg2KImagePlugin
-2025-12-07 12:44:01,472 - DEBUG - Importing McIdasImagePlugin
-2025-12-07 12:44:01,473 - DEBUG - Importing MicImagePlugin
-2025-12-07 12:44:01,475 - DEBUG - Importing MpegImagePlugin
-2025-12-07 12:44:01,476 - DEBUG - Importing MpoImagePlugin
-2025-12-07 12:44:01,477 - DEBUG - Importing MspImagePlugin
-2025-12-07 12:44:01,478 - DEBUG - Importing PalmImagePlugin
-2025-12-07 12:44:01,480 - DEBUG - Importing PcdImagePlugin
-2025-12-07 12:44:01,481 - DEBUG - Importing PcxImagePlugin
-2025-12-07 12:44:01,481 - DEBUG - Importing PdfImagePlugin
-2025-12-07 12:44:01,487 - DEBUG - Importing PixarImagePlugin
-2025-12-07 12:44:01,488 - DEBUG - Importing PngImagePlugin
-2025-12-07 12:44:01,488 - DEBUG - Importing PpmImagePlugin
-2025-12-07 12:44:01,489 - DEBUG - Importing PsdImagePlugin
-2025-12-07 12:44:01,490 - DEBUG - Importing SgiImagePlugin
-2025-12-07 12:44:01,491 - DEBUG - Importing SpiderImagePlugin
-2025-12-07 12:44:01,492 - DEBUG - Importing SunImagePlugin
-2025-12-07 12:44:01,493 - DEBUG - Importing TgaImagePlugin
-2025-12-07 12:44:01,495 - DEBUG - Importing TiffImagePlugin
-2025-12-07 12:44:01,495 - DEBUG - Importing WebPImagePlugin
-2025-12-07 12:44:01,499 - DEBUG - Importing WmfImagePlugin
-2025-12-07 12:44:01,500 - DEBUG - Importing XbmImagePlugin
-2025-12-07 12:44:01,501 - DEBUG - Importing XpmImagePlugin
-2025-12-07 12:44:01,503 - DEBUG - Importing XVThumbImagePlugin
-2025-12-07 12:44:02,357 - INFO - Updating folders for path: W:\Collection
-2025-12-07 12:44:02,941 - INFO - Found 25 folders.
-2025-12-07 12:50:47,662 - DEBUG - Importing BlpImagePlugin
-2025-12-07 12:50:47,664 - DEBUG - Importing BmpImagePlugin
-2025-12-07 12:50:47,664 - DEBUG - Importing BufrStubImagePlugin
-2025-12-07 12:50:47,665 - DEBUG - Importing CurImagePlugin
-2025-12-07 12:50:47,666 - DEBUG - Importing DcxImagePlugin
-2025-12-07 12:50:47,669 - DEBUG - Importing DdsImagePlugin
-2025-12-07 12:50:47,670 - DEBUG - Importing EpsImagePlugin
-2025-12-07 12:50:47,695 - DEBUG - Importing FitsStubImagePlugin
-2025-12-07 12:50:47,696 - DEBUG - Importing FliImagePlugin
-2025-12-07 12:50:47,697 - DEBUG - Importing FpxImagePlugin
-2025-12-07 12:50:47,702 - DEBUG - Importing FtexImagePlugin
-2025-12-07 12:50:47,703 - DEBUG - Importing GbrImagePlugin
-2025-12-07 12:50:47,704 - DEBUG - Importing GifImagePlugin
-2025-12-07 12:50:47,704 - DEBUG - Importing GribStubImagePlugin
-2025-12-07 12:50:47,705 - DEBUG - Importing Hdf5StubImagePlugin
-2025-12-07 12:50:47,707 - DEBUG - Importing IcnsImagePlugin
-2025-12-07 12:50:47,710 - DEBUG - Importing IcoImagePlugin
-2025-12-07 12:50:47,711 - DEBUG - Importing ImImagePlugin
-2025-12-07 12:50:47,714 - DEBUG - Importing ImtImagePlugin
-2025-12-07 12:50:47,715 - DEBUG - Importing IptcImagePlugin
-2025-12-07 12:50:47,716 - DEBUG - Importing JpegImagePlugin
-2025-12-07 12:50:47,716 - DEBUG - Importing Jpeg2KImagePlugin
-2025-12-07 12:50:47,716 - DEBUG - Importing McIdasImagePlugin
-2025-12-07 12:50:47,718 - DEBUG - Importing MicImagePlugin
-2025-12-07 12:50:47,719 - DEBUG - Importing MpegImagePlugin
-2025-12-07 12:50:47,720 - DEBUG - Importing MpoImagePlugin
-2025-12-07 12:50:47,721 - DEBUG - Importing MspImagePlugin
-2025-12-07 12:50:47,722 - DEBUG - Importing PalmImagePlugin
-2025-12-07 12:50:47,724 - DEBUG - Importing PcdImagePlugin
-2025-12-07 12:50:47,725 - DEBUG - Importing PcxImagePlugin
-2025-12-07 12:50:47,725 - DEBUG - Importing PdfImagePlugin
-2025-12-07 12:50:47,731 - DEBUG - Importing PixarImagePlugin
-2025-12-07 12:50:47,732 - DEBUG - Importing PngImagePlugin
-2025-12-07 12:50:47,732 - DEBUG - Importing PpmImagePlugin
-2025-12-07 12:50:47,732 - DEBUG - Importing PsdImagePlugin
-2025-12-07 12:50:47,734 - DEBUG - Importing SgiImagePlugin
-2025-12-07 12:50:47,735 - DEBUG - Importing SpiderImagePlugin
-2025-12-07 12:50:47,736 - DEBUG - Importing SunImagePlugin
-2025-12-07 12:50:47,737 - DEBUG - Importing TgaImagePlugin
-2025-12-07 12:50:47,738 - DEBUG - Importing TiffImagePlugin
-2025-12-07 12:50:47,739 - DEBUG - Importing WebPImagePlugin
-2025-12-07 12:50:47,743 - DEBUG - Importing WmfImagePlugin
-2025-12-07 12:50:47,744 - DEBUG - Importing XbmImagePlugin
-2025-12-07 12:50:47,746 - DEBUG - Importing XpmImagePlugin
-2025-12-07 12:50:47,747 - DEBUG - Importing XVThumbImagePlugin
-2025-12-07 12:50:48,661 - INFO - Updating folders for path: W:\Collection
-2025-12-07 12:50:49,328 - INFO - Found 25 folders.
-2025-12-07 13:27:08,534 - DEBUG - Importing BlpImagePlugin
-2025-12-07 13:27:08,536 - DEBUG - Importing BmpImagePlugin
-2025-12-07 13:27:08,536 - DEBUG - Importing BufrStubImagePlugin
-2025-12-07 13:27:08,537 - DEBUG - Importing CurImagePlugin
-2025-12-07 13:27:08,538 - DEBUG - Importing DcxImagePlugin
-2025-12-07 13:27:08,541 - DEBUG - Importing DdsImagePlugin
-2025-12-07 13:27:08,542 - DEBUG - Importing EpsImagePlugin
-2025-12-07 13:27:08,566 - DEBUG - Importing FitsStubImagePlugin
-2025-12-07 13:27:08,568 - DEBUG - Importing FliImagePlugin
-2025-12-07 13:27:08,569 - DEBUG - Importing FpxImagePlugin
-2025-12-07 13:27:08,573 - DEBUG - Importing FtexImagePlugin
-2025-12-07 13:27:08,574 - DEBUG - Importing GbrImagePlugin
-2025-12-07 13:27:08,576 - DEBUG - Importing GifImagePlugin
-2025-12-07 13:27:08,576 - DEBUG - Importing GribStubImagePlugin
-2025-12-07 13:27:08,577 - DEBUG - Importing Hdf5StubImagePlugin
-2025-12-07 13:27:08,578 - DEBUG - Importing IcnsImagePlugin
-2025-12-07 13:27:08,583 - DEBUG - Importing IcoImagePlugin
-2025-12-07 13:27:08,584 - DEBUG - Importing ImImagePlugin
-2025-12-07 13:27:08,585 - DEBUG - Importing ImtImagePlugin
-2025-12-07 13:27:08,587 - DEBUG - Importing IptcImagePlugin
-2025-12-07 13:27:08,588 - DEBUG - Importing JpegImagePlugin
-2025-12-07 13:27:08,588 - DEBUG - Importing Jpeg2KImagePlugin
-2025-12-07 13:27:08,588 - DEBUG - Importing McIdasImagePlugin
-2025-12-07 13:27:08,589 - DEBUG - Importing MicImagePlugin
-2025-12-07 13:27:08,590 - DEBUG - Importing MpegImagePlugin
-2025-12-07 13:27:08,592 - DEBUG - Importing MpoImagePlugin
-2025-12-07 13:27:08,593 - DEBUG - Importing MspImagePlugin
-2025-12-07 13:27:08,594 - DEBUG - Importing PalmImagePlugin
-2025-12-07 13:27:08,596 - DEBUG - Importing PcdImagePlugin
-2025-12-07 13:27:08,597 - DEBUG - Importing PcxImagePlugin
-2025-12-07 13:27:08,597 - DEBUG - Importing PdfImagePlugin
-2025-12-07 13:27:08,603 - DEBUG - Importing PixarImagePlugin
-2025-12-07 13:27:08,604 - DEBUG - Importing PngImagePlugin
-2025-12-07 13:27:08,604 - DEBUG - Importing PpmImagePlugin
-2025-12-07 13:27:08,604 - DEBUG - Importing PsdImagePlugin
-2025-12-07 13:27:08,605 - DEBUG - Importing SgiImagePlugin
-2025-12-07 13:27:08,607 - DEBUG - Importing SpiderImagePlugin
-2025-12-07 13:27:08,608 - DEBUG - Importing SunImagePlugin
-2025-12-07 13:27:08,609 - DEBUG - Importing TgaImagePlugin
-2025-12-07 13:27:08,610 - DEBUG - Importing TiffImagePlugin
-2025-12-07 13:27:08,610 - DEBUG - Importing WebPImagePlugin
-2025-12-07 13:27:08,614 - DEBUG - Importing WmfImagePlugin
-2025-12-07 13:27:08,616 - DEBUG - Importing XbmImagePlugin
-2025-12-07 13:27:08,617 - DEBUG - Importing XpmImagePlugin
-2025-12-07 13:27:08,619 - DEBUG - Importing XVThumbImagePlugin
-2025-12-07 13:27:09,526 - INFO - Updating folders for path: W:\Collection
-2025-12-07 13:27:09,564 - ERROR - QML FAILED to load
-2025-12-07 13:30:12,140 - DEBUG - Importing BlpImagePlugin
-2025-12-07 13:30:12,142 - DEBUG - Importing BmpImagePlugin
-2025-12-07 13:30:12,142 - DEBUG - Importing BufrStubImagePlugin
-2025-12-07 13:30:12,143 - DEBUG - Importing CurImagePlugin
-2025-12-07 13:30:12,144 - DEBUG - Importing DcxImagePlugin
-2025-12-07 13:30:12,146 - DEBUG - Importing DdsImagePlugin
-2025-12-07 13:30:12,148 - DEBUG - Importing EpsImagePlugin
-2025-12-07 13:30:12,173 - DEBUG - Importing FitsStubImagePlugin
-2025-12-07 13:30:12,174 - DEBUG - Importing FliImagePlugin
-2025-12-07 13:30:12,175 - DEBUG - Importing FpxImagePlugin
-2025-12-07 13:30:12,180 - DEBUG - Importing FtexImagePlugin
-2025-12-07 13:30:12,181 - DEBUG - Importing GbrImagePlugin
-2025-12-07 13:30:12,182 - DEBUG - Importing GifImagePlugin
-2025-12-07 13:30:12,182 - DEBUG - Importing GribStubImagePlugin
-2025-12-07 13:30:12,183 - DEBUG - Importing Hdf5StubImagePlugin
-2025-12-07 13:30:12,185 - DEBUG - Importing IcnsImagePlugin
-2025-12-07 13:30:12,188 - DEBUG - Importing IcoImagePlugin
-2025-12-07 13:30:12,189 - DEBUG - Importing ImImagePlugin
-2025-12-07 13:30:12,191 - DEBUG - Importing ImtImagePlugin
-2025-12-07 13:30:12,192 - DEBUG - Importing IptcImagePlugin
-2025-12-07 13:30:12,193 - DEBUG - Importing JpegImagePlugin
-2025-12-07 13:30:12,193 - DEBUG - Importing Jpeg2KImagePlugin
-2025-12-07 13:30:12,193 - DEBUG - Importing McIdasImagePlugin
-2025-12-07 13:30:12,195 - DEBUG - Importing MicImagePlugin
-2025-12-07 13:30:12,196 - DEBUG - Importing MpegImagePlugin
-2025-12-07 13:30:12,197 - DEBUG - Importing MpoImagePlugin
-2025-12-07 13:30:12,198 - DEBUG - Importing MspImagePlugin
-2025-12-07 13:30:12,199 - DEBUG - Importing PalmImagePlugin
-2025-12-07 13:30:12,201 - DEBUG - Importing PcdImagePlugin
-2025-12-07 13:30:12,202 - DEBUG - Importing PcxImagePlugin
-2025-12-07 13:30:12,202 - DEBUG - Importing PdfImagePlugin
-2025-12-07 13:30:12,208 - DEBUG - Importing PixarImagePlugin
-2025-12-07 13:30:12,209 - DEBUG - Importing PngImagePlugin
-2025-12-07 13:30:12,209 - DEBUG - Importing PpmImagePlugin
-2025-12-07 13:30:12,209 - DEBUG - Importing PsdImagePlugin
-2025-12-07 13:30:12,211 - DEBUG - Importing SgiImagePlugin
-2025-12-07 13:30:12,212 - DEBUG - Importing SpiderImagePlugin
-2025-12-07 13:30:12,213 - DEBUG - Importing SunImagePlugin
-2025-12-07 13:30:12,214 - DEBUG - Importing TgaImagePlugin
-2025-12-07 13:30:12,215 - DEBUG - Importing TiffImagePlugin
-2025-12-07 13:30:12,215 - DEBUG - Importing WebPImagePlugin
-2025-12-07 13:30:12,220 - DEBUG - Importing WmfImagePlugin
-2025-12-07 13:30:12,221 - DEBUG - Importing XbmImagePlugin
-2025-12-07 13:30:12,223 - DEBUG - Importing XpmImagePlugin
-2025-12-07 13:30:12,224 - DEBUG - Importing XVThumbImagePlugin
-2025-12-07 13:30:13,143 - INFO - Updating folders for path: W:\Collection
-2025-12-07 13:30:13,806 - INFO - Found 25 folders.
-2025-12-07 13:39:20,482 - DEBUG - Importing BlpImagePlugin
-2025-12-07 13:39:20,484 - DEBUG - Importing BmpImagePlugin
-2025-12-07 13:39:20,484 - DEBUG - Importing BufrStubImagePlugin
-2025-12-07 13:39:20,485 - DEBUG - Importing CurImagePlugin
-2025-12-07 13:39:20,487 - DEBUG - Importing DcxImagePlugin
-2025-12-07 13:39:20,489 - DEBUG - Importing DdsImagePlugin
-2025-12-07 13:39:20,490 - DEBUG - Importing EpsImagePlugin
-2025-12-07 13:39:20,515 - DEBUG - Importing FitsStubImagePlugin
-2025-12-07 13:39:20,516 - DEBUG - Importing FliImagePlugin
-2025-12-07 13:39:20,518 - DEBUG - Importing FpxImagePlugin
-2025-12-07 13:39:20,522 - DEBUG - Importing FtexImagePlugin
-2025-12-07 13:39:20,523 - DEBUG - Importing GbrImagePlugin
-2025-12-07 13:39:20,524 - DEBUG - Importing GifImagePlugin
-2025-12-07 13:39:20,524 - DEBUG - Importing GribStubImagePlugin
-2025-12-07 13:39:20,526 - DEBUG - Importing Hdf5StubImagePlugin
-2025-12-07 13:39:20,527 - DEBUG - Importing IcnsImagePlugin
-2025-12-07 13:39:20,530 - DEBUG - Importing IcoImagePlugin
-2025-12-07 13:39:20,532 - DEBUG - Importing ImImagePlugin
-2025-12-07 13:39:20,533 - DEBUG - Importing ImtImagePlugin
-2025-12-07 13:39:20,534 - DEBUG - Importing IptcImagePlugin
-2025-12-07 13:39:20,536 - DEBUG - Importing JpegImagePlugin
-2025-12-07 13:39:20,536 - DEBUG - Importing Jpeg2KImagePlugin
-2025-12-07 13:39:20,536 - DEBUG - Importing McIdasImagePlugin
-2025-12-07 13:39:20,537 - DEBUG - Importing MicImagePlugin
-2025-12-07 13:39:20,538 - DEBUG - Importing MpegImagePlugin
-2025-12-07 13:39:20,539 - DEBUG - Importing MpoImagePlugin
-2025-12-07 13:39:20,541 - DEBUG - Importing MspImagePlugin
-2025-12-07 13:39:20,542 - DEBUG - Importing PalmImagePlugin
-2025-12-07 13:39:20,543 - DEBUG - Importing PcdImagePlugin
-2025-12-07 13:39:20,545 - DEBUG - Importing PcxImagePlugin
-2025-12-07 13:39:20,545 - DEBUG - Importing PdfImagePlugin
-2025-12-07 13:39:20,551 - DEBUG - Importing PixarImagePlugin
-2025-12-07 13:39:20,552 - DEBUG - Importing PngImagePlugin
-2025-12-07 13:39:20,552 - DEBUG - Importing PpmImagePlugin
-2025-12-07 13:39:20,552 - DEBUG - Importing PsdImagePlugin
-2025-12-07 13:39:20,553 - DEBUG - Importing SgiImagePlugin
-2025-12-07 13:39:20,554 - DEBUG - Importing SpiderImagePlugin
-2025-12-07 13:39:20,556 - DEBUG - Importing SunImagePlugin
-2025-12-07 13:39:20,557 - DEBUG - Importing TgaImagePlugin
-2025-12-07 13:39:20,558 - DEBUG - Importing TiffImagePlugin
-2025-12-07 13:39:20,558 - DEBUG - Importing WebPImagePlugin
-2025-12-07 13:39:20,562 - DEBUG - Importing WmfImagePlugin
-2025-12-07 13:39:20,564 - DEBUG - Importing XbmImagePlugin
-2025-12-07 13:39:20,565 - DEBUG - Importing XpmImagePlugin
-2025-12-07 13:39:20,566 - DEBUG - Importing XVThumbImagePlugin
-2025-12-07 13:39:21,434 - INFO - Updating folders for path: W:\Collection
-2025-12-07 13:39:22,079 - INFO - Found 25 folders.
-2025-12-07 13:49:41,250 - DEBUG - Importing BlpImagePlugin
-2025-12-07 13:49:41,251 - DEBUG - Importing BmpImagePlugin
-2025-12-07 13:49:41,251 - DEBUG - Importing BufrStubImagePlugin
-2025-12-07 13:49:41,253 - DEBUG - Importing CurImagePlugin
-2025-12-07 13:49:41,254 - DEBUG - Importing DcxImagePlugin
-2025-12-07 13:49:41,256 - DEBUG - Importing DdsImagePlugin
-2025-12-07 13:49:41,258 - DEBUG - Importing EpsImagePlugin
-2025-12-07 13:49:41,283 - DEBUG - Importing FitsStubImagePlugin
-2025-12-07 13:49:41,284 - DEBUG - Importing FliImagePlugin
-2025-12-07 13:49:41,286 - DEBUG - Importing FpxImagePlugin
-2025-12-07 13:49:41,290 - DEBUG - Importing FtexImagePlugin
-2025-12-07 13:49:41,291 - DEBUG - Importing GbrImagePlugin
-2025-12-07 13:49:41,292 - DEBUG - Importing GifImagePlugin
-2025-12-07 13:49:41,293 - DEBUG - Importing GribStubImagePlugin
-2025-12-07 13:49:41,294 - DEBUG - Importing Hdf5StubImagePlugin
-2025-12-07 13:49:41,295 - DEBUG - Importing IcnsImagePlugin
-2025-12-07 13:49:41,299 - DEBUG - Importing IcoImagePlugin
-2025-12-07 13:49:41,300 - DEBUG - Importing ImImagePlugin
-2025-12-07 13:49:41,301 - DEBUG - Importing ImtImagePlugin
-2025-12-07 13:49:41,303 - DEBUG - Importing IptcImagePlugin
-2025-12-07 13:49:41,304 - DEBUG - Importing JpegImagePlugin
-2025-12-07 13:49:41,304 - DEBUG - Importing Jpeg2KImagePlugin
-2025-12-07 13:49:41,304 - DEBUG - Importing McIdasImagePlugin
-2025-12-07 13:49:41,305 - DEBUG - Importing MicImagePlugin
-2025-12-07 13:49:41,306 - DEBUG - Importing MpegImagePlugin
-2025-12-07 13:49:41,308 - DEBUG - Importing MpoImagePlugin
-2025-12-07 13:49:41,309 - DEBUG - Importing MspImagePlugin
-2025-12-07 13:49:41,310 - DEBUG - Importing PalmImagePlugin
-2025-12-07 13:49:41,312 - DEBUG - Importing PcdImagePlugin
-2025-12-07 13:49:41,313 - DEBUG - Importing PcxImagePlugin
-2025-12-07 13:49:41,313 - DEBUG - Importing PdfImagePlugin
-2025-12-07 13:49:41,319 - DEBUG - Importing PixarImagePlugin
-2025-12-07 13:49:41,320 - DEBUG - Importing PngImagePlugin
-2025-12-07 13:49:41,320 - DEBUG - Importing PpmImagePlugin
-2025-12-07 13:49:41,320 - DEBUG - Importing PsdImagePlugin
-2025-12-07 13:49:41,321 - DEBUG - Importing SgiImagePlugin
-2025-12-07 13:49:41,323 - DEBUG - Importing SpiderImagePlugin
-2025-12-07 13:49:41,324 - DEBUG - Importing SunImagePlugin
-2025-12-07 13:49:41,325 - DEBUG - Importing TgaImagePlugin
-2025-12-07 13:49:41,326 - DEBUG - Importing TiffImagePlugin
-2025-12-07 13:49:41,326 - DEBUG - Importing WebPImagePlugin
-2025-12-07 13:49:41,331 - DEBUG - Importing WmfImagePlugin
-2025-12-07 13:49:41,332 - DEBUG - Importing XbmImagePlugin
-2025-12-07 13:49:41,333 - DEBUG - Importing XpmImagePlugin
-2025-12-07 13:49:41,334 - DEBUG - Importing XVThumbImagePlugin
-2025-12-07 13:49:42,264 - INFO - Updating folders for path: W:\Collection
-2025-12-07 13:49:42,397 - ERROR - QML FAILED to load
-2025-12-07 13:54:42,113 - DEBUG - Importing BlpImagePlugin
-2025-12-07 13:54:42,115 - DEBUG - Importing BmpImagePlugin
-2025-12-07 13:54:42,115 - DEBUG - Importing BufrStubImagePlugin
-2025-12-07 13:54:42,116 - DEBUG - Importing CurImagePlugin
-2025-12-07 13:54:42,117 - DEBUG - Importing DcxImagePlugin
-2025-12-07 13:54:42,119 - DEBUG - Importing DdsImagePlugin
-2025-12-07 13:54:42,121 - DEBUG - Importing EpsImagePlugin
-2025-12-07 13:54:42,145 - DEBUG - Importing FitsStubImagePlugin
-2025-12-07 13:54:42,147 - DEBUG - Importing FliImagePlugin
-2025-12-07 13:54:42,148 - DEBUG - Importing FpxImagePlugin
-2025-12-07 13:54:42,152 - DEBUG - Importing FtexImagePlugin
-2025-12-07 13:54:42,153 - DEBUG - Importing GbrImagePlugin
-2025-12-07 13:54:42,155 - DEBUG - Importing GifImagePlugin
-2025-12-07 13:54:42,155 - DEBUG - Importing GribStubImagePlugin
-2025-12-07 13:54:42,156 - DEBUG - Importing Hdf5StubImagePlugin
-2025-12-07 13:54:42,158 - DEBUG - Importing IcnsImagePlugin
-2025-12-07 13:54:42,162 - DEBUG - Importing IcoImagePlugin
-2025-12-07 13:54:42,163 - DEBUG - Importing ImImagePlugin
-2025-12-07 13:54:42,164 - DEBUG - Importing ImtImagePlugin
-2025-12-07 13:54:42,166 - DEBUG - Importing IptcImagePlugin
-2025-12-07 13:54:42,167 - DEBUG - Importing JpegImagePlugin
-2025-12-07 13:54:42,167 - DEBUG - Importing Jpeg2KImagePlugin
-2025-12-07 13:54:42,167 - DEBUG - Importing McIdasImagePlugin
-2025-12-07 13:54:42,168 - DEBUG - Importing MicImagePlugin
-2025-12-07 13:54:42,169 - DEBUG - Importing MpegImagePlugin
-2025-12-07 13:54:42,170 - DEBUG - Importing MpoImagePlugin
-2025-12-07 13:54:42,172 - DEBUG - Importing MspImagePlugin
-2025-12-07 13:54:42,173 - DEBUG - Importing PalmImagePlugin
-2025-12-07 13:54:42,174 - DEBUG - Importing PcdImagePlugin
-2025-12-07 13:54:42,176 - DEBUG - Importing PcxImagePlugin
-2025-12-07 13:54:42,176 - DEBUG - Importing PdfImagePlugin
-2025-12-07 13:54:42,181 - DEBUG - Importing PixarImagePlugin
-2025-12-07 13:54:42,183 - DEBUG - Importing PngImagePlugin
-2025-12-07 13:54:42,183 - DEBUG - Importing PpmImagePlugin
-2025-12-07 13:54:42,183 - DEBUG - Importing PsdImagePlugin
-2025-12-07 13:54:42,184 - DEBUG - Importing SgiImagePlugin
-2025-12-07 13:54:42,185 - DEBUG - Importing SpiderImagePlugin
-2025-12-07 13:54:42,186 - DEBUG - Importing SunImagePlugin
-2025-12-07 13:54:42,188 - DEBUG - Importing TgaImagePlugin
-2025-12-07 13:54:42,189 - DEBUG - Importing TiffImagePlugin
-2025-12-07 13:54:42,189 - DEBUG - Importing WebPImagePlugin
-2025-12-07 13:54:42,193 - DEBUG - Importing WmfImagePlugin
-2025-12-07 13:54:42,194 - DEBUG - Importing XbmImagePlugin
-2025-12-07 13:54:42,196 - DEBUG - Importing XpmImagePlugin
-2025-12-07 13:54:42,197 - DEBUG - Importing XVThumbImagePlugin
-2025-12-07 13:54:43,090 - INFO - Updating folders for path: W:\Collection
-2025-12-07 13:54:43,322 - ERROR - QML FAILED to load
-2025-12-07 14:08:28,122 - DEBUG - Importing BlpImagePlugin
-2025-12-07 14:08:28,124 - DEBUG - Importing BmpImagePlugin
-2025-12-07 14:08:28,124 - DEBUG - Importing BufrStubImagePlugin
-2025-12-07 14:08:28,125 - DEBUG - Importing CurImagePlugin
-2025-12-07 14:08:28,127 - DEBUG - Importing DcxImagePlugin
-2025-12-07 14:08:28,129 - DEBUG - Importing DdsImagePlugin
-2025-12-07 14:08:28,130 - DEBUG - Importing EpsImagePlugin
-2025-12-07 14:08:28,155 - DEBUG - Importing FitsStubImagePlugin
-2025-12-07 14:08:28,156 - DEBUG - Importing FliImagePlugin
-2025-12-07 14:08:28,158 - DEBUG - Importing FpxImagePlugin
-2025-12-07 14:08:28,162 - DEBUG - Importing FtexImagePlugin
-2025-12-07 14:08:28,163 - DEBUG - Importing GbrImagePlugin
-2025-12-07 14:08:28,164 - DEBUG - Importing GifImagePlugin
-2025-12-07 14:08:28,164 - DEBUG - Importing GribStubImagePlugin
-2025-12-07 14:08:28,166 - DEBUG - Importing Hdf5StubImagePlugin
-2025-12-07 14:08:28,167 - DEBUG - Importing IcnsImagePlugin
-2025-12-07 14:08:28,170 - DEBUG - Importing IcoImagePlugin
-2025-12-07 14:08:28,172 - DEBUG - Importing ImImagePlugin
-2025-12-07 14:08:28,173 - DEBUG - Importing ImtImagePlugin
-2025-12-07 14:08:28,174 - DEBUG - Importing IptcImagePlugin
-2025-12-07 14:08:28,176 - DEBUG - Importing JpegImagePlugin
-2025-12-07 14:08:28,176 - DEBUG - Importing Jpeg2KImagePlugin
-2025-12-07 14:08:28,176 - DEBUG - Importing McIdasImagePlugin
-2025-12-07 14:08:28,177 - DEBUG - Importing MicImagePlugin
-2025-12-07 14:08:28,178 - DEBUG - Importing MpegImagePlugin
-2025-12-07 14:08:28,179 - DEBUG - Importing MpoImagePlugin
-2025-12-07 14:08:28,181 - DEBUG - Importing MspImagePlugin
-2025-12-07 14:08:28,182 - DEBUG - Importing PalmImagePlugin
-2025-12-07 14:08:28,183 - DEBUG - Importing PcdImagePlugin
-2025-12-07 14:08:28,185 - DEBUG - Importing PcxImagePlugin
-2025-12-07 14:08:28,185 - DEBUG - Importing PdfImagePlugin
-2025-12-07 14:08:28,191 - DEBUG - Importing PixarImagePlugin
-2025-12-07 14:08:28,192 - DEBUG - Importing PngImagePlugin
-2025-12-07 14:08:28,192 - DEBUG - Importing PpmImagePlugin
-2025-12-07 14:08:28,192 - DEBUG - Importing PsdImagePlugin
-2025-12-07 14:08:28,193 - DEBUG - Importing SgiImagePlugin
-2025-12-07 14:08:28,194 - DEBUG - Importing SpiderImagePlugin
-2025-12-07 14:08:28,195 - DEBUG - Importing SunImagePlugin
-2025-12-07 14:08:28,197 - DEBUG - Importing TgaImagePlugin
-2025-12-07 14:08:28,198 - DEBUG - Importing TiffImagePlugin
-2025-12-07 14:08:28,198 - DEBUG - Importing WebPImagePlugin
-2025-12-07 14:08:28,202 - DEBUG - Importing WmfImagePlugin
-2025-12-07 14:08:28,203 - DEBUG - Importing XbmImagePlugin
-2025-12-07 14:08:28,205 - DEBUG - Importing XpmImagePlugin
-2025-12-07 14:08:28,206 - DEBUG - Importing XVThumbImagePlugin
-2025-12-07 14:08:29,073 - INFO - Updating folders for path: W:\Collection
-2025-12-07 14:08:29,698 - INFO - Found 25 folders.
-2025-12-07 14:10:28,016 - DEBUG - Importing BlpImagePlugin
-2025-12-07 14:10:28,018 - DEBUG - Importing BmpImagePlugin
-2025-12-07 14:10:28,018 - DEBUG - Importing BufrStubImagePlugin
-2025-12-07 14:10:28,019 - DEBUG - Importing CurImagePlugin
-2025-12-07 14:10:28,020 - DEBUG - Importing DcxImagePlugin
-2025-12-07 14:10:28,023 - DEBUG - Importing DdsImagePlugin
-2025-12-07 14:10:28,024 - DEBUG - Importing EpsImagePlugin
-2025-12-07 14:10:28,049 - DEBUG - Importing FitsStubImagePlugin
-2025-12-07 14:10:28,050 - DEBUG - Importing FliImagePlugin
-2025-12-07 14:10:28,051 - DEBUG - Importing FpxImagePlugin
-2025-12-07 14:10:28,056 - DEBUG - Importing FtexImagePlugin
-2025-12-07 14:10:28,057 - DEBUG - Importing GbrImagePlugin
-2025-12-07 14:10:28,058 - DEBUG - Importing GifImagePlugin
-2025-12-07 14:10:28,058 - DEBUG - Importing GribStubImagePlugin
-2025-12-07 14:10:28,059 - DEBUG - Importing Hdf5StubImagePlugin
-2025-12-07 14:10:28,061 - DEBUG - Importing IcnsImagePlugin
-2025-12-07 14:10:28,064 - DEBUG - Importing IcoImagePlugin
-2025-12-07 14:10:28,065 - DEBUG - Importing ImImagePlugin
-2025-12-07 14:10:28,067 - DEBUG - Importing ImtImagePlugin
-2025-12-07 14:10:28,068 - DEBUG - Importing IptcImagePlugin
-2025-12-07 14:10:28,069 - DEBUG - Importing JpegImagePlugin
-2025-12-07 14:10:28,069 - DEBUG - Importing Jpeg2KImagePlugin
-2025-12-07 14:10:28,069 - DEBUG - Importing McIdasImagePlugin
-2025-12-07 14:10:28,071 - DEBUG - Importing MicImagePlugin
-2025-12-07 14:10:28,072 - DEBUG - Importing MpegImagePlugin
-2025-12-07 14:10:28,073 - DEBUG - Importing MpoImagePlugin
-2025-12-07 14:10:28,074 - DEBUG - Importing MspImagePlugin
-2025-12-07 14:10:28,075 - DEBUG - Importing PalmImagePlugin
-2025-12-07 14:10:28,077 - DEBUG - Importing PcdImagePlugin
-2025-12-07 14:10:28,078 - DEBUG - Importing PcxImagePlugin
-2025-12-07 14:10:28,078 - DEBUG - Importing PdfImagePlugin
-2025-12-07 14:10:28,084 - DEBUG - Importing PixarImagePlugin
-2025-12-07 14:10:28,085 - DEBUG - Importing PngImagePlugin
-2025-12-07 14:10:28,085 - DEBUG - Importing PpmImagePlugin
-2025-12-07 14:10:28,085 - DEBUG - Importing PsdImagePlugin
-2025-12-07 14:10:28,087 - DEBUG - Importing SgiImagePlugin
-2025-12-07 14:10:28,088 - DEBUG - Importing SpiderImagePlugin
-2025-12-07 14:10:28,089 - DEBUG - Importing SunImagePlugin
-2025-12-07 14:10:28,091 - DEBUG - Importing TgaImagePlugin
-2025-12-07 14:10:28,092 - DEBUG - Importing TiffImagePlugin
-2025-12-07 14:10:28,093 - DEBUG - Importing WebPImagePlugin
-2025-12-07 14:10:28,097 - DEBUG - Importing WmfImagePlugin
-2025-12-07 14:10:28,098 - DEBUG - Importing XbmImagePlugin
-2025-12-07 14:10:28,100 - DEBUG - Importing XpmImagePlugin
-2025-12-07 14:10:28,101 - DEBUG - Importing XVThumbImagePlugin
-2025-12-07 14:10:29,029 - INFO - Updating folders for path: W:\Collection
-2025-12-07 14:10:29,617 - INFO - Found 25 folders.
-2025-12-07 14:21:23,099 - DEBUG - Importing BlpImagePlugin
-2025-12-07 14:21:23,100 - DEBUG - Importing BmpImagePlugin
-2025-12-07 14:21:23,100 - DEBUG - Importing BufrStubImagePlugin
-2025-12-07 14:21:23,101 - DEBUG - Importing CurImagePlugin
-2025-12-07 14:21:23,103 - DEBUG - Importing DcxImagePlugin
-2025-12-07 14:21:23,105 - DEBUG - Importing DdsImagePlugin
-2025-12-07 14:21:23,106 - DEBUG - Importing EpsImagePlugin
-2025-12-07 14:21:23,131 - DEBUG - Importing FitsStubImagePlugin
-2025-12-07 14:21:23,132 - DEBUG - Importing FliImagePlugin
-2025-12-07 14:21:23,134 - DEBUG - Importing FpxImagePlugin
-2025-12-07 14:21:23,138 - DEBUG - Importing FtexImagePlugin
-2025-12-07 14:21:23,139 - DEBUG - Importing GbrImagePlugin
-2025-12-07 14:21:23,140 - DEBUG - Importing GifImagePlugin
-2025-12-07 14:21:23,140 - DEBUG - Importing GribStubImagePlugin
-2025-12-07 14:21:23,142 - DEBUG - Importing Hdf5StubImagePlugin
-2025-12-07 14:21:23,143 - DEBUG - Importing IcnsImagePlugin
-2025-12-07 14:21:23,147 - DEBUG - Importing IcoImagePlugin
-2025-12-07 14:21:23,148 - DEBUG - Importing ImImagePlugin
-2025-12-07 14:21:23,149 - DEBUG - Importing ImtImagePlugin
-2025-12-07 14:21:23,150 - DEBUG - Importing IptcImagePlugin
-2025-12-07 14:21:23,152 - DEBUG - Importing JpegImagePlugin
-2025-12-07 14:21:23,152 - DEBUG - Importing Jpeg2KImagePlugin
-2025-12-07 14:21:23,152 - DEBUG - Importing McIdasImagePlugin
-2025-12-07 14:21:23,153 - DEBUG - Importing MicImagePlugin
-2025-12-07 14:21:23,154 - DEBUG - Importing MpegImagePlugin
-2025-12-07 14:21:23,155 - DEBUG - Importing MpoImagePlugin
-2025-12-07 14:21:23,157 - DEBUG - Importing MspImagePlugin
-2025-12-07 14:21:23,158 - DEBUG - Importing PalmImagePlugin
-2025-12-07 14:21:23,159 - DEBUG - Importing PcdImagePlugin
-2025-12-07 14:21:23,161 - DEBUG - Importing PcxImagePlugin
-2025-12-07 14:21:23,161 - DEBUG - Importing PdfImagePlugin
-2025-12-07 14:21:23,166 - DEBUG - Importing PixarImagePlugin
-2025-12-07 14:21:23,168 - DEBUG - Importing PngImagePlugin
-2025-12-07 14:21:23,168 - DEBUG - Importing PpmImagePlugin
-2025-12-07 14:21:23,168 - DEBUG - Importing PsdImagePlugin
-2025-12-07 14:21:23,169 - DEBUG - Importing SgiImagePlugin
-2025-12-07 14:21:23,170 - DEBUG - Importing SpiderImagePlugin
-2025-12-07 14:21:23,171 - DEBUG - Importing SunImagePlugin
-2025-12-07 14:21:23,173 - DEBUG - Importing TgaImagePlugin
-2025-12-07 14:21:23,174 - DEBUG - Importing TiffImagePlugin
-2025-12-07 14:21:23,174 - DEBUG - Importing WebPImagePlugin
-2025-12-07 14:21:23,178 - DEBUG - Importing WmfImagePlugin
-2025-12-07 14:21:23,179 - DEBUG - Importing XbmImagePlugin
-2025-12-07 14:21:23,181 - DEBUG - Importing XpmImagePlugin
-2025-12-07 14:21:23,182 - DEBUG - Importing XVThumbImagePlugin
-2025-12-07 14:21:24,114 - INFO - Updating folders for path: W:\Collection
-2025-12-07 14:21:24,342 - ERROR - QML FAILED to load
-2025-12-07 14:24:40,917 - DEBUG - Importing BlpImagePlugin
-2025-12-07 14:24:40,919 - DEBUG - Importing BmpImagePlugin
-2025-12-07 14:24:40,919 - DEBUG - Importing BufrStubImagePlugin
-2025-12-07 14:24:40,920 - DEBUG - Importing CurImagePlugin
-2025-12-07 14:24:40,921 - DEBUG - Importing DcxImagePlugin
-2025-12-07 14:24:40,924 - DEBUG - Importing DdsImagePlugin
-2025-12-07 14:24:40,925 - DEBUG - Importing EpsImagePlugin
-2025-12-07 14:24:40,949 - DEBUG - Importing FitsStubImagePlugin
-2025-12-07 14:24:40,951 - DEBUG - Importing FliImagePlugin
-2025-12-07 14:24:40,952 - DEBUG - Importing FpxImagePlugin
-2025-12-07 14:24:40,956 - DEBUG - Importing FtexImagePlugin
-2025-12-07 14:24:40,958 - DEBUG - Importing GbrImagePlugin
-2025-12-07 14:24:40,959 - DEBUG - Importing GifImagePlugin
-2025-12-07 14:24:40,959 - DEBUG - Importing GribStubImagePlugin
-2025-12-07 14:24:40,961 - DEBUG - Importing Hdf5StubImagePlugin
-2025-12-07 14:24:40,962 - DEBUG - Importing IcnsImagePlugin
-2025-12-07 14:24:40,966 - DEBUG - Importing IcoImagePlugin
-2025-12-07 14:24:40,967 - DEBUG - Importing ImImagePlugin
-2025-12-07 14:24:40,969 - DEBUG - Importing ImtImagePlugin
-2025-12-07 14:24:40,970 - DEBUG - Importing IptcImagePlugin
-2025-12-07 14:24:40,971 - DEBUG - Importing JpegImagePlugin
-2025-12-07 14:24:40,971 - DEBUG - Importing Jpeg2KImagePlugin
-2025-12-07 14:24:40,971 - DEBUG - Importing McIdasImagePlugin
-2025-12-07 14:24:40,972 - DEBUG - Importing MicImagePlugin
-2025-12-07 14:24:40,974 - DEBUG - Importing MpegImagePlugin
-2025-12-07 14:24:40,975 - DEBUG - Importing MpoImagePlugin
-2025-12-07 14:24:40,976 - DEBUG - Importing MspImagePlugin
-2025-12-07 14:24:40,977 - DEBUG - Importing PalmImagePlugin
-2025-12-07 14:24:40,979 - DEBUG - Importing PcdImagePlugin
-2025-12-07 14:24:40,980 - DEBUG - Importing PcxImagePlugin
-2025-12-07 14:24:40,980 - DEBUG - Importing PdfImagePlugin
-2025-12-07 14:24:40,986 - DEBUG - Importing PixarImagePlugin
-2025-12-07 14:24:40,987 - DEBUG - Importing PngImagePlugin
-2025-12-07 14:24:40,987 - DEBUG - Importing PpmImagePlugin
-2025-12-07 14:24:40,987 - DEBUG - Importing PsdImagePlugin
-2025-12-07 14:24:40,988 - DEBUG - Importing SgiImagePlugin
-2025-12-07 14:24:40,990 - DEBUG - Importing SpiderImagePlugin
-2025-12-07 14:24:40,991 - DEBUG - Importing SunImagePlugin
-2025-12-07 14:24:40,992 - DEBUG - Importing TgaImagePlugin
-2025-12-07 14:24:40,993 - DEBUG - Importing TiffImagePlugin
-2025-12-07 14:24:40,993 - DEBUG - Importing WebPImagePlugin
-2025-12-07 14:24:40,998 - DEBUG - Importing WmfImagePlugin
-2025-12-07 14:24:40,999 - DEBUG - Importing XbmImagePlugin
-2025-12-07 14:24:41,001 - DEBUG - Importing XpmImagePlugin
-2025-12-07 14:24:41,002 - DEBUG - Importing XVThumbImagePlugin
-2025-12-07 14:24:41,883 - INFO - Updating folders for path: W:\Collection
-2025-12-07 14:24:42,556 - INFO - Found 25 folders.
-2025-12-07 14:26:33,345 - DEBUG - Importing BlpImagePlugin
-2025-12-07 14:26:33,347 - DEBUG - Importing BmpImagePlugin
-2025-12-07 14:26:33,347 - DEBUG - Importing BufrStubImagePlugin
-2025-12-07 14:26:33,348 - DEBUG - Importing CurImagePlugin
-2025-12-07 14:26:33,349 - DEBUG - Importing DcxImagePlugin
-2025-12-07 14:26:33,353 - DEBUG - Importing DdsImagePlugin
-2025-12-07 14:26:33,354 - DEBUG - Importing EpsImagePlugin
-2025-12-07 14:26:33,379 - DEBUG - Importing FitsStubImagePlugin
-2025-12-07 14:26:33,380 - DEBUG - Importing FliImagePlugin
-2025-12-07 14:26:33,381 - DEBUG - Importing FpxImagePlugin
-2025-12-07 14:26:33,386 - DEBUG - Importing FtexImagePlugin
-2025-12-07 14:26:33,387 - DEBUG - Importing GbrImagePlugin
-2025-12-07 14:26:33,388 - DEBUG - Importing GifImagePlugin
-2025-12-07 14:26:33,388 - DEBUG - Importing GribStubImagePlugin
-2025-12-07 14:26:33,389 - DEBUG - Importing Hdf5StubImagePlugin
-2025-12-07 14:26:33,391 - DEBUG - Importing IcnsImagePlugin
-2025-12-07 14:26:33,394 - DEBUG - Importing IcoImagePlugin
-2025-12-07 14:26:33,395 - DEBUG - Importing ImImagePlugin
-2025-12-07 14:26:33,397 - DEBUG - Importing ImtImagePlugin
-2025-12-07 14:26:33,398 - DEBUG - Importing IptcImagePlugin
-2025-12-07 14:26:33,399 - DEBUG - Importing JpegImagePlugin
-2025-12-07 14:26:33,399 - DEBUG - Importing Jpeg2KImagePlugin
-2025-12-07 14:26:33,399 - DEBUG - Importing McIdasImagePlugin
-2025-12-07 14:26:33,401 - DEBUG - Importing MicImagePlugin
-2025-12-07 14:26:33,402 - DEBUG - Importing MpegImagePlugin
-2025-12-07 14:26:33,403 - DEBUG - Importing MpoImagePlugin
-2025-12-07 14:26:33,404 - DEBUG - Importing MspImagePlugin
-2025-12-07 14:26:33,405 - DEBUG - Importing PalmImagePlugin
-2025-12-07 14:26:33,407 - DEBUG - Importing PcdImagePlugin
-2025-12-07 14:26:33,408 - DEBUG - Importing PcxImagePlugin
-2025-12-07 14:26:33,408 - DEBUG - Importing PdfImagePlugin
-2025-12-07 14:26:33,414 - DEBUG - Importing PixarImagePlugin
-2025-12-07 14:26:33,415 - DEBUG - Importing PngImagePlugin
-2025-12-07 14:26:33,415 - DEBUG - Importing PpmImagePlugin
-2025-12-07 14:26:33,415 - DEBUG - Importing PsdImagePlugin
-2025-12-07 14:26:33,417 - DEBUG - Importing SgiImagePlugin
-2025-12-07 14:26:33,418 - DEBUG - Importing SpiderImagePlugin
-2025-12-07 14:26:33,419 - DEBUG - Importing SunImagePlugin
-2025-12-07 14:26:33,420 - DEBUG - Importing TgaImagePlugin
-2025-12-07 14:26:33,421 - DEBUG - Importing TiffImagePlugin
-2025-12-07 14:26:33,421 - DEBUG - Importing WebPImagePlugin
-2025-12-07 14:26:33,426 - DEBUG - Importing WmfImagePlugin
-2025-12-07 14:26:33,427 - DEBUG - Importing XbmImagePlugin
-2025-12-07 14:26:33,429 - DEBUG - Importing XpmImagePlugin
-2025-12-07 14:26:33,430 - DEBUG - Importing XVThumbImagePlugin
-2025-12-07 14:26:34,351 - INFO - Updating folders for path: W:\Collection
-2025-12-07 14:26:34,979 - INFO - Found 25 folders.
-2025-12-07 14:27:58,828 - DEBUG - Importing BlpImagePlugin
-2025-12-07 14:27:58,830 - DEBUG - Importing BmpImagePlugin
-2025-12-07 14:27:58,830 - DEBUG - Importing BufrStubImagePlugin
-2025-12-07 14:27:58,831 - DEBUG - Importing CurImagePlugin
-2025-12-07 14:27:58,832 - DEBUG - Importing DcxImagePlugin
-2025-12-07 14:27:58,835 - DEBUG - Importing DdsImagePlugin
-2025-12-07 14:27:58,836 - DEBUG - Importing EpsImagePlugin
-2025-12-07 14:27:58,861 - DEBUG - Importing FitsStubImagePlugin
-2025-12-07 14:27:58,862 - DEBUG - Importing FliImagePlugin
-2025-12-07 14:27:58,863 - DEBUG - Importing FpxImagePlugin
-2025-12-07 14:27:58,869 - DEBUG - Importing FtexImagePlugin
-2025-12-07 14:27:58,870 - DEBUG - Importing GbrImagePlugin
-2025-12-07 14:27:58,871 - DEBUG - Importing GifImagePlugin
-2025-12-07 14:27:58,871 - DEBUG - Importing GribStubImagePlugin
-2025-12-07 14:27:58,872 - DEBUG - Importing Hdf5StubImagePlugin
-2025-12-07 14:27:58,874 - DEBUG - Importing IcnsImagePlugin
-2025-12-07 14:27:58,877 - DEBUG - Importing IcoImagePlugin
-2025-12-07 14:27:58,878 - DEBUG - Importing ImImagePlugin
-2025-12-07 14:27:58,880 - DEBUG - Importing ImtImagePlugin
-2025-12-07 14:27:58,881 - DEBUG - Importing IptcImagePlugin
-2025-12-07 14:27:58,882 - DEBUG - Importing JpegImagePlugin
-2025-12-07 14:27:58,882 - DEBUG - Importing Jpeg2KImagePlugin
-2025-12-07 14:27:58,882 - DEBUG - Importing McIdasImagePlugin
-2025-12-07 14:27:58,884 - DEBUG - Importing MicImagePlugin
-2025-12-07 14:27:58,885 - DEBUG - Importing MpegImagePlugin
-2025-12-07 14:27:58,886 - DEBUG - Importing MpoImagePlugin
-2025-12-07 14:27:58,887 - DEBUG - Importing MspImagePlugin
-2025-12-07 14:27:58,889 - DEBUG - Importing PalmImagePlugin
-2025-12-07 14:27:58,890 - DEBUG - Importing PcdImagePlugin
-2025-12-07 14:27:58,891 - DEBUG - Importing PcxImagePlugin
-2025-12-07 14:27:58,892 - DEBUG - Importing PdfImagePlugin
-2025-12-07 14:27:58,898 - DEBUG - Importing PixarImagePlugin
-2025-12-07 14:27:58,899 - DEBUG - Importing PngImagePlugin
-2025-12-07 14:27:58,899 - DEBUG - Importing PpmImagePlugin
-2025-12-07 14:27:58,899 - DEBUG - Importing PsdImagePlugin
-2025-12-07 14:27:58,900 - DEBUG - Importing SgiImagePlugin
-2025-12-07 14:27:58,901 - DEBUG - Importing SpiderImagePlugin
-2025-12-07 14:27:58,903 - DEBUG - Importing SunImagePlugin
-2025-12-07 14:27:58,904 - DEBUG - Importing TgaImagePlugin
-2025-12-07 14:27:58,905 - DEBUG - Importing TiffImagePlugin
-2025-12-07 14:27:58,905 - DEBUG - Importing WebPImagePlugin
-2025-12-07 14:27:58,909 - DEBUG - Importing WmfImagePlugin
-2025-12-07 14:27:58,910 - DEBUG - Importing XbmImagePlugin
-2025-12-07 14:27:58,912 - DEBUG - Importing XpmImagePlugin
-2025-12-07 14:27:58,913 - DEBUG - Importing XVThumbImagePlugin
-2025-12-07 14:27:59,781 - INFO - Updating folders for path: W:\Collection
-2025-12-07 14:28:00,416 - INFO - Found 25 folders.
-2025-12-07 14:35:42,036 - DEBUG - Importing BlpImagePlugin
-2025-12-07 14:35:42,038 - DEBUG - Importing BmpImagePlugin
-2025-12-07 14:35:42,038 - DEBUG - Importing BufrStubImagePlugin
-2025-12-07 14:35:42,039 - DEBUG - Importing CurImagePlugin
-2025-12-07 14:35:42,041 - DEBUG - Importing DcxImagePlugin
-2025-12-07 14:35:42,043 - DEBUG - Importing DdsImagePlugin
-2025-12-07 14:35:42,044 - DEBUG - Importing EpsImagePlugin
-2025-12-07 14:35:42,069 - DEBUG - Importing FitsStubImagePlugin
-2025-12-07 14:35:42,070 - DEBUG - Importing FliImagePlugin
-2025-12-07 14:35:42,071 - DEBUG - Importing FpxImagePlugin
-2025-12-07 14:35:42,076 - DEBUG - Importing FtexImagePlugin
-2025-12-07 14:35:42,076 - DEBUG - Importing GbrImagePlugin
-2025-12-07 14:35:42,079 - DEBUG - Importing GifImagePlugin
-2025-12-07 14:35:42,079 - DEBUG - Importing GribStubImagePlugin
-2025-12-07 14:35:42,080 - DEBUG - Importing Hdf5StubImagePlugin
-2025-12-07 14:35:42,081 - DEBUG - Importing IcnsImagePlugin
-2025-12-07 14:35:42,085 - DEBUG - Importing IcoImagePlugin
-2025-12-07 14:35:42,086 - DEBUG - Importing ImImagePlugin
-2025-12-07 14:35:42,087 - DEBUG - Importing ImtImagePlugin
-2025-12-07 14:35:42,089 - DEBUG - Importing IptcImagePlugin
-2025-12-07 14:35:42,090 - DEBUG - Importing JpegImagePlugin
-2025-12-07 14:35:42,090 - DEBUG - Importing Jpeg2KImagePlugin
-2025-12-07 14:35:42,090 - DEBUG - Importing McIdasImagePlugin
-2025-12-07 14:35:42,091 - DEBUG - Importing MicImagePlugin
-2025-12-07 14:35:42,092 - DEBUG - Importing MpegImagePlugin
-2025-12-07 14:35:42,094 - DEBUG - Importing MpoImagePlugin
-2025-12-07 14:35:42,095 - DEBUG - Importing MspImagePlugin
-2025-12-07 14:35:42,096 - DEBUG - Importing PalmImagePlugin
-2025-12-07 14:35:42,098 - DEBUG - Importing PcdImagePlugin
-2025-12-07 14:35:42,099 - DEBUG - Importing PcxImagePlugin
-2025-12-07 14:35:42,099 - DEBUG - Importing PdfImagePlugin
-2025-12-07 14:35:42,105 - DEBUG - Importing PixarImagePlugin
-2025-12-07 14:35:42,106 - DEBUG - Importing PngImagePlugin
-2025-12-07 14:35:42,106 - DEBUG - Importing PpmImagePlugin
-2025-12-07 14:35:42,106 - DEBUG - Importing PsdImagePlugin
-2025-12-07 14:35:42,107 - DEBUG - Importing SgiImagePlugin
-2025-12-07 14:35:42,108 - DEBUG - Importing SpiderImagePlugin
-2025-12-07 14:35:42,110 - DEBUG - Importing SunImagePlugin
-2025-12-07 14:35:42,111 - DEBUG - Importing TgaImagePlugin
-2025-12-07 14:35:42,112 - DEBUG - Importing TiffImagePlugin
-2025-12-07 14:35:42,112 - DEBUG - Importing WebPImagePlugin
-2025-12-07 14:35:42,116 - DEBUG - Importing WmfImagePlugin
-2025-12-07 14:35:42,117 - DEBUG - Importing XbmImagePlugin
-2025-12-07 14:35:42,119 - DEBUG - Importing XpmImagePlugin
-2025-12-07 14:35:42,120 - DEBUG - Importing XVThumbImagePlugin
-2025-12-07 14:35:43,041 - INFO - Updating folders for path: W:\Collection
-2025-12-07 14:35:43,725 - INFO - Found 25 folders.
-2025-12-07 14:43:13,366 - DEBUG - Importing BlpImagePlugin
-2025-12-07 14:43:13,367 - DEBUG - Importing BmpImagePlugin
-2025-12-07 14:43:13,367 - DEBUG - Importing BufrStubImagePlugin
-2025-12-07 14:43:13,369 - DEBUG - Importing CurImagePlugin
-2025-12-07 14:43:13,370 - DEBUG - Importing DcxImagePlugin
-2025-12-07 14:43:13,372 - DEBUG - Importing DdsImagePlugin
-2025-12-07 14:43:13,373 - DEBUG - Importing EpsImagePlugin
-2025-12-07 14:43:13,398 - DEBUG - Importing FitsStubImagePlugin
-2025-12-07 14:43:13,400 - DEBUG - Importing FliImagePlugin
-2025-12-07 14:43:13,401 - DEBUG - Importing FpxImagePlugin
-2025-12-07 14:43:13,405 - DEBUG - Importing FtexImagePlugin
-2025-12-07 14:43:13,406 - DEBUG - Importing GbrImagePlugin
-2025-12-07 14:43:13,408 - DEBUG - Importing GifImagePlugin
-2025-12-07 14:43:13,408 - DEBUG - Importing GribStubImagePlugin
-2025-12-07 14:43:13,409 - DEBUG - Importing Hdf5StubImagePlugin
-2025-12-07 14:43:13,410 - DEBUG - Importing IcnsImagePlugin
-2025-12-07 14:43:13,414 - DEBUG - Importing IcoImagePlugin
-2025-12-07 14:43:13,415 - DEBUG - Importing ImImagePlugin
-2025-12-07 14:43:13,416 - DEBUG - Importing ImtImagePlugin
-2025-12-07 14:43:13,418 - DEBUG - Importing IptcImagePlugin
-2025-12-07 14:43:13,419 - DEBUG - Importing JpegImagePlugin
-2025-12-07 14:43:13,419 - DEBUG - Importing Jpeg2KImagePlugin
-2025-12-07 14:43:13,419 - DEBUG - Importing McIdasImagePlugin
-2025-12-07 14:43:13,420 - DEBUG - Importing MicImagePlugin
-2025-12-07 14:43:13,421 - DEBUG - Importing MpegImagePlugin
-2025-12-07 14:43:13,423 - DEBUG - Importing MpoImagePlugin
-2025-12-07 14:43:13,424 - DEBUG - Importing MspImagePlugin
-2025-12-07 14:43:13,425 - DEBUG - Importing PalmImagePlugin
-2025-12-07 14:43:13,427 - DEBUG - Importing PcdImagePlugin
-2025-12-07 14:43:13,428 - DEBUG - Importing PcxImagePlugin
-2025-12-07 14:43:13,428 - DEBUG - Importing PdfImagePlugin
-2025-12-07 14:43:13,434 - DEBUG - Importing PixarImagePlugin
-2025-12-07 14:43:13,435 - DEBUG - Importing PngImagePlugin
-2025-12-07 14:43:13,435 - DEBUG - Importing PpmImagePlugin
-2025-12-07 14:43:13,435 - DEBUG - Importing PsdImagePlugin
-2025-12-07 14:43:13,436 - DEBUG - Importing SgiImagePlugin
-2025-12-07 14:43:13,437 - DEBUG - Importing SpiderImagePlugin
-2025-12-07 14:43:13,439 - DEBUG - Importing SunImagePlugin
-2025-12-07 14:43:13,440 - DEBUG - Importing TgaImagePlugin
-2025-12-07 14:43:13,441 - DEBUG - Importing TiffImagePlugin
-2025-12-07 14:43:13,441 - DEBUG - Importing WebPImagePlugin
-2025-12-07 14:43:13,445 - DEBUG - Importing WmfImagePlugin
-2025-12-07 14:43:13,447 - DEBUG - Importing XbmImagePlugin
-2025-12-07 14:43:13,448 - DEBUG - Importing XpmImagePlugin
-2025-12-07 14:43:13,450 - DEBUG - Importing XVThumbImagePlugin
-2025-12-07 14:43:14,369 - INFO - Updating folders for path: W:\Collection
-2025-12-07 14:43:14,407 - ERROR - QML FAILED to load
-2025-12-07 14:43:53,916 - DEBUG - Importing BlpImagePlugin
-2025-12-07 14:43:53,919 - DEBUG - Importing BmpImagePlugin
-2025-12-07 14:43:53,919 - DEBUG - Importing BufrStubImagePlugin
-2025-12-07 14:43:53,920 - DEBUG - Importing CurImagePlugin
-2025-12-07 14:43:53,921 - DEBUG - Importing DcxImagePlugin
-2025-12-07 14:43:53,924 - DEBUG - Importing DdsImagePlugin
-2025-12-07 14:43:53,925 - DEBUG - Importing EpsImagePlugin
-2025-12-07 14:43:53,949 - DEBUG - Importing FitsStubImagePlugin
-2025-12-07 14:43:53,951 - DEBUG - Importing FliImagePlugin
-2025-12-07 14:43:53,952 - DEBUG - Importing FpxImagePlugin
-2025-12-07 14:43:53,956 - DEBUG - Importing FtexImagePlugin
-2025-12-07 14:43:53,958 - DEBUG - Importing GbrImagePlugin
-2025-12-07 14:43:53,959 - DEBUG - Importing GifImagePlugin
-2025-12-07 14:43:53,959 - DEBUG - Importing GribStubImagePlugin
-2025-12-07 14:43:53,960 - DEBUG - Importing Hdf5StubImagePlugin
-2025-12-07 14:43:53,961 - DEBUG - Importing IcnsImagePlugin
-2025-12-07 14:43:53,965 - DEBUG - Importing IcoImagePlugin
-2025-12-07 14:43:53,966 - DEBUG - Importing ImImagePlugin
-2025-12-07 14:43:53,967 - DEBUG - Importing ImtImagePlugin
-2025-12-07 14:43:53,969 - DEBUG - Importing IptcImagePlugin
-2025-12-07 14:43:53,970 - DEBUG - Importing JpegImagePlugin
-2025-12-07 14:43:53,970 - DEBUG - Importing Jpeg2KImagePlugin
-2025-12-07 14:43:53,970 - DEBUG - Importing McIdasImagePlugin
-2025-12-07 14:43:53,971 - DEBUG - Importing MicImagePlugin
-2025-12-07 14:43:53,973 - DEBUG - Importing MpegImagePlugin
-2025-12-07 14:43:53,974 - DEBUG - Importing MpoImagePlugin
-2025-12-07 14:43:53,975 - DEBUG - Importing MspImagePlugin
-2025-12-07 14:43:53,976 - DEBUG - Importing PalmImagePlugin
-2025-12-07 14:43:53,978 - DEBUG - Importing PcdImagePlugin
-2025-12-07 14:43:53,979 - DEBUG - Importing PcxImagePlugin
-2025-12-07 14:43:53,979 - DEBUG - Importing PdfImagePlugin
-2025-12-07 14:43:53,985 - DEBUG - Importing PixarImagePlugin
-2025-12-07 14:43:53,986 - DEBUG - Importing PngImagePlugin
-2025-12-07 14:43:53,986 - DEBUG - Importing PpmImagePlugin
-2025-12-07 14:43:53,986 - DEBUG - Importing PsdImagePlugin
-2025-12-07 14:43:53,987 - DEBUG - Importing SgiImagePlugin
-2025-12-07 14:43:53,989 - DEBUG - Importing SpiderImagePlugin
-2025-12-07 14:43:53,990 - DEBUG - Importing SunImagePlugin
-2025-12-07 14:43:53,991 - DEBUG - Importing TgaImagePlugin
-2025-12-07 14:43:53,992 - DEBUG - Importing TiffImagePlugin
-2025-12-07 14:43:53,992 - DEBUG - Importing WebPImagePlugin
-2025-12-07 14:43:53,997 - DEBUG - Importing WmfImagePlugin
-2025-12-07 14:43:53,998 - DEBUG - Importing XbmImagePlugin
-2025-12-07 14:43:53,999 - DEBUG - Importing XpmImagePlugin
-2025-12-07 14:43:54,001 - DEBUG - Importing XVThumbImagePlugin
-2025-12-07 14:43:54,856 - INFO - Updating folders for path: W:\Collection
-2025-12-07 14:43:55,507 - INFO - Found 25 folders.
-2025-12-07 14:45:13,419 - DEBUG - Importing BlpImagePlugin
-2025-12-07 14:45:13,421 - DEBUG - Importing BmpImagePlugin
-2025-12-07 14:45:13,421 - DEBUG - Importing BufrStubImagePlugin
-2025-12-07 14:45:13,422 - DEBUG - Importing CurImagePlugin
-2025-12-07 14:45:13,424 - DEBUG - Importing DcxImagePlugin
-2025-12-07 14:45:13,426 - DEBUG - Importing DdsImagePlugin
-2025-12-07 14:45:13,427 - DEBUG - Importing EpsImagePlugin
-2025-12-07 14:45:13,452 - DEBUG - Importing FitsStubImagePlugin
-2025-12-07 14:45:13,454 - DEBUG - Importing FliImagePlugin
-2025-12-07 14:45:13,455 - DEBUG - Importing FpxImagePlugin
-2025-12-07 14:45:13,459 - DEBUG - Importing FtexImagePlugin
-2025-12-07 14:45:13,460 - DEBUG - Importing GbrImagePlugin
-2025-12-07 14:45:13,462 - DEBUG - Importing GifImagePlugin
-2025-12-07 14:45:13,462 - DEBUG - Importing GribStubImagePlugin
-2025-12-07 14:45:13,463 - DEBUG - Importing Hdf5StubImagePlugin
-2025-12-07 14:45:13,464 - DEBUG - Importing IcnsImagePlugin
-2025-12-07 14:45:13,468 - DEBUG - Importing IcoImagePlugin
-2025-12-07 14:45:13,469 - DEBUG - Importing ImImagePlugin
-2025-12-07 14:45:13,470 - DEBUG - Importing ImtImagePlugin
-2025-12-07 14:45:13,472 - DEBUG - Importing IptcImagePlugin
-2025-12-07 14:45:13,473 - DEBUG - Importing JpegImagePlugin
-2025-12-07 14:45:13,473 - DEBUG - Importing Jpeg2KImagePlugin
-2025-12-07 14:45:13,473 - DEBUG - Importing McIdasImagePlugin
-2025-12-07 14:45:13,474 - DEBUG - Importing MicImagePlugin
-2025-12-07 14:45:13,475 - DEBUG - Importing MpegImagePlugin
-2025-12-07 14:45:13,477 - DEBUG - Importing MpoImagePlugin
-2025-12-07 14:45:13,478 - DEBUG - Importing MspImagePlugin
-2025-12-07 14:45:13,479 - DEBUG - Importing PalmImagePlugin
-2025-12-07 14:45:13,481 - DEBUG - Importing PcdImagePlugin
-2025-12-07 14:45:13,482 - DEBUG - Importing PcxImagePlugin
-2025-12-07 14:45:13,482 - DEBUG - Importing PdfImagePlugin
-2025-12-07 14:45:13,488 - DEBUG - Importing PixarImagePlugin
-2025-12-07 14:45:13,489 - DEBUG - Importing PngImagePlugin
-2025-12-07 14:45:13,489 - DEBUG - Importing PpmImagePlugin
-2025-12-07 14:45:13,489 - DEBUG - Importing PsdImagePlugin
-2025-12-07 14:45:13,490 - DEBUG - Importing SgiImagePlugin
-2025-12-07 14:45:13,492 - DEBUG - Importing SpiderImagePlugin
-2025-12-07 14:45:13,493 - DEBUG - Importing SunImagePlugin
-2025-12-07 14:45:13,494 - DEBUG - Importing TgaImagePlugin
-2025-12-07 14:45:13,495 - DEBUG - Importing TiffImagePlugin
-2025-12-07 14:45:13,495 - DEBUG - Importing WebPImagePlugin
-2025-12-07 14:45:13,500 - DEBUG - Importing WmfImagePlugin
-2025-12-07 14:45:13,501 - DEBUG - Importing XbmImagePlugin
-2025-12-07 14:45:13,502 - DEBUG - Importing XpmImagePlugin
-2025-12-07 14:45:13,504 - DEBUG - Importing XVThumbImagePlugin
-2025-12-07 14:45:14,405 - INFO - Updating folders for path: W:\Collection
-2025-12-07 14:45:15,005 - INFO - Found 25 folders.
-2025-12-07 14:47:00,125 - DEBUG - Importing BlpImagePlugin
-2025-12-07 14:47:00,127 - DEBUG - Importing BmpImagePlugin
-2025-12-07 14:47:00,127 - DEBUG - Importing BufrStubImagePlugin
-2025-12-07 14:47:00,128 - DEBUG - Importing CurImagePlugin
-2025-12-07 14:47:00,129 - DEBUG - Importing DcxImagePlugin
-2025-12-07 14:47:00,132 - DEBUG - Importing DdsImagePlugin
-2025-12-07 14:47:00,133 - DEBUG - Importing EpsImagePlugin
-2025-12-07 14:47:00,158 - DEBUG - Importing FitsStubImagePlugin
-2025-12-07 14:47:00,160 - DEBUG - Importing FliImagePlugin
-2025-12-07 14:47:00,162 - DEBUG - Importing FpxImagePlugin
-2025-12-07 14:47:00,166 - DEBUG - Importing FtexImagePlugin
-2025-12-07 14:47:00,167 - DEBUG - Importing GbrImagePlugin
-2025-12-07 14:47:00,169 - DEBUG - Importing GifImagePlugin
-2025-12-07 14:47:00,169 - DEBUG - Importing GribStubImagePlugin
-2025-12-07 14:47:00,170 - DEBUG - Importing Hdf5StubImagePlugin
-2025-12-07 14:47:00,171 - DEBUG - Importing IcnsImagePlugin
-2025-12-07 14:47:00,175 - DEBUG - Importing IcoImagePlugin
-2025-12-07 14:47:00,176 - DEBUG - Importing ImImagePlugin
-2025-12-07 14:47:00,177 - DEBUG - Importing ImtImagePlugin
-2025-12-07 14:47:00,179 - DEBUG - Importing IptcImagePlugin
-2025-12-07 14:47:00,180 - DEBUG - Importing JpegImagePlugin
-2025-12-07 14:47:00,180 - DEBUG - Importing Jpeg2KImagePlugin
-2025-12-07 14:47:00,180 - DEBUG - Importing McIdasImagePlugin
-2025-12-07 14:47:00,181 - DEBUG - Importing MicImagePlugin
-2025-12-07 14:47:00,182 - DEBUG - Importing MpegImagePlugin
-2025-12-07 14:47:00,184 - DEBUG - Importing MpoImagePlugin
-2025-12-07 14:47:00,185 - DEBUG - Importing MspImagePlugin
-2025-12-07 14:47:00,186 - DEBUG - Importing PalmImagePlugin
-2025-12-07 14:47:00,188 - DEBUG - Importing PcdImagePlugin
-2025-12-07 14:47:00,189 - DEBUG - Importing PcxImagePlugin
-2025-12-07 14:47:00,189 - DEBUG - Importing PdfImagePlugin
-2025-12-07 14:47:00,195 - DEBUG - Importing PixarImagePlugin
-2025-12-07 14:47:00,196 - DEBUG - Importing PngImagePlugin
-2025-12-07 14:47:00,196 - DEBUG - Importing PpmImagePlugin
-2025-12-07 14:47:00,196 - DEBUG - Importing PsdImagePlugin
-2025-12-07 14:47:00,197 - DEBUG - Importing SgiImagePlugin
-2025-12-07 14:47:00,199 - DEBUG - Importing SpiderImagePlugin
-2025-12-07 14:47:00,200 - DEBUG - Importing SunImagePlugin
-2025-12-07 14:47:00,201 - DEBUG - Importing TgaImagePlugin
-2025-12-07 14:47:00,203 - DEBUG - Importing TiffImagePlugin
-2025-12-07 14:47:00,203 - DEBUG - Importing WebPImagePlugin
-2025-12-07 14:47:00,207 - DEBUG - Importing WmfImagePlugin
-2025-12-07 14:47:00,208 - DEBUG - Importing XbmImagePlugin
-2025-12-07 14:47:00,210 - DEBUG - Importing XpmImagePlugin
-2025-12-07 14:47:00,211 - DEBUG - Importing XVThumbImagePlugin
-2025-12-07 14:47:01,163 - INFO - Updating folders for path: W:\Collection
-2025-12-07 14:47:01,745 - INFO - Found 25 folders.
-2025-12-07 14:47:39,187 - DEBUG - Importing BlpImagePlugin
-2025-12-07 14:47:39,189 - DEBUG - Importing BmpImagePlugin
-2025-12-07 14:47:39,189 - DEBUG - Importing BufrStubImagePlugin
-2025-12-07 14:47:39,190 - DEBUG - Importing CurImagePlugin
-2025-12-07 14:47:39,191 - DEBUG - Importing DcxImagePlugin
-2025-12-07 14:47:39,193 - DEBUG - Importing DdsImagePlugin
-2025-12-07 14:47:39,195 - DEBUG - Importing EpsImagePlugin
-2025-12-07 14:47:39,219 - DEBUG - Importing FitsStubImagePlugin
-2025-12-07 14:47:39,222 - DEBUG - Importing FliImagePlugin
-2025-12-07 14:47:39,223 - DEBUG - Importing FpxImagePlugin
-2025-12-07 14:47:39,227 - DEBUG - Importing FtexImagePlugin
-2025-12-07 14:47:39,228 - DEBUG - Importing GbrImagePlugin
-2025-12-07 14:47:39,229 - DEBUG - Importing GifImagePlugin
-2025-12-07 14:47:39,230 - DEBUG - Importing GribStubImagePlugin
-2025-12-07 14:47:39,231 - DEBUG - Importing Hdf5StubImagePlugin
-2025-12-07 14:47:39,232 - DEBUG - Importing IcnsImagePlugin
-2025-12-07 14:47:39,236 - DEBUG - Importing IcoImagePlugin
-2025-12-07 14:47:39,237 - DEBUG - Importing ImImagePlugin
-2025-12-07 14:47:39,238 - DEBUG - Importing ImtImagePlugin
-2025-12-07 14:47:39,240 - DEBUG - Importing IptcImagePlugin
-2025-12-07 14:47:39,241 - DEBUG - Importing JpegImagePlugin
-2025-12-07 14:47:39,241 - DEBUG - Importing Jpeg2KImagePlugin
-2025-12-07 14:47:39,241 - DEBUG - Importing McIdasImagePlugin
-2025-12-07 14:47:39,242 - DEBUG - Importing MicImagePlugin
-2025-12-07 14:47:39,243 - DEBUG - Importing MpegImagePlugin
-2025-12-07 14:47:39,245 - DEBUG - Importing MpoImagePlugin
-2025-12-07 14:47:39,246 - DEBUG - Importing MspImagePlugin
-2025-12-07 14:47:39,247 - DEBUG - Importing PalmImagePlugin
-2025-12-07 14:47:39,249 - DEBUG - Importing PcdImagePlugin
-2025-12-07 14:47:39,250 - DEBUG - Importing PcxImagePlugin
-2025-12-07 14:47:39,250 - DEBUG - Importing PdfImagePlugin
-2025-12-07 14:47:39,256 - DEBUG - Importing PixarImagePlugin
-2025-12-07 14:47:39,257 - DEBUG - Importing PngImagePlugin
-2025-12-07 14:47:39,257 - DEBUG - Importing PpmImagePlugin
-2025-12-07 14:47:39,257 - DEBUG - Importing PsdImagePlugin
-2025-12-07 14:47:39,258 - DEBUG - Importing SgiImagePlugin
-2025-12-07 14:47:39,259 - DEBUG - Importing SpiderImagePlugin
-2025-12-07 14:47:39,261 - DEBUG - Importing SunImagePlugin
-2025-12-07 14:47:39,262 - DEBUG - Importing TgaImagePlugin
-2025-12-07 14:47:39,263 - DEBUG - Importing TiffImagePlugin
-2025-12-07 14:47:39,263 - DEBUG - Importing WebPImagePlugin
-2025-12-07 14:47:39,267 - DEBUG - Importing WmfImagePlugin
-2025-12-07 14:47:39,268 - DEBUG - Importing XbmImagePlugin
-2025-12-07 14:47:39,270 - DEBUG - Importing XpmImagePlugin
-2025-12-07 14:47:39,271 - DEBUG - Importing XVThumbImagePlugin
-2025-12-07 14:47:40,137 - INFO - Updating folders for path: W:\Collection
-2025-12-07 14:47:40,717 - INFO - Found 25 folders.
-2025-12-07 14:48:23,052 - INFO - Resolved video path: file:///W%3A/Collection/Bond%20Movies/A%20View%20to%20a%20Kill%20%281985%29.ts
-2025-12-07 14:48:27,761 - INFO - Resolved video path: file:///W%3A/Collection/Bond%20Movies/A%20View%20to%20a%20Kill%20%281985%29.ts
-2025-12-07 14:49:30,804 - DEBUG - Importing BlpImagePlugin
-2025-12-07 14:49:30,806 - DEBUG - Importing BmpImagePlugin
-2025-12-07 14:49:30,806 - DEBUG - Importing BufrStubImagePlugin
-2025-12-07 14:49:30,807 - DEBUG - Importing CurImagePlugin
-2025-12-07 14:49:30,808 - DEBUG - Importing DcxImagePlugin
-2025-12-07 14:49:30,811 - DEBUG - Importing DdsImagePlugin
-2025-12-07 14:49:30,812 - DEBUG - Importing EpsImagePlugin
-2025-12-07 14:49:30,837 - DEBUG - Importing FitsStubImagePlugin
-2025-12-07 14:49:30,839 - DEBUG - Importing FliImagePlugin
-2025-12-07 14:49:30,840 - DEBUG - Importing FpxImagePlugin
-2025-12-07 14:49:30,844 - DEBUG - Importing FtexImagePlugin
-2025-12-07 14:49:30,845 - DEBUG - Importing GbrImagePlugin
-2025-12-07 14:49:30,847 - DEBUG - Importing GifImagePlugin
-2025-12-07 14:49:30,847 - DEBUG - Importing GribStubImagePlugin
-2025-12-07 14:49:30,848 - DEBUG - Importing Hdf5StubImagePlugin
-2025-12-07 14:49:30,849 - DEBUG - Importing IcnsImagePlugin
-2025-12-07 14:49:30,853 - DEBUG - Importing IcoImagePlugin
-2025-12-07 14:49:30,854 - DEBUG - Importing ImImagePlugin
-2025-12-07 14:49:30,855 - DEBUG - Importing ImtImagePlugin
-2025-12-07 14:49:30,857 - DEBUG - Importing IptcImagePlugin
-2025-12-07 14:49:30,858 - DEBUG - Importing JpegImagePlugin
-2025-12-07 14:49:30,858 - DEBUG - Importing Jpeg2KImagePlugin
-2025-12-07 14:49:30,858 - DEBUG - Importing McIdasImagePlugin
-2025-12-07 14:49:30,859 - DEBUG - Importing MicImagePlugin
-2025-12-07 14:49:30,860 - DEBUG - Importing MpegImagePlugin
-2025-12-07 14:49:30,862 - DEBUG - Importing MpoImagePlugin
-2025-12-07 14:49:30,863 - DEBUG - Importing MspImagePlugin
-2025-12-07 14:49:30,864 - DEBUG - Importing PalmImagePlugin
-2025-12-07 14:49:30,866 - DEBUG - Importing PcdImagePlugin
-2025-12-07 14:49:30,867 - DEBUG - Importing PcxImagePlugin
-2025-12-07 14:49:30,867 - DEBUG - Importing PdfImagePlugin
-2025-12-07 14:49:30,873 - DEBUG - Importing PixarImagePlugin
-2025-12-07 14:49:30,874 - DEBUG - Importing PngImagePlugin
-2025-12-07 14:49:30,874 - DEBUG - Importing PpmImagePlugin
-2025-12-07 14:49:30,874 - DEBUG - Importing PsdImagePlugin
-2025-12-07 14:49:30,875 - DEBUG - Importing SgiImagePlugin
-2025-12-07 14:49:30,876 - DEBUG - Importing SpiderImagePlugin
-2025-12-07 14:49:30,877 - DEBUG - Importing SunImagePlugin
-2025-12-07 14:49:30,878 - DEBUG - Importing TgaImagePlugin
-2025-12-07 14:49:30,880 - DEBUG - Importing TiffImagePlugin
-2025-12-07 14:49:30,880 - DEBUG - Importing WebPImagePlugin
-2025-12-07 14:49:30,884 - DEBUG - Importing WmfImagePlugin
-2025-12-07 14:49:30,885 - DEBUG - Importing XbmImagePlugin
-2025-12-07 14:49:30,887 - DEBUG - Importing XpmImagePlugin
-2025-12-07 14:49:30,888 - DEBUG - Importing XVThumbImagePlugin
-2025-12-07 14:49:31,812 - INFO - Updating folders for path: W:\Collection
-2025-12-07 14:49:32,388 - INFO - Found 25 folders.
-2025-12-15 20:00:20,243 - DEBUG - Importing AvifImagePlugin
-2025-12-15 20:00:20,454 - DEBUG - Importing BlpImagePlugin
-2025-12-15 20:00:20,456 - DEBUG - Importing BmpImagePlugin
-2025-12-15 20:00:20,456 - DEBUG - Importing BufrStubImagePlugin
-2025-12-15 20:00:20,458 - DEBUG - Importing CurImagePlugin
-2025-12-15 20:00:20,460 - DEBUG - Importing DcxImagePlugin
-2025-12-15 20:00:20,463 - DEBUG - Importing DdsImagePlugin
-2025-12-15 20:00:20,470 - DEBUG - Importing EpsImagePlugin
-2025-12-15 20:00:20,473 - DEBUG - Importing FitsImagePlugin
-2025-12-15 20:00:20,477 - DEBUG - Importing FliImagePlugin
-2025-12-15 20:00:20,479 - DEBUG - Importing FpxImagePlugin
-2025-12-15 20:00:20,482 - DEBUG - Image: failed to import FpxImagePlugin: No module named 'olefile'
-2025-12-15 20:00:20,482 - DEBUG - Importing FtexImagePlugin
-2025-12-15 20:00:20,484 - DEBUG - Importing GbrImagePlugin
-2025-12-15 20:00:20,485 - DEBUG - Importing GifImagePlugin
-2025-12-15 20:00:20,485 - DEBUG - Importing GribStubImagePlugin
-2025-12-15 20:00:20,487 - DEBUG - Importing Hdf5StubImagePlugin
-2025-12-15 20:00:20,489 - DEBUG - Importing IcnsImagePlugin
-2025-12-15 20:00:20,495 - DEBUG - Importing IcoImagePlugin
-2025-12-15 20:00:20,497 - DEBUG - Importing ImImagePlugin
-2025-12-15 20:00:20,499 - DEBUG - Importing ImtImagePlugin
-2025-12-15 20:00:20,501 - DEBUG - Importing IptcImagePlugin
-2025-12-15 20:00:20,503 - DEBUG - Importing JpegImagePlugin
-2025-12-15 20:00:20,504 - DEBUG - Importing Jpeg2KImagePlugin
-2025-12-15 20:00:20,504 - DEBUG - Importing McIdasImagePlugin
-2025-12-15 20:00:20,505 - DEBUG - Importing MicImagePlugin
-2025-12-15 20:00:20,508 - DEBUG - Image: failed to import MicImagePlugin: No module named 'olefile'
-2025-12-15 20:00:20,508 - DEBUG - Importing MpegImagePlugin
-2025-12-15 20:00:20,512 - DEBUG - Importing MpoImagePlugin
-2025-12-15 20:00:20,522 - DEBUG - Importing MspImagePlugin
-2025-12-15 20:00:20,524 - DEBUG - Importing PalmImagePlugin
-2025-12-15 20:00:20,527 - DEBUG - Importing PcdImagePlugin
-2025-12-15 20:00:20,529 - DEBUG - Importing PcxImagePlugin
-2025-12-15 20:00:20,529 - DEBUG - Importing PdfImagePlugin
-2025-12-15 20:00:20,543 - DEBUG - Importing PixarImagePlugin
-2025-12-15 20:00:20,545 - DEBUG - Importing PngImagePlugin
-2025-12-15 20:00:20,545 - DEBUG - Importing PpmImagePlugin
-2025-12-15 20:00:20,545 - DEBUG - Importing PsdImagePlugin
-2025-12-15 20:00:20,546 - DEBUG - Importing QoiImagePlugin
-2025-12-15 20:00:20,548 - DEBUG - Importing SgiImagePlugin
-2025-12-15 20:00:20,550 - DEBUG - Importing SpiderImagePlugin
-2025-12-15 20:00:20,552 - DEBUG - Importing SunImagePlugin
-2025-12-15 20:00:20,554 - DEBUG - Importing TgaImagePlugin
-2025-12-15 20:00:20,556 - DEBUG - Importing TiffImagePlugin
-2025-12-15 20:00:20,556 - DEBUG - Importing WebPImagePlugin
-2025-12-15 20:00:20,729 - DEBUG - Importing WmfImagePlugin
-2025-12-15 20:00:20,731 - DEBUG - Importing XbmImagePlugin
-2025-12-15 20:00:20,733 - DEBUG - Importing XpmImagePlugin
-2025-12-15 20:00:20,760 - DEBUG - Importing XVThumbImagePlugin
-2025-12-15 20:00:42,814 - INFO - Updating folders for path: W:\Collection
-2025-12-15 20:00:44,810 - INFO - Found 25 folders.
-2025-12-15 20:00:59,709 - INFO - Resolved video path: file:///W%3A/Collection/Bond%20Movies/Dr%20No%20%281962%29.ts
-2025-12-15 20:03:13,579 - DEBUG - Importing AvifImagePlugin
-2025-12-15 20:03:13,626 - DEBUG - Importing BlpImagePlugin
-2025-12-15 20:03:13,628 - DEBUG - Importing BmpImagePlugin
-2025-12-15 20:03:13,628 - DEBUG - Importing BufrStubImagePlugin
-2025-12-15 20:03:13,629 - DEBUG - Importing CurImagePlugin
-2025-12-15 20:03:13,630 - DEBUG - Importing DcxImagePlugin
-2025-12-15 20:03:13,632 - DEBUG - Importing DdsImagePlugin
-2025-12-15 20:03:13,637 - DEBUG - Importing EpsImagePlugin
-2025-12-15 20:03:13,639 - DEBUG - Importing FitsImagePlugin
-2025-12-15 20:03:13,643 - DEBUG - Importing FliImagePlugin
-2025-12-15 20:03:13,644 - DEBUG - Importing FpxImagePlugin
-2025-12-15 20:03:13,647 - DEBUG - Image: failed to import FpxImagePlugin: No module named 'olefile'
-2025-12-15 20:03:13,647 - DEBUG - Importing FtexImagePlugin
-2025-12-15 20:03:13,648 - DEBUG - Importing GbrImagePlugin
-2025-12-15 20:03:13,649 - DEBUG - Importing GifImagePlugin
-2025-12-15 20:03:13,649 - DEBUG - Importing GribStubImagePlugin
-2025-12-15 20:03:13,650 - DEBUG - Importing Hdf5StubImagePlugin
-2025-12-15 20:03:13,652 - DEBUG - Importing IcnsImagePlugin
-2025-12-15 20:03:13,655 - DEBUG - Importing IcoImagePlugin
-2025-12-15 20:03:13,657 - DEBUG - Importing ImImagePlugin
-2025-12-15 20:03:13,658 - DEBUG - Importing ImtImagePlugin
-2025-12-15 20:03:13,659 - DEBUG - Importing IptcImagePlugin
-2025-12-15 20:03:13,660 - DEBUG - Importing JpegImagePlugin
-2025-12-15 20:03:13,660 - DEBUG - Importing Jpeg2KImagePlugin
-2025-12-15 20:03:13,660 - DEBUG - Importing McIdasImagePlugin
-2025-12-15 20:03:13,661 - DEBUG - Importing MicImagePlugin
-2025-12-15 20:03:13,664 - DEBUG - Image: failed to import MicImagePlugin: No module named 'olefile'
-2025-12-15 20:03:13,664 - DEBUG - Importing MpegImagePlugin
-2025-12-15 20:03:13,667 - DEBUG - Importing MpoImagePlugin
-2025-12-15 20:03:13,676 - DEBUG - Importing MspImagePlugin
-2025-12-15 20:03:13,678 - DEBUG - Importing PalmImagePlugin
-2025-12-15 20:03:13,680 - DEBUG - Importing PcdImagePlugin
-2025-12-15 20:03:13,681 - DEBUG - Importing PcxImagePlugin
-2025-12-15 20:03:13,681 - DEBUG - Importing PdfImagePlugin
-2025-12-15 20:03:13,695 - DEBUG - Importing PixarImagePlugin
-2025-12-15 20:03:13,697 - DEBUG - Importing PngImagePlugin
-2025-12-15 20:03:13,697 - DEBUG - Importing PpmImagePlugin
-2025-12-15 20:03:13,697 - DEBUG - Importing PsdImagePlugin
-2025-12-15 20:03:13,699 - DEBUG - Importing QoiImagePlugin
-2025-12-15 20:03:13,700 - DEBUG - Importing SgiImagePlugin
-2025-12-15 20:03:13,702 - DEBUG - Importing SpiderImagePlugin
-2025-12-15 20:03:13,703 - DEBUG - Importing SunImagePlugin
-2025-12-15 20:03:13,704 - DEBUG - Importing TgaImagePlugin
-2025-12-15 20:03:13,706 - DEBUG - Importing TiffImagePlugin
-2025-12-15 20:03:13,706 - DEBUG - Importing WebPImagePlugin
-2025-12-15 20:03:13,740 - DEBUG - Importing WmfImagePlugin
-2025-12-15 20:03:13,742 - DEBUG - Importing XbmImagePlugin
-2025-12-15 20:03:13,744 - DEBUG - Importing XpmImagePlugin
-2025-12-15 20:03:13,746 - DEBUG - Importing XVThumbImagePlugin
-2025-12-15 20:03:32,806 - INFO - Updating folders for path: W:\Collection
-2025-12-15 20:03:34,439 - INFO - Found 25 folders.
-2025-12-15 21:22:11,205 - ERROR - QML FAILED to load
-2025-12-15 21:25:21,311 - ERROR - QML FAILED to load
-2025-12-15 21:26:02,800 - ERROR - QML FAILED to load
+2025-12-21 11:43:26,591 - DEBUG - Importing AvifImagePlugin
+2025-12-21 11:43:26,591 - DEBUG - Importing BlpImagePlugin
+2025-12-21 11:43:26,605 - DEBUG - Importing BmpImagePlugin
+2025-12-21 11:43:26,605 - DEBUG - Importing BufrStubImagePlugin
+2025-12-21 11:43:26,607 - DEBUG - Importing CurImagePlugin
+2025-12-21 11:43:26,608 - DEBUG - Importing DcxImagePlugin
+2025-12-21 11:43:26,611 - DEBUG - Importing DdsImagePlugin
+2025-12-21 11:43:26,614 - DEBUG - Importing EpsImagePlugin
+2025-12-21 11:43:26,616 - DEBUG - Importing FitsImagePlugin
+2025-12-21 11:43:26,619 - DEBUG - Importing FliImagePlugin
+2025-12-21 11:43:26,620 - DEBUG - Importing FpxImagePlugin
+2025-12-21 11:43:26,620 - DEBUG - Image: failed to import FpxImagePlugin: No module named 'olefile'
+2025-12-21 11:43:26,620 - DEBUG - Importing FtexImagePlugin
+2025-12-21 11:43:26,620 - DEBUG - Importing GbrImagePlugin
+2025-12-21 11:43:26,620 - DEBUG - Importing GifImagePlugin
+2025-12-21 11:43:26,620 - DEBUG - Importing GribStubImagePlugin
+2025-12-21 11:43:26,620 - DEBUG - Importing Hdf5StubImagePlugin
+2025-12-21 11:43:26,620 - DEBUG - Importing IcnsImagePlugin
+2025-12-21 11:43:26,620 - DEBUG - Importing IcoImagePlugin
+2025-12-21 11:43:26,620 - DEBUG - Importing ImImagePlugin
+2025-12-21 11:43:26,636 - DEBUG - Importing ImtImagePlugin
+2025-12-21 11:43:26,636 - DEBUG - Importing IptcImagePlugin
+2025-12-21 11:43:26,636 - DEBUG - Importing JpegImagePlugin
+2025-12-21 11:43:26,636 - DEBUG - Importing Jpeg2KImagePlugin
+2025-12-21 11:43:26,636 - DEBUG - Importing McIdasImagePlugin
+2025-12-21 11:43:26,636 - DEBUG - Importing MicImagePlugin
+2025-12-21 11:43:26,636 - DEBUG - Image: failed to import MicImagePlugin: No module named 'olefile'
+2025-12-21 11:43:26,636 - DEBUG - Importing MpegImagePlugin
+2025-12-21 11:43:26,636 - DEBUG - Importing MpoImagePlugin
+2025-12-21 11:43:26,652 - DEBUG - Importing MspImagePlugin
+2025-12-21 11:43:26,652 - DEBUG - Importing PalmImagePlugin
+2025-12-21 11:43:26,652 - DEBUG - Importing PcdImagePlugin
+2025-12-21 11:43:26,652 - DEBUG - Importing PcxImagePlugin
+2025-12-21 11:43:26,652 - DEBUG - Importing PdfImagePlugin
+2025-12-21 11:43:26,652 - DEBUG - Importing PixarImagePlugin
+2025-12-21 11:43:26,667 - DEBUG - Importing PngImagePlugin
+2025-12-21 11:43:26,667 - DEBUG - Importing PpmImagePlugin
+2025-12-21 11:43:26,667 - DEBUG - Importing PsdImagePlugin
+2025-12-21 11:43:26,667 - DEBUG - Importing QoiImagePlugin
+2025-12-21 11:43:26,667 - DEBUG - Importing SgiImagePlugin
+2025-12-21 11:43:26,667 - DEBUG - Importing SpiderImagePlugin
+2025-12-21 11:43:26,667 - DEBUG - Importing SunImagePlugin
+2025-12-21 11:43:26,667 - DEBUG - Importing TgaImagePlugin
+2025-12-21 11:43:26,667 - DEBUG - Importing TiffImagePlugin
+2025-12-21 11:43:26,667 - DEBUG - Importing WebPImagePlugin
+2025-12-21 11:43:26,667 - DEBUG - Importing WmfImagePlugin
+2025-12-21 11:43:26,683 - DEBUG - Importing XbmImagePlugin
+2025-12-21 11:43:26,683 - DEBUG - Importing XpmImagePlugin
+2025-12-21 11:43:26,683 - DEBUG - Importing XVThumbImagePlugin
+2025-12-21 11:43:27,371 - INFO - Updating folders for path: W:\Collection
+2025-12-21 11:43:27,670 - ERROR - QML FAILED to load
+2025-12-21 11:54:18,312 - DEBUG - Importing AvifImagePlugin
+2025-12-21 11:54:18,312 - DEBUG - Importing BlpImagePlugin
+2025-12-21 11:54:18,312 - DEBUG - Importing BmpImagePlugin
+2025-12-21 11:54:18,312 - DEBUG - Importing BufrStubImagePlugin
+2025-12-21 11:54:18,328 - DEBUG - Importing CurImagePlugin
+2025-12-21 11:54:18,328 - DEBUG - Importing DcxImagePlugin
+2025-12-21 11:54:18,328 - DEBUG - Importing DdsImagePlugin
+2025-12-21 11:54:18,328 - DEBUG - Importing EpsImagePlugin
+2025-12-21 11:54:18,328 - DEBUG - Importing FitsImagePlugin
+2025-12-21 11:54:18,328 - DEBUG - Importing FliImagePlugin
+2025-12-21 11:54:18,328 - DEBUG - Importing FpxImagePlugin
+2025-12-21 11:54:18,343 - DEBUG - Image: failed to import FpxImagePlugin: No module named 'olefile'
+2025-12-21 11:54:18,343 - DEBUG - Importing FtexImagePlugin
+2025-12-21 11:54:18,343 - DEBUG - Importing GbrImagePlugin
+2025-12-21 11:54:18,343 - DEBUG - Importing GifImagePlugin
+2025-12-21 11:54:18,343 - DEBUG - Importing GribStubImagePlugin
+2025-12-21 11:54:18,343 - DEBUG - Importing Hdf5StubImagePlugin
+2025-12-21 11:54:18,343 - DEBUG - Importing IcnsImagePlugin
+2025-12-21 11:54:18,343 - DEBUG - Importing IcoImagePlugin
+2025-12-21 11:54:18,343 - DEBUG - Importing ImImagePlugin
+2025-12-21 11:54:18,359 - DEBUG - Importing ImtImagePlugin
+2025-12-21 11:54:18,359 - DEBUG - Importing IptcImagePlugin
+2025-12-21 11:54:18,359 - DEBUG - Importing JpegImagePlugin
+2025-12-21 11:54:18,359 - DEBUG - Importing Jpeg2KImagePlugin
+2025-12-21 11:54:18,359 - DEBUG - Importing McIdasImagePlugin
+2025-12-21 11:54:18,359 - DEBUG - Importing MicImagePlugin
+2025-12-21 11:54:18,359 - DEBUG - Image: failed to import MicImagePlugin: No module named 'olefile'
+2025-12-21 11:54:18,359 - DEBUG - Importing MpegImagePlugin
+2025-12-21 11:54:18,359 - DEBUG - Importing MpoImagePlugin
+2025-12-21 11:54:18,359 - DEBUG - Importing MspImagePlugin
+2025-12-21 11:54:18,375 - DEBUG - Importing PalmImagePlugin
+2025-12-21 11:54:18,375 - DEBUG - Importing PcdImagePlugin
+2025-12-21 11:54:18,375 - DEBUG - Importing PcxImagePlugin
+2025-12-21 11:54:18,375 - DEBUG - Importing PdfImagePlugin
+2025-12-21 11:54:18,375 - DEBUG - Importing PixarImagePlugin
+2025-12-21 11:54:18,375 - DEBUG - Importing PngImagePlugin
+2025-12-21 11:54:18,375 - DEBUG - Importing PpmImagePlugin
+2025-12-21 11:54:18,375 - DEBUG - Importing PsdImagePlugin
+2025-12-21 11:54:18,391 - DEBUG - Importing QoiImagePlugin
+2025-12-21 11:54:18,391 - DEBUG - Importing SgiImagePlugin
+2025-12-21 11:54:18,391 - DEBUG - Importing SpiderImagePlugin
+2025-12-21 11:54:18,391 - DEBUG - Importing SunImagePlugin
+2025-12-21 11:54:18,391 - DEBUG - Importing TgaImagePlugin
+2025-12-21 11:54:18,391 - DEBUG - Importing TiffImagePlugin
+2025-12-21 11:54:18,391 - DEBUG - Importing WebPImagePlugin
+2025-12-21 11:54:18,391 - DEBUG - Importing WmfImagePlugin
+2025-12-21 11:54:18,391 - DEBUG - Importing XbmImagePlugin
+2025-12-21 11:54:18,406 - DEBUG - Importing XpmImagePlugin
+2025-12-21 11:54:18,406 - DEBUG - Importing XVThumbImagePlugin
+2025-12-21 11:54:19,085 - INFO - Updating folders for path: W:\Collection
+2025-12-21 11:54:22,344 - INFO - Found 25 folders.
+2025-12-21 12:03:15,419 - DEBUG - Importing AvifImagePlugin
+2025-12-21 12:03:15,424 - DEBUG - Importing BlpImagePlugin
+2025-12-21 12:03:15,426 - DEBUG - Importing BmpImagePlugin
+2025-12-21 12:03:15,426 - DEBUG - Importing BufrStubImagePlugin
+2025-12-21 12:03:15,427 - DEBUG - Importing CurImagePlugin
+2025-12-21 12:03:15,429 - DEBUG - Importing DcxImagePlugin
+2025-12-21 12:03:15,432 - DEBUG - Importing DdsImagePlugin
+2025-12-21 12:03:15,435 - DEBUG - Importing EpsImagePlugin
+2025-12-21 12:03:15,437 - DEBUG - Importing FitsImagePlugin
+2025-12-21 12:03:15,440 - DEBUG - Importing FliImagePlugin
+2025-12-21 12:03:15,441 - DEBUG - Importing FpxImagePlugin
+2025-12-21 12:03:15,444 - DEBUG - Image: failed to import FpxImagePlugin: No module named 'olefile'
+2025-12-21 12:03:15,444 - DEBUG - Importing FtexImagePlugin
+2025-12-21 12:03:15,446 - DEBUG - Importing GbrImagePlugin
+2025-12-21 12:03:15,447 - DEBUG - Importing GifImagePlugin
+2025-12-21 12:03:15,447 - DEBUG - Importing GribStubImagePlugin
+2025-12-21 12:03:15,448 - DEBUG - Importing Hdf5StubImagePlugin
+2025-12-21 12:03:15,450 - DEBUG - Importing IcnsImagePlugin
+2025-12-21 12:03:15,454 - DEBUG - Importing IcoImagePlugin
+2025-12-21 12:03:15,456 - DEBUG - Importing ImImagePlugin
+2025-12-21 12:03:15,458 - DEBUG - Importing ImtImagePlugin
+2025-12-21 12:03:15,459 - DEBUG - Importing IptcImagePlugin
+2025-12-21 12:03:15,461 - DEBUG - Importing JpegImagePlugin
+2025-12-21 12:03:15,461 - DEBUG - Importing Jpeg2KImagePlugin
+2025-12-21 12:03:15,461 - DEBUG - Importing McIdasImagePlugin
+2025-12-21 12:03:15,462 - DEBUG - Importing MicImagePlugin
+2025-12-21 12:03:15,465 - DEBUG - Image: failed to import MicImagePlugin: No module named 'olefile'
+2025-12-21 12:03:15,465 - DEBUG - Importing MpegImagePlugin
+2025-12-21 12:03:15,466 - DEBUG - Importing MpoImagePlugin
+2025-12-21 12:03:15,472 - DEBUG - Importing MspImagePlugin
+2025-12-21 12:03:15,474 - DEBUG - Importing PalmImagePlugin
+2025-12-21 12:03:15,476 - DEBUG - Importing PcdImagePlugin
+2025-12-21 12:03:15,477 - DEBUG - Importing PcxImagePlugin
+2025-12-21 12:03:15,477 - DEBUG - Importing PdfImagePlugin
+2025-12-21 12:03:15,488 - DEBUG - Importing PixarImagePlugin
+2025-12-21 12:03:15,490 - DEBUG - Importing PngImagePlugin
+2025-12-21 12:03:15,490 - DEBUG - Importing PpmImagePlugin
+2025-12-21 12:03:15,490 - DEBUG - Importing PsdImagePlugin
+2025-12-21 12:03:15,491 - DEBUG - Importing QoiImagePlugin
+2025-12-21 12:03:15,493 - DEBUG - Importing SgiImagePlugin
+2025-12-21 12:03:15,494 - DEBUG - Importing SpiderImagePlugin
+2025-12-21 12:03:15,496 - DEBUG - Importing SunImagePlugin
+2025-12-21 12:03:15,497 - DEBUG - Importing TgaImagePlugin
+2025-12-21 12:03:15,499 - DEBUG - Importing TiffImagePlugin
+2025-12-21 12:03:15,499 - DEBUG - Importing WebPImagePlugin
+2025-12-21 12:03:15,504 - DEBUG - Importing WmfImagePlugin
+2025-12-21 12:03:15,505 - DEBUG - Importing XbmImagePlugin
+2025-12-21 12:03:15,507 - DEBUG - Importing XpmImagePlugin
+2025-12-21 12:03:15,509 - DEBUG - Importing XVThumbImagePlugin
+2025-12-21 12:03:16,194 - INFO - Updating folders for path: W:\Collection
+2025-12-21 12:03:16,840 - INFO - Found 25 folders.
+2025-12-21 12:06:12,087 - DEBUG - Importing AvifImagePlugin
+2025-12-21 12:06:12,092 - DEBUG - Importing BlpImagePlugin
+2025-12-21 12:06:12,094 - DEBUG - Importing BmpImagePlugin
+2025-12-21 12:06:12,094 - DEBUG - Importing BufrStubImagePlugin
+2025-12-21 12:06:12,095 - DEBUG - Importing CurImagePlugin
+2025-12-21 12:06:12,097 - DEBUG - Importing DcxImagePlugin
+2025-12-21 12:06:12,099 - DEBUG - Importing DdsImagePlugin
+2025-12-21 12:06:12,103 - DEBUG - Importing EpsImagePlugin
+2025-12-21 12:06:12,105 - DEBUG - Importing FitsImagePlugin
+2025-12-21 12:06:12,108 - DEBUG - Importing FliImagePlugin
+2025-12-21 12:06:12,109 - DEBUG - Importing FpxImagePlugin
+2025-12-21 12:06:12,112 - DEBUG - Image: failed to import FpxImagePlugin: No module named 'olefile'
+2025-12-21 12:06:12,112 - DEBUG - Importing FtexImagePlugin
+2025-12-21 12:06:12,113 - DEBUG - Importing GbrImagePlugin
+2025-12-21 12:06:12,115 - DEBUG - Importing GifImagePlugin
+2025-12-21 12:06:12,115 - DEBUG - Importing GribStubImagePlugin
+2025-12-21 12:06:12,116 - DEBUG - Importing Hdf5StubImagePlugin
+2025-12-21 12:06:12,118 - DEBUG - Importing IcnsImagePlugin
+2025-12-21 12:06:12,123 - DEBUG - Importing IcoImagePlugin
+2025-12-21 12:06:12,125 - DEBUG - Importing ImImagePlugin
+2025-12-21 12:06:12,127 - DEBUG - Importing ImtImagePlugin
+2025-12-21 12:06:12,128 - DEBUG - Importing IptcImagePlugin
+2025-12-21 12:06:12,130 - DEBUG - Importing JpegImagePlugin
+2025-12-21 12:06:12,130 - DEBUG - Importing Jpeg2KImagePlugin
+2025-12-21 12:06:12,130 - DEBUG - Importing McIdasImagePlugin
+2025-12-21 12:06:12,131 - DEBUG - Importing MicImagePlugin
+2025-12-21 12:06:12,134 - DEBUG - Image: failed to import MicImagePlugin: No module named 'olefile'
+2025-12-21 12:06:12,134 - DEBUG - Importing MpegImagePlugin
+2025-12-21 12:06:12,135 - DEBUG - Importing MpoImagePlugin
+2025-12-21 12:06:12,141 - DEBUG - Importing MspImagePlugin
+2025-12-21 12:06:12,143 - DEBUG - Importing PalmImagePlugin
+2025-12-21 12:06:12,145 - DEBUG - Importing PcdImagePlugin
+2025-12-21 12:06:12,146 - DEBUG - Importing PcxImagePlugin
+2025-12-21 12:06:12,146 - DEBUG - Importing PdfImagePlugin
+2025-12-21 12:06:12,156 - DEBUG - Importing PixarImagePlugin
+2025-12-21 12:06:12,157 - DEBUG - Importing PngImagePlugin
+2025-12-21 12:06:12,157 - DEBUG - Importing PpmImagePlugin
+2025-12-21 12:06:12,158 - DEBUG - Importing PsdImagePlugin
+2025-12-21 12:06:12,159 - DEBUG - Importing QoiImagePlugin
+2025-12-21 12:06:12,160 - DEBUG - Importing SgiImagePlugin
+2025-12-21 12:06:12,162 - DEBUG - Importing SpiderImagePlugin
+2025-12-21 12:06:12,163 - DEBUG - Importing SunImagePlugin
+2025-12-21 12:06:12,165 - DEBUG - Importing TgaImagePlugin
+2025-12-21 12:06:12,166 - DEBUG - Importing TiffImagePlugin
+2025-12-21 12:06:12,167 - DEBUG - Importing WebPImagePlugin
+2025-12-21 12:06:12,171 - DEBUG - Importing WmfImagePlugin
+2025-12-21 12:06:12,173 - DEBUG - Importing XbmImagePlugin
+2025-12-21 12:06:12,175 - DEBUG - Importing XpmImagePlugin
+2025-12-21 12:06:12,177 - DEBUG - Importing XVThumbImagePlugin
+2025-12-21 12:06:12,848 - INFO - Updating folders for path: W:\Collection
+2025-12-21 12:06:13,540 - INFO - Found 25 folders.
+2025-12-21 12:09:39,320 - DEBUG - Importing AvifImagePlugin
+2025-12-21 12:09:39,325 - DEBUG - Importing BlpImagePlugin
+2025-12-21 12:09:39,326 - DEBUG - Importing BmpImagePlugin
+2025-12-21 12:09:39,327 - DEBUG - Importing BufrStubImagePlugin
+2025-12-21 12:09:39,328 - DEBUG - Importing CurImagePlugin
+2025-12-21 12:09:39,329 - DEBUG - Importing DcxImagePlugin
+2025-12-21 12:09:39,332 - DEBUG - Importing DdsImagePlugin
+2025-12-21 12:09:39,335 - DEBUG - Importing EpsImagePlugin
+2025-12-21 12:09:39,337 - DEBUG - Importing FitsImagePlugin
+2025-12-21 12:09:39,340 - DEBUG - Importing FliImagePlugin
+2025-12-21 12:09:39,342 - DEBUG - Importing FpxImagePlugin
+2025-12-21 12:09:39,344 - DEBUG - Image: failed to import FpxImagePlugin: No module named 'olefile'
+2025-12-21 12:09:39,344 - DEBUG - Importing FtexImagePlugin
+2025-12-21 12:09:39,346 - DEBUG - Importing GbrImagePlugin
+2025-12-21 12:09:39,347 - DEBUG - Importing GifImagePlugin
+2025-12-21 12:09:39,347 - DEBUG - Importing GribStubImagePlugin
+2025-12-21 12:09:39,349 - DEBUG - Importing Hdf5StubImagePlugin
+2025-12-21 12:09:39,350 - DEBUG - Importing IcnsImagePlugin
+2025-12-21 12:09:39,355 - DEBUG - Importing IcoImagePlugin
+2025-12-21 12:09:39,356 - DEBUG - Importing ImImagePlugin
+2025-12-21 12:09:39,358 - DEBUG - Importing ImtImagePlugin
+2025-12-21 12:09:39,359 - DEBUG - Importing IptcImagePlugin
+2025-12-21 12:09:39,361 - DEBUG - Importing JpegImagePlugin
+2025-12-21 12:09:39,361 - DEBUG - Importing Jpeg2KImagePlugin
+2025-12-21 12:09:39,361 - DEBUG - Importing McIdasImagePlugin
+2025-12-21 12:09:39,362 - DEBUG - Importing MicImagePlugin
+2025-12-21 12:09:39,365 - DEBUG - Image: failed to import MicImagePlugin: No module named 'olefile'
+2025-12-21 12:09:39,365 - DEBUG - Importing MpegImagePlugin
+2025-12-21 12:09:39,366 - DEBUG - Importing MpoImagePlugin
+2025-12-21 12:09:39,373 - DEBUG - Importing MspImagePlugin
+2025-12-21 12:09:39,374 - DEBUG - Importing PalmImagePlugin
+2025-12-21 12:09:39,376 - DEBUG - Importing PcdImagePlugin
+2025-12-21 12:09:39,377 - DEBUG - Importing PcxImagePlugin
+2025-12-21 12:09:39,377 - DEBUG - Importing PdfImagePlugin
+2025-12-21 12:09:39,387 - DEBUG - Importing PixarImagePlugin
+2025-12-21 12:09:39,389 - DEBUG - Importing PngImagePlugin
+2025-12-21 12:09:39,389 - DEBUG - Importing PpmImagePlugin
+2025-12-21 12:09:39,389 - DEBUG - Importing PsdImagePlugin
+2025-12-21 12:09:39,391 - DEBUG - Importing QoiImagePlugin
+2025-12-21 12:09:39,393 - DEBUG - Importing SgiImagePlugin
+2025-12-21 12:09:39,394 - DEBUG - Importing SpiderImagePlugin
+2025-12-21 12:09:39,396 - DEBUG - Importing SunImagePlugin
+2025-12-21 12:09:39,397 - DEBUG - Importing TgaImagePlugin
+2025-12-21 12:09:39,399 - DEBUG - Importing TiffImagePlugin
+2025-12-21 12:09:39,399 - DEBUG - Importing WebPImagePlugin
+2025-12-21 12:09:39,403 - DEBUG - Importing WmfImagePlugin
+2025-12-21 12:09:39,405 - DEBUG - Importing XbmImagePlugin
+2025-12-21 12:09:39,407 - DEBUG - Importing XpmImagePlugin
+2025-12-21 12:09:39,408 - DEBUG - Importing XVThumbImagePlugin
+2025-12-21 12:09:40,102 - INFO - Updating folders for path: W:\Collection
+2025-12-21 12:09:40,666 - INFO - Found 25 folders.
+2025-12-21 12:24:58,994 - DEBUG - Importing AvifImagePlugin
+2025-12-21 12:24:59,000 - DEBUG - Importing BlpImagePlugin
+2025-12-21 12:24:59,002 - DEBUG - Importing BmpImagePlugin
+2025-12-21 12:24:59,002 - DEBUG - Importing BufrStubImagePlugin
+2025-12-21 12:24:59,004 - DEBUG - Importing CurImagePlugin
+2025-12-21 12:24:59,005 - DEBUG - Importing DcxImagePlugin
+2025-12-21 12:24:59,008 - DEBUG - Importing DdsImagePlugin
+2025-12-21 12:24:59,011 - DEBUG - Importing EpsImagePlugin
+2025-12-21 12:24:59,013 - DEBUG - Importing FitsImagePlugin
+2025-12-21 12:24:59,016 - DEBUG - Importing FliImagePlugin
+2025-12-21 12:24:59,018 - DEBUG - Importing FpxImagePlugin
+2025-12-21 12:24:59,020 - DEBUG - Image: failed to import FpxImagePlugin: No module named 'olefile'
+2025-12-21 12:24:59,020 - DEBUG - Importing FtexImagePlugin
+2025-12-21 12:24:59,022 - DEBUG - Importing GbrImagePlugin
+2025-12-21 12:24:59,023 - DEBUG - Importing GifImagePlugin
+2025-12-21 12:24:59,023 - DEBUG - Importing GribStubImagePlugin
+2025-12-21 12:24:59,025 - DEBUG - Importing Hdf5StubImagePlugin
+2025-12-21 12:24:59,026 - DEBUG - Importing IcnsImagePlugin
+2025-12-21 12:24:59,031 - DEBUG - Importing IcoImagePlugin
+2025-12-21 12:24:59,032 - DEBUG - Importing ImImagePlugin
+2025-12-21 12:24:59,034 - DEBUG - Importing ImtImagePlugin
+2025-12-21 12:24:59,035 - DEBUG - Importing IptcImagePlugin
+2025-12-21 12:24:59,037 - DEBUG - Importing JpegImagePlugin
+2025-12-21 12:24:59,037 - DEBUG - Importing Jpeg2KImagePlugin
+2025-12-21 12:24:59,037 - DEBUG - Importing McIdasImagePlugin
+2025-12-21 12:24:59,038 - DEBUG - Importing MicImagePlugin
+2025-12-21 12:24:59,041 - DEBUG - Image: failed to import MicImagePlugin: No module named 'olefile'
+2025-12-21 12:24:59,041 - DEBUG - Importing MpegImagePlugin
+2025-12-21 12:24:59,042 - DEBUG - Importing MpoImagePlugin
+2025-12-21 12:24:59,048 - DEBUG - Importing MspImagePlugin
+2025-12-21 12:24:59,050 - DEBUG - Importing PalmImagePlugin
+2025-12-21 12:24:59,052 - DEBUG - Importing PcdImagePlugin
+2025-12-21 12:24:59,053 - DEBUG - Importing PcxImagePlugin
+2025-12-21 12:24:59,053 - DEBUG - Importing PdfImagePlugin
+2025-12-21 12:24:59,063 - DEBUG - Importing PixarImagePlugin
+2025-12-21 12:24:59,065 - DEBUG - Importing PngImagePlugin
+2025-12-21 12:24:59,065 - DEBUG - Importing PpmImagePlugin
+2025-12-21 12:24:59,065 - DEBUG - Importing PsdImagePlugin
+2025-12-21 12:24:59,066 - DEBUG - Importing QoiImagePlugin
+2025-12-21 12:24:59,068 - DEBUG - Importing SgiImagePlugin
+2025-12-21 12:24:59,069 - DEBUG - Importing SpiderImagePlugin
+2025-12-21 12:24:59,071 - DEBUG - Importing SunImagePlugin
+2025-12-21 12:24:59,072 - DEBUG - Importing TgaImagePlugin
+2025-12-21 12:24:59,073 - DEBUG - Importing TiffImagePlugin
+2025-12-21 12:24:59,074 - DEBUG - Importing WebPImagePlugin
+2025-12-21 12:24:59,078 - DEBUG - Importing WmfImagePlugin
+2025-12-21 12:24:59,080 - DEBUG - Importing XbmImagePlugin
+2025-12-21 12:24:59,082 - DEBUG - Importing XpmImagePlugin
+2025-12-21 12:24:59,083 - DEBUG - Importing XVThumbImagePlugin
+2025-12-21 12:24:59,781 - INFO - Updating folders for path: W:\Collection
+2025-12-21 12:25:00,092 - ERROR - QML FAILED to load
+2025-12-21 12:27:47,605 - DEBUG - Importing AvifImagePlugin
+2025-12-21 12:27:47,610 - DEBUG - Importing BlpImagePlugin
+2025-12-21 12:27:47,612 - DEBUG - Importing BmpImagePlugin
+2025-12-21 12:27:47,612 - DEBUG - Importing BufrStubImagePlugin
+2025-12-21 12:27:47,613 - DEBUG - Importing CurImagePlugin
+2025-12-21 12:27:47,614 - DEBUG - Importing DcxImagePlugin
+2025-12-21 12:27:47,617 - DEBUG - Importing DdsImagePlugin
+2025-12-21 12:27:47,621 - DEBUG - Importing EpsImagePlugin
+2025-12-21 12:27:47,622 - DEBUG - Importing FitsImagePlugin
+2025-12-21 12:27:47,625 - DEBUG - Importing FliImagePlugin
+2025-12-21 12:27:47,627 - DEBUG - Importing FpxImagePlugin
+2025-12-21 12:27:47,629 - DEBUG - Image: failed to import FpxImagePlugin: No module named 'olefile'
+2025-12-21 12:27:47,629 - DEBUG - Importing FtexImagePlugin
+2025-12-21 12:27:47,631 - DEBUG - Importing GbrImagePlugin
+2025-12-21 12:27:47,632 - DEBUG - Importing GifImagePlugin
+2025-12-21 12:27:47,632 - DEBUG - Importing GribStubImagePlugin
+2025-12-21 12:27:47,634 - DEBUG - Importing Hdf5StubImagePlugin
+2025-12-21 12:27:47,635 - DEBUG - Importing IcnsImagePlugin
+2025-12-21 12:27:47,640 - DEBUG - Importing IcoImagePlugin
+2025-12-21 12:27:47,641 - DEBUG - Importing ImImagePlugin
+2025-12-21 12:27:47,643 - DEBUG - Importing ImtImagePlugin
+2025-12-21 12:27:47,645 - DEBUG - Importing IptcImagePlugin
+2025-12-21 12:27:47,646 - DEBUG - Importing JpegImagePlugin
+2025-12-21 12:27:47,646 - DEBUG - Importing Jpeg2KImagePlugin
+2025-12-21 12:27:47,646 - DEBUG - Importing McIdasImagePlugin
+2025-12-21 12:27:47,648 - DEBUG - Importing MicImagePlugin
+2025-12-21 12:27:47,650 - DEBUG - Image: failed to import MicImagePlugin: No module named 'olefile'
+2025-12-21 12:27:47,650 - DEBUG - Importing MpegImagePlugin
+2025-12-21 12:27:47,651 - DEBUG - Importing MpoImagePlugin
+2025-12-21 12:27:47,658 - DEBUG - Importing MspImagePlugin
+2025-12-21 12:27:47,659 - DEBUG - Importing PalmImagePlugin
+2025-12-21 12:27:47,661 - DEBUG - Importing PcdImagePlugin
+2025-12-21 12:27:47,662 - DEBUG - Importing PcxImagePlugin
+2025-12-21 12:27:47,662 - DEBUG - Importing PdfImagePlugin
+2025-12-21 12:27:47,672 - DEBUG - Importing PixarImagePlugin
+2025-12-21 12:27:47,673 - DEBUG - Importing PngImagePlugin
+2025-12-21 12:27:47,673 - DEBUG - Importing PpmImagePlugin
+2025-12-21 12:27:47,674 - DEBUG - Importing PsdImagePlugin
+2025-12-21 12:27:47,675 - DEBUG - Importing QoiImagePlugin
+2025-12-21 12:27:47,677 - DEBUG - Importing SgiImagePlugin
+2025-12-21 12:27:47,678 - DEBUG - Importing SpiderImagePlugin
+2025-12-21 12:27:47,680 - DEBUG - Importing SunImagePlugin
+2025-12-21 12:27:47,681 - DEBUG - Importing TgaImagePlugin
+2025-12-21 12:27:47,682 - DEBUG - Importing TiffImagePlugin
+2025-12-21 12:27:47,683 - DEBUG - Importing WebPImagePlugin
+2025-12-21 12:27:47,687 - DEBUG - Importing WmfImagePlugin
+2025-12-21 12:27:47,689 - DEBUG - Importing XbmImagePlugin
+2025-12-21 12:27:47,691 - DEBUG - Importing XpmImagePlugin
+2025-12-21 12:27:47,692 - DEBUG - Importing XVThumbImagePlugin
+2025-12-21 12:27:48,373 - INFO - Updating folders for path: W:\Collection
+2025-12-21 12:27:49,085 - INFO - Found 25 folders.
+2025-12-21 12:29:33,448 - DEBUG - Importing AvifImagePlugin
+2025-12-21 12:29:33,453 - DEBUG - Importing BlpImagePlugin
+2025-12-21 12:29:33,455 - DEBUG - Importing BmpImagePlugin
+2025-12-21 12:29:33,455 - DEBUG - Importing BufrStubImagePlugin
+2025-12-21 12:29:33,457 - DEBUG - Importing CurImagePlugin
+2025-12-21 12:29:33,458 - DEBUG - Importing DcxImagePlugin
+2025-12-21 12:29:33,461 - DEBUG - Importing DdsImagePlugin
+2025-12-21 12:29:33,464 - DEBUG - Importing EpsImagePlugin
+2025-12-21 12:29:33,466 - DEBUG - Importing FitsImagePlugin
+2025-12-21 12:29:33,469 - DEBUG - Importing FliImagePlugin
+2025-12-21 12:29:33,471 - DEBUG - Importing FpxImagePlugin
+2025-12-21 12:29:33,473 - DEBUG - Image: failed to import FpxImagePlugin: No module named 'olefile'
+2025-12-21 12:29:33,473 - DEBUG - Importing FtexImagePlugin
+2025-12-21 12:29:33,475 - DEBUG - Importing GbrImagePlugin
+2025-12-21 12:29:33,476 - DEBUG - Importing GifImagePlugin
+2025-12-21 12:29:33,476 - DEBUG - Importing GribStubImagePlugin
+2025-12-21 12:29:33,478 - DEBUG - Importing Hdf5StubImagePlugin
+2025-12-21 12:29:33,479 - DEBUG - Importing IcnsImagePlugin
+2025-12-21 12:29:33,483 - DEBUG - Importing IcoImagePlugin
+2025-12-21 12:29:33,485 - DEBUG - Importing ImImagePlugin
+2025-12-21 12:29:33,487 - DEBUG - Importing ImtImagePlugin
+2025-12-21 12:29:33,488 - DEBUG - Importing IptcImagePlugin
+2025-12-21 12:29:33,490 - DEBUG - Importing JpegImagePlugin
+2025-12-21 12:29:33,490 - DEBUG - Importing Jpeg2KImagePlugin
+2025-12-21 12:29:33,490 - DEBUG - Importing McIdasImagePlugin
+2025-12-21 12:29:33,491 - DEBUG - Importing MicImagePlugin
+2025-12-21 12:29:33,494 - DEBUG - Image: failed to import MicImagePlugin: No module named 'olefile'
+2025-12-21 12:29:33,494 - DEBUG - Importing MpegImagePlugin
+2025-12-21 12:29:33,495 - DEBUG - Importing MpoImagePlugin
+2025-12-21 12:29:33,501 - DEBUG - Importing MspImagePlugin
+2025-12-21 12:29:33,503 - DEBUG - Importing PalmImagePlugin
+2025-12-21 12:29:33,505 - DEBUG - Importing PcdImagePlugin
+2025-12-21 12:29:33,506 - DEBUG - Importing PcxImagePlugin
+2025-12-21 12:29:33,506 - DEBUG - Importing PdfImagePlugin
+2025-12-21 12:29:33,516 - DEBUG - Importing PixarImagePlugin
+2025-12-21 12:29:33,517 - DEBUG - Importing PngImagePlugin
+2025-12-21 12:29:33,517 - DEBUG - Importing PpmImagePlugin
+2025-12-21 12:29:33,518 - DEBUG - Importing PsdImagePlugin
+2025-12-21 12:29:33,519 - DEBUG - Importing QoiImagePlugin
+2025-12-21 12:29:33,521 - DEBUG - Importing SgiImagePlugin
+2025-12-21 12:29:33,522 - DEBUG - Importing SpiderImagePlugin
+2025-12-21 12:29:33,524 - DEBUG - Importing SunImagePlugin
+2025-12-21 12:29:33,525 - DEBUG - Importing TgaImagePlugin
+2025-12-21 12:29:33,526 - DEBUG - Importing TiffImagePlugin
+2025-12-21 12:29:33,527 - DEBUG - Importing WebPImagePlugin
+2025-12-21 12:29:33,531 - DEBUG - Importing WmfImagePlugin
+2025-12-21 12:29:33,533 - DEBUG - Importing XbmImagePlugin
+2025-12-21 12:29:33,535 - DEBUG - Importing XpmImagePlugin
+2025-12-21 12:29:33,536 - DEBUG - Importing XVThumbImagePlugin
+2025-12-21 12:29:34,227 - INFO - Updating folders for path: W:\Collection
+2025-12-21 12:29:34,795 - INFO - Found 25 folders.

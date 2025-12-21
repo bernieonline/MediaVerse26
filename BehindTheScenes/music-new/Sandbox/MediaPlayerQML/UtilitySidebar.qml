@@ -6,21 +6,23 @@ Item {
     id: root
     anchors.fill: parent
 
-    // --- SLIM 10ft Configuration (Reduced by 50%) ---
-    property int sidebarWidth: 225 // Was 450
+    // --- CONFIGURATION ---
+    property int sidebarWidth: 225
     property bool isOpen: false
-    property int iconSize: 21      // Was 42
-    
+    property int iconSize: 21
+    property color brandColor: "#1E90FF" // ContentWindow Blue
+
+    // --- NOTIFICATION DATA (Mechanisms) ---
+    property int unreadCount: 3
+    property bool hasUrgent: true 
+
     // --- FONT LOADER ---
     FontLoader {
         id: faSolid
         source: fontPathFA
-        onStatusChanged: {
-            if (status === FontLoader.Error) console.log("❌ Error loading FontAwesome from:", source)
-        }
     }
 
-    // --- TRIGGER ZONE ---
+    // --- 1. THE TRIGGER ZONE (BUMP) + PULSING URGENT SIGNAL ---
     MouseArea {
         id: bumpArea
         width: 15
@@ -30,9 +32,34 @@ Item {
         hoverEnabled: true
         onEntered: root.isOpen = true
         z: 999 
+
+        // Subtle Red Pulse (Only visible when sidebar is closed)
+        Rectangle {
+            anchors.fill: parent
+            color: "red"
+            visible: root.hasUrgent && !root.isOpen
+            opacity: 0.5
+            
+            SequentialAnimation on opacity {
+                running: root.hasUrgent && !root.isOpen
+                loops: Animation.Infinite
+                NumberAnimation { from: 0.1; to: 0.7; duration: 1200; easing.type: Easing.InOutQuad }
+                NumberAnimation { from: 0.7; to: 0.1; duration: 1200; easing.type: Easing.InOutQuad }
+            }
+        }
     }
 
-    // --- SIDEBAR BODY ---
+    // --- 2. THE NOTIFICATION PANEL (SUB-COMPONENT) ---
+    // This is the component defined in Notifications.qml
+    Notifications {
+        id: notificationPanel
+        // Slide out to the left of the sidebar when active
+        x: root.isOpen && notificationPanel.isShown ? 
+           (parent.width - sidebarBody.width - width) : parent.width
+        z: 998 
+    }
+
+    // --- 3. THE SIDEBAR BODY ---
     Rectangle {
         id: sidebarBody
         width: root.sidebarWidth
@@ -45,10 +72,10 @@ Item {
             NumberAnimation { duration: 350; easing.type: Easing.OutCubic }
         }
 
-        // --- SLIM DEPTH SHADOW ---
+        // Slim Depth Shadow
         Rectangle {
             id: edgeGlow
-            width: 15 // Reduced shadow width
+            width: 15
             height: parent.height
             anchors.right: sidebarBody.left
             gradient: Gradient {
@@ -58,70 +85,115 @@ Item {
             }
         }
 
+        // Main Tools Layout
         Column {
             anchors.fill: parent
-            anchors.topMargin: 40 // Reduced margin
-            spacing: 25           // Reduced spacing
+            anchors.topMargin: 40
+            spacing: 25
 
             Text {
-                text: "TOOLS" // Shortened for slim width
+                text: "TOOLS"
                 color: "yellow"
-                font.pixelSize: 18 // Was 36
+                font.pixelSize: 18
                 font.bold: true
                 anchors.horizontalCenter: parent.horizontalCenter
             }
 
-            // TOOL LIST
             Column {
                 width: parent.width
-                spacing: 12 // Tighter vertical spacing
+                spacing: 12
 
                 ToolButton {
                     iconCode: "\uf0f3"
                     toolName: "Alerts"
-                    onClicked: root.isOpen = false 
+                    unreadBadge: root.unreadCount
+                    isUrgent: root.hasUrgent
+                    onClicked: notificationPanel.isShown = !notificationPanel.isShown
                 }
 
                 ToolButton {
                     iconCode: "\uf5dc"
                     toolName: "AI"
-                    onClicked: console.log("AI Assistant active")
+                    onClicked: console.log("AI Assistant Toggle")
                 }
 
                 ToolButton {
                     iconCode: "\uf002"
                     toolName: "Search"
-                    onClicked: root.isOpen = false
+                    onClicked: {
+                        notificationPanel.isShown = false
+                        root.isOpen = false
+                    }
                 }
 
                 ToolButton {
                     iconCode: "\uf07c"
                     toolName: "Files"
-                    onClicked: root.isOpen = false
+                    onClicked: {
+                        notificationPanel.isShown = false
+                        root.isOpen = false
+                    }
                 }
             }
         }
 
-        // --- AUTO-HIDE SENSOR ---
+        // Branding Logo
+        Column {
+            anchors.bottom: parent.bottom
+            anchors.bottomMargin: 30
+            anchors.horizontalCenter: parent.horizontalCenter
+            spacing: 2
+
+            Text {
+                text: "MediaVerse"
+                color: root.brandColor
+                font.pixelSize: 22
+                font.bold: true
+                font.letterSpacing: 1.5
+                anchors.horizontalCenter: parent.horizontalCenter
+                
+                layer.enabled: true
+                layer.effect: DropShadow {
+                    color: root.brandColor
+                    radius: 4
+                    samples: 8
+                }
+            }
+
+            Text {
+                text: "v1.0"
+                color: "#66FFFFFF"
+                font.pixelSize: 12
+                anchors.horizontalCenter: parent.horizontalCenter
+            }
+        }
+
+        // Auto-Hide Sensor
         MouseArea {
             anchors.fill: parent
             z: -1
             hoverEnabled: true
             onExited: {
-                if (mouseX < 0) root.isOpen = false
+                // If we move left, close everything. 
+                // If we move to notification panel, stay open.
+                if (mouseX < 0 && !notificationPanel.isShown) {
+                    root.isOpen = false
+                }
             }
         }
     }
 
-    // --- COMPONENT: ToolButton ---
+    // --- INTERNAL COMPONENT: ToolButton ---
     component ToolButton: Rectangle {
         id: btnRoot
         property string iconCode: ""
         property string toolName: ""
+        property int unreadBadge: 0
+        property bool isUrgent: false
         signal clicked()
 
-        width: parent.width - 20 // Scaled down margin
-        height: 60               // Was 120
+        width: parent.width - 20
+        height: 60
         anchors.horizontalCenter: parent.horizontalCenter
         color: btnMouse.containsMouse ? "#22FFFFFF" : "transparent"
         radius: 8
@@ -137,16 +209,29 @@ Item {
                 text: btnRoot.iconCode
                 font.family: faSolid.name
                 font.pixelSize: root.iconSize
-                color: btnMouse.containsMouse ? "yellow" : "white"
+                color: btnRoot.isUrgent ? "red" : (btnMouse.containsMouse ? "yellow" : "white")
                 anchors.verticalCenter: parent.verticalCenter
             }
 
             Text {
                 text: btnRoot.toolName
                 color: "white"
-                font.pixelSize: 13 // Was 26
+                font.pixelSize: 13
                 font.bold: true
                 anchors.verticalCenter: parent.verticalCenter
+            }
+
+            // Unread Badge Rectangle
+            Rectangle {
+                width: 18; height: 18; radius: 9
+                color: btnRoot.isUrgent ? "red" : "yellow"
+                visible: btnRoot.unreadBadge > 0
+                anchors.verticalCenter: parent.verticalCenter
+                Text {
+                    text: btnRoot.unreadBadge
+                    color: "black"; font.pixelSize: 10; font.bold: true
+                    anchors.centerIn: parent
+                }
             }
         }
 

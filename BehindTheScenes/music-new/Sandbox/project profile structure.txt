@@ -1,30 +1,69 @@
 here is my project scenario
 I am developing media management software for use in my home.
 
-The basic overview is that I have a movie library on a local server that feeds my JRiver software. I want to replace the jriver interface with my own for browsing and playing
- although the actual playing will be handed off to jriver. I will use my software on a number of networked Windows PCs.
+The basic overview is that I have a movie library on a local server that feeds my JRiver software. I want to replace
+ the jriver interface with my own for browsing and playing
+ although the actual playing will be handed off to jriver. I will use my software on a number of networked
+  Windows PCs.
 
 Software development uses Pyside6 QMLfor interface design.
 
-I have the basic framework running and it works like this. The user clicks a button and a series of top level folders are shown on a sliding panel. These folders have a strict hierarchy as do the contents. Each folder represents a subset of a group of movies eg 1990s, Bond Fils etc.
-The folders typically hold a movie file, an image poster file and an xml jriver sidecar file. When the user clicks a folder the images are displayed in either grid view or carousel view. These images are stored as a cache on each local pc using the software and the cache folder structure 
+I have the basic framework running and it works like this. The user clicks a button and a series of top level folders
+ are shown on a sliding panel. These folders have a strict hierarchy as do the contents. Each folder represents a 
+ subset of a group of movies eg 1990s, Bond Films etc.
+The folders typically hold a group of  movie files, image posters file and  xml jriver sidecar files. When the
+ user clicks
+ a folder the images are displayed in either grid view or carousel view. These images are stored as a cache on 
+ each local pc using the software and the cache folder structure to
 mirror the movie library.Caching is there to speed up the display process and the images are thumbnails.
 
-The user has 2 options when viewing the images. The first is a single click that creates a detal_view of the movie, on the left pane the image on the right a tabbed pane fed by the xml from the sidecar file. There is a video button that the user can click to either play the movie full screen
- through jriver or on a built in mini player. If the user double clicks the image the movie just plays in the default video player. This all works well.
+The user has 2 options when viewing the images. The first is a single click that creates a detal_view of the movie,
+ on the left pane the image on the right a tabbed pane fed by the xml from the sidecar file. 
+ There is a video button that the user can click to either play the movie full screen
+ through jriver or on a built in mini player. 
+ If the user double clicks the image the movie just plays in the default video player. This all works well.
 
 The next requirements creates more complexity
-Requirement 1 - DVD playon: Jriver plays DVS folders happily if passed the folder path so that is my aim, however no image exists in the library folder so none exist
+Requirement 1 - DVD playing: Jriver plays DVD folders happily if passed the folder path, so that is my aim, however
+ no image exists in the library folder so none exist
  in the cach so they are invisible. in this scenario a dvd folder will exist side by side with the images and video file and will be named in the same convention. Ideally
 inside the dvd folder is a video_ts folder that holds the vob files etc. There is also an image file named video_ts.jpg representing the movie image. Its made more complex in that the folders structure may not always be consistent and the image may be further down in the folder hierarch
 Whwn my cache is built i need to add a behaviour that checks for dvd folders, finds the image file, and copies it into the cache, renamed with the name if its move from the top level folder that it exists in. This will then be displayed alongside hd moves etc in a seamless way. When I play the file i pick up the movie name 
 and passit it to jriver on e the folder path is retreived. I'm not sure yet whether I will need to be able to identify the dvd images in case the play command requires a different syntax to pass the folder adderess. I also plan to generate an xml file that will be stored in the same folder as the image.
 
-This describes my first requirement and I would normally pause here to concentrate just on this task but the second tak is related and may affect our design pattern of the first task
+This describes my first requirement and I would normally pause here to concentrate just on this task but the second 
+tak is related and may affect our design pattern of the first task. We have done somw work on this and created a manifest.json that holds details of the paths to the video and xml
+files as well as details of the image and whether its a dvd folder. Here is a sample of a movie item, {
+  "items": [
+    {
+      "title": "A Hard Days Night (1964)",
+      "shared": {
+        "original": "W:\\Collection\\1960s 70s 80s\\A Hard Days Night (1964).jpg",
+        "video": "W:\\Collection\\1960s 70s 80s\\A Hard Days Night (1964).mkv",
+        "dvd_root": null,
+        "xml": "W:\\Collection\\1960s 70s 80s\\A Hard Days Night (1964)_m2ts_JRSidecar.xml"
+      },
+      "cache": {
+        "relative_thumb": "1960s 70s 80s\\A Hard Days Night (1964).jpg",
+        "relative_display": "1960s 70s 80s\\A Hard Days Night (1964).jpg"
+      },
+      "metadata": {
+        "type": "movie",
+        "year": null,
+        "id": null
+      }
+    },
 
-The issue is this. There are folders that hold tv series. One folder is named TV Series and inside is another set of folders each named for the series title, inside each of these folders could be another set of folders, one for each season, in each season folders will be a set of files like our movies with video, image and 
-xml, or they could each be dvd folders as previously discussed. We can design our way through the TV series folder I'm sure, but it gets more complicate dwhen a stand alone folder in the top level group also represents a tv series. I need a design pattern that will allow me to drill down and represent the various views in a way that allows images to be used.
-What i can tell you is that the toplevel folders holding a series are not currently dvd folder but follow the format of top level movie folder so can be given a low priority
+
+The second issue is this. There are folders that hold tv series. One folder is named TV Series and inside is another 
+set of folders each named for the series title, inside each of these folders could be another set of folders, 
+one for each season, in each season folders will be a set of files like our movies with video, image and 
+xml, or they could each be dvd folders as previously discussed. We can design our way through the TV series 
+folder I'm sure, but it gets more complicate dwhen a stand alone folder in the top level group also represents 
+a tv series. I need a design pattern that will allow me to drill down and represent the various views in a way
+ that allows images to be used.
+What i can tell you is that the toplevel folders holding a series are not currently dvd folder but 
+follow the format of top level movie folder so can be given a low priority
 
 The TV Series folder nestin is like this
 
@@ -82,6 +121,29 @@ TV Shows Folder Name
 
 Mediaverse stage 2 master plan
 This plan keeps you in control: small, testable steps, each with explicit terminal outputs. Implement one step at a time; only proceed once the current step is stable.
+
+
+
+Here is an example of the manifest relating to a tv episode
+
+My current objective is to re test this code to understand how it generates the manifest
+Then to decide how to implement it. Currently it is created in the W:/Collections folder which is on my
+media server, I will make a folder in the root of W: named MediaVerse and move the manifest to that location.
+
+we then need to construct a cache for the image files based on the manifest. This cache will also be stored 
+within that MediaVerse folder. The logic is that when a user on a client machine logs in the program will check in the
+ background whether the library folder on the server has been updated since the creation of the manifest. If it has
+ the manifest will be remade, the server cach updated and finally the local cach will clone the server cache.
+
+Please note that there is code in place to create the cach on each local machine and remake every time the user logs in.
+This new system will run in the background sending notification progress messages to display in the qml
+
+Once the first run builds the server cache and local cache, the subsequent start ups should be carried out 
+quietly in the background
+
+
+
+
 
 Groundwork and visibility
 - Goal: Establish deterministic scanning and classification with clear terminal visibility.
