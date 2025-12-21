@@ -10,14 +10,28 @@ Item {
     property bool isOpen: false
     property int iconSize: 21
     property color brandColor: "#1E90FF" 
-    property int unreadCount: 3
-    property bool hasUrgent: true 
+    property int unreadCount: 0  // Start at 0 for live notifications
+    property bool hasUrgent: false 
 
     FontLoader { id: faSolid; source: fontPathFA }
 
+    // --- SIGNAL BRIDGE ---
+    // This listens to your Python NotificationManager
+    Connections {
+        target: notificationManager
+        ignoreUnknownSignals: true
+        
+        function onNotificationReceived(message, is_urgent) {
+            root.unreadCount += 1
+            if (is_urgent) root.hasUrgent = true
+            
+            // Push to the child component's function
+            notificationPanel.addNewEntry(message, is_urgent)
+            console.log("📬 QML: New notification added")
+        }
+    }
+
     // --- 1. THE DISMISSAL SHIELD ---
-    // This covers the entire screen EXCEPT the sidebar when it's open.
-    // Clicking anywhere else on the screen will close the sidebar.
     MouseArea {
         id: dismissalShield
         anchors.fill: parent
@@ -25,9 +39,8 @@ Item {
         onClicked: {
             root.isOpen = false
             notificationPanel.isShown = false
-            console.log("🖱️ Sidebar closed via background click")
         }
-        z: 997 // Sits below the sidebar but above the library
+        z: 997 
     }
 
     // --- 2. THE TRIGGER ZONE (BUMP) ---
@@ -58,7 +71,9 @@ Item {
     // --- 3. THE NOTIFICATION PANEL ---
     Notifications {
         id: notificationPanel
-        x: root.isOpen && notificationPanel.isShown ? (parent.width - sidebarBody.width - width) : parent.width
+        // Slide logic:
+        x: root.isOpen && notificationPanel.isShown ? 
+           (parent.width - sidebarBody.width - width) : parent.width
         z: 998 
     }
 
@@ -73,15 +88,11 @@ Item {
 
         Behavior on x { NumberAnimation { duration: 350; easing.type: Easing.OutCubic } }
 
-        // --- EMPTY SPACE CLICKER ---
-        // This MouseArea fills the sidebar. Because ToolButtons have their own MouseAreas,
-        // those will catch clicks first. Clicking anywhere else (empty space) closes the bar.
         MouseArea {
             anchors.fill: parent
             onClicked: {
                 root.isOpen = false
                 notificationPanel.isShown = false
-                console.log("🖱️ Sidebar closed via empty space click")
             }
         }
 
@@ -100,34 +111,16 @@ Item {
             }
 
             Column {
-                width: parent.width
-                spacing: 12
-
+                width: parent.width; spacing: 12
                 ToolButton {
                     iconCode: "\uf0f3"; toolName: "Alerts"
                     unreadBadge: root.unreadCount; isUrgent: root.hasUrgent
                     onClicked: notificationPanel.isShown = !notificationPanel.isShown
                 }
-                
-                ToolButton { iconCode: "\uf5dc"; toolName: "AI"; onClicked: console.log("AI Clicked") }
-                ToolButton { iconCode: "\uf002"; toolName: "Search"; onClicked: console.log("Search Clicked") }
-                ToolButton { iconCode: "\uf07c"; toolName: "Files"; onClicked: console.log("Files Clicked") }
+                ToolButton { iconCode: "\uf5dc"; toolName: "AI" }
+                ToolButton { iconCode: "\uf002"; toolName: "Search" }
+                ToolButton { iconCode: "\uf07c"; toolName: "Files" }
             }
-        }
-
-        // Branding Logo
-        Column {
-            anchors.bottom: parent.bottom
-            anchors.bottomMargin: 30
-            anchors.horizontalCenter: parent.horizontalCenter
-            spacing: 2
-            Text {
-                text: "MediaVerse"; color: root.brandColor; font.pixelSize: 22; font.bold: true
-                font.letterSpacing: 1.5; anchors.horizontalCenter: parent.horizontalCenter
-                layer.enabled: true
-                layer.effect: DropShadow { color: root.brandColor; radius: 4; samples: 8 }
-            }
-            Text { text: "v1.0"; color: "#66FFFFFF"; font.pixelSize: 12; anchors.horizontalCenter: parent.horizontalCenter }
         }
     }
 
@@ -166,7 +159,7 @@ Item {
         }
         MouseArea { 
             id: btnMouse; anchors.fill: parent; hoverEnabled: true; 
-            onClicked: btnRoot.clicked() // This "swallows" the click so it doesn't close the sidebar
+            onClicked: btnRoot.clicked() 
         }
     }
 }

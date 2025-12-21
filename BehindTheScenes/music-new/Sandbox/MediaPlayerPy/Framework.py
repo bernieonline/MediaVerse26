@@ -19,7 +19,7 @@ from Settings_Manager import SettingsManager
 #Adding fonts awesome path
 # NEW: use your v2 wrapper exactly as intended
 from Manifest_v2_wrapper import ManifestUpdater_v2 as ManifestUpdater
-
+from NotificationManager import notifier
 import threading
 
 
@@ -34,15 +34,14 @@ def main():
             level=logging.DEBUG,
             format='%(asctime)s - %(levelname)s - %(message)s'
         )
-
+        # mysql connection
+        myLibrary = getLibraryList()
         # ------------------------------------------------------------
         # Settings + filesystem
         # ------------------------------------------------------------
         config_path = paths["config"]
         fileSystem = FileSystem()
         settings_manager = SettingsManager(config_path, fileSystem)
-
-        print(".........................1")
 
         # Convert the Path object to a string QML can understand
         font_url = "file:///" + str(paths["fonts"].as_posix())
@@ -54,8 +53,9 @@ def main():
         # Manifest updater (v2 wrapper)
         # ------------------------------------------------------------
         manifest_updater = ManifestUpdater()
-        print(".........................2")
-
+        #
+        #need feedback when manifest is updated or not
+        #followed by cache feedback
         # ------------------------------------------------------------
         # Cache updater (your existing system)
         # ------------------------------------------------------------
@@ -67,23 +67,6 @@ def main():
         # ------------------------------------------------------------
         os.environ["QT_QUICK_CONTROLS_STYLE"] = "Material"
         app = QApplication(sys.argv)
-
-        # ------------------------------------------------------------
-        # Database library list
-        # ------------------------------------------------------------
-        myLibrary = getLibraryList()
-        if not myLibrary:
-            error_message = "Server not running or no libraries found."
-            logging.error(error_message)
-            msg_box = QMessageBox()
-            msg_box.setIcon(QMessageBox.Icon.Critical)
-            msg_box.setText(error_message)
-            msg_box.setWindowTitle("Database Connection Error")
-            msg_box.exec()
-            return -1
-
-        print("Data being passed to QML as myLibraryModel:", myLibrary)
-
         # ------------------------------------------------------------
         # QML engine setup
         # ------------------------------------------------------------
@@ -96,14 +79,12 @@ def main():
         engine = QQmlApplicationEngine()
         engine.addImportPath(os.path.join(os.path.dirname(PySide6.__file__), "qml"))
         engine.addImportPath(QLibraryInfo.path(QLibraryInfo.LibraryPath.Qml2ImportsPath))
-
         engine.rootContext().setContextProperty("imagesPath", Path(paths["assets"]).as_uri())
         engine.rootContext().setContextProperty("centralMenuData", menu_data)
         engine.rootContext().setContextProperty("SettingsManager", settings_manager)
         engine.rootContext().setContextProperty("fileSystemManager", fileSystem)
         engine.rootContext().setContextProperty("fontPathFA", font_url)
-
-        print("Data being passed to QML as menuData:", menu_data)
+        engine.rootContext().setContextProperty("notificationManager", notifier)
 
         # ------------------------------------------------------------
         # XML + filesystem controllers
@@ -119,7 +100,6 @@ def main():
 
         # Expose manifest updater to QML
         ctx.setContextProperty("manifestUpdater", manifest_updater)
-
         ctx.setContextProperty("fileSystemManager", fileSystem)
         ctx.setContextProperty("xmlController", xml_controller)
         ctx.setContextProperty("xmlDetails", xml_provider)
@@ -147,8 +127,21 @@ def main():
         ).start()
 
         print("✅ Framework-1.qml loaded successfully.")
+        
+        # ------------------------------------------------------------
+        # Database library list
+        # ------------------------------------------------------------
+        
+        if not myLibrary:
+            error_message = "Server not running or no libraries found."
+            notifier.post_notification("Database Connection Failed!", True)
+            logging.error(error_message)
+            return -1
+        else:
+            notifier.post_notification("Database Connected: MediaVerse is Online", False)
+        
         return app.exec()
-
+      
     except Exception:
         logging.exception("An unhandled exception occurred:")
         return -1
