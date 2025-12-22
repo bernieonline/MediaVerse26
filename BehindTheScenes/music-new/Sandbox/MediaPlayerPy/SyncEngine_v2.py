@@ -117,7 +117,7 @@ class SyncEngine_v2(QObject):
         notifier.post_notification(message, True)
 
     # ---------------------------------------------------------
-    # Check 0 — Library folder vs manifest
+    # Check 0 — Library folder vs manifest .....
     # ---------------------------------------------------------
     def _check_library_vs_manifest(self):
         print(">>> Check 0: Library folder vs manifest")
@@ -203,6 +203,59 @@ class SyncEngine_v2(QObject):
             print("❌ " + msg)
             self.report["errors"].append(msg)
         return cache_info
+    
+        # ---------------------------------------------------------
+    # Check C — Local manifest vs server manifest
+    # ---------------------------------------------------------
+    def _sync_local_manifest_if_needed(self):
+        print(">>> Check C: Local manifest vs server manifest")
+
+        self._ensure_local_structure()
+
+        # Load server manifest
+        server_manifest = self._load_json(self.server_manifest_path)
+        if server_manifest is None:
+            msg = "Server manifest missing — cannot compare with local manifest"
+            print("❌ " + msg)
+            self.report["manifest_check"] = msg
+            self.report["errors"].append(msg)
+            return False
+
+        server_generated = server_manifest.get("generated", "")
+        print(f"    server manifest.generated = {server_generated}")
+
+        # Load local manifest
+        local_manifest_path = self.local_manifest_dir / "manifest.json"
+        local_manifest = self._load_json(local_manifest_path)
+        local_generated = local_manifest.get("generated", "") if local_manifest else ""
+
+        print(f"    local  manifest.generated = {local_generated or 'None'}")
+
+        # If timestamps match → nothing to do
+        if local_generated == server_generated and local_generated != "":
+            msg = "Local manifest already matches server manifest — no action required"
+            print("    " + msg)
+            self.report["manifest_check"] = msg
+            return False
+
+        # Otherwise → update local manifest
+        msg = "Local manifest missing or outdated — updating from server"
+        print("⚠️ " + msg)
+        self.report["manifest_check"] = msg
+        self._notify_action("Updating local MediaVerse manifest from server")
+
+        try:
+            shutil.copy2(self.server_manifest_path, local_manifest_path)
+            print("    Local manifest updated")
+        except Exception as e:
+            err = f"Failed to update local manifest: {e}"
+            print("❌ " + err)
+            self.report["errors"].append(err)
+            return False
+
+        return True  # local manifest changed
+    
+
 
     # ---------------------------------------------------------
     # Check B — Server cache vs local cache
