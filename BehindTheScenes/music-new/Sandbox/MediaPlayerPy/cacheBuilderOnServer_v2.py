@@ -1,58 +1,88 @@
+# CacheBuilder_v2.py
+# MediaVerse V2 Cache Builder
+#
+# Generates three optimized image sizes:
+#   - thumb:   300px tall (grid view)
+#   - display: 900px tall (detail view)
+#   - carousel: 1600px wide (hero banner)
+#
+# All images are resized, compressed, and saved to the server cache.
+
 from pathlib import Path
-import os  # needed for os.makedirs
+import os
 
 from PySide6.QtCore import QObject, Signal
 
 
 class CacheBuilder_v2(QObject):
-    # Signal emitted when the cache building process starts
     cacheStarted = Signal()
-
-    # Signal emitted during progress: done items, total items
     cacheProgress = Signal(int, int)
-
-    # Signal emitted when the cache building process finishes
     cacheFinished = Signal()
 
+    # ---------------------------------------------------------
+    # Target resolutions
+    # ---------------------------------------------------------
+    THUMB_HEIGHT = 300
+    DISPLAY_HEIGHT = 900
+    CAROUSEL_WIDTH = 1600
+
     def __init__(self, manifest, cache_root):
-        """
-        :param manifest: dict with structure:
-            {
-              "version": 2,
-              "generated": "...",
-              "items": [ ... ]
-            }
-        :param cache_root: root folder for server cache, e.g.
-            r"W:\MediaVerse\cache\images"
-        """
         super().__init__()
 
         self.manifest = manifest
         self.cache_root = Path(cache_root)
 
-        # Debug: confirm we received manifest and cache_root correctly
-        print(">>> CacheBuilder_v2.__init__ called")
-        print(f"    cache_root set to: {self.cache_root}")
-        print(f"    manifest type: {type(self.manifest)}")
+        print(">>> CacheBuilder_v2 initialized")
+        print(f"    cache_root = {self.cache_root}")
 
+    # ---------------------------------------------------------
+    # Image resizing helpers
+    # ---------------------------------------------------------
+    def _resize_portrait(self, img, target_height):
+        """Resize portrait poster to a specific height, preserving 2:3 ratio."""
+        w, h = img.size
+        scale = target_height / h
+        new_w = int(w * scale)
+        new_h = int(h * scale)
+        return img.resize((new_w, new_h))
+
+    def _resize_carousel(self, img, target_width):
+        """
+        Resize portrait poster into a landscape hero banner.
+        Strategy:
+          1. Scale image so width >= target_width
+          2. Crop vertically to create a cinematic banner
+        """
+        w, h = img.size
+        scale = target_width / w
+        new_w = target_width
+        new_h = int(h * scale)
+
+        img = img.resize((new_w, new_h))
+
+        # Crop to cinematic height (900px)
+        target_h = 900
+        if new_h > target_h:
+            top = (new_h - target_h) // 2
+            bottom = top + target_h
+            img = img.crop((0, top, new_w, bottom))
+
+        return img
+
+    # ---------------------------------------------------------
+    # Main processing loop
+    # ---------------------------------------------------------
     def run(self):
-        """
-        Main method that builds the image cache from the v2 manifest.
-        Intended to be run in a background thread.
-        """
-
         print(">>> CacheBuilder_v2.run() started")
-
-        # Emit signal to tell any listeners that cache building has started
-        print(">>> Emitting cacheStarted signal")
         self.cacheStarted.emit()
 
-        # Safely get the list of items from the manifest dictionary (v2 structure)
         items = self.manifest.get("items", [])
-
-        print(f">>> Manifest contains {len(items)} items")
         total = len(items)
         done = 0
+
+        print(f">>> Manifest contains {total} items")
+
+        from PIL import Image, ImageOps
 
         for index, item in enumerate(items):
             print(f"\n>>> Processing item {index + 1} of {total}")
@@ -60,78 +90,74 @@ class CacheBuilder_v2(QObject):
             shared = item.get("shared", {})
             cache_info = item.get("cache", {})
 
-            # v2 source image: shared.original
             source_str = shared.get("original")
-            print(f"    source_str: {source_str}")
-
-            # v2 cache targets: thumb / display / carousel
-            thumb_rel_str = cache_info.get("thumb")
-            display_rel_str = cache_info.get("display")
-            carousel_rel_str = cache_info.get("carousel")
-
-            print(f"    thumb_rel_str: {thumb_rel_str}")
-            print(f"    display_rel_str: {display_rel_str}")
-            print(f"    carousel_rel_str: {carousel_rel_str}")
-
             if not source_str:
-                print("    ⚠️ Missing source image, skipping item")
-                continue
-
-            # At least thumb should exist to consider this cacheable
-            if not thumb_rel_str and not display_rel_str and not carousel_rel_str:
-                print("    ⚠️ No cache paths defined, skipping item")
+                print("    ⚠️ No source image path — skipping")
                 continue
 
             source = Path(source_str)
+            if not source.exists():
+                print(f"    ⚠️ Source file missing: {source}")
+                continue
+
+            # Cache filenames
+            thumb_rel = cache_info.get("thumb")
+            display_rel = cache_info.get("display")
+            carousel_rel = cache_info.get("carousel")
+
+            # Skip if no cache targets
+            if not any([thumb_rel, display_rel, carousel_rel]):
+                print("    ⚠️ No cache targets defined — skipping")
+                continue
 
             try:
-                if not source.exists():
-                    print(f"    ⚠️ Source file does not exist, skipping: {source}")
-                    continue
-
-                from PIL import Image
-
                 print(f"    Opening image: {source}")
                 img = Image.open(source)
 
-                # Build target paths under server cache root:
-                # W:\MediaVerse\cache\images\thumb\..., display\..., carousel\...
-                targets = []
+                # Fix EXIF orientation if needed
+                img = ImageOps.exif_transpose(img)
 
-                if thumb_rel_str:
-                    thumb_name = Path(thumb_rel_str).name
+                # Ensure RGB for JPEG output
+                if img.mode not in ("RGB", "RGBA"):
+                    img = img.convert("RGB")
+
+                # ---------------------------------------------------------
+                # Build each cache variant
+                # ---------------------------------------------------------
+                if thumb_rel:
+                    thumb_name = Path(thumb_rel).name
                     thumb_target = self.cache_root / "thumb" / thumb_name
-                    targets.append(("thumb", thumb_target))
+                    os.makedirs(thumb_target.parent, exist_ok=True)
 
-                if display_rel_str:
-                    display_name = Path(display_rel_str).name
+                    print(f"    [thumb] → {thumb_target}")
+                    thumb_img = self._resize_portrait(img, self.THUMB_HEIGHT)
+                    thumb_img.save(thumb_target, quality=85, optimize=True)
+
+                if display_rel:
+                    display_name = Path(display_rel).name
                     display_target = self.cache_root / "display" / display_name
-                    targets.append(("display", display_target))
+                    os.makedirs(display_target.parent, exist_ok=True)
 
-                if carousel_rel_str:
-                    carousel_name = Path(carousel_rel_str).name
+                    print(f"    [display] → {display_target}")
+                    display_img = self._resize_portrait(img, self.DISPLAY_HEIGHT)
+                    display_img.save(display_target, quality=85, optimize=True)
+
+                if carousel_rel:
+                    carousel_name = Path(carousel_rel).name
                     carousel_target = self.cache_root / "carousel" / carousel_name
-                    targets.append(("carousel", carousel_target))
+                    os.makedirs(carousel_target.parent, exist_ok=True)
 
-                # Save image for each required cache variant
-                for label, target in targets:
-                    print(f"    [{label}] Target path: {target}")
-                    print(f"    Ensuring target directory exists: {target.parent}")
-                    os.makedirs(target.parent, exist_ok=True)
-
-                    # For now, same image saved; later you can add resizing per type
-                    print(f"    Saving {label} cached image to: {target}")
-                    img.save(target)
+                    print(f"    [carousel] → {carousel_target}")
+                    carousel_img = self._resize_carousel(img, self.CAROUSEL_WIDTH)
+                    carousel_img.save(carousel_target, quality=85, optimize=True)
 
                 done += 1
-                print(f"    ✅ Cached {done} of {total} items")
-                print("    Emitting cacheProgress signal")
+                print(f"    ✅ Cached {done} of {total}")
                 self.cacheProgress.emit(done, total)
 
             except Exception as e:
-                print(f"    ⚠️ Exception while processing {source}: {e}")
+                print(f"    ⚠️ Error processing {source}: {e}")
 
-        print("\n>>> All items processed (loop complete)")
-        print(">>> Emitting cacheFinished signal")
+        print("\n>>> Cache building complete")
         self.cacheFinished.emit()
         print(">>> CacheBuilder_v2.run() finished")

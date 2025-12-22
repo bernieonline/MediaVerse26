@@ -1,0 +1,307 @@
+# SyncEngine_v2.py
+# MediaVerse V2 Sync Engine
+# Handles:
+#   Check 0: Library folder vs manifest
+#   Check A: Manifest vs server cache
+#   Check B: Server cache vs local cache
+#
+# Produces:
+#   - Neatly formatted sync report in the terminal
+#   - Notifications only when action is taken or errors occur
+
+import json
+import shutil
+from pathlib import Path
+from datetime import datetime
+
+from PySide6.QtCore import QObject
+
+from project_paths import paths
+from cache_builder_v2 import CacheBuilder_v2
+from NotificationManager import notifier
+
+
+class SyncEngine_v2(QObject):
+
+    def __init__(self):
+        super().__init__()
+
+        # ---------------------------------------------------------
+        # SERVER PATHS
+        # ---------------------------------------------------------
+        self.server_manifest_path = paths["server_manifest_v2"]
+
+        self.server_cache_root = paths["server_cache_root_v2"]
+        self.server_cache_thumb = paths["server_cache_thumb_v2"]
+        self.server_cache_display = paths["server_cache_display_v2"]
+        self.server_cache_carousel = paths["server_cache_carousel_v2"]
+
+        # cache_info.json lives one level above images/
+        self.server_cache_info_path = self.server_cache_root.parent / "cache_info.json"
+
+        # ---------------------------------------------------------
+        # LOCAL PATHS
+        # ---------------------------------------------------------
+        self.local_manifest_dir = paths["local_manifest_v2"]
+        self.local_cache_root = paths["local_cache_v2"]
+        self.local_cache_images = paths["local_cache_images_v2"]
+
+        self.local_thumb = paths["local_thumb_v2"]
+        self.local_display = paths["local_display_v2"]
+        self.local_carousel = paths["local_carousel_v2"]
+
+        self.local_cache_info_path = self.local_cache_root / "cache_info.json"
+
+        # ---------------------------------------------------------
+        # LIBRARY ROOT (source of truth)
+        # ---------------------------------------------------------
+        self.library_root = Path(r"W:\Collection")
+
+        # ---------------------------------------------------------
+        # SYNC REPORT (populated during run_sync)
+        # ---------------------------------------------------------
+        self.report = {
+            "library_check": "",
+            "manifest_check": "",
+            "server_cache_check": "",
+            "local_cache_check": "",
+            "errors": [],
+            "completed_at": None,
+        }
+
+    # ---------------------------------------------------------
+    # Helpers
+    # ---------------------------------------------------------
+    def _ensure_local_structure(self):
+        for p in [
+            self.local_manifest_dir,
+            self.local_thumb,
+            self.local_display,
+            self.local_carousel,
+        ]:
+            p.mkdir(parents=True, exist_ok=True)
+
+    def _load_json(self, path):
+        if not path.exists():
+            return None
+        try:
+            with open(path, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except Exception as e:
+            msg = f"Failed to load JSON from {path}: {e}"
+            print("⚠️ " + msg)
+            self.report["errors"].append(msg)
+            return None
+
+    def _write_cache_info(self, manifest):
+        info = {
+            "cache_built": datetime.now().isoformat(),
+            "manifest_generated": manifest.get("generated", "")
+        }
+        with open(self.server_cache_info_path, "w", encoding="utf-8") as f:
+            json.dump(info, f, indent=2)
+        print(f">>> server cache_info.json written to {self.server_cache_info_path}")
+
+    def _get_library_last_modified(self):
+        latest = 0
+        for path in self.library_root.rglob("*"):
+            try:
+                latest = max(latest, path.stat().st_mtime)
+            except Exception:
+                # Ignore files we can't stat
+                pass
+        return datetime.fromtimestamp(latest) if latest > 0 else datetime.fromtimestamp(0)
+
+    def _notify_action(self, message):
+        """Only used when something actually changes or an error occurs."""
+        notifier.post_notification(message, True)
+
+    # ---------------------------------------------------------
+    # Check 0 — Library folder vs manifest
+    # ---------------------------------------------------------
+    def _check_library_vs_manifest(self):
+        print(">>> Check 0: Library folder vs manifest")
+
+        manifest = self._load_json(self.server_manifest_path)
+        if manifest is None:
+            msg = "Server manifest missing — treating as out of date with library"
+            print("❌ " + msg)
+            self.report["library_check"] = msg
+            self.report["manifest_check"] = "Manifest missing or unreadable"
+            self.report["errors"].append("Server manifest missing")
+            # Caller should trigger manifest rebuild externally
+            return True  # force rebuild
+
+        manifest_time = datetime.fromisoformat(
+            manifest.get("generated", "1970-01-01T00:00:00")
+        )
+        library_time = self._get_library_last_modified()
+
+        print(f"    manifest.generated = {manifest_time}")
+        print(f"    library last edit   = {library_time}")
+
+        if library_time > manifest_time:
+            msg = "Library is newer than manifest — rebuild required"
+            print("⚠️ " + msg)
+            self.report["library_check"] = msg
+            # Caller should trigger manifest rebuild externally
+            self._notify_action("Library updated — manifest and cache will need rebuilding")
+            return True
+
+        msg = "Library matches manifest — no rebuild required"
+        print("    " + msg)
+        self.report["library_check"] = msg
+        return False
+
+    # ---------------------------------------------------------
+    # Check A — Server cache vs manifest
+    # ---------------------------------------------------------
+    def _check_and_rebuild_server_cache_if_needed(self):
+        print(">>> Check A: Server cache vs manifest")
+
+        manifest = self._load_json(self.server_manifest_path)
+        if manifest is None:
+            msg = f"Server manifest not found at {self.server_manifest_path}"
+            print("❌ " + msg)
+            self.report["manifest_check"] = msg
+            self.report["errors"].append(msg)
+            return None
+
+        manifest_generated = manifest.get("generated", "")
+        print(f"    manifest.generated = {manifest_generated}")
+
+        cache_info = self._load_json(self.server_cache_info_path)
+        cache_manifest_generated = cache_info.get("manifest_generated", "") if cache_info else ""
+
+        print(f"    cache_info.manifest_generated = {cache_manifest_generated or 'None'}")
+
+        if manifest_generated != cache_manifest_generated:
+            msg = "Manifest and server cache differ — rebuilding server cache"
+            print("⚠️ " + msg)
+            self.report["server_cache_check"] = msg
+            self._notify_action("Rebuilding server cache for MediaVerse")
+
+            builder = CacheBuilder_v2(manifest, self.server_cache_root)
+
+            builder.cacheStarted.connect(lambda: print(">>> CacheBuilder_v2: started"))
+            builder.cacheProgress.connect(lambda d, t: print(f">>> CacheBuilder_v2: {d}/{t}"))
+            builder.cacheFinished.connect(lambda: print(">>> CacheBuilder_v2: finished"))
+
+            builder.run()
+
+            self._write_cache_info(manifest)
+            self._notify_action("Server cache rebuild completed")
+        else:
+            msg = "Server cache already matches manifest — no action required"
+            print("    " + msg)
+            self.report["server_cache_check"] = msg
+
+        # Reload cache_info after potential rebuild
+        cache_info = self._load_json(self.server_cache_info_path)
+        if cache_info is None:
+            msg = "Server cache_info.json missing or unreadable after rebuild"
+            print("❌ " + msg)
+            self.report["errors"].append(msg)
+        return cache_info
+
+    # ---------------------------------------------------------
+    # Check B — Server cache vs local cache
+    # ---------------------------------------------------------
+    def _sync_server_to_local_if_needed(self, server_cache_info):
+        print(">>> Check B: Server cache vs local cache")
+
+        self._ensure_local_structure()
+
+        local_cache_info = self._load_json(self.local_cache_info_path)
+        server_built = server_cache_info.get("cache_built", "")
+        local_built = local_cache_info.get("cache_built", "") if local_cache_info else ""
+
+        print(f"    server cache_built = {server_built or 'None'}")
+        print(f"    local  cache_built = {local_built or 'None'}")
+
+        if server_built == local_built and local_built != "":
+            msg = "Local cache is already up to date — no action required"
+            print("    " + msg)
+            self.report["local_cache_check"] = msg
+            return
+
+        # If we reach here, local cache is missing or outdated
+        msg = "Local cache missing or outdated — syncing from server"
+        print("⚠️ " + msg)
+        self.report["local_cache_check"] = msg
+        self._notify_action("Updating local MediaVerse cache from server")
+
+        # Copy manifest
+        shutil.copy2(self.server_manifest_path, self.local_manifest_dir / "manifest.json")
+
+        # Copy cache_info.json
+        shutil.copy2(self.server_cache_info_path, self.local_cache_info_path)
+
+        # Copy images
+        for src_dir, dst_dir in [
+            (self.server_cache_thumb, self.local_thumb),
+            (self.server_cache_display, self.local_display),
+            (self.server_cache_carousel, self.local_carousel),
+        ]:
+            for src_file in src_dir.iterdir():
+                if src_file.is_file():
+                    shutil.copy2(src_file, dst_dir / src_file.name)
+
+        self._notify_action("Local MediaVerse cache sync completed")
+        print(">>> Local cache sync completed")
+
+    # ---------------------------------------------------------
+    # Reporting
+    # ---------------------------------------------------------
+    def _print_report(self):
+        self.report["completed_at"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+        print("\n=== MediaVerse V2 Sync Report ===\n")
+
+        print("Library Check:")
+        print("  " + (self.report["library_check"] or "No result recorded"))
+
+        print("\nManifest Check:")
+        print("  " + (self.report["manifest_check"] or "No explicit manifest rebuild logic here (assumed external)"))
+
+        print("\nServer Cache Check:")
+        print("  " + (self.report["server_cache_check"] or "No result recorded"))
+
+        print("\nLocal Cache Check:")
+        print("  " + (self.report["local_cache_check"] or "No result recorded"))
+
+        print("\nErrors:")
+        if self.report["errors"]:
+            for err in self.report["errors"]:
+                print("  - " + err)
+        else:
+            print("  None")
+
+        print(f"\nSync completed at: {self.report['completed_at']}")
+        print("=================================\n")
+
+    # ---------------------------------------------------------
+    # Public API
+    # ---------------------------------------------------------
+    def run_sync(self):
+        print("\n=== MediaVerse V2 Sync Started ===")
+
+        # Check 0 — Library freshness
+        library_requires_rebuild = self._check_library_vs_manifest()
+        # Note: actual manifest rebuild is assumed to be handled externally
+        # (e.g. ManifestBuilder_v2), then rerun sync.
+
+        # Check A — Server cache freshness
+        server_cache_info = self._check_and_rebuild_server_cache_if_needed()
+        if server_cache_info is None:
+            print(">>> Aborting sync: server cache_info unavailable")
+            self._print_report()
+            return
+
+        # Check B — Local cache freshness
+        self._sync_server_to_local_if_needed(server_cache_info)
+
+        # Final report to terminal
+        self._print_report()
+
+        print("=== MediaVerse V2 Sync Finished ===\n")

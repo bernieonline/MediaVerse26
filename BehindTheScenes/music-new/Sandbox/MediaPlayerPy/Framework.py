@@ -8,7 +8,6 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 
-
 import PySide6
 from PySide6.QtWidgets import QApplication, QMessageBox
 from PySide6.QtCore import QCoreApplication, QUrl, QLibraryInfo
