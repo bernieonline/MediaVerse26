@@ -116,42 +116,94 @@ class SyncEngine_v2(QObject):
         """Only used when something actually changes or an error occurs."""
         notifier.post_notification(message, True)
 
+    def _write_server_manifest(self, manifest):
+        """Write the given manifest dict to the server manifest path."""
+        try:
+            with open(self.server_manifest_path, "w", encoding="utf-8") as f:
+                json.dump(manifest, f, indent=2)
+            print(f">>> Server manifest written to {self.server_manifest_path}")
+        except Exception as e:
+            msg = f"Failed to write server manifest: {e}"
+            print("⚠️ " + msg)
+            self.report["errors"].append(msg)
+    
+    
+    
+    
+    
+    def _build_manifest_candidate(self):
+        """
+        Build a candidate manifest from the library folder.
+        Returns a dict with 'version', 'generated', and 'items'.
+        """
+        items = []
+        for path in self.library_root.rglob("*"):
+            if path.is_file():
+                items.append({
+                    "id": str(path.relative_to(self.library_root)),
+                    "title": path.stem,
+                    "type": path.suffix.lower().lstrip("."),
+                })
+
+        manifest = {
+            "version": 2,
+            "generated": datetime.now().isoformat(),
+            "items": items,
+        }
+        return manifest
+
+
     # ---------------------------------------------------------
     # Check 0 — Library folder vs manifest .....
     # ---------------------------------------------------------
-    def _check_library_vs_manifest(self):
-        print(">>> Check 0: Library folder vs manifest")
+        # ---------------------------------------------------------
+    # ---------------------------------------------------------
+    # Check 0 — Library folder vs manifest (content-aware)
+    # ---------------------------------------------------------
+    def _check_library_vs_manifest(self, path_a: Path, path_b: Path) -> dict:
+        print(">>> Check 0: Comparing manifest A vs B")
 
-        manifest = self._load_json(self.server_manifest_path)
-        if manifest is None:
-            msg = "Server manifest missing — treating as out of date with library"
+        manifest_a = self._load_json(path_a)
+        manifest_b = self._load_json(path_b)
+
+        if manifest_a is None or manifest_b is None:
+            msg = "One or both manifest files could not be loaded."
             print("❌ " + msg)
             self.report["library_check"] = msg
-            self.report["manifest_check"] = "Manifest missing or unreadable"
-            self.report["errors"].append("Server manifest missing")
-            # Caller should trigger manifest rebuild externally
-            return True  # force rebuild
+            self.report["errors"].append(msg)
+            return None
 
-        manifest_time = datetime.fromisoformat(
-            manifest.get("generated", "1970-01-01T00:00:00")
-        )
-        library_time = self._get_library_last_modified()
+        count_A = len(manifest_a.get("items", []))
+        count_B = len(manifest_b.get("items", []))
 
-        print(f"    manifest.generated = {manifest_time}")
-        print(f"    library last edit   = {library_time}")
+        hash_A = manifest_a.get("manifest_hash")
+        hash_B = manifest_b.get("manifest_hash")
 
-        if library_time > manifest_time:
-            msg = "Library is newer than manifest — rebuild required"
-            print("⚠️ " + msg)
-            self.report["library_check"] = msg
-            # Caller should trigger manifest rebuild externally
-            self._notify_action("Library updated — manifest and cache will need rebuilding")
-            return True
+        print(f"    Count A: {count_A}, Hash A: {hash_A}")
+        print(f"    Count B: {count_B}, Hash B: {hash_B}")
 
-        msg = "Library matches manifest — no rebuild required"
+        if count_A != count_B:
+            print(f"⚠️ Item count changed ({count_A} vs {count_B}) — content changed.")
+            self.report["library_check"] = "Item count differs — content changed"
+            self.report["manifest_check"] = "Server manifest should be updated"
+            manifest_a["content_changed"] = True
+            return manifest_a
+
+        if hash_A != hash_B:
+            print("⚠️ Hash mismatch — content changed.")
+            self.report["library_check"] = "Hash mismatch — content changed"
+            self.report["manifest_check"] = "Server manifest should be updated"
+            manifest_a["content_changed"] = True
+            return manifest_a
+
+        msg = "Manifest hashes and item counts are identical — no rebuild required"
         print("    " + msg)
         self.report["library_check"] = msg
-        return False
+        self.report["manifest_check"] = "No change"
+        manifest_a["content_changed"] = False
+        return manifest_a
+    '''
+
 
     # ---------------------------------------------------------
     # Check A — Server cache vs manifest
@@ -184,7 +236,7 @@ class SyncEngine_v2(QObject):
             builder = CacheBuilder_v2(manifest, self.server_cache_root)
 
             builder.cacheStarted.connect(lambda: print(">>> CacheBuilder_v2: started"))
-            builder.cacheProgress.connect(lambda d, t: print(f">>> CacheBuilder_v2: {d}/{t}"))
+            #builder.cacheProgress.connect(lambda d, t: print(f">>> CacheBuilder_v2: {d}/{t}"))
             builder.cacheFinished.connect(lambda: print(">>> CacheBuilder_v2: finished"))
 
             builder.run()
@@ -204,7 +256,7 @@ class SyncEngine_v2(QObject):
             self.report["errors"].append(msg)
         return cache_info
     
-        # ---------------------------------------------------------
+    # ---------------------------------------------------------
     # Check C — Local manifest vs server manifest
     # ---------------------------------------------------------
     def _sync_local_manifest_if_needed(self):
@@ -302,7 +354,7 @@ class SyncEngine_v2(QObject):
 
         self._notify_action("Local MediaVerse cache sync completed")
         print(">>> Local cache sync completed")
-
+    '''
     # ---------------------------------------------------------
     # Reporting
     # ---------------------------------------------------------

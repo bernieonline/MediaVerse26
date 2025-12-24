@@ -7,6 +7,8 @@ class CacheBuilder_v2(QObject):
     cacheProgress = Signal(int, int)
     cacheFinished = Signal()
 
+    print("running cache_builder_v2")
+
     def __init__(self, manifest, cache_root):
         super().__init__()
         self.manifest = manifest
@@ -27,7 +29,7 @@ class CacheBuilder_v2(QObject):
         print(f">>> Manifest contains {total} items")
 
         for index, item in enumerate(items):
-            print(f"\n>>> Processing item {index + 1} of {total}")
+            #print(f"\n>>> Processing item {index + 1} of {total}")
 
             shared = item.get("shared", {})
             cache_info = item.get("cache", {})
@@ -37,10 +39,10 @@ class CacheBuilder_v2(QObject):
             display_rel_str = cache_info.get("display")
             carousel_rel_str = cache_info.get("carousel")
 
-            print(f"    source_str: {source_str}")
-            print(f"    thumb_rel_str: {thumb_rel_str}")
-            print(f"    display_rel_str: {display_rel_str}")
-            print(f"    carousel_rel_str: {carousel_rel_str}")
+            #print(f"    source_str: {source_str}")
+            #print(f"    thumb_rel_str: {thumb_rel_str}")
+            #print(f"    display_rel_str: {display_rel_str}")
+            #print(f"    carousel_rel_str: {carousel_rel_str}")
 
             if not source_str:
                 print("    ⚠️ Missing source image, skipping item")
@@ -58,7 +60,7 @@ class CacheBuilder_v2(QObject):
                     continue
 
                 from PIL import Image
-                print(f"    Opening image: {source}")
+                #print(f"    Opening image: {source}")
                 img = Image.open(source)
 
                 targets = []
@@ -81,7 +83,7 @@ class CacheBuilder_v2(QObject):
                     img.save(target)
 
                 done += 1
-                print(f"    ✅ Cached {done} of {total} items")
+                #print(f"    ✅ Cached {done} of {total} items")
                 self.cacheProgress.emit(done, total)
 
             except Exception as e:

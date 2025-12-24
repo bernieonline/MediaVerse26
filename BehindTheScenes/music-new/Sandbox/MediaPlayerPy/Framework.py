@@ -127,6 +127,8 @@ def main():
         # ------------------------------------------------------------
         # Helper: decide whether cache rebuild is needed
         # ------------------------------------------------------------
+        
+        '''
         def is_cache_up_to_date(manifest: dict) -> bool:
             """
             Compare manifest['generated'] with cache_info['manifest_generated'].
@@ -152,10 +154,11 @@ def main():
                 print(f"[CacheInfo] Failed to read/compare cache_info.json: {e}")
                 # On error, be safe and rebuild
                 return False
-
+        '''
         # ------------------------------------------------------------
         # Helper: update cache_info.json after successful rebuild
         # ------------------------------------------------------------
+        '''
         def update_cache_info(manifest: dict):
             """
             Store manifest['generated'] into cache_info.json so we can
@@ -180,7 +183,7 @@ def main():
 
             except Exception as e:
                 print(f"[CacheInfo] Failed to update cache_info.json: {e}")
-
+        '''
         # ------------------------------------------------------------
         # Helper: run server cache builder in background
         # ------------------------------------------------------------
@@ -190,6 +193,7 @@ def main():
             This runs in a worker thread to avoid blocking the UI.
             """
             try:
+                print("Framework,py")
                 print("[CacheBuilder_v2] Initializing server cache builder...")
                 builder = CacheBuilder_v2(manifest, server_cache_root_v2)
 
@@ -197,8 +201,11 @@ def main():
                 builder.cacheStarted.connect(
                     lambda: print("[CacheBuilder_v2] Cache build started")
                 )
+                #builder.cacheProgress.connect(
+                    #lambda done, total: print(f"[CacheBuilder_v2] Progress: {done}/{total}")   
+                #)
                 builder.cacheProgress.connect(
-                    lambda done, total: print(f"[CacheBuilder_v2] Progress: {done}/{total}")
+                    lambda done, total: None
                 )
                 builder.cacheFinished.connect(
                     lambda: print("[CacheBuilder_v2] Cache build finished")
@@ -207,7 +214,7 @@ def main():
                 builder.run()
 
                 # After a successful run, record the manifest timestamp
-                update_cache_info(manifest)
+                #update_cache_info(manifest)
 
             except Exception as e:
                 print(f"[CacheBuilder_v2] ERROR during cache build: {e}")
@@ -215,6 +222,8 @@ def main():
 
         # ------------------------------------------------------------
         # Slot: called when manifest is loaded (after update)
+        # this should do nothing - actions affecting the cache and decisions about 
+        # rebuilding are handled in sync engine check 0, check A Check B, Check C
         # ------------------------------------------------------------
         def on_manifest_loaded(manifest: dict):
             """
@@ -222,21 +231,43 @@ def main():
             We decide here whether to rebuild the server cache.
             """
             print("[Framework] manifestLoaded received in Framework.")
+            print(f"[Framework] content_changed = {manifest.get('content_changed')}")
+            print(f"[Framework] manifest keys = {list(manifest.keys())}")
+            print(f"[Framework] manifest source = {manifest.get('_source')}")
+
+
+            print("[Framework] manifestLoaded received in Framework.")
             # Decide if cache is up to date
-            if is_cache_up_to_date(manifest):
-                print("[Framework] Server cache is up to date. No rebuild required.")
+            #if is_cache_up_to_date(manifest):
+            #    print("[Framework] Server cache is up to date. No rebuild required.")
+            #    return
+
+            #print("[Framework] Server cache is OUT of date. Launching CacheBuilder_v2 in background...")
+            if manifest.get("content_changed") is True:
+                print("[Framework] Library content changed — launching CacheBuilder_v2 in background...")
+                threading.Thread(
+                    target=run_server_cache_builder,
+                    args=(manifest,),
+                    daemon=True
+                ).start()
                 return
 
-            print("[Framework] Server cache is OUT of date. Launching CacheBuilder_v2 in background...")
+            print("[Framework] No content_changed flag found — defaulting to rebuild.")
+
 
             # Run cache builder in a background thread
+            #this runs the above  method
             threading.Thread(
                 target=run_server_cache_builder,
                 args=(manifest,),
                 daemon=True
             ).start()
 
-        # Connect manifestLoaded signal to our handler
+
+        # Connect manifestLoaded signal to our handler signal sent from wrapper when
+        #manifest is done
+
+        # this is no loner used and the method in calls is not used
         manifest_updater.manifestLoaded.connect(on_manifest_loaded)
 
         # ------------------------------------------------------------

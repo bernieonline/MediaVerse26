@@ -12,7 +12,7 @@ from pathlib import Path
 import os
 
 from PySide6.QtCore import QObject, Signal
-
+print("Running cacheBuilderOnServer_v2..........................")
 
 class CacheBuilder_v2(QObject):
     cacheStarted = Signal()
@@ -85,7 +85,7 @@ class CacheBuilder_v2(QObject):
         from PIL import Image, ImageOps
 
         for index, item in enumerate(items):
-            print(f"\n>>> Processing item {index + 1} of {total}")
+            #print(f"\n>>> Processing item {index + 1} of {total}")
 
             shared = item.get("shared", {})
             cache_info = item.get("cache", {})
@@ -111,7 +111,7 @@ class CacheBuilder_v2(QObject):
                 continue
 
             try:
-                print(f"    Opening image: {source}")
+                #print(f"    Opening image: {source}")
                 img = Image.open(source)
 
                 # Fix EXIF orientation if needed
@@ -129,7 +129,7 @@ class CacheBuilder_v2(QObject):
                     thumb_target = self.cache_root / "thumb" / thumb_name
                     os.makedirs(thumb_target.parent, exist_ok=True)
 
-                    print(f"    [thumb] → {thumb_target}")
+                    #print(f"    [thumb] → {thumb_target}")
                     thumb_img = self._resize_portrait(img, self.THUMB_HEIGHT)
                     thumb_img.save(thumb_target, quality=85, optimize=True)
 
@@ -138,7 +138,7 @@ class CacheBuilder_v2(QObject):
                     display_target = self.cache_root / "display" / display_name
                     os.makedirs(display_target.parent, exist_ok=True)
 
-                    print(f"    [display] → {display_target}")
+                    #print(f"    [display] → {display_target}")
                     display_img = self._resize_portrait(img, self.DISPLAY_HEIGHT)
                     display_img.save(display_target, quality=85, optimize=True)
 
@@ -147,12 +147,12 @@ class CacheBuilder_v2(QObject):
                     carousel_target = self.cache_root / "carousel" / carousel_name
                     os.makedirs(carousel_target.parent, exist_ok=True)
 
-                    print(f"    [carousel] → {carousel_target}")
+                    #print(f"    [carousel] → {carousel_target}")
                     carousel_img = self._resize_carousel(img, self.CAROUSEL_WIDTH)
                     carousel_img.save(carousel_target, quality=85, optimize=True)
 
                 done += 1
-                print(f"    ✅ Cached {done} of {total}")
+                #print(f"    ✅ Cached {done} of {total}")
                 self.cacheProgress.emit(done, total)
 
             except Exception as e:
