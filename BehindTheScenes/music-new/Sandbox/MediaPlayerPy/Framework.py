@@ -236,13 +236,13 @@ def main():
             print(f"[Framework] manifest source = {manifest.get('_source')}")
 
 
-            print("[Framework] manifestLoaded received in Framework.")
+            #print("[Framework] manifestLoaded received in Framework.")
             # Decide if cache is up to date
             #if is_cache_up_to_date(manifest):
             #    print("[Framework] Server cache is up to date. No rebuild required.")
             #    return
 
-            #print("[Framework] Server cache is OUT of date. Launching CacheBuilder_v2 in background...")
+            print("[Framework] Server cache is OUT of date. Launching CacheBuilder_v2 in background...")
             if manifest.get("content_changed") is True:
                 print("[Framework] Library content changed — launching CacheBuilder_v2 in background...")
                 threading.Thread(
@@ -267,18 +267,10 @@ def main():
         # Connect manifestLoaded signal to our handler signal sent from wrapper when
         #manifest is done
 
-        # this is no loner used and the method in calls is not used
+        
         manifest_updater.manifestLoaded.connect(on_manifest_loaded)
 
-        # ------------------------------------------------------------
-        # Start manifest build in background
-        # ------------------------------------------------------------
-        # This will eventually emit manifestLoaded(manifest),
-        # which triggers on_manifest_loaded(), which may trigger CacheBuilder_v2.
-        threading.Thread(
-            target=manifest_updater.update_manifest_background,
-            daemon=False
-        ).start()
+    
 
         print("✅ Framework-1.qml loaded successfully.")
 
