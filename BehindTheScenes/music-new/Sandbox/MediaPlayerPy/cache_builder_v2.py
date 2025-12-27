@@ -7,7 +7,7 @@ class CacheBuilder_v2(QObject):
     cacheProgress = Signal(int, int)
     cacheFinished = Signal()
 
-    print("running cache_builder_v2")
+    print("loading cache_builder_v2")
 
     def __init__(self, manifest, cache_root):
         super().__init__()

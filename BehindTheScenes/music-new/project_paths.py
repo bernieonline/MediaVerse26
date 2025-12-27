@@ -32,7 +32,10 @@ font_path = (
     project_root
     / "Fonts"
     / "fontawesome-free-7.1.0-desktop"
-    / "otfs"
+    / "webfonts"
+    / "fa-solid-900.ttf"
+
+
 
 )
 
@@ -47,6 +50,9 @@ config_json = project_root / "Assets" / "Config.json"
 # SERVER PATHS (MediaVerse V2)
 # ---------------------------------------------------------
 server_manifest_v2 = Path(r"W:\MediaVerse\manifest\manifest.json")
+
+
+
 
 server_cache_root_v2 = Path(r"W:\MediaVerse\cache\images")
 server_cache_thumb_v2 = server_cache_root_v2 / "thumb"

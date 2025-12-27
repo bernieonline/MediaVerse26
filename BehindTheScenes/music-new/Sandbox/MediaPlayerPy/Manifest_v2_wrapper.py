@@ -6,17 +6,25 @@ import copy
 
 from manifest_v3 import write_manifest_to_disk
 from SyncEngine_v2 import SyncEngine_v2
+from project_paths import paths
+
 
 class ManifestUpdater_v2(QObject):
-    print("running Manifest_v2_wrapper")
+    print("loading Manifest_v2_wrapper")
+    #send out 3 signals
     manifestLoaded = Signal(dict)
     manifestError = Signal(str)
     manifestUpdated = Signal()
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.manifest_path = Path(r"W:\MediaVerse\manifest\manifest.json")
+        #the current manifest file
+        #self.manifest_path = Path(r"W:\MediaVerse\manifest\manifest.json")
+        self.manifest_path = paths["server_manifest_v2"]
+
+        #the manifest newly created from library data for comparison with current manifest
         self.comparison_path = Path(r"W:\MediaVerse\manifest\manifest_b.json")
+        #sync engine has a check 0 method that compares the two manifests and decides if there is an update needed to the cache
         self.sync_engine = SyncEngine_v2()
 
     # ------------------------------------------------------------
@@ -87,7 +95,52 @@ class ManifestUpdater_v2(QObject):
             msg = f"Manifest update failed: {e}"
             print("[ManifestUpdater_v2]", msg)
             self.manifestError.emit(msg)
+    
+    def bootstrap_manifest(self):
+        """
+        First‑run manifest builder.
 
+        Reuse the existing manifest_v3.write_manifest_to_disk logic
+        to build the canonical manifest at self.manifest_path,
+        then load it, inject V2 flags, and emit manifestLoaded so
+        Framework can trigger CacheBuilder_v2.
+
+        This avoids needing scan_library/normalize_item/sort_items
+        while we prove the V2 pipeline.
+        """
+        try:
+            print("[ManifestUpdater_v2] BOOTSTRAP: Building full manifest via write_manifest_to_disk...")
+
+            # 1. Build manifest.json at self.manifest_path using existing logic
+            write_manifest_to_disk(self.manifest_path)
+
+            if not self.manifest_path.exists():
+                raise FileNotFoundError(f"Manifest file not found after bootstrap build: {self.manifest_path}")
+
+            # 2. Load manifest from disk
+            with open(self.manifest_path, "r", encoding="utf-8") as f:
+                manifest = json.load(f)
+
+            # 3. Inject V2 flags/metadata
+            manifest["content_changed"] = True          # bootstrap always forces cache rebuild
+            manifest["_source"] = "bootstrap"
+
+            print("[ManifestUpdater_v2] BOOTSTRAP: Manifest loaded after build")
+            print(f"  Version:   {manifest.get('version')}")
+            print(f"  Generated: {manifest.get('generated')}")
+            print(f"  Items:     {len(manifest.get('items', []))}")
+            print(f"  Content changed: {manifest.get('content_changed')}")
+
+            # 4. Emit manifest to Framework
+            self.manifestLoaded.emit(copy.deepcopy(manifest))
+            print("[ManifestUpdater_v2] BOOTSTRAP: manifestLoaded emitted")
+
+        except Exception as e:
+            print(f"[ManifestUpdater_v2] ERROR during bootstrap: {e}")
+            import traceback
+            traceback.print_exc()
+            self.manifestError.emit(f"Bootstrap failed: {e}")
+    
     def _load_manifest(self):
         """Load manifest from disk and emit it with default content_changed = False."""
         if not self.manifest_path.exists():

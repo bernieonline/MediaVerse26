@@ -23,7 +23,7 @@ Manifest Builder v2 (based on working v1 logic)
 
 Standalone script: no Qt, no threads.
 """
-print("running manifest_v2.py")
+print("loading manifest_v2.py")
 # --- Root location ---
 ROOT_PATH = Path(r"W:\Collection")
 MANIFEST_OUTPUT = Path(r"W:\MediaVerse\manifest\manifest.json")

@@ -5,7 +5,7 @@ from pathlib import Path
 from datetime import datetime
 from manifest_hash_processor import process_and_save
 
-print("running manifest_v3.py")
+print("loading manifest_v3.py")
 
 # --- Root location ---
 ROOT_PATH = Path(r"W:\Collection")
