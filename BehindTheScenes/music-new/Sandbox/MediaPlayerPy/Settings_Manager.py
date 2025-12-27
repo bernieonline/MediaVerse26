@@ -23,8 +23,8 @@ class SettingsManager(QObject):
             with open(self.config_path, "r", encoding="utf-8") as f:
                 self._settings = json.load(f)
             print("settings now loaded")
-            for key, value in self._settings.items():
-                print(f" - {key}: {value}")
+            #for key, value in self._settings.items():
+                #print(f" - {key}: {value}")
             self.settingsChanged.emit()
         except Exception as e:
             print(f"[ERROR] Could not load config: {e}")
