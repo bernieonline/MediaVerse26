@@ -15,6 +15,7 @@ from pathlib import Path
 from datetime import datetime
 
 from PySide6.QtCore import QObject
+from NotificationManager import notifier
 
 from project_paths import paths
 from cache_builder_v2 import CacheBuilder_v2
@@ -162,6 +163,8 @@ class SyncEngine_v2(QObject):
     # ---------------------------------------------------------
     def _check_library_vs_manifest(self, path_a: Path, path_b: Path) -> dict:
         print(">>> Check 0: Comparing manifest A vs B")
+        notifier.post_notification("syncengine comparing manifests.", False)
+
 
         manifest_a = self._load_json(path_a)
         manifest_b = self._load_json(path_b)
@@ -186,6 +189,8 @@ class SyncEngine_v2(QObject):
             print(f"⚠️ Item count changed ({count_A} vs {count_B}) — content changed.")
             self.report["library_check"] = "Item count differs — content changed"
             self.report["manifest_check"] = "Server manifest should be updated"
+            notifier.post_notification("Manifest content changed - Rebuild.", False)
+
             manifest_a["content_changed"] = True
             return manifest_a
 
@@ -197,6 +202,8 @@ class SyncEngine_v2(QObject):
             return manifest_a
 
         msg = "Manifest hashes and item counts are identical — no rebuild required"
+        notifier.post_notification("Manifest contents unchanged no action needed.", False)
+
         print("    " + msg)
         self.report["library_check"] = msg
         self.report["manifest_check"] = "No change"

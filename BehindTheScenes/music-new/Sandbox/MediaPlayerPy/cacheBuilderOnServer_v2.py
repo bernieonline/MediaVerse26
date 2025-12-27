@@ -10,6 +10,7 @@
 
 from pathlib import Path
 import os
+from NotificationManager import notifier
 import shutil
 
 from PySide6.QtCore import QObject, Signal
@@ -86,7 +87,8 @@ class CacheBuilder_v2(QObject):
     # ---------------------------------------------------------
     def run(self):
         try:
-            print(">>> CacheBuilder_v2.run() started")
+            #print(">>> CacheBuilder_v2.run() started")
+            notifier.post_notification("Building server cache…", False)
             self.cacheStarted.emit()
 
             items = self.manifest.get("items", [])
@@ -177,7 +179,7 @@ class CacheBuilder_v2(QObject):
 
             #update local copies from server copies
             self.sync_to_local()
-            
+
         except Exception as e:
             print(f"[CacheBuilder_v2] ERROR in run(): {e}")
             traceback.print_exc()
@@ -190,6 +192,9 @@ class CacheBuilder_v2(QObject):
         
 
         print("[CacheBuilder_v2] Syncing server → local...")
+        print("[CacheBuilder_v2] Sync complete.")
+
+
 
         # Ensure local directories exist
         local_manifest_v2.parent.mkdir(parents=True, exist_ok=True)
@@ -211,4 +216,5 @@ class CacheBuilder_v2(QObject):
                 shutil.rmtree(dst)
             shutil.copytree(src, dst)
 
-        print("[CacheBuilder_v2] Sync complete.")    
+        print("[CacheBuilder_v2] Sync complete.")   
+        notifier.post_notification("Local cache updated.", False) 

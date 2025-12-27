@@ -12,7 +12,6 @@ import PySide6
 from PySide6.QtWidgets import QApplication
 from PySide6.QtCore import QCoreApplication, QUrl, QLibraryInfo, QTimer
 from PySide6.QtQml import QQmlApplicationEngine
-
 from project_paths import paths
 from XML_Details import GetXMLDetails
 from dbMySql.db_utils import getLibraryList
@@ -122,7 +121,7 @@ def main():
         server_manifest_path = paths["server_manifest_v2"]
 
         # ------------------------------------------------------------
-        # Cache builder worker
+        # Cache builder worker - messages
         # ------------------------------------------------------------
         def run_server_cache_builder(manifest: dict):
             try:
@@ -149,12 +148,18 @@ def main():
         # Manifest loaded handler
         # ------------------------------------------------------------
         def on_manifest_loaded(manifest: dict):
-            print("[Framework] manifestLoaded received in Framework.")
-            print(f"[Framework] content_changed = {manifest.get('content_changed')}")
-            print(f"[Framework] manifest source = {manifest.get('_source')}")
+            #print("[Framework] manifestLoaded received in Framework.")
+            #print(f"[Framework] content_changed = {manifest.get('content_changed')}")
+            #print(f"[Framework] manifest source = {manifest.get('_source')}")
+
+            notifier.post_notification("Manifest loaded.", False)
+
 
             if manifest.get("content_changed") is True:
                 print("[Framework] Launching CacheBuilder_v2 in background...")
+                if manifest.get("content_changed") is True:
+                    notifier.post_notification("Library changed — rebuilding cache…", False)
+
                 threading.Thread(
                     target=run_server_cache_builder,
                     args=(manifest,),
@@ -172,7 +177,8 @@ def main():
         # ------------------------------------------------------------
         def start_manifest_work():
             if not server_manifest_path.exists():
-                print("NO MANIFEST SO BOOTSTRAP (via QTimer)")
+                #print("NO MANIFEST SO BOOTSTRAP (via QTimer)")
+                notifier.post_notification("Building manifest for the first time…", False)
                 manifest_updater.bootstrap_manifest()
             else:
                 print("MANIFEST EXISTS — UPDATE IN BACKGROUND (via QTimer)")

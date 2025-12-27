@@ -7,6 +7,7 @@ import copy
 from manifest_v3 import write_manifest_to_disk
 from SyncEngine_v2 import SyncEngine_v2
 from project_paths import paths
+from NotificationManager import notifier
 
 
 class ManifestUpdater_v2(QObject):
@@ -52,8 +53,10 @@ class ManifestUpdater_v2(QObject):
         """Full Check 0 flow: build A, build B, compare, trigger cache if needed."""
         try:
             # Step 1: Build canonical manifest.json
-            print(f"[ManifestUpdater_v2] Building canonical manifest at {self.manifest_path}...")
-            write_manifest_to_disk(self.manifest_path)
+            #print("running _update_and_check_manifest inside manifest_v2_wrapper")
+            #print(f"[ManifestUpdater_v2] Building canonical manifest at {self.manifest_path}...")
+            #write_manifest_to_disk(self.manifest_path)
+            #notifier.post_notification("Wrapper - Manifest Written to server.", False)
 
             # Step 2: Build comparison manifest_b.json
             print(f"[ManifestUpdater_v2] Building comparison manifest at {self.comparison_path}...")
