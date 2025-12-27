@@ -13,7 +13,14 @@ Item {
     property int unreadCount: 0  // Start at 0 for live notifications
     property bool hasUrgent: false 
 
-    FontLoader { id: faSolid; source: fontPathFA }
+    FontLoader { 
+        id: faSolid;
+        Component.onCompleted: {
+            console.log("Font path received:", fontPathFA)
+            faSolid.source = fontPathFA 
+        }
+   
+    }
 
     // --- SIGNAL BRIDGE ---
     // This listens to your Python NotificationManager
