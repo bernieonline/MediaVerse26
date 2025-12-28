@@ -21,6 +21,7 @@ db_path = project_root / "dbMySql"
 log_path = project_root / "application.log"
 req_path = project_root / "requirements.txt"
 
+
 # Local cache (old system)
 thumb_dir = project_root / "cache" / "thumbnails"
 display_dir = project_root / "cache" / "display"
@@ -45,6 +46,9 @@ font_path = (
 json_path = project_root / "Assets" / "XMLCategories.json"
 menu_json_path = project_root / "Assets" / "MainMenu.json"
 config_json = project_root / "Assets" / "Config.json"
+coll_data = project_root / "Assets" / "xml_collection_data.json"
+coll_json = project_root / "Assets" /"xml_collection.json"
+
 
 # ---------------------------------------------------------
 # SERVER PATHS (MediaVerse V2)
@@ -86,6 +90,9 @@ paths = {
     "display": display_dir,
     "config": config_json,
     "fonts": font_path,
+   "xmldate" : coll_data,
+   "jsoncoll" : coll_json,
+
 
     # Server V2
     "server_manifest_v2": server_manifest_v2,
