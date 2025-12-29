@@ -119,13 +119,14 @@ class XMLCollections(QObject):
 
     @Slot('QVariant', result=list)
     def get_collection_results(self, criteria):
-        """Returns matching objects for the grid. Handles translation between QML and JSON keys."""
+        """Returns matching objects from the filtered movie pool for the grid."""
         if not self.master_cache:
             return []
             
-        # Convert QML JavaScript object to Python Dictionary
+        # --- FIX: Convert QJSValue/QVariant to a Python Dict ---
         if hasattr(criteria, "toVariant"):
             criteria = criteria.toVariant()
+        # ------------------------------------------------------
 
         if not criteria or not isinstance(criteria, dict):
             return self.master_cache
@@ -137,28 +138,19 @@ class XMLCollections(QObject):
                 if not val:
                     continue
                 
-                # --- CATEGORY TRANSLATION LOGIC ---
-                
-                # 1. Handle Actors (List check)
+                # Check based on your Title Case JSON keys
                 if key == "Actors":
                     if val not in item.get("Actors", []):
                         match = False
-                
-                # 2. Handle Decade (Year prefix check)
                 elif key == "Decade":
-                    # val is '1970s', year is '1973'
                     yr = str(item.get("Year", ""))
                     if not yr.startswith(str(val)[:3]):
                         match = False
-                
-                # 3. Handle Genre and Keywords (String contains check)
                 elif key in ["Genre", "Keywords"]:
-                    # JSON stores these as "Drama; Action"
                     if val not in item.get(key, ""):
                         match = False
-                
-                # 4. Handle Everything Else (Director, etc.)
                 else:
+                    # Direct match for Director, etc.
                     if str(item.get(key)) != str(val):
                         match = False
             
@@ -167,44 +159,29 @@ class XMLCollections(QObject):
         
         print(f"🔍 Filter applied: {criteria} | Found: {len(results)} movies")
         return results
-    
 
     @Slot(str, 'QVariant')
     def save_collection_template(self, name, criteria):
-        """Adds a collection recipe to the master registry for the Display Window."""
+        """Saves current filters to a named collection on W: drive."""
         try:
+            # --- FIX: Convert JavaScript object to Python Dictionary ---
             if hasattr(criteria, "toVariant"):
                 criteria = criteria.toVariant()
+            # -----------------------------------------------------------
 
-            file_path = Path("W:/MediaVerse/collections/Movies_Collections.json")
-            file_path.parent.mkdir(parents=True, exist_ok=True)
-
-            # 1. Load the existing Library
-            library = []
-            if file_path.exists():
-                with open(file_path, 'r', encoding='utf-8') as f:
-                    try:
-                        library = json.load(f)
-                    except: library = []
-
-            # 2. Overwrite if name exists, otherwise append
-            library = [item for item in library if item.get("name") != name]
+            save_path = Path("W:/MediaVerse/collections")
+            save_path.mkdir(parents=True, exist_ok=True)
             
-            # 3. Store the 'Recipe'
-            new_collection = {
-                "name": name,
-                "rules": criteria,
-                "created": "2025-12-29" # Useful for sorting cards by 'Newest'
-            }
-            library.append(new_collection)
-
-            # 4. Save
+            # Use the collection name as the filename
+            file_path = save_path / f"{name}.json"
+            
             with open(file_path, 'w', encoding='utf-8') as f:
-                json.dump(library, f, indent=4)
+                json.dump(criteria, f, indent=4)
                 
-            print(f"✅ Collection '{name}' added to Library.")
+            print(f"💾 Collection Saved Successfully: {file_path}")
+            print(f"📄 Data Saved: {criteria}")
             return True
+            
         except Exception as e:
-            print(f"❌ Registry Save Error: {e}")
+            print(f"❌ Save Failed: {e}")
             return False
-    
