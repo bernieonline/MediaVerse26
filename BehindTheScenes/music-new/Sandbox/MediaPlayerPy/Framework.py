@@ -2,7 +2,7 @@ import sys
 import os
 import logging
 import json
-
+import threading
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -12,6 +12,7 @@ import PySide6
 from PySide6.QtWidgets import QApplication
 from PySide6.QtCore import QCoreApplication, QUrl, QLibraryInfo, QTimer
 from PySide6.QtQml import QQmlApplicationEngine
+
 from project_paths import paths
 from XML_Details import GetXMLDetails
 from dbMySql.db_utils import getLibraryList
@@ -20,9 +21,9 @@ from FileSystem import FileSystem
 from Settings_Manager import SettingsManager
 from Manifest_v2_wrapper import ManifestUpdater_v2 as ManifestUpdater
 from NotificationManager import notifier
-
-import threading
+from todo_manager import ToDoManager
 from cacheBuilderOnServer_v2 import CacheBuilder_v2
+from xml_collections import XMLCollections
 
 
 def main():
@@ -37,7 +38,9 @@ def main():
             format='%(asctime)s - %(levelname)s - %(message)s'
         )
 
-        # mysql connection
+        # ------------------------------------------------------------
+        # Database connection
+        # ------------------------------------------------------------
         myLibrary = getLibraryList()
 
         # ------------------------------------------------------------
@@ -46,16 +49,27 @@ def main():
         config_path = paths["config"]
         fileSystem = FileSystem()
         settings_manager = SettingsManager(config_path, fileSystem)
-
         font_url = paths["fonts"].as_uri()
-
         settings_manager.load_settings()
         print(">>> Framework: settings loaded, continuing startup")
 
         # ------------------------------------------------------------
-        # Manifest updater (v2 wrapper)
+        # Manifest updater and ToDo manager
         # ------------------------------------------------------------
         manifest_updater = ManifestUpdater()
+        todo_manager = ToDoManager()
+
+        # ------------------------------------------------------------
+        # XML logic
+        # ------------------------------------------------------------
+        xml_logic = XMLCollections()
+        xml_controller = XmlController()
+        xml_provider = GetXMLDetails()
+        xml_logic.refresh_master_cache()
+
+        if myLibrary and "path" in myLibrary[0]:
+            root_path = myLibrary[0]["path"]
+            fileSystem.update_folders(root_path)
 
         # ------------------------------------------------------------
         # Qt setup
@@ -63,43 +77,39 @@ def main():
         os.environ["QT_QUICK_CONTROLS_STYLE"] = "Material"
         app = QApplication(sys.argv)
 
-        # ------------------------------------------------------------
-        # QML engine setup
-        # ------------------------------------------------------------
-        QCoreApplication.addLibraryPath(str(Path(sys.modules["PySide6"].__file__).parent / "plugins"))
+        QCoreApplication.addLibraryPath(
+            str(Path(sys.modules["PySide6"].__file__).parent / "plugins")
+        )
         os.add_dll_directory(str(Path(sys.modules["PySide6"].__file__).parent))
 
+        # ------------------------------------------------------------
+        # Load menu data
+        # ------------------------------------------------------------
         with open(paths["menu"], encoding="utf-8") as f:
             menu_data = json.load(f)
 
+        # ------------------------------------------------------------
+        # QML engine setup
+        # ------------------------------------------------------------
         engine = QQmlApplicationEngine()
+        ctx = engine.rootContext()
+
         engine.addImportPath(os.path.join(os.path.dirname(PySide6.__file__), "qml"))
         engine.addImportPath(QLibraryInfo.path(QLibraryInfo.LibraryPath.Qml2ImportsPath))
 
-        engine.rootContext().setContextProperty("imagesPath", Path(paths["assets"]).as_uri())
-        engine.rootContext().setContextProperty("centralMenuData", menu_data)
-        engine.rootContext().setContextProperty("SettingsManager", settings_manager)
-        engine.rootContext().setContextProperty("fileSystemManager", fileSystem)
-        engine.rootContext().setContextProperty("fontPathFA", font_url)
-        engine.rootContext().setContextProperty("notificationManager", notifier)
-
-        # ------------------------------------------------------------
-        # XML + filesystem controllers
-        # ------------------------------------------------------------
-        xml_controller = XmlController()
-        xml_provider = GetXMLDetails()
-
-        if myLibrary and "path" in myLibrary[0]:
-            root_path = myLibrary[0]["path"]
-            fileSystem.update_folders(root_path)
-
-        ctx = engine.rootContext()
-        ctx.setContextProperty("manifestUpdater", manifest_updater)
+        # Expose Python objects to QML
+        ctx.setContextProperty("collectionLogic", xml_logic)
+        ctx.setContextProperty("todoManager", todo_manager)
+        ctx.setContextProperty("imagesPath", Path(paths["assets"]).as_uri())
+        ctx.setContextProperty("centralMenuData", menu_data)
+        ctx.setContextProperty("SettingsManager", settings_manager)
         ctx.setContextProperty("fileSystemManager", fileSystem)
+        ctx.setContextProperty("fontPathFA", font_url)
+        ctx.setContextProperty("notificationManager", notifier)
+        ctx.setContextProperty("manifestUpdater", manifest_updater)
         ctx.setContextProperty("xmlController", xml_controller)
         ctx.setContextProperty("xmlDetails", xml_provider)
         ctx.setContextProperty("myLibraryModel", myLibrary)
-
         ctx.setContextProperty("thumbsPath", paths["thumbs"].as_uri())
         ctx.setContextProperty("displayPath", paths["display"].as_uri())
 
@@ -121,22 +131,16 @@ def main():
         server_manifest_path = paths["server_manifest_v2"]
 
         # ------------------------------------------------------------
-        # Cache builder worker - messages
+        # Cache builder worker
         # ------------------------------------------------------------
         def run_server_cache_builder(manifest: dict):
             try:
                 print("[CacheBuilder_v2] Initializing server cache builder...")
                 builder = CacheBuilder_v2(manifest, server_cache_root_v2)
 
-                builder.cacheStarted.connect(
-                    lambda: print("[CacheBuilder_v2] Cache build started")
-                )
-                builder.cacheProgress.connect(
-                    lambda done, total: None
-                )
-                builder.cacheFinished.connect(
-                    lambda: print("[CacheBuilder_v2] Cache build finished")
-                )
+                builder.cacheStarted.connect(lambda: print("[CacheBuilder_v2] Cache build started"))
+                builder.cacheProgress.connect(lambda done, total: None)
+                builder.cacheFinished.connect(lambda: print("[CacheBuilder_v2] Cache build finished"))
 
                 builder.run()
 
@@ -148,28 +152,21 @@ def main():
         # Manifest loaded handler
         # ------------------------------------------------------------
         def on_manifest_loaded(manifest: dict):
-            #print("[Framework] manifestLoaded received in Framework.")
-            #print(f"[Framework] content_changed = {manifest.get('content_changed')}")
-            #print(f"[Framework] manifest source = {manifest.get('_source')}")
-
             notifier.post_notification("Manifest loaded.", False)
-
 
             if manifest.get("content_changed") is True:
                 print("[Framework] Launching CacheBuilder_v2 in background...")
-                if manifest.get("content_changed") is True:
-                    notifier.post_notification("Library changed — rebuilding cache…", False)
+                notifier.post_notification("Library changed — rebuilding cache…", False)
 
                 threading.Thread(
                     target=run_server_cache_builder,
                     args=(manifest,),
-                    #daemon=True
+                    # daemon=True
                 ).start()
                 return
 
             print("[Framework] No content_changed flag — skipping rebuild.")
 
-        # Connect signal BEFORE bootstrap
         manifest_updater.manifestLoaded.connect(on_manifest_loaded)
 
         # ------------------------------------------------------------
@@ -177,7 +174,6 @@ def main():
         # ------------------------------------------------------------
         def start_manifest_work():
             if not server_manifest_path.exists():
-                #print("NO MANIFEST SO BOOTSTRAP (via QTimer)")
                 notifier.post_notification("Building manifest for the first time…", False)
                 manifest_updater.bootstrap_manifest()
             else:
