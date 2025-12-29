@@ -212,25 +212,40 @@ Rectangle {
                     text: "💾" 
                     font.pixelSize: 20
                 }
-
+                //onclicked
                 onClicked: {
-                    if (collectionName === "") {
-                        notificationManager.post_notification("Please enter a name first!", true)
+                    // 1. Get the current text and trim whitespace
+                    let finalName = nameInput.text.trim();
+                    
+                    // 2. TRAP: If name is empty, try to generate one
+                    if (finalName === "") {
+                        let keys = Object.keys(currentCriteria);
+                        if (keys.length > 0) {
+                            // Take the values of the rules (e.g., "1960s") and add " Collection"
+                            let autoParts = keys.map(k => currentCriteria[k]);
+                            finalName = autoParts.join(" & ") + " Collection";
+                            
+                            // Show the user what we named it in the UI
+                            nameInput.text = finalName;
+                        }
+                    }
+
+                    // 3. FINAL VALIDATION: If it's STILL empty (no name AND no rules selected)
+                    if (finalName === "") {
+                        notificationManager.post_notification("Please select a filter or enter a name!", true);
                     } else {
-                        // Call the Python save slot
-                        collectionLogic.save_collection_template(collectionName, currentCriteria)
-                        notificationManager.post_notification("Collection Saved to Server", false)
+                        // 4. Send to Python
+                        collectionLogic.save_collection_template(finalName, currentCriteria);
+                        notificationManager.post_notification("Saved: " + finalName, false);
 
-                        // --- ADD THESE LINES TO RESET FORM ---
-                        currentCriteria = {}      // Clear the rules
-                        nameInput.text = ""       // Clear the text field
-                        updateResults()           // Reset count
-                        // ------------------------------------
+                        // 5. Reset the Form
+                        currentCriteria = {};
+                        nameInput.text = "";
+                        updateResults();
 
-
-
+                        // Close the panel
                         if (creatorRoot.parent.hasOwnProperty("isShown")) {
-                             creatorRoot.parent.isShown = false 
+                            creatorRoot.parent.isShown = false;
                         }
                     }
                 }
