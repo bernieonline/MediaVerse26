@@ -119,41 +119,79 @@ class XMLCollections(QObject):
 
     @Slot('QVariant', result=list)
     def get_collection_results(self, criteria):
-        """Returns matching objects from the filtered movie pool for the grid."""
-        if not self.master_cache: return []
-        if not criteria: return self.master_cache
+        """Returns matching objects for the grid. Handles translation between QML and JSON keys."""
+        if not self.master_cache:
+            return []
+            
+        # Convert QML JavaScript object to Python Dictionary
+        if hasattr(criteria, "toVariant"):
+            criteria = criteria.toVariant()
+
+        if not criteria or not isinstance(criteria, dict):
+            return self.master_cache
 
         results = []
         for item in self.master_cache:
             match = True
             for key, val in criteria.items():
-                if not val: continue
+                if not val:
+                    continue
                 
+                # --- CATEGORY TRANSLATION LOGIC ---
+                
+                # 1. Handle Actors (List check)
                 if key == "Actors":
-                    if val not in item.get("Actors", []): match = False
+                    if val not in item.get("Actors", []):
+                        match = False
+                
+                # 2. Handle Decade (Year prefix check)
                 elif key == "Decade":
+                    # val is '1970s', year is '1973'
                     yr = str(item.get("Year", ""))
-                    if not yr.startswith(val[:3]): match = False
+                    if not yr.startswith(str(val)[:3]):
+                        match = False
+                
+                # 3. Handle Genre and Keywords (String contains check)
                 elif key in ["Genre", "Keywords"]:
-                    if val not in item.get(key, ""): match = False
+                    # JSON stores these as "Drama; Action"
+                    if val not in item.get(key, ""):
+                        match = False
+                
+                # 4. Handle Everything Else (Director, etc.)
                 else:
-                    if str(item.get(key)) != str(val): match = False
+                    if str(item.get(key)) != str(val):
+                        match = False
             
             if match:
                 results.append(item)
+        
+        print(f"🔍 Filter applied: {criteria} | Found: {len(results)} movies")
         return results
+    
 
+    
     @Slot(str, 'QVariant')
     def save_collection_template(self, name, criteria):
         """Saves current filters to a named collection on W: drive."""
         try:
+            # --- FIX: Convert JavaScript object to Python Dictionary ---
+            if hasattr(criteria, "toVariant"):
+                criteria = criteria.toVariant()
+            # -----------------------------------------------------------
+
             save_path = Path("W:/MediaVerse/collections")
             save_path.mkdir(parents=True, exist_ok=True)
+            
+            # Use the collection name as the filename
             file_path = save_path / f"{name}.json"
+            
             with open(file_path, 'w', encoding='utf-8') as f:
                 json.dump(criteria, f, indent=4)
-            print(f"💾 Collection Saved: {file_path}")
+                
+            print(f"💾 Collection Saved Successfully: {file_path}")
+            print(f"📄 Data Saved: {criteria}")
             return True
+            
         except Exception as e:
             print(f"❌ Save Failed: {e}")
             return False

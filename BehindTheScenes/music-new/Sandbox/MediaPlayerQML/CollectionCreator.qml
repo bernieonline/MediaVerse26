@@ -84,7 +84,11 @@ Rectangle {
                     MouseArea {
                         anchors.fill: parent
                         cursorShape: Qt.PointingHandCursor
-                        onClicked: activeCategory = modelData
+                        onClicked: {
+                            activeCategory = modelData;
+                            currentCriteria = {}; // Fixed the spelling and added semicolon
+                            updateResults();      
+                        }
                     }
                 }
             }
@@ -216,6 +220,15 @@ Rectangle {
                         // Call the Python save slot
                         collectionLogic.save_collection_template(collectionName, currentCriteria)
                         notificationManager.post_notification("Collection Saved to Server", false)
+
+                        // --- ADD THESE LINES TO RESET FORM ---
+                        currentCriteria = {}      // Clear the rules
+                        nameInput.text = ""       // Clear the text field
+                        updateResults()           // Reset count
+                        // ------------------------------------
+
+
+
                         if (creatorRoot.parent.hasOwnProperty("isShown")) {
                              creatorRoot.parent.isShown = false 
                         }
