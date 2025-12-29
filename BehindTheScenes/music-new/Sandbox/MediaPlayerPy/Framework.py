@@ -60,7 +60,7 @@ def main():
         todo_manager = ToDoManager()
 
         # ------------------------------------------------------------
-        # XML logic
+        # XML logic - Collections
         # ------------------------------------------------------------
         xml_logic = XMLCollections()
         xml_controller = XmlController()

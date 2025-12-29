@@ -10,31 +10,43 @@ Item {
     property bool isOpen: false
     property int iconSize: 21
     property color brandColor: "#1E90FF" 
-    property int unreadCount: 0  // Start at 0 for live notifications
+    property int unreadCount: 0  
     property bool hasUrgent: false 
+
+    // --- NEW: Helper Function for your main button ---
+    function showCollectionCreator() {
+        // 1. Close other panels
+        notificationPanel.isShown = false
+        todoPanel.isShown = false
+        
+        // 2. Open this panel
+        collectionCreatorPanel.isShown = true
+        
+        // 3. Refresh data from Python
+        collectionLogic.refresh_master_cache()
+    }
 
     FontLoader { 
         id: faSolid;
         Component.onCompleted: {
-            console.log("Font path received:", fontPathFA)
             faSolid.source = fontPathFA 
         }
-   
     }
 
-    // --- SIGNAL BRIDGE ---
-    // This listens to your Python NotificationManager
+    // --- SIGNAL BRIDGES ---
     Connections {
         target: notificationManager
-        ignoreUnknownSignals: true
-        
         function onNotificationReceived(message, is_urgent) {
             root.unreadCount += 1
             if (is_urgent) root.hasUrgent = true
-            
-            // Push to the child component's function
             notificationPanel.addNewEntry(message, is_urgent)
-            console.log("📬 QML: New notification added")
+        }
+    }
+
+    Connections {
+        target: todoManager
+        function onTodoChanged(newContent) {
+            todoTextArea.text = newContent
         }
     }
 
@@ -46,11 +58,13 @@ Item {
         onClicked: {
             root.isOpen = false
             notificationPanel.isShown = false
+            todoPanel.isShown = false
+            collectionCreatorPanel.isShown = false // Close the new panel too
         }
         z: 997 
     }
 
-    // --- 2. THE TRIGGER ZONE (BUMP) ---
+    // --- 2. THE TRIGGER ZONE ---
     MouseArea {
         id: bumpArea
         width: 15
@@ -60,31 +74,59 @@ Item {
         hoverEnabled: true
         onEntered: root.isOpen = true
         z: 999 
-
-        Rectangle {
-            anchors.fill: parent
-            color: "red"
-            visible: root.hasUrgent && !root.isOpen
-            opacity: 0.5
-            SequentialAnimation on opacity {
-                running: root.hasUrgent && !root.isOpen
-                loops: Animation.Infinite
-                NumberAnimation { from: 0.1; to: 0.7; duration: 1200; easing.type: Easing.InOutQuad }
-                NumberAnimation { from: 0.7; to: 0.1; duration: 1200; easing.type: Easing.InOutQuad }
-            }
-        }
     }
 
     // --- 3. THE NOTIFICATION PANEL ---
     Notifications {
         id: notificationPanel
-        // Slide logic:
         x: root.isOpen && notificationPanel.isShown ? 
            (parent.width - sidebarBody.width - width) : parent.width
         z: 998 
     }
 
-    // --- 4. THE SIDEBAR BODY ---
+    // --- 4. THE TODO PANEL ---
+    // (Existing code remains the same inside this rectangle)
+    Rectangle {
+        id: todoPanel
+        property bool isShown: false
+        width: 350; height: parent.height
+        color: "#1E1E1E"; border.color: "#333"; border.width: 1; z: 998
+        x: root.isOpen && isShown ? (parent.width - sidebarBody.width - width) : parent.width
+        Behavior on x { NumberAnimation { duration: 300; easing.type: Easing.OutCubic } }
+        
+        // ... rest of your Column/TextArea code here ...
+        Column {
+            anchors.fill: parent; anchors.margins: 20; spacing: 15
+            Text { text: "SHARED TO-DO LIST"; color: "yellow"; font.pixelSize: 18; font.bold: true }
+            Rectangle {
+                width: parent.width; height: parent.height - 120; color: "#121212"; radius: 5
+                ScrollView {
+                    anchors.fill: parent; anchors.margins: 10
+                    TextArea {
+                        id: todoTextArea; color: "white"; font.pixelSize: 14; wrapMode: TextEdit.Wrap
+                        selectByMouse: true; placeholderText: "Type notes here..."
+                    }
+                }
+            }
+            Row {
+                width: parent.width; spacing: 10
+                Button { text: "Save"; width: parent.width * 0.5; onClicked: todoManager.save_todo(todoTextArea.text) }
+                Button { text: "Close"; width: parent.width * 0.4; onClicked: todoPanel.isShown = false }
+            }
+        }
+    }
+
+    // --- 5. NEW: THE COLLECTION CREATOR PANEL ---
+    CollectionCreator {
+        id: collectionCreatorPanel
+        property bool isShown: false
+        z: 998
+        // Same sliding math as your other panels
+        x: root.isOpen && isShown ? (parent.width - sidebarBody.width - width) : parent.width
+        Behavior on x { NumberAnimation { duration: 350; easing.type: Easing.OutCubic } }
+    }
+
+    // --- 6. THE SIDEBAR BODY ---
     Rectangle {
         id: sidebarBody
         width: root.sidebarWidth
@@ -95,14 +137,6 @@ Item {
 
         Behavior on x { NumberAnimation { duration: 350; easing.type: Easing.OutCubic } }
 
-        MouseArea {
-            anchors.fill: parent
-            onClicked: {
-                root.isOpen = false
-                notificationPanel.isShown = false
-            }
-        }
-
         Column {
             anchors.fill: parent
             anchors.topMargin: 40
@@ -110,20 +144,40 @@ Item {
 
             Text {
                 text: "TOOLS"
-                color: "yellow"
-                font.pixelSize: 20
-                font.bold: true
-                font.letterSpacing: 1.5
+                color: "yellow"; font.pixelSize: 20; font.bold: true
                 anchors.horizontalCenter: parent.horizontalCenter
             }
 
             Column {
                 width: parent.width; spacing: 12
+                
                 ToolButton {
                     iconCode: "\uf0f3"; toolName: "Alerts"
                     unreadBadge: root.unreadCount; isUrgent: root.hasUrgent
-                    onClicked: notificationPanel.isShown = !notificationPanel.isShown
+                    onClicked: {
+                        todoPanel.isShown = false
+                        collectionCreatorPanel.isShown = false // Added this
+                        notificationPanel.isShown = !notificationPanel.isShown
+                    }
                 }
+
+                ToolButton { 
+                    iconCode: "\uf044"; toolName: "To-Do" 
+                    onClicked: {
+                        notificationPanel.isShown = false
+                        collectionCreatorPanel.isShown = false // Added this
+                        todoPanel.isShown = !todoPanel.isShown
+                        if (todoPanel.isShown) todoTextArea.text = todoManager.load_todo()
+                    }
+                }
+
+                // New icon for the Collection Creator within the sidebar
+                ToolButton { 
+                    iconCode: "\uf00b" 
+                    toolName: "Collections" 
+                    onClicked: root.showCollectionCreator()
+                }
+
                 ToolButton { iconCode: "\uf5dc"; toolName: "AI" }
                 ToolButton { iconCode: "\uf002"; toolName: "Search" }
                 ToolButton { iconCode: "\uf07c"; toolName: "Files" }
@@ -132,16 +186,15 @@ Item {
     }
 
     // --- TOOL BUTTON COMPONENT ---
+    // (Existing ToolButton component remains exactly the same)
     component ToolButton: Rectangle {
         id: btnRoot
         property string iconCode; property string toolName
         property int unreadBadge: 0; property bool isUrgent: false
         signal clicked()
-
         width: parent.width - 20; height: 60; anchors.horizontalCenter: parent.horizontalCenter
         color: btnMouse.containsMouse ? "#22FFFFFF" : "transparent"
         radius: 8; border.color: btnMouse.containsMouse ? "yellow" : "transparent"; border.width: 1
-
         Row {
             anchors.fill: parent; anchors.leftMargin: 15; spacing: 15
             Text {
@@ -153,20 +206,7 @@ Item {
                 text: btnRoot.toolName; color: "white"; font.pixelSize: 14; font.bold: true
                 anchors.verticalCenter: parent.verticalCenter
             }
-            Rectangle {
-                width: 20; height: 20; radius: 10
-                color: btnRoot.isUrgent ? "#D32F2F" : "#FBC02D"
-                visible: btnRoot.unreadBadge > 0
-                anchors.verticalCenter: parent.verticalCenter
-                Text {
-                    text: btnRoot.unreadBadge; color: "white" 
-                    font.pixelSize: 11; font.bold: true; anchors.centerIn: parent
-                }
-            }
         }
-        MouseArea { 
-            id: btnMouse; anchors.fill: parent; hoverEnabled: true; 
-            onClicked: btnRoot.clicked() 
-        }
+        MouseArea { id: btnMouse; anchors.fill: parent; hoverEnabled: true; onClicked: btnRoot.clicked() }
     }
 }

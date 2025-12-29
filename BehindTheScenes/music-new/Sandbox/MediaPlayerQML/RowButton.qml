@@ -5,11 +5,12 @@ Row {
     id: buttonRow
 
     anchors.left: parent.left
-    anchors.margins: 50   // adds 50px padding left and right
+    anchors.right: parent.right // Encouraged for spacingCalc to work correctly
+    anchors.margins: 50   
 
     property int buttonWidth: 150
     property int buttonHeight: 60
-    property int buttonCount: 4
+    property int buttonCount: 5 // Updated from 4 to 5
     property real spacingCalc: (width - (buttonCount * buttonWidth)) / (buttonCount - 1)
 
     spacing: spacingCalc
@@ -20,7 +21,6 @@ Row {
         text: "Menu"
         fixedWidth: buttonRow.buttonWidth
         fixedHeight: buttonRow.buttonHeight
-
         onClicked: {
             libraryPanel.x = (libraryPanel.x === 0) ? -libraryPanel.width : 0
             if (libraryPanel.x === 0 && libraryPanel.categoryCombo.currentIndex !== -1) {
@@ -35,7 +35,6 @@ Row {
         text: "Video"
         fixedWidth: buttonRow.buttonWidth
         fixedHeight: buttonRow.buttonHeight
-
         onClicked: {
             let folderPath = window.selectedFolderPath
             let imageFile  = window.selectedImageFile
@@ -46,6 +45,24 @@ Row {
         }
     }
 
+    // --- NEW: Quick Collection Button ---
+    StyledButton {
+        id: quickCollectionButton
+        text: "Quick Collection"
+        fixedWidth: buttonRow.buttonWidth
+        fixedHeight: buttonRow.buttonHeight
+
+        onClicked: {
+            // 1. Open Sidebar if closed
+            if (!utilitySidebar.isOpen) {
+                utilitySidebar.isOpen = true
+            }
+            
+            // 2. Trigger the sliding panel and data refresh
+            utilitySidebar.showCollectionCreator()
+        }
+    }
+
     // --- View Toggle Button ---
     StyledButton {
         id: viewToggleButton
@@ -53,7 +70,6 @@ Row {
         text: isGridView ? "Carousel View" : "Grid View"
         fixedWidth: buttonRow.buttonWidth
         fixedHeight: buttonRow.buttonHeight
-
         onClicked: {
             isGridView = !isGridView
             if (isGridView) {
@@ -69,7 +85,6 @@ Row {
         text: "Close"
         fixedWidth: buttonRow.buttonWidth
         fixedHeight: buttonRow.buttonHeight
-
         onClicked: Qt.quit()
     }
 }
