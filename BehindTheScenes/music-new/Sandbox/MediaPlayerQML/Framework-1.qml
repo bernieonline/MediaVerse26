@@ -255,15 +255,23 @@ ApplicationWindow {
         border.width: 1
 
         // Loader for dynamically loading content like the GridView
+        // Loader for dynamically loading content like the GridView
         Loader {
             id: contentLoader
             anchors.fill: parent
             source: "ImageGridView.qml" // Set initial view
 
             onLoaded: {
+                // --- NEW: Handle Collections Gallery Data Hand-off ---
+                if (contentLoader.source.toString().includes("CollectionsGallery.qml")) {
+                    console.log("📂 Collections Gallery Loaded - Fetching data...")
+                    // This calls the Python slot we discussed and fills the Gallery model
+                    contentLoader.item.collectionsModel = collectionLogic.load_collections_list()
+                }
+
+                // --- Existing: Single-click connection ---
                 if (contentLoader.item && contentLoader.item.imageClicked) {
-                    // Log that the signal is connected
-                    console.log("✅ Connected imageClicked from ImageGridView")
+                    console.log("✅ Connected imageClicked from current view")
 
                     contentLoader.item.imageClicked.connect(function(cachePath, originalPath) {
                         // Derive filename from cachePath
@@ -272,42 +280,27 @@ ApplicationWindow {
                         var filename = decoded.split("/").pop()
 
                         // Store filename for Video button
-                    window.selectedImageFile = filename
-                    console.log("🖼️ Stored filename for Video button:", filename)
-
-                    // Optional: also store folder path from cachePath (redundant if SlidingPanel already sets it)
-                    // window.selectedFolderPath = decoded.split("/").slice(0, -1).join("/")
-
-
-
-
-
-                        //contentLoader.setSource("Detail_View.qml", { imagePath: path })
+                        window.selectedImageFile = filename
+                        console.log("🖼️ Stored filename for Video button:", filename)
 
                         contentLoader.setSource("Detail_View.qml", {
                             imagePath: cachePath,
                             xmlDetails: xmlDetails
                         })
-
                     })
                 }
 
-                // Double‑click connection (new)
+                // --- Existing: Double‑click connection ---
                 if (contentLoader.item && contentLoader.item.launchVideoRequested) {
-                    console.log("✅ Connected launchVideoRequested from ImageGridView")
+                    console.log("✅ Connected launchVideoRequested from current view")
 
                     contentLoader.item.launchVideoRequested.connect(function(cachePath) {
                         console.log("🎯 Double‑click received cachePath:", cachePath)
 
-                        // Derive filename from cachePath
                         var filename = window.filenameFromCachePath(cachePath)
                         window.selectedImageFile = filename
 
-
-                        // ✅ Use the existing Python slot
-
                         var videoPath = fileSystemManager.findVideoInFolder(window.selectedFolderPath, filename)
-
                         console.log("🎬 Resolved Video Path:", videoPath)
 
                         // Launch PlayerPanel
@@ -316,11 +309,9 @@ ApplicationWindow {
                         isVideoPanelVisible = true
                     })
                 }
-
             }
-
         }
-    }
+    }//end contentcontainer
 
     // ... [Existing code: contentContainer, videoPanel, etc.] ...
 

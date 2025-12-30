@@ -50,18 +50,25 @@ Item {
         }
     }
 
+    
     // --- 1. THE DISMISSAL SHIELD ---
     MouseArea {
         id: dismissalShield
         anchors.fill: parent
-        enabled: root.isOpen
+        
+        // ENABLED if EITHER the sidebar is open OR the collection panel is shown
+        enabled: root.isOpen || collectionCreatorPanel.isShown
+        
+        z: 997 
         onClicked: {
+            // Close everything
             root.isOpen = false
             notificationPanel.isShown = false
             todoPanel.isShown = false
-            collectionCreatorPanel.isShown = false // Close the new panel too
+            collectionCreatorPanel.isShown = false 
+            
+            console.log("Shield clicked: Closing all panels")
         }
-        z: 997 
     }
 
     // --- 2. THE TRIGGER ZONE ---

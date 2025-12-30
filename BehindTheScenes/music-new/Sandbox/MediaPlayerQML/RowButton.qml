@@ -5,12 +5,12 @@ Row {
     id: buttonRow
 
     anchors.left: parent.left
-    anchors.right: parent.right // Encouraged for spacingCalc to work correctly
+    anchors.right: parent.right
     anchors.margins: 50   
 
     property int buttonWidth: 150
     property int buttonHeight: 60
-    property int buttonCount: 5 // Updated from 4 to 5
+    property int buttonCount: 6 // Increased to 6 to fit both Collection buttons
     property real spacingCalc: (width - (buttonCount * buttonWidth)) / (buttonCount - 1)
 
     spacing: spacingCalc
@@ -23,9 +23,6 @@ Row {
         fixedHeight: buttonRow.buttonHeight
         onClicked: {
             libraryPanel.x = (libraryPanel.x === 0) ? -libraryPanel.width : 0
-            if (libraryPanel.x === 0 && libraryPanel.categoryCombo.currentIndex !== -1) {
-                libraryPanel.categoryCombo.activated(libraryPanel.categoryCombo.currentIndex)
-            }
         }
     }
 
@@ -45,20 +42,27 @@ Row {
         }
     }
 
-    // --- NEW: Quick Collection Button ---
+    // --- 1. VIEW COLLECTIONS ---
     StyledButton {
-        id: quickCollectionButton
-        text: "Quick Collection"
+        id: viewCollectionsButton
+        text: "View Collections"
         fixedWidth: buttonRow.buttonWidth
         fixedHeight: buttonRow.buttonHeight
-
         onClicked: {
-            // 1. Open Sidebar if closed
-            if (!utilitySidebar.isOpen) {
-                utilitySidebar.isOpen = true
-            }
-            
-            // 2. Trigger the sliding panel and data refresh
+            // This is the next big step: Loading the saved collections view
+            notificationManager.post_notification("Opening Collections Gallery...", false)
+            contentLoader.setSource("CollectionsGallery.qml") 
+        }
+    }
+
+    // --- 2. CREATE COLLECTION (Formerly Quick Collection) ---
+    StyledButton {
+        id: createCollectionButton
+        text: "Create Collection"
+        fixedWidth: buttonRow.buttonWidth
+        fixedHeight: buttonRow.buttonHeight
+        onClicked: {
+            // Only opens the side panel, doesn't change the main view
             utilitySidebar.showCollectionCreator()
         }
     }
