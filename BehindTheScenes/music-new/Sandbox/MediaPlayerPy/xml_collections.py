@@ -213,21 +213,17 @@ class XMLCollections(QObject):
         
 
     def _extract_sidecar_metadata(self, video_path, xml_path, cache_info):
-        """Helper to parse J.River XML and map local/server image paths."""
-        
+        """
+        Parses J.River XML and extracts pure metadata.
+        Image paths are excluded to keep data dynamic and decoupled.
+        """
         # 1. Year Extraction from filename
         year_match = re.search(r"\((\d{4})\)", video_path.name)
         extracted_year = year_match.group(1) if year_match else ""
 
-        # 2. Image Path Logic
-        rel_thumb = cache_info.get("relative_thumb", "")
-        local_img = paths["local_thumb_v2"] / rel_thumb
-        server_img = f"file:///W:/MediaVerse/cache/images/thumb/{quote(rel_thumb)}"
-        final_thumb = f"file:///{local_img}" if local_img.exists() else server_img
-
-        # Initial structure
+        # 2. Pure Metadata Structure (No URLs)
         data = {
-            "Filename": str(video_path),
+            "Filename": str(video_path),  # This is our JOIN KEY
             "Year": extracted_year,
             "Genre": "",
             "Keywords": "",
@@ -235,30 +231,31 @@ class XMLCollections(QObject):
             "Director": "Unknown",
             "Name": video_path.stem.split(' (')[0],
             "Series": "",
-            "Thumb_URL": final_thumb,
-            "Display_URL": final_thumb.replace("thumb", "display")
+            "IMDb ID": "",
+            "Media Sub Type": "Movie",
+            "Season": "",
+            "Episode": "",
+            "TheTVDB Series ID": "",
+            "TheMovieDB Series ID": ""
         }
 
-        # 3. Parse J.River XML
+        # 3. Parse J.River XML for details
         if xml_path.exists():
             try:
                 tree = ET.parse(xml_path)
                 root = tree.getroot()
                 
-                # Define helper function here, at the start of the XML block
                 def get_field(name):
                     node = root.find(f".//Field[@Name='{name}']")
                     return node.text if node is not None and node.text else ""
 
-                # Now use it safely
-                data["Genre"] = get_field("Genre")
-                data["Keywords"] = get_field("Keywords")
-                data["Director"] = get_field("Director") or "Unknown"
-                
                 data.update({
+                    "Genre": get_field("Genre"),
+                    "Keywords": get_field("Keywords"),
+                    "Director": get_field("Director") or "Unknown",
+                    "Series": get_field("Series"),
                     "IMDb ID": get_field("IMDb ID"),
                     "Media Sub Type": get_field("Media Sub Type"),
-                    "Series": get_field("Series"),
                     "Season": get_field("Season"),
                     "Episode": get_field("Episode"),
                     "TheTVDB Series ID": get_field("TheTVDB Series ID"),
