@@ -65,7 +65,19 @@ def main():
         xml_logic = XMLCollections()
         xml_controller = XmlController()
         xml_provider = GetXMLDetails()
-        xml_logic.refresh_master_cache()
+
+        # --- FIRST RUN / BOOTSTRAP LOGIC ---
+        # Check if the enriched metadata file (xml_collection_data.json) exists
+        if not paths["xmldate"].exists():
+            print("🚀 [Framework] FIRST RUN: xml_collection_data.json not found.")
+            print(">>> Building enriched metadata from J.River sidecars...")
+            # This triggers the threaded builder we just added
+            xml_logic.build_collection_data_json()
+        else:
+            # Normal startup: Just load the existing file into the master_cache
+            print("📡 [Framework] Metadata found. Loading Master Cache...")
+            xml_logic.refresh_master_cache()
+
 
         if myLibrary and "path" in myLibrary[0]:
             root_path = myLibrary[0]["path"]
