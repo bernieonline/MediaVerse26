@@ -120,9 +120,14 @@ Item {
     CollectionCreator {
         id: collectionCreatorPanel
         property bool isShown: false
-        z: 998
-        // Same sliding math as your other panels
-        x: root.isOpen && isShown ? (parent.width - sidebarBody.width - width) : parent.width
+        z: 1100 // Set this higher than sidebarBody (which is 1000)
+        
+        // If isShown is true, it slides to its open position. 
+        // If false, it hides off-screen to the right.
+        x: isShown ? (parent.width - width) : parent.width
+        
+        width: 600 // Or whatever width you want for the builder
+        
         Behavior on x { NumberAnimation { duration: 350; easing.type: Easing.OutCubic } }
     }
 
