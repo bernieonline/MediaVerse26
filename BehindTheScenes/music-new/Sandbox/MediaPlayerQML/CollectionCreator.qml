@@ -14,18 +14,8 @@ Rectangle {
     property var currentCriteria: ({})
     property string activeCategory: "Actors" 
     property var resultsCount: 0
-    property string statusMessage: "" // New status tracking
 
-    // Clear status when clicking anywhere in the panel
-    MouseArea {
-        anchors.fill: parent
-        propagateComposedEvents: true
-        onPressed: (mouse) => {
-            creatorRoot.statusMessage = ""
-            mouse.accepted = false // Allows buttons and fields to still work
-        }
-    }
-
+    // Guarded function to prevent "null" errors during startup
     function updateResults() {
         if (typeof collectionLogic !== 'undefined' && collectionLogic !== null) {
             let results = collectionLogic.get_collection_results(currentCriteria)
@@ -33,17 +23,19 @@ Rectangle {
         }
     }
 
+    // Refresh when the panel is opened
     onVisibleChanged: {
         if (visible) {
             updateResults()
-            creatorRoot.statusMessage = ""
         }
     }
 
+    // Listen for the background scan to finish
     Connections {
         target: collectionLogic
         function onCacheRebuilt() {
             updateResults()
+            // Force a refresh of the Repeater
             let temp = activeCategory
             activeCategory = ""
             activeCategory = temp
@@ -77,7 +69,6 @@ Rectangle {
             onTextChanged: creatorRoot.collectionName = text
         }
 
-        // Category Selector
         Flow {
             width: parent.width
             spacing: 10
@@ -95,8 +86,7 @@ Rectangle {
                         cursorShape: Qt.PointingHandCursor
                         onClicked: {
                             activeCategory = modelData;
-                            currentCriteria = {}; 
-                            creatorRoot.statusMessage = "";
+                            currentCriteria = {}; // Fixed the spelling and added semicolon
                             updateResults();      
                         }
                     }
@@ -104,10 +94,9 @@ Rectangle {
             }
         }
 
-        // Filter Options List
         Rectangle {
             width: parent.width
-            height: parent.height - 420 // Adjusted to make room for status message
+            height: parent.height - 380
             color: "transparent"
             clip: true
 
@@ -126,6 +115,7 @@ Rectangle {
                     width: parent.width
                     spacing: 8
                     Repeater {
+                        // Guarded model to prevent startup crash
                         model: (typeof collectionLogic !== 'undefined' && collectionLogic !== null) 
                             ? collectionLogic.get_filter_options(activeCategory) 
                             : []
@@ -155,7 +145,6 @@ Rectangle {
                                     currentCriteria[activeCategory] = modelData
                                 }
                                 currentCriteria = Object.assign({}, currentCriteria)
-                                creatorRoot.statusMessage = ""
                                 updateResults()
                             }
                         }
@@ -164,20 +153,6 @@ Rectangle {
             }
         }
 
-        // Inline Status Notification
-        Text {
-            id: statusLabel
-            width: parent.width
-            text: creatorRoot.statusMessage
-            color: "gold"
-            font.pixelSize: 12
-            font.italic: true
-            horizontalAlignment: Text.AlignRight
-            opacity: creatorRoot.statusMessage !== "" ? 1.0 : 0.0
-            Behavior on opacity { NumberAnimation { duration: 200 } }
-        }
-
-        // Summary and Save Section
         Rectangle {
             width: parent.width
             height: 140
@@ -215,7 +190,6 @@ Rectangle {
             }
 
             Button {
-                id: saveButton
                 anchors.right: parent.right
                 anchors.bottom: parent.bottom
                 anchors.margins: 10
@@ -238,35 +212,41 @@ Rectangle {
                     text: "💾" 
                     font.pixelSize: 20
                 }
-
+                //onclicked
                 onClicked: {
+                    // 1. Get the current text and trim whitespace
                     let finalName = nameInput.text.trim();
                     
-                    // Smart Trap: Auto-generate name if empty
+                    // 2. TRAP: If name is empty, try to generate one
                     if (finalName === "") {
                         let keys = Object.keys(currentCriteria);
                         if (keys.length > 0) {
+                            // Take the values of the rules (e.g., "1960s") and add " Collection"
                             let autoParts = keys.map(k => currentCriteria[k]);
                             finalName = autoParts.join(" & ") + " Collection";
+                            
+                            // Show the user what we named it in the UI
                             nameInput.text = finalName;
                         }
                     }
 
+                    // 3. FINAL VALIDATION: If it's STILL empty (no name AND no rules selected)
                     if (finalName === "") {
                         notificationManager.post_notification("Please select a filter or enter a name!", true);
                     } else {
-                        // 1. Python Save
+                        // 4. Send to Python
                         collectionLogic.save_collection_template(finalName, currentCriteria);
-                        
-                        // 2. Local Inline Feedback
-                        creatorRoot.statusMessage = "✓ " + finalName + " Created";
+                        notificationManager.post_notification("Saved: " + finalName, false);
 
-                        // 3. Reset for next use
+                        // 5. Reset the Form
                         currentCriteria = {};
                         nameInput.text = "";
                         updateResults();
-                        
-                        // We do NOT close the panel here, allowing for "On-The-Fly" creation
+
+                        // Close the panel
+                        if (creatorRoot.parent.hasOwnProperty("isShown")) {
+                            creatorRoot.parent.isShown = false;
+                        }
                     }
                 }
             }

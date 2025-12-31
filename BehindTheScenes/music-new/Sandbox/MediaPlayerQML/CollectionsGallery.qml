@@ -7,9 +7,9 @@ GridView {
     anchors.fill: parent
     anchors.margins: 30
     
-    // Adjusted for nice spacing between square cards
+    // Spacing adjusted for the "fan" width
     cellWidth: 280 
-    cellHeight: 300
+    cellHeight: 320
     clip: true
 
     // This property is filled by the Loader in main.qml
@@ -17,9 +17,13 @@ GridView {
     model: collectionsModel
 
     delegate: Item {
-        width: 260; height: 280
+        width: 260; height: 300
 
-        // --- 1. SHADOW LAYER ---
+        // Fetch the 3 images from Python. 
+        // We do this once per delegate to keep it efficient.
+        property var fanImages: (modelData.rules) ? collectionLogic.get_collection_images_by_rules(modelData.rules) : []
+
+        // --- 1. OUTER GLOW/SHADOW ---
         DropShadow {
             anchors.fill: cardRect
             horizontalOffset: 0
@@ -28,63 +32,84 @@ GridView {
             samples: 20
             color: cardMouse.containsMouse ? "#801E90FF" : "#99000000"
             source: cardRect
-            
             Behavior on color { ColorAnimation { duration: 200 } }
         }
 
         // --- 2. MAIN CARD BODY ---
         Rectangle {
             id: cardRect
-            width: 240; height: 260
+            width: 240; height: 280
             anchors.centerIn: parent
             color: "#1A1A1A"
-            radius: 20 // Rounded corners
+            radius: 20 
             border.color: cardMouse.containsMouse ? "#1E90FF" : "#333333"
             border.width: cardMouse.containsMouse ? 3 : 1
 
             Column {
                 anchors.fill: parent
                 anchors.margins: 15
-                spacing: 15
+                spacing: 12
 
-                // --- SQUARE IMAGE CONTAINER ---
-                Rectangle {
-                    id: imageContainer
+                // --- THE FAN CONTAINER ---
+                Item {
+                    id: fanContainer
                     width: parent.width
-                    height: parent.width // Makes it square
-                    color: "#000"
-                    radius: 15
+                    height: 180 // Box for the cards to sit in
                     
-                    Image {
-                        id: posterPreview
-                        anchors.fill: parent
-                        // Python function to find the first movie image for this collection
-                        source: (modelData.rules) ? collectionLogic.get_collection_images_by_rules(modelData.rules)[0] : ""
-                        fillMode: Image.PreserveAspectCrop
-                        visible: false // Hidden to be used by the mask
-                    }
+                    Repeater {
+                        model: fanImages.length
 
-                    // Rounded Mask for the Image
-                    Rectangle {
-                        id: maskRect
-                        anchors.fill: parent
-                        radius: 15
-                        visible: false
-                    }
+                        delegate: Item {
+                            width: 110; height: 165
+                            anchors.centerIn: parent
+                            
+                            // Transform logic for the "Playing Card" fan
+                            // index 0: Left (-20°), index 1: Center (0°), index 2: Right (+30°)
+                            rotation: index === 0 ? -20 : (index === 1 ? 0 : 30)
+                            x: index === 0 ? -30 : (index === 1 ? 0 : 35)
+                            z: index // Top card sits on top
 
-                    OpacityMask {
-                        anchors.fill: posterPreview
-                        source: posterPreview
-                        maskSource: maskRect
-                    }
-                    
-                    // Inner glow to give the image depth
-                    InnerShadow {
-                        anchors.fill: parent
-                        radius: 10
-                        samples: 16
-                        color: "#AA000000"
-                        source: maskRect
+                            Rectangle {
+                                id: cardBase
+                                anchors.fill: parent
+                                radius: 8
+                                color: "#000"
+                                border.color: "white"
+                                border.width: 2
+                                clip: true
+
+                                Image {
+                                    id: posterImg
+                                    anchors.fill: parent
+                                    anchors.margins: 2 // Margin shows the white border
+                                    source: fanImages[index]
+                                    fillMode: Image.PreserveAspectCrop
+                                    visible: false // Used by mask
+                                }
+
+                                Rectangle {
+                                    id: maskRct
+                                    anchors.fill: parent
+                                    radius: 6
+                                    visible: false
+                                }
+
+                                OpacityMask {
+                                    anchors.fill: parent
+                                    source: posterImg
+                                    maskSource: maskRct
+                                }
+                            }
+
+                            // Subtle shadow for each card in the fan to separate them
+                            DropShadow {
+                                anchors.fill: cardBase
+                                radius: 4
+                                samples: 8
+                                color: "#AA000000"
+                                source: cardBase
+                            }
+                        }
                     }
                 }
 
@@ -110,23 +135,21 @@ GridView {
                     console.log("🚀 Opening Collection:", modelData.name)
                     var filteredMovies = collectionLogic.get_collection_results(modelData.rules)
     
-                    // Safety: If the ID 'contentLoader' isn't directy accessible, 
-                    // we search for it or use the reference in main.qml
                     if (typeof contentLoader !== "undefined") {
                         contentLoader.setSource("ImageGridView.qml", { "externalImageList": filteredMovies })
                     } else {
-                        // Fallback if ID scoping fails
-                        console.log("Searching for loader...")
-                        var root = collectionsGrid.parent
-                        while (root.parent) { root = root.parent } // Go to main.qml root
-                        root.findChildLoader("contentLoader").setSource("ImageGridView.qml", { "externalImageList": filteredMovies })
+                        // Fallback root search
+                        var rootObj = collectionsGrid.parent
+                        while (rootObj.parent) { rootObj = rootObj.parent }
+                        if (rootObj.findChildLoader) {
+                            rootObj.findChildLoader("contentLoader").setSource("ImageGridView.qml", { "externalImageList": filteredMovies })
+                        }
                     }
                 }
             }
         }
     }
     
-    // Scrollbar styling
     ScrollBar.vertical: ScrollBar {
         policy: ScrollBar.AsNeeded
     }

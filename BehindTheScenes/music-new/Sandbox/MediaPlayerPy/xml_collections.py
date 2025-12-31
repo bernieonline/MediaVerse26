@@ -94,18 +94,32 @@ class XMLCollections(QObject):
             print(f"❌ Error loading collections list: {e}")
             return []
     #START
-
     @Slot('QVariant', result=list)
     def get_collection_images_by_rules(self, rules):
-        """Returns a randomized list of URIs for the collection card preview."""
         matches = self.get_collection_results(rules)
-        # Extract just the filePaths and shuffle them
-        images = [m["filePath"] for m in matches if m["filePath"]]
-        if images:
-            random.shuffle(images)
-            return images
-        return []
-    #####END
+        raw_paths = [m["filePath"] for m in matches if m.get("filePath")]
+        
+        if not raw_paths:
+            return []
+
+        random.shuffle(raw_paths)
+        
+        # This is the EXACT path from your "First Item Verified" log
+        # Note: Using forward slashes for QML compatibility
+        thumb_base = "D:/MediaVerse1.0/BehindTheScenes/BehindTheScenes/music-new/cacheV2/images/thumb/"
+        
+        final_fan_paths = []
+        for path in raw_paths[:3]:
+            # Get just the filename without extension (e.g., "Water (1985)")
+            file_name = os.path.splitext(os.path.basename(path))[0]
+            
+            # Construct the path to the thumbnail
+            full_thumb_path = f"{thumb_base}{file_name}.jpg"
+            
+            # Convert to QML-friendly file URL
+            final_fan_paths.append("file:///" + full_thumb_path)
+            
+        return final_fan_paths
     #start
     @Slot('QVariant', result=list)
     def get_collection_results(self, criteria):
