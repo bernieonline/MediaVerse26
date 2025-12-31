@@ -21,8 +21,10 @@ GridView {
 
         // Fetch the 3 images from Python. 
         // We do this once per delegate to keep it efficient.
-        property var fanImages: (modelData.rules) ? collectionLogic.get_collection_images_by_rules(modelData.rules) : []
-
+        //property var fanImages: (modelData.rules) ? collectionLogic.get_collection_images_by_rules(modelData.rules) : []
+        property var fanImages: (modelData && modelData.rules && (typeof collectionLogic !== "undefined") && collectionLogic !== null) 
+                         ? collectionLogic.get_collection_images_by_rules(modelData.rules) 
+                         : []
         // --- 1. OUTER GLOW/SHADOW ---
         DropShadow {
             anchors.fill: cardRect

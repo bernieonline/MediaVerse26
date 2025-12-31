@@ -131,24 +131,49 @@ class XMLCollections(QObject):
         for item in self.master_cache:
             match = True
             for key, value in criteria.items():
-                # Flexible matching (case-insensitive and partial)
-                item_val = str(item.get(key, "")).lower()
-                if str(value).lower() not in item_val:
-                    match = False
-                    break
+                
+                # --- NEW DECADE LOGIC WITH DEBUG PRINTS ---
+                if key == "Decade":
+                    # 1. Get the prefix (e.g., '196')
+                    target_decade_prefix = str(value).strip()[:3]
+                    
+                    # 2. Get the movie's year
+                    item_year = str(item.get("Year") or item.get("year") or "").strip()
+                    
+                    # 3. Match check
+                    did_match = item_year.startswith(target_decade_prefix)
+                    
+                    # OPTIONAL: Only print the first few matches to avoid flooding the console
+                    if did_match and len(results) < 5:
+                        print(f"📊 [Decade Match] Rule: {value} (Prefix: {target_decade_prefix}) | Movie: {item.get('Title')} | Year: {item_year}")
+
+                    if not did_match:
+                        match = False
+                        break
+                
+                # --- EXISTING WORKING LOGIC ---
+                else:
+                    item_val = str(item.get(key, "")).lower()
+                    if str(value).lower() not in item_val:
+                        match = False
+                        break
             
             if match:
                 video_path = item.get("Filename")
                 thumb_uri = self.image_lookup.get(video_path, "")
                 
-                # We format this to match what your ImageGridView delegate needs
                 results.append({
                     "filePath": thumb_uri, 
                     "originalPath": video_path,
                     "fileName": item.get("Title", "Unknown")
                 })
         
-        print(f"🔍 Collection Search: Found {len(results)} matches.")
+        # FINAL LOG
+        if "Decade" in criteria:
+            print(f"✅ [Decade Summary] Criteria {criteria} found {len(results)} movies.")
+        else:
+            print(f"🔍 Collection Search: Found {len(results)} matches.")
+            
         return results
     #start
     @Slot(str, result=list)
