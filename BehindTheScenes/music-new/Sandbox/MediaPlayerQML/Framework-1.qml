@@ -94,7 +94,20 @@ ApplicationWindow {
             miniPlayer.play(videoPath)   // call your MiniPlayer’s play() method
         }
     }
-
+    // A "Breadcrumb" style back button
+    Button {
+        text: "📁 Back to Gallery"
+        visible: contentLoader.source.toString().includes("ImageGridView.qml") && 
+                contentLoader.item && contentLoader.item.externalImageList &&
+                contentLoader.item.externalImageList.length > 0
+        
+        anchors.left: parent.left
+        anchors.top: parent.top
+        anchors.margins: 10
+        z: 100 // High Z-index to stay above the grid
+        
+        onClicked: contentLoader.setSource("CollectionsGallery.qml")
+    }
 
     Rectangle {
         id: logoFrame

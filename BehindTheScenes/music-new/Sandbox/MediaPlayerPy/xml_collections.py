@@ -7,9 +7,10 @@ from pathlib import Path
 from collections import Counter
 from urllib.parse import quote
 from PySide6.QtCore import QObject, Signal, Slot
-
+import random  # <--- Crucial for the random posters
+from project_paths import paths  # <--- Loads your relative path dictionary
 # Import your centralized path definitions
-from project_paths import paths
+
 
 class XMLCollections(QObject):
     cacheRebuilt = Signal()
@@ -21,6 +22,8 @@ class XMLCollections(QObject):
         
         # SOURCE OF TRUTH: xml_collection_data.json
         self.manifest_path = paths["xmldate"]
+
+        self.load_data()
         
         # INTERNAL CACHING
         self.cache_dir = Path("W:/MediaVerse/cache")
@@ -29,23 +32,52 @@ class XMLCollections(QObject):
         # Initialize internal maps
         self._load_image_map()
         print(f"🛠️ XMLCollections initialized. Target: {self.manifest_path}")
+    
+    def load_data(self):
+        """Loads the master movie data."""
+        data_path = paths.get("xmldate")
+        if data_path and Path(data_path).exists():
+            with open(data_path, 'r', encoding='utf-8') as f:
+                self.master_cache = json.load(f)
+            print(f"🛠️ XMLCollections: Loaded {len(self.master_cache)} movies.")
 
+    # start
     def _load_image_map(self):
-        """Pre-loads the v2 manifest so we can instantly find posters for collections."""
-        source_manifest = paths.get("server_manifest_v2")
-        if source_manifest and source_manifest.exists():
-            try:
-                with open(source_manifest, 'r', encoding='utf-8') as f:
-                    data = json.load(f)
-                    items = data.get("items", [])
-                    # Lookup: { "D:/Movies/Gladiator.mp4": "thumb/path.jpg" }
-                    self.image_lookup = { 
-                        item["shared"]["video"]: item["cache"].get("relative_thumb") 
-                        for item in items if "shared" in item and "cache" in item
-                    }
-                print(f"🖼️ Image lookup map built: {len(self.image_lookup)} links.")
-            except Exception as e:
-                print(f"⚠️ Image map build failed: {e}")
+        """Links Video Filenames to Thumbnails using relative project paths."""
+        # 1. Get the paths from your central dictionary
+        manifest_path = paths.get("server_manifest_v2")
+        local_base = paths.get("local_thumb_v2")
+
+        # 2. Safety Check: Ensure the manifest exists
+        if manifest_path and Path(manifest_path).exists():
+            with open(manifest_path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+                items = data if isinstance(data, list) else data.get("items", [])
+
+                # 3. Use enumerate so 'i' is defined for your first-item test
+                for i, item in enumerate(items):
+                    # Extract the video ID and the relative thumbnail path
+                    v_path = item.get("shared", {}).get("video")
+                    #t_rel = item.get("cache", {}).get("relative_thumb")
+                    t_path_raw = item.get("cache", {}).get("thumb", "") # "Cache/thumb/A Hard Days Night (1964).jpg"
+                    t_rel = t_path_raw.replace("Cache/thumb/", "")     # "A Hard Days Night (1964).jpg"
+
+                    # 4. Only proceed if we have all three components
+                    if v_path and t_rel and local_base:
+                        # Combine: D:/.../thumb/ + folder/image.jpg
+                        thumb_path = Path(local_base) / t_rel
+
+                        # 5. Link only if the file actually exists on your D: drive
+                        if thumb_path.exists():
+                            self.image_lookup[v_path] = thumb_path.as_uri()
+                        
+                        # Keeping your first-item check for peace of mind
+                        if i == 0:
+                            print(f"\n--- FIRST ITEM VERIFIED ---")
+                            print(f"Target: {thumb_path}")
+                            print(f"Status: {'✅ FOUND' if thumb_path.exists() else '❌ MISSING ON D: DRIVE'}")
+
+        print(f"🖼️ Linked {len(self.image_lookup)} videos to local thumbnails.")
 
     @Slot(result='QVariant')
     def load_collections_list(self):
@@ -61,72 +93,50 @@ class XMLCollections(QObject):
         except Exception as e:
             print(f"❌ Error loading collections list: {e}")
             return []
+    #START
 
     @Slot('QVariant', result=list)
     def get_collection_images_by_rules(self, rules):
-        """Returns matching local thumb URLs based on the card rules."""
-        # Use existing filter logic
+        """Returns a randomized list of URIs for the collection card preview."""
         matches = self.get_collection_results(rules)
-        image_urls = []
-
-        # Target thumb directory (adjust if your project_paths has a specific thumb root)
-        thumb_root = Path("D:/MediaVerse1.0/BehindTheScenes/BehindTheScenes/music-new/Assets/Cache/thumb")
-
-        for movie in matches:
-            v_path = movie.get("Filename")
-            rel_thumb = self.image_lookup.get(v_path)
-            if rel_thumb:
-                full_path = thumb_root / rel_thumb
-                if full_path.exists():
-                    image_urls.append(full_path.as_uri())
-        
-        return image_urls
-
+        # Extract just the filePaths and shuffle them
+        images = [m["filePath"] for m in matches if m["filePath"]]
+        if images:
+            random.shuffle(images)
+            return images
+        return []
+    #####END
+    #start
     @Slot('QVariant', result=list)
     def get_collection_results(self, criteria):
-        """Core filtering engine. Handles both single and (eventually) multiple criteria."""
-        if not self.master_cache:
+        """Filters master cache and returns data compatible with ImageGridView."""
+        if not self.master_cache or not criteria:
             return []
-            
-        # Convert JS Object to Python Dict
-        if hasattr(criteria, "toVariant"):
-            criteria = criteria.toVariant()
-
-        if not criteria or not isinstance(criteria, dict):
-            return self.master_cache
 
         results = []
         for item in self.master_cache:
             match = True
-            for key, val in criteria.items():
-                if not val: continue
-                
-                # 1. Actors (List)
-                if key == "Actors":
-                    if val not in item.get("Actors", []):
-                        match = False
-                
-                # 2. Decade (String Prefix)
-                elif key == "Decade":
-                    yr = str(item.get("Year", ""))
-                    if not yr.startswith(str(val)[:3]):
-                        match = False
-                
-                # 3. Genre/Keywords (Semicolon String)
-                elif key in ["Genre", "Keywords"]:
-                    if val not in item.get(key, ""):
-                        match = False
-                
-                # 4. Direct Match (Director, Series, Name)
-                else:
-                    if str(item.get(key)) != str(val):
-                        match = False
+            for key, value in criteria.items():
+                # Flexible matching (case-insensitive and partial)
+                item_val = str(item.get(key, "")).lower()
+                if str(value).lower() not in item_val:
+                    match = False
+                    break
             
             if match:
-                results.append(item)
+                video_path = item.get("Filename")
+                thumb_uri = self.image_lookup.get(video_path, "")
+                
+                # We format this to match what your ImageGridView delegate needs
+                results.append({
+                    "filePath": thumb_uri, 
+                    "originalPath": video_path,
+                    "fileName": item.get("Title", "Unknown")
+                })
         
+        print(f"🔍 Collection Search: Found {len(results)} matches.")
         return results
-
+    #start
     @Slot(str, result=list)
     def get_filter_options(self, category):
         """Calculates Top 10 for the Sidebar buttons."""

@@ -108,12 +108,19 @@ GridView {
                 hoverEnabled: true
                 onClicked: {
                     console.log("🚀 Opening Collection:", modelData.name)
-                    
-                    // 1. Get the list of movies from Python using the card's rules
-                    var images = collectionLogic.get_collection_results(modelData.rules)
-                    
-                    // 2. Switch the Loader back to the GridView, passing the results
-                    contentLoader.setSource("ImageGridView.qml", { "externalImageList": images })
+                    var filteredMovies = collectionLogic.get_collection_results(modelData.rules)
+    
+                    // Safety: If the ID 'contentLoader' isn't directy accessible, 
+                    // we search for it or use the reference in main.qml
+                    if (typeof contentLoader !== "undefined") {
+                        contentLoader.setSource("ImageGridView.qml", { "externalImageList": filteredMovies })
+                    } else {
+                        // Fallback if ID scoping fails
+                        console.log("Searching for loader...")
+                        var root = collectionsGrid.parent
+                        while (root.parent) { root = root.parent } // Go to main.qml root
+                        root.findChildLoader("contentLoader").setSource("ImageGridView.qml", { "externalImageList": filteredMovies })
+                    }
                 }
             }
         }

@@ -4,7 +4,8 @@ import QtQuick.Layouts 1.15
 
 Rectangle {
     id: root
-    property var xmlDetails   // Python object passed in
+    property var externalImageList: []
+    property var xmlDetails
     property string _pendingImagePath: ""
     property string currentFolderPath: ""
 
@@ -19,6 +20,11 @@ Rectangle {
 
         GridView {
             id: imageGridView
+            // --- FIXED: Combined Priority Model ---
+            model: (externalImageList && externalImageList.length > 0) 
+                   ? externalImageList 
+                   : (fileSystemManager ? fileSystemManager.imageFiles : [])
+            
             Layout.fillWidth: true
             Layout.fillHeight: true
             Layout.margins: 10
@@ -27,9 +33,6 @@ Rectangle {
 
             ScrollBar.vertical: ScrollBar { policy: ScrollBar.AlwaysOn }
 
-            // Guard against null fileSystemManager
-            model: fileSystemManager ? fileSystemManager.imageFiles : []
-
             cellWidth: imageGridView.width / 6
             cellHeight: (imageGridView.width / 6) * 1.5
 
@@ -37,9 +40,9 @@ Rectangle {
                 width: imageGridView.width / 6
                 height: (imageGridView.width / 6) * 1.5
 
+                // Uses the filePath provided by either Python or FileSystemManager
                 source: modelData.filePath
 
-                // Define doubleClickActive at delegate level
                 property bool doubleClickActive: false
 
                 MouseArea {
@@ -51,7 +54,6 @@ Rectangle {
                         repeat: false
                         onTriggered: {
                             if (!parent.doubleClickActive) {
-                                console.log("✅ Single click confirmed")
                                 root.imageClicked(modelData.filePath, modelData.originalPath)
                             }
                             parent.doubleClickActive = false
@@ -66,14 +68,15 @@ Rectangle {
                     onDoubleClicked: {
                         parent.doubleClickActive = true
                         singleClickTimer.stop()
+                        
+                        // Use originalPath/videoPath logic
+                        let videoPath = modelData.originalPath 
+                        // Fallback to your old search if originalPath isn't direct
+                        if (!videoPath && fileSystemManager) {
+                             videoPath = fileSystemManager.findVideoInFolder(window.selectedFolderPath, modelData.fileName)
+                        }
 
-                        console.log("🎯 Image Double‑clicked:", modelData.fileName)
-
-                        window.selectedImageFile = modelData.fileName
-                        let folderPath = window.selectedFolderPath
-                        let videoPath  = fileSystemManager.findVideoInFolder(folderPath, window.selectedImageFile)
-
-                        console.log("➡️ Double‑click resolved videoPath:", videoPath)
+                        console.log("🎯 Launching:", videoPath)
                         SettingsManager.launch_video_with_preferred_player(videoPath)
                     }
                 }
@@ -85,8 +88,6 @@ Rectangle {
             Layout.fillWidth: true
             Layout.fillHeight: true
             active: false
-            source: ""
-
             onLoaded: {
                 if (!item || !xmlDetails) return
                 item.xmlDetails = xmlDetails
@@ -99,22 +100,16 @@ Rectangle {
     Connections {
         target: root
         function onImageClicked(cachePath, originalPath) {
-            console.log("📂 imagegridview: Cache Path:", cachePath)
-            console.log("🖼️ imagegridview: Original Path:", originalPath)
-
             root._pendingImagePath = cachePath
-
-            detailLoader.active = false
             detailLoader.source = "Detail_View.qml"
             detailLoader.active = true
-
-            detailLoader.item.imagePath = cachePath
-            detailLoader.item.originalXmlPath = originalPath
-
-            var vid = fileSystemManager.findVideoForImage(cachePath)
-            detailLoader.item.videoPath = vid
-
-            console.log("Video URL from Python:", vid)
+            
+            if (detailLoader.item) {
+                detailLoader.item.imagePath = cachePath
+                detailLoader.item.originalXmlPath = originalPath
+                var vid = fileSystemManager.findVideoForImage(cachePath)
+                detailLoader.item.videoPath = vid
+            }
         }
     }
 }
