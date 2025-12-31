@@ -124,34 +124,29 @@ class XMLCollections(QObject):
     @Slot('QVariant', result=list)
     def get_collection_results(self, criteria):
         """Filters master cache and returns data compatible with ImageGridView."""
-        if not self.master_cache or not criteria:
+        # --- NEW SAFETY CONVERSION ---
+        # If criteria is a QJSValue (from QML), convert it to a dict
+        if hasattr(criteria, 'toVariant'):
+            criteria = criteria.toVariant()
+        
+        # Double check it's actually a dictionary now
+        if not isinstance(criteria, dict) or not self.master_cache:
+            print(f"⚠️ XMLCollections: Invalid criteria type: {type(criteria)}")
             return []
 
         results = []
         for item in self.master_cache:
             match = True
             for key, value in criteria.items():
-                
-                # --- NEW DECADE LOGIC WITH DEBUG PRINTS ---
+                # --- DECADE LOGIC ---
                 if key == "Decade":
-                    # 1. Get the prefix (e.g., '196')
                     target_decade_prefix = str(value).strip()[:3]
-                    
-                    # 2. Get the movie's year
                     item_year = str(item.get("Year") or item.get("year") or "").strip()
-                    
-                    # 3. Match check
-                    did_match = item_year.startswith(target_decade_prefix)
-                    
-                    # OPTIONAL: Only print the first few matches to avoid flooding the console
-                    if did_match and len(results) < 5:
-                        print(f"📊 [Decade Match] Rule: {value} (Prefix: {target_decade_prefix}) | Movie: {item.get('Title')} | Year: {item_year}")
-
-                    if not did_match:
+                    if not item_year.startswith(target_decade_prefix):
                         match = False
                         break
                 
-                # --- EXISTING WORKING LOGIC ---
+                # --- STANDARD LOGIC ---
                 else:
                     item_val = str(item.get(key, "")).lower()
                     if str(value).lower() not in item_val:
@@ -161,19 +156,13 @@ class XMLCollections(QObject):
             if match:
                 video_path = item.get("Filename")
                 thumb_uri = self.image_lookup.get(video_path, "")
-                
                 results.append({
                     "filePath": thumb_uri, 
                     "originalPath": video_path,
                     "fileName": item.get("Title", "Unknown")
                 })
         
-        # FINAL LOG
-        if "Decade" in criteria:
-            print(f"✅ [Decade Summary] Criteria {criteria} found {len(results)} movies.")
-        else:
-            print(f"🔍 Collection Search: Found {len(results)} matches.")
-            
+        print(f"🔍 Builder Update: '{criteria}' found {len(results)} movies.")
         return results
     #start
     @Slot(str, result=list)
