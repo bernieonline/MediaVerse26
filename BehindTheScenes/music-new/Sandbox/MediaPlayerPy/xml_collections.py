@@ -341,7 +341,19 @@ class XMLCollections(QObject):
         matches = [opt for opt in clean_list if query in opt.lower()]
         return sorted(matches)[:50]
     
-
+    @Slot(result=list)
+    def get_existing_collection_names(self):
+        # This must return a list of strings like ["John Wayne", "Action", "1990s"]
+        names = []
+        try:
+            # Check your specific registry variable (e.g., self.v2_registry)
+            for item in self.v2_registry:
+                names.append(str(item['name']))
+            print(f"DEBUG: Found {len(names)} existing collections.") # Look for this in your log
+        except Exception as e:
+            print(f"DEBUG Error: {e}")
+        return names
+        
     @Slot(str, 'QVariant', str, bool)
     def save_collection_v2(self, name, criteria, category, is_favorite):
         """Saves collection with extra V2 metadata."""

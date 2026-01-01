@@ -9,6 +9,13 @@ Rectangle {
     height: parent.height
     color: "#D9121212" 
     
+    // --- 1. CLICK BLOCKER ---
+    // Prevents clicks on the panel from passing through to the dismissal shield
+    MouseArea {
+        anchors.fill: parent
+        onClicked: (mouse) => mouse.accepted = true
+    }
+
     Rectangle {
         width: 3; height: parent.height; color: "gold"; anchors.left: parent.left
     }
@@ -45,21 +52,19 @@ Rectangle {
     Column {
         anchors.fill: parent
         anchors.margins: 25
-        spacing: 20
+        spacing: 25 
 
         Text {
             text: "QUICK COLLECTION"
             color: "gold"; font.pixelSize: 22; font.bold: true; font.letterSpacing: 2
         }
 
-        // --- NAME INPUT SECTION (OPAQUE) ---
+        // --- NAME INPUT SECTION ---
         Column {
-            width: parent.width
-            spacing: 8
+            width: parent.width; spacing: 8 
             Text { text: "COLLECTION NAME"; color: "#AAA"; font.pixelSize: 11; font.bold: true }
             RowLayout {
-                width: parent.width
-                spacing: 15
+                width: parent.width; spacing: 15
                 TextField {
                     id: nameInput
                     Layout.fillWidth: true
@@ -67,8 +72,7 @@ Rectangle {
                     color: "white"; font.pixelSize: 16
                     background: Rectangle {
                         id: nameInputBg
-                        color: "#252525" 
-                        radius: 4
+                        color: "#20FFFFFF"; radius: 4
                         border.color: nameInput.activeFocus ? "gold" : "#444"
                         border.width: 2
                     }
@@ -81,7 +85,7 @@ Rectangle {
             }
         }
 
-        // --- CATEGORY SELECTORS ---
+        // --- CATEGORIES ---
         Flow {
             width: parent.width; spacing: 12
             Repeater {
@@ -95,27 +99,30 @@ Rectangle {
             }
         }
 
-        // --- SEARCH BOX ---
-        TextField {
-            id: filterField
-            width: parent.width
-            placeholderText: "Search " + activeCategory + "..."
-            color: "white"; leftPadding: 45; font.pixelSize: 14
-            background: Rectangle {
-                color: "#15FFFFFF"; radius: 20; border.color: filterField.activeFocus ? "gold" : "#666"; border.width: 2
-                Text { text: "🔍"; anchors.left: parent.left; anchors.leftMargin: 15; anchors.verticalCenter: parent.verticalCenter }
+        // --- SEARCH SECTION ---
+        Column {
+            width: parent.width; spacing: 8
+            Text { text: "SEARCH " + activeCategory.toUpperCase(); color: "#AAA"; font.pixelSize: 11; font.bold: true }
+            TextField {
+                id: filterField
+                width: parent.width
+                placeholderText: "Find..."
+                color: "white"; leftPadding: 45; font.pixelSize: 14
+                background: Rectangle {
+                    color: "#15FFFFFF"; radius: 20; border.color: filterField.activeFocus ? "gold" : "#666"; border.width: 2
+                    Text { text: "🔍"; anchors.left: parent.left; anchors.leftMargin: 15; anchors.verticalCenter: parent.verticalCenter }
+                }
             }
         }
 
         // --- DISCOVERY CLOUD ---
         Rectangle {
-            width: parent.width; height: 420; color: "transparent"; clip: true
+            width: parent.width; height: 400; color: "transparent"; clip: true
             Flickable {
                 anchors.fill: parent; contentHeight: keywordFlow.height; clip: true
-                ScrollBar.vertical: ScrollBar { width: 4 }
+                ScrollBar.vertical: ScrollBar { width: 4; policy: ScrollBar.AsNeeded }
                 Flow {
-                    id: keywordFlow
-                    width: parent.width - 10; spacing: 8
+                    id: keywordFlow; width: parent.width - 10; spacing: 8
                     Repeater {
                         model: (collectionLogic) ? collectionLogic.get_filtered_keywords(activeCategory, filterField.text) : []
                         delegate: Button {
@@ -144,12 +151,10 @@ Rectangle {
 
         // --- FOOTER AREA ---
         Item {
-            width: parent.width
-            height: 100
+            width: parent.width; height: 100
 
             Text {
-                id: feedbackText
-                anchors.top: parent.top; anchors.right: parent.right
+                id: feedbackText; anchors.top: parent.top; anchors.right: parent.right
                 text: creatorRoot.feedbackMessage; color: creatorRoot.feedbackColor
                 font.pixelSize: 13; font.bold: true; opacity: 0
                 Behavior on opacity { NumberAnimation { duration: 300 } }
@@ -162,29 +167,33 @@ Rectangle {
             }
 
             Row {
-                anchors.right: parent.right; anchors.bottom: parent.bottom; anchors.bottomMargin: 10
-                spacing: 20
+                anchors.right: parent.right; anchors.bottom: parent.bottom; anchors.bottomMargin: 10; spacing: 20
 
-                // --- DUPLICATED CLOSE BUTTON DESIGN ---
+                // --- CLOSE BUTTON ---
                 Column {
                     spacing: 4
-                    anchors.verticalCenter: parent.verticalCenter
                     Text { text: "CLOSE"; color: "gold"; font.pixelSize: 10; font.bold: true; anchors.horizontalCenter: parent.horizontalCenter }
                     Button {
                         id: closeBtn
                         width: 60; height: 60
                         background: Rectangle { 
-                            color: closeBtn.pressed ? "#B8860B" : "gold"; radius: 30 
+                            color: closeBtn.pressed ? "#B8860B" : "gold"
+                            radius: 30 
                         }
-                        contentItem: Text { text: "✕"; font.pixelSize: 26; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
-                        onClicked: creatorRoot.visible = false 
+                        contentItem: Text { 
+                            text: "✕"; font.pixelSize: 26; font.bold: true; 
+                            horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter 
+                        }
+                        onClicked: {
+                            // Toggles the 'isShown' property declared in UtilitySidebar.qml
+                            creatorRoot.isShown = false 
+                        }
                     }
                 }
 
-                // --- SAVE BUTTON DESIGN ---
+                // --- SAVE BUTTON ---
                 Column {
                     spacing: 4
-                    anchors.verticalCenter: parent.verticalCenter
                     Text { text: "SAVE"; color: "gold"; font.pixelSize: 10; font.bold: true; anchors.horizontalCenter: parent.horizontalCenter }
                     Button {
                         id: saveBtn
@@ -206,10 +215,10 @@ Rectangle {
                                 feedbackText.opacity = 1;
                                 feedbackTimer.restart();
                                 
-                                // Reset
-                                currentCriteria = {};
-                                nameInput.text = "";
-                                filterField.text = "";
+                                // Reset for next use
+                                currentCriteria = {}; 
+                                nameInput.text = ""; 
+                                filterField.text = ""; 
                                 creatorRoot.isFavorite = false;
                                 updateResults();
                             }
