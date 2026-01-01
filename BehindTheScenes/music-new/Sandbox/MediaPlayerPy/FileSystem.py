@@ -160,6 +160,7 @@ class FileSystem(QObject):
     def on_thread_finished(self):
         self.thread = None
 
+
     @Slot(str)
     def list_image_files_in_folder(self, folder_path):
         image_files = []
@@ -169,20 +170,28 @@ class FileSystem(QObject):
                 parent_folder = os.path.basename(folder_path)
 
                 for item in os.listdir(folder_path):
+                    # 1. Standardize the path
                     item_path = os.path.join(folder_path, item).replace('\\', '/')
+                    
                     if os.path.isfile(item_path) and item.lower().endswith(image_extensions):
+                        # 2. TRIGGER THE ORIGINAL SCOUT LOGIC
+                        # Instead of sending the .jpg to 'originalPath', we find the real video
+                        video_uri = self.findVideoInFolder(folder_path, item)
+                        
+                        # 3. Convert URI back to a clean path for JRiver if needed
+                        # (JRiver usually prefers W:/path/movie.mp4 over file:///W:/...)
+                        actual_video_path = normalize_path(video_uri) if video_uri else ""
+
                         image_files.append({
                             'fileName': item,
-                            'filePath': Path(item_path).as_uri(),          # original server URL
-                            'originalPath': item_path, 
-
-                            'parentFolder': parent_folder,                 # e.g. "Beatles"
-                            'relativePath': parent_folder + "/" + item     # e.g. "Beatles/A Hard Days Night (1964).jpg"
+                            'filePath': Path(item_path).as_uri(), # Visual (UI)
+                            'originalPath': actual_video_path,     # Playable (Video)
+                            'parentFolder': parent_folder,
+                            'relativePath': parent_folder + "/" + item
                         })
         except Exception as e:
-            logging.error(f"Error listing image files in {folder_path}: {e}")
+            logging.error(f"Error listing image files: {e}")
 
         self._imageFiles = image_files
         self.imageFilesChanged.emit()
-
 

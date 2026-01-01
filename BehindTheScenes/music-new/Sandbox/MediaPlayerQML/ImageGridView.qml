@@ -68,6 +68,19 @@ Rectangle {
                     onDoubleClicked: {
                         parent.doubleClickActive = true
                         singleClickTimer.stop()
+
+                        // --- DIAGNOSTIC INSPECTION ---
+                        console.log("-----------------i just double clicked grid view------------------------")
+                        console.log("🔎 [D-Click Debug] Raw modelData:", JSON.stringify(modelData))
+                        console.log("🔎 [D-Click Debug] Type:", typeof modelData)
+
+                        // Check the specific properties we are trying to use
+                        if (typeof modelData === "object" && modelData !== null) {
+                            console.log("🔎 [Property Check] fileName:", modelData.fileName)
+                            console.log("🔎 [Property Check] filePath:", modelData.filePath)
+                            console.log("🔎 [Property Check] originalPath:", modelData.originalPath)
+                        }
+                        // ----------------------------
                         
                         // Use originalPath/videoPath logic
                         let videoPath = modelData.originalPath 
