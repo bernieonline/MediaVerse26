@@ -1,6 +1,6 @@
 # Ignore the entire virtual environment folder
 BehindTheScenes/MMenv2/
-
+venv/
 # VS Code settings
 .vscode/
 
@@ -17,12 +17,16 @@ thumbnails/
 *.bmp
 *.gif
 *.webp
+*.svg
 
 
+
+BehindTheScenes/venv
 
 # Standard Python ignores
 __pycache__/
 *.pyc
+BehindTheScenes/music-new/Fonts
 BehindTheScenes/music-new/Sandbox/MediaPlayerPy/runButton.py
 BehindTheScenes/music-new/Sandbox/MediaPlayerQML/main.qml
 BehindTheScenes/music-new/Sandbox/detail_view.md
@@ -42,3 +46,18 @@ BehindTheScenes/music-new/Sandbox/ToDo.md
 BehindTheScenes/music-new/Assets/XMLCategories.json
 BehindTheScenes/music-new/application.log
 BehindTheScenes/music-new/Sandbox/MediaPlayerPy/runButton.py
+BehindTheScenes/music-new/Sandbox/MediaPlayerQML/CollectionCreator copy.qml
+BehindTheScenes/music-new/Sandbox/MediaPlayerPy/SyncEngine_v2OLD.py
+BehindTheScenes/music-new/Sandbox/MediaPlayerPy/manifestOld.py
+BehindTheScenes/music-new/Sandbox/MediaPlayerPy/Manifest_v2_wrapperOLD.py
+BehindTheScenes/music-new/Sandbox/MediaPlayerPy/coll_test.py
+BehindTheScenes/music-new/Sandbox/MediaPlayerPy/cacheBuilderonServerOLD.py
+BehindTheScenes/music-new/Sandbox/MediaPlayerPy/cachebuilderOLD.py
+BehindTheScenes/music-new/project_pathsOLOD.py
+BehindTheScenes/music-new/cacheV2/images/thumb/Thumbs.db
+BehindTheScenes/music-new/cacheV2/images/display/Thumbs.db
+BehindTheScenes/music-new/Assets/xml_collection_dataOLD.json
+BehindTheScenes/music-new/Assets/xml_collection_dataB.json
+BehindTheScenes/music-new/.gitignoreOLD
+BehindTheScenes/music-new/application.log
+BehindTheScenes/music-new/Sandbox/MediaPlayerQML/CollectionsGallery copy.qml
