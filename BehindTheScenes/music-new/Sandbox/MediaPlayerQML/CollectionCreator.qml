@@ -1,44 +1,44 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
+import QtQuick.Layouts 1.15
 import Qt5Compat.GraphicalEffects
 
 Rectangle {
     id: creatorRoot
-    width: 350
+    width: 400 
     height: parent.height
     color: "#D9121212" 
-    border.color: "#66D4AF37" 
-    border.width: 1
+    
+    Rectangle {
+        width: 3; height: parent.height; color: "gold"; anchors.left: parent.left
+    }
     
     property string collectionName: ""
     property var currentCriteria: ({})
     property string activeCategory: "Actors" 
-    property var resultsCount: 0
+    property int resultsCount: 0
+    property bool isFavorite: false
+    property string feedbackMessage: ""
+    property color feedbackColor: "#00FF7F"
 
-    // Guarded function to prevent "null" errors during startup
+    Timer {
+        id: feedbackTimer
+        interval: 3000
+        onTriggered: feedbackText.opacity = 0
+    }
+
+    SequentialAnimation {
+        id: nameWarningAnim
+        PropertyAnimation { target: nameInputBg; property: "border.color"; to: "red"; duration: 200 }
+        PropertyAnimation { target: nameInputBg; property: "border.color"; to: "gold"; duration: 200 }
+        PropertyAnimation { target: nameInputBg; property: "border.color"; to: "red"; duration: 200 }
+        PropertyAnimation { target: nameInputBg; property: "border.color"; to: "#444"; duration: 400 }
+    }
+
     function updateResults() {
         if (typeof collectionLogic !== 'undefined' && collectionLogic !== null) {
             let results = collectionLogic.get_collection_results(currentCriteria)
             resultsCount = results.length
-        }
-    }
-
-    // Refresh when the panel is opened
-    onVisibleChanged: {
-        if (visible) {
-            updateResults()
-        }
-    }
-
-    // Listen for the background scan to finish
-    Connections {
-        target: collectionLogic
-        function onCacheRebuilt() {
-            updateResults()
-            // Force a refresh of the Repeater
-            let temp = activeCategory
-            activeCategory = ""
-            activeCategory = temp
         }
     }
 
@@ -49,101 +49,90 @@ Rectangle {
 
         Text {
             text: "QUICK COLLECTION"
-            color: "gold"
-            font.pixelSize: 20
-            font.bold: true
-            font.letterSpacing: 2
+            color: "gold"; font.pixelSize: 22; font.bold: true; font.letterSpacing: 2
         }
 
-        TextField {
-            id: nameInput
+        // --- NAME INPUT SECTION (OPAQUE) ---
+        Column {
             width: parent.width
-            placeholderText: "Name your collection..."
-            color: "white"
-            font.pixelSize: 14
-            background: Rectangle {
-                color: "#1AFFFFFF"
-                radius: 4
-                border.color: nameInput.activeFocus ? "gold" : "#333"
+            spacing: 8
+            Text { text: "COLLECTION NAME"; color: "#AAA"; font.pixelSize: 11; font.bold: true }
+            RowLayout {
+                width: parent.width
+                spacing: 15
+                TextField {
+                    id: nameInput
+                    Layout.fillWidth: true
+                    placeholderText: "Type name..."
+                    color: "white"; font.pixelSize: 16
+                    background: Rectangle {
+                        id: nameInputBg
+                        color: "#252525" 
+                        radius: 4
+                        border.color: nameInput.activeFocus ? "gold" : "#444"
+                        border.width: 2
+                    }
+                }
+                Text {
+                    text: creatorRoot.isFavorite ? "★" : "☆"
+                    color: "gold"; font.pixelSize: 30
+                    MouseArea { anchors.fill: parent; onClicked: creatorRoot.isFavorite = !creatorRoot.isFavorite }
+                }
             }
-            onTextChanged: creatorRoot.collectionName = text
         }
 
+        // --- CATEGORY SELECTORS ---
         Flow {
-            width: parent.width
-            spacing: 10
+            width: parent.width; spacing: 12
             Repeater {
                 model: ["Actors", "Decade", "Director", "Genre", "Keywords", "Series"]
                 delegate: Text {
                     text: modelData
-                    color: activeCategory === modelData ? "gold" : "#888"
-                    font.pixelSize: 12
-                    font.bold: activeCategory === modelData
-                    font.underline: activeCategory === modelData
-                    
-                    MouseArea {
-                        anchors.fill: parent
-                        cursorShape: Qt.PointingHandCursor
-                        onClicked: {
-                            activeCategory = modelData;
-                            currentCriteria = {}; // Fixed the spelling and added semicolon
-                            updateResults();      
-                        }
-                    }
+                    color: activeCategory === modelData ? "gold" : "#BBB"
+                    font.pixelSize: 14; font.bold: activeCategory === modelData
+                    MouseArea { anchors.fill: parent; onClicked: { activeCategory = modelData; filterField.text = "" } }
                 }
             }
         }
 
-        Rectangle {
+        // --- SEARCH BOX ---
+        TextField {
+            id: filterField
             width: parent.width
-            height: parent.height - 380
-            color: "transparent"
-            clip: true
+            placeholderText: "Search " + activeCategory + "..."
+            color: "white"; leftPadding: 45; font.pixelSize: 14
+            background: Rectangle {
+                color: "#15FFFFFF"; radius: 20; border.color: filterField.activeFocus ? "gold" : "#666"; border.width: 2
+                Text { text: "🔍"; anchors.left: parent.left; anchors.leftMargin: 15; anchors.verticalCenter: parent.verticalCenter }
+            }
+        }
 
-            Column {
-                width: parent.width
-                spacing: 15
-
-                Text {
-                    text: "TOP 10 " + activeCategory.toUpperCase()
-                    color: "#AAA"
-                    font.pixelSize: 11
-                    font.letterSpacing: 1
-                }
-
+        // --- DISCOVERY CLOUD ---
+        Rectangle {
+            width: parent.width; height: 420; color: "transparent"; clip: true
+            Flickable {
+                anchors.fill: parent; contentHeight: keywordFlow.height; clip: true
+                ScrollBar.vertical: ScrollBar { width: 4 }
                 Flow {
-                    width: parent.width
-                    spacing: 8
+                    id: keywordFlow
+                    width: parent.width - 10; spacing: 8
                     Repeater {
-                        // Guarded model to prevent startup crash
-                        model: (typeof collectionLogic !== 'undefined' && collectionLogic !== null) 
-                            ? collectionLogic.get_filter_options(activeCategory) 
-                            : []
+                        model: (collectionLogic) ? collectionLogic.get_filtered_keywords(activeCategory, filterField.text) : []
                         delegate: Button {
-                            id: goldBtn
-                            flat: true
-                            contentItem: Text {
-                                text: modelData
-                                color: currentCriteria[activeCategory] === modelData ? "black" : "gold"
-                                font.bold: true
-                                font.pixelSize: 11
-                                horizontalAlignment: Text.AlignHCenter
-                                verticalAlignment: Text.AlignVCenter
-                            }
                             background: Rectangle {
-                                implicitWidth: 100
-                                implicitHeight: 32
+                                implicitWidth: lbl.implicitWidth + 24; implicitHeight: 34
                                 color: currentCriteria[activeCategory] === modelData ? "gold" : "transparent"
-                                border.color: "gold"
-                                border.width: 1
-                                radius: 16
+                                border.color: "gold"; border.width: 1; radius: 17
+                            }
+                            contentItem: Text {
+                                id: lbl; text: modelData
+                                color: currentCriteria[activeCategory] === modelData ? "black" : "gold"
+                                font.pixelSize: 12; font.bold: true
                             }
                             onClicked: {
-                                if (currentCriteria[activeCategory] === modelData) {
-                                    delete currentCriteria[activeCategory]
-                                } else {
-                                    currentCriteria[activeCategory] = modelData
-                                }
+                                nameInput.text = modelData;
+                                if (currentCriteria[activeCategory] === modelData) delete currentCriteria[activeCategory]
+                                else currentCriteria[activeCategory] = modelData
                                 currentCriteria = Object.assign({}, currentCriteria)
                                 updateResults()
                             }
@@ -153,99 +142,77 @@ Rectangle {
             }
         }
 
-        Rectangle {
+        // --- FOOTER AREA ---
+        Item {
             width: parent.width
-            height: 140
-            radius: 12
-            color: "#22D4AF37"
-            border.color: "#44D4AF37"
+            height: 100
 
-            Column {
-                anchors.fill: parent
-                anchors.margins: 15
-                spacing: 10
-
-                Text {
-                    text: "COLLECTION SUMMARY"
-                    color: "gold"
-                    font.pixelSize: 10
-                    font.bold: true
-                }
-
-                Text {
-                    text: "Items: " + resultsCount
-                    color: "white"
-                    font.pixelSize: 18
-                    font.bold: true
-                }
-
-                Text {
-                    text: "Rules: " + (Object.keys(currentCriteria).length > 0 ? JSON.stringify(currentCriteria) : "None selected")
-                    color: "#888"
-                    font.pixelSize: 10
-                    width: parent.width
-                    wrapMode: Text.Wrap
-                    maximumLineCount: 2
-                }
+            Text {
+                id: feedbackText
+                anchors.top: parent.top; anchors.right: parent.right
+                text: creatorRoot.feedbackMessage; color: creatorRoot.feedbackColor
+                font.pixelSize: 13; font.bold: true; opacity: 0
+                Behavior on opacity { NumberAnimation { duration: 300 } }
             }
 
-            Button {
-                anchors.right: parent.right
-                anchors.bottom: parent.bottom
-                anchors.margins: 10
-                width: 50
-                height: 50
-                
-                background: Rectangle {
-                    color: "gold"
-                    radius: 25
-                    layer.enabled: true
-                    layer.effect: DropShadow {
-                        transparentBorder: true
-                        color: "#80000000"
-                        radius: 8
-                    }
-                }
-                
-                Text {
-                    anchors.centerIn: parent
-                    text: "💾" 
-                    font.pixelSize: 20
-                }
-                //onclicked
-                onClicked: {
-                    // 1. Get the current text and trim whitespace
-                    let finalName = nameInput.text.trim();
-                    
-                    // 2. TRAP: If name is empty, try to generate one
-                    if (finalName === "") {
-                        let keys = Object.keys(currentCriteria);
-                        if (keys.length > 0) {
-                            // Take the values of the rules (e.g., "1960s") and add " Collection"
-                            let autoParts = keys.map(k => currentCriteria[k]);
-                            finalName = autoParts.join(" & ") + " Collection";
-                            
-                            // Show the user what we named it in the UI
-                            nameInput.text = finalName;
+            Column {
+                anchors.left: parent.left; anchors.bottom: parent.bottom; anchors.bottomMargin: 10
+                Text { text: "MATCHES"; color: "gold"; font.pixelSize: 10; font.bold: true }
+                Text { text: resultsCount + " Movies"; color: "white"; font.pixelSize: 22; font.bold: true }
+            }
+
+            Row {
+                anchors.right: parent.right; anchors.bottom: parent.bottom; anchors.bottomMargin: 10
+                spacing: 20
+
+                // --- DUPLICATED CLOSE BUTTON DESIGN ---
+                Column {
+                    spacing: 4
+                    anchors.verticalCenter: parent.verticalCenter
+                    Text { text: "CLOSE"; color: "gold"; font.pixelSize: 10; font.bold: true; anchors.horizontalCenter: parent.horizontalCenter }
+                    Button {
+                        id: closeBtn
+                        width: 60; height: 60
+                        background: Rectangle { 
+                            color: closeBtn.pressed ? "#B8860B" : "gold"; radius: 30 
                         }
+                        contentItem: Text { text: "✕"; font.pixelSize: 26; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
+                        onClicked: creatorRoot.visible = false 
                     }
+                }
 
-                    // 3. FINAL VALIDATION: If it's STILL empty (no name AND no rules selected)
-                    if (finalName === "") {
-                        notificationManager.post_notification("Please select a filter or enter a name!", true);
-                    } else {
-                        // 4. Send to Python
-                        collectionLogic.save_collection_template(finalName, currentCriteria);
-                        notificationManager.post_notification("Saved: " + finalName, false);
-
-                        // 5. Reset the Form
-                        currentCriteria = {};
-                        nameInput.text = "";
-                        updateResults();
-
-                        // Close the panel
-                        if (creatorRoot.parent.hasOwnProperty("isShown")) {
-                            creatorRoot.parent.isShown = false;
+                // --- SAVE BUTTON DESIGN ---
+                Column {
+                    spacing: 4
+                    anchors.verticalCenter: parent.verticalCenter
+                    Text { text: "SAVE"; color: "gold"; font.pixelSize: 10; font.bold: true; anchors.horizontalCenter: parent.horizontalCenter }
+                    Button {
+                        id: saveBtn
+                        width: 60; height: 60
+                        background: Rectangle { color: saveBtn.pressed ? "#B8860B" : "gold"; radius: 30 }
+                        contentItem: Text { text: "💾"; font.pixelSize: 26; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
+                        onClicked: {
+                            let name = nameInput.text.trim();
+                            if (name === "") {
+                                creatorRoot.feedbackMessage = "⚠ Name Required!";
+                                creatorRoot.feedbackColor = "#FF4444";
+                                feedbackText.opacity = 1;
+                                nameWarningAnim.start();
+                                feedbackTimer.restart();
+                            } else {
+                                collectionLogic.save_collection_v2(name, currentCriteria, activeCategory, creatorRoot.isFavorite);
+                                creatorRoot.feedbackMessage = "✓ Saved: " + name;
+                                creatorRoot.feedbackColor = "#00FF7F";
+                                feedbackText.opacity = 1;
+                                feedbackTimer.restart();
+                                
+                                // Reset
+                                currentCriteria = {};
+                                nameInput.text = "";
+                                filterField.text = "";
+                                creatorRoot.isFavorite = false;
+                                updateResults();
+                            }
                         }
                     }
                 }

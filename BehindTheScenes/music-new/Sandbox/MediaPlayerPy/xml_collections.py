@@ -297,3 +297,84 @@ class XMLCollections(QObject):
                     data["Actors"] = [a.strip() for a in act.split(";") if a.strip()][:5]
             except: pass
         return data
+    @Slot(str, str, result=list)
+    def get_filtered_keywords(self, category, filter_text):
+        """
+        Dynamically extracts and filters metadata for the Discovery Cloud.
+        category: "Actors", "Director", "Genre", "Keywords", "Series", "Decade"
+        filter_text: User input from the 10ft UI search bar
+        """
+        if not self.master_cache:
+            return []
+
+        all_options = set()
+        query = filter_text.lower().strip()
+
+        # 1. Extract values based on category
+        for item in self.master_cache:
+            val = ""
+            if category == "Decade":
+                year = str(item.get("Year") or "")
+                if year.isdigit() and len(year) >= 4:
+                    val = year[:3] + "0s"
+            else:
+                # Standard fields: Actors (list), Genre (str), Keywords (str), etc.
+                val = item.get(category, "")
+
+            # 2. Process data types (Lists vs Semicolon Strings)
+            if isinstance(val, list):
+                all_options.update(val)
+            elif isinstance(val, str) and val:
+                # Split JRiver style strings "Action; Sci-Fi" -> ["Action", "Sci-Fi"]
+                parts = [p.strip() for p in val.split(";") if p.strip()]
+                all_options.update(parts)
+
+        # 3. Filter and Sort
+        # Filter out "Unknown" or empty strings
+        clean_list = [opt for opt in all_options if opt and str(opt).lower() != "unknown"]
+        
+        if not query:
+            # If no search, return alphabetically (or you could return most common)
+            return sorted(clean_list)[:100] 
+
+        # Return only matches containing the search string
+        matches = [opt for opt in clean_list if query in opt.lower()]
+        return sorted(matches)[:50]
+    
+
+    @Slot(str, 'QVariant', str, bool)
+    def save_collection_v2(self, name, criteria, category, is_favorite):
+        """Saves collection with extra V2 metadata."""
+        try:
+            if hasattr(criteria, "toVariant"):
+                criteria = criteria.toVariant()
+
+            # Using your V2 path
+            file_path = Path("W:/MediaVerse/Collections/Movies_Collections_v2.json")
+            file_path.parent.mkdir(parents=True, exist_ok=True)
+
+            library = []
+            if file_path.exists():
+                with open(file_path, 'r', encoding='utf-8') as f:
+                    try: library = json.load(f)
+                    except: library = []
+
+            # Remove existing entry with same name
+            library = [item for item in library if item.get("name") != name]
+            
+            # Save with NEW fields
+            library.append({
+                "name": name,
+                "rules": criteria,
+                "primary_category": category,
+                "favorite": is_favorite,
+                "created": "2026-01-01" 
+            })
+
+            with open(file_path, 'w', encoding='utf-8') as f:
+                json.dump(library, f, indent=4)
+            print(f"✅ Collection '{name}' saved to V2 registry.")
+            return True
+        except Exception as e:
+            print(f"❌ V2 Save Error: {e}")
+            return False
