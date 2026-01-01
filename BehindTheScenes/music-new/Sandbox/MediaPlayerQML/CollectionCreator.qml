@@ -10,7 +10,6 @@ Rectangle {
     color: "#D9121212" 
     
     // --- 1. CLICK BLOCKER ---
-    // Prevents clicks on the panel from passing through to the dismissal shield
     MouseArea {
         anchors.fill: parent
         onClicked: (mouse) => mouse.accepted = true
@@ -72,7 +71,9 @@ Rectangle {
                     color: "white"; font.pixelSize: 16
                     background: Rectangle {
                         id: nameInputBg
-                        color: "#20FFFFFF"; radius: 4
+                        // --- OPAQUE BACKGROUND ---
+                        color: "#252525" 
+                        radius: 4
                         border.color: nameInput.activeFocus ? "gold" : "#444"
                         border.width: 2
                     }
@@ -185,7 +186,6 @@ Rectangle {
                             horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter 
                         }
                         onClicked: {
-                            // Toggles the 'isShown' property declared in UtilitySidebar.qml
                             creatorRoot.isShown = false 
                         }
                     }
@@ -215,7 +215,6 @@ Rectangle {
                                 feedbackText.opacity = 1;
                                 feedbackTimer.restart();
                                 
-                                // Reset for next use
                                 currentCriteria = {}; 
                                 nameInput.text = ""; 
                                 filterField.text = ""; 
