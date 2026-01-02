@@ -269,32 +269,47 @@ ApplicationWindow {
 
         // Loader for dynamically loading content like the GridView
         // Loader for dynamically loading content like the GridView
+        // Loader for dynamically loading content like the GridView
         Loader {
             id: contentLoader
             anchors.fill: parent
             source: "ImageGridView.qml" // Set initial view
 
             onLoaded: {
-                // --- NEW: Handle Collections Gallery Data Hand-off ---
+                // --- NEW: Handle the 2x3 Category Grid Connection ---
+                if (contentLoader.source.toString().includes("CategoryMenu.qml")) {
+                    console.log("🎬 Category Menu Loaded")
+                    
+                    // Connect the signal from the card click
+                    contentLoader.item.categorySelected.connect(function(categoryKey) {
+                        console.log("📡 Signal Received: Filter by " + categoryKey)
+                        
+                        // 1. Fetch filtered list from Python
+                        let filteredData = collectionLogic.get_collections_by_category(categoryKey)
+                        
+                        // 2. Load the Gallery, passing the filtered data
+                        contentLoader.setSource("CollectionsGallery.qml", { "collectionsModel": filteredData })
+                        
+                        notificationManager.post_notification("Showing " + categoryKey + " Collections", false)
+                    })
+                }
+
+                // --- UPDATED: Handle Collections Gallery Data Hand-off ---
                 if (contentLoader.source.toString().includes("CollectionsGallery.qml")) {
-                    console.log("📂 Collections Gallery Loaded - Fetching data...")
-                    // This calls the Python slot we discussed and fills the Gallery model
-                    contentLoader.item.collectionsModel = collectionLogic.load_collections_list()
+                    // If collectionsModel wasn't passed in (legacy call from the old button), load everything
+                    if (!contentLoader.item.collectionsModel || contentLoader.item.collectionsModel.length === 0) {
+                        console.log("📂 Legacy Call: Loading ALL Collections")
+                        contentLoader.item.collectionsModel = collectionLogic.load_collections_list()
+                    }
                 }
 
                 // --- Existing: Single-click connection ---
                 if (contentLoader.item && contentLoader.item.imageClicked) {
-                    console.log("✅ Connected imageClicked from current view")
-
                     contentLoader.item.imageClicked.connect(function(cachePath, originalPath) {
-                        // Derive filename from cachePath
                         var decoded = decodeURIComponent(cachePath)
                         if (decoded.startsWith("file:///")) decoded = decoded.substring(8)
                         var filename = decoded.split("/").pop()
-
-                        // Store filename for Video button
                         window.selectedImageFile = filename
-                        console.log("🖼️ Stored filename for Video button:", filename)
 
                         contentLoader.setSource("Detail_View.qml", {
                             imagePath: cachePath,
@@ -305,25 +320,17 @@ ApplicationWindow {
 
                 // --- Existing: Double‑click connection ---
                 if (contentLoader.item && contentLoader.item.launchVideoRequested) {
-                    console.log("✅ Connected launchVideoRequested from current view")
-
                     contentLoader.item.launchVideoRequested.connect(function(cachePath) {
-                        console.log("🎯 Double‑click received cachePath:", cachePath)
-
                         var filename = window.filenameFromCachePath(cachePath)
                         window.selectedImageFile = filename
-
                         var videoPath = fileSystemManager.findVideoInFolder(window.selectedFolderPath, filename)
-                        console.log("🎬 Resolved Video Path:", videoPath)
-
-                        // Launch PlayerPanel
                         videoPanel.videoPath = videoPath
                         videoPanel.isPlaying = true
                         isVideoPanelVisible = true
                     })
                 }
-            }
-        }
+            } // End of onLoaded
+        } // End of Loader    
     }//end contentcontainer
 
     // ... [Existing code: contentContainer, videoPanel, etc.] ...

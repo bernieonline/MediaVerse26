@@ -10,7 +10,7 @@ Row {
 
     property int buttonWidth: 150
     property int buttonHeight: 60
-    property int buttonCount: 6 // Increased to 6 to fit both Collection buttons
+    property int buttonCount: 7 // Increased to 7 to accommodate the New Curations button
     property real spacingCalc: (width - (buttonCount * buttonWidth)) / (buttonCount - 1)
 
     spacing: spacingCalc
@@ -42,27 +42,38 @@ Row {
         }
     }
 
-    // --- 1. VIEW COLLECTIONS ---
+    // --- 1. VIEW COLLECTIONS (The Legacy View) ---
     StyledButton {
         id: viewCollectionsButton
         text: "View Collections"
         fixedWidth: buttonRow.buttonWidth
         fixedHeight: buttonRow.buttonHeight
         onClicked: {
-            // This is the next big step: Loading the saved collections view
             notificationManager.post_notification("Opening Collections Gallery...", false)
             contentLoader.setSource("CollectionsGallery.qml") 
         }
     }
 
-    // --- 2. CREATE COLLECTION (Formerly Quick Collection) ---
+    // --- NEW: COLLECTION CURATIONS (The Advanced Grid View) ---
+    StyledButton {
+        id: curationsButton
+        text: "Curations"
+        fixedWidth: buttonRow.buttonWidth
+        fixedHeight: buttonRow.buttonHeight
+        onClicked: {
+            notificationManager.post_notification("Loading Categorized Curations...", false)
+            // This loads our new 2x3 grid component
+            contentLoader.setSource("CategoryMenu.qml")
+        }
+    }
+
+    // --- 2. CREATE COLLECTION ---
     StyledButton {
         id: createCollectionButton
         text: "Create Collection"
         fixedWidth: buttonRow.buttonWidth
         fixedHeight: buttonRow.buttonHeight
         onClicked: {
-            // Only opens the side panel, doesn't change the main view
             utilitySidebar.showCollectionCreator()
         }
     }

@@ -49,7 +49,9 @@ config_json = project_root / "Assets" / "Config.json"
 coll_data = project_root / "Assets" / "xml_collection_data.json"
 coll_json = project_root / "Assets" /"xml_collection.json"
 
-
+#collections paths
+collection_bg = project_root / "Assets" / "Collections.jpg"
+movies_coll_v2 = Path(r"W:\MediaVerse\Collections\Movies_Collections_v2.json")
 # ---------------------------------------------------------
 # SERVER PATHS (MediaVerse V2)
 # ---------------------------------------------------------
@@ -108,4 +110,8 @@ paths = {
     "local_thumb_v2": local_thumb_v2,
     "local_display_v2": local_display_v2,
     "local_carousel_v2": local_carousel_v2,
+    "collection_bg": collection_bg,
+    "movies_coll_v2": movies_coll_v2
+
+
 }

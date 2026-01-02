@@ -5,13 +5,14 @@ import QtQuick
 import QtQuick.Controls
 //import "CinemaButton.qml" as Custom
 //import QtQuick.Controls 2.15
-
+// adding toolbar
 
 //version 1.0.1 border edge added to left panel
 //1.o.2 sliding video panel added
 //1.0.3 centre button moved to toolbar
 //1.0.4 final adjustments made before applying styling to panels
 //1.0.5 Glow effects added to main window
+//simple bug fix
 
 ApplicationWindow {
     id: window
@@ -19,6 +20,13 @@ ApplicationWindow {
     title: "MediaVerse"
     //property var xmlDetails  // will be set by Python as a dynamic property
     property var xmlDetails: xmlDetails   // bind the context property into the window’s property
+    //property var menuData: menuData  // bind to context property
+
+
+    // 🔑 Add these two here from signals emitted on clicking a folder
+    property string selectedFolderPath: ""
+    property string selectedImageFile: ""
+
 
 
 
@@ -38,6 +46,92 @@ ApplicationWindow {
         //target: border
     }
 
+    StyledMenu {
+        id: centralMenu
+        anchors.top: parent.top
+        anchors.topMargin: 20        // <-- push it down from the top
+        anchors.horizontalCenter: parent.horizontalCenter
+        menuData: centralMenuData   // <- bind directly to Python property
+    }
+    Connections {
+        target: manifestUpdater
+        onRefreshStarted: {
+            console.log("Manifest refresh started")
+            refreshIndicator.running = true
+            refreshIndicator.visible = true
+        }
+        onRefreshFinished: {
+            console.log("Manifest refresh finished")
+            refreshIndicator.running = false
+            refreshIndicator.visible = false
+        }
+    }
+
+    
+    BusyIndicator {
+        id: refreshIndicator
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        anchors.margins: 12   // add a little padding from the edges
+        running: false
+        visible: false
+    }
+   
+
+    Connections {
+        target: SettingsManager
+
+        // Refresh UI when settings change
+        function onSettingsChanged() {
+            let settings = SettingsManager.get_settings()
+            currentPlayerIndex = settings["Preferred Player"]
+            console.log("Settings refreshed, Preferred Player:", currentPlayerIndex)
+        }
+
+        // Play video when Python emits the launch signal
+        function onVideoLaunchRequested(videoPath) {
+            console.log("🎬 MiniPlayer received videoPath:", videoPath)
+            miniPlayer.play(videoPath)   // call your MiniPlayer’s play() method
+        }
+    }
+    // A "Breadcrumb" style back button
+    Button {
+        text: "📁 Back to Gallery"
+        visible: contentLoader.source.toString().includes("ImageGridView.qml") && 
+                contentLoader.item && contentLoader.item.externalImageList &&
+                contentLoader.item.externalImageList.length > 0
+        
+        anchors.left: parent.left
+        anchors.top: parent.top
+        anchors.margins: 10
+        z: 100 // High Z-index to stay above the grid
+        
+        onClicked: contentLoader.setSource("CollectionsGallery.qml")
+    }
+
+    Rectangle {
+        id: logoFrame
+        width: buttonRows.height * 1.5      // make it square
+        height: buttonRows.height * 1.5
+        anchors.top: parent.top
+        anchors.left: parent.left
+        anchors.margins: 20           // margin around the edge
+        color: "transparent"
+        border.color: "transparent"
+        border.width: 2
+
+        Image {
+            anchors.fill: parent
+            anchors.margins: 10       // inner margin inside the frame
+            //source: imagesPath + "/mediaverse.png"
+            source: imagesPath + "/mediaverse2.png"
+
+            
+            fillMode: Image.PreserveAspectFit
+            smooth: true
+        }
+}
+
     Rectangle { //subdued glow
         id: border
         anchors.fill: parent
@@ -53,248 +147,38 @@ ApplicationWindow {
         //target: sidePanel
     }
 
-    Rectangle { //sliding panel on left
-        id: sidePanel
-        width: 300
-        height: parent.height * 2 / 3
-        anchors.verticalCenter: parent.verticalCenter
-        x: -width
-        z: 2
-        color: "transparent"
-        radius: 25
-        border.color: "yellow"
-        border.width: 1
+    SlidingPanel {
+        id: libraryPanel
+        libraryModel: myLibraryModel
+        folderModel: fileSystemManager.folders
 
-        Behavior on x {
-            NumberAnimation { duration: 300; easing.type: Easing.OutCubic }
+        //onFolderSelected: fileSystemManager.list_image_files_in_folder(folderPath)
+        onFolderSelected: function(folderPath) {
+            fileSystemManager.list_image_files_in_folder(folderPath)
+            window.selectedFolderPath = folderPath   // ✅ store selection
+
         }
 
-        Rectangle {//background to sliding panel
-            // This is the background
-            anchors.fill: parent
-            anchors.margins: 5
-            color: "#1e1e1e"
-            radius: 20
-            border.width: 0
-
-            Label {//refers to combobox
-                id: chooseLocationLabel
-                text: "Choose a Location"
-                color: "white"
-                font.pixelSize: 20
-                anchors.top: parent.top
-                anchors.horizontalCenter: parent.horizontalCenter
-                anchors.topMargin: 10
-                padding: 10
-                background: Rectangle {
-                    color: "transparent"
-                    border.color: "yellow"
-                    border.width: 1
-                    radius: 5
-                }
-            }
-
-            ComboBox {//sets up combobox for receiving data from .py
-                id: categoryCombo
-                anchors.top: chooseLocationLabel.bottom
-                anchors.horizontalCenter: parent.horizontalCenter
-                anchors.topMargin: 20
-                
-                width: parent.width
-                model: myLibraryModel
-                textRole: "name"
-
-                onModelChanged: {
-                    for (var i = 0; i < model.length; i++) {
-                        if (model[i].name === "JRiver Library") {
-                            currentIndex = i;
-                            categoryCombo.activated(i)
-                            break;
-                        }
-                    }
-                }
-
-                onActivated: function(index) {
-                    if (model[index]) {
-                        let selectedPath = model[index].path
-                        console.log("Selected path:", selectedPath)
-                        fileSystemManager.update_folders(selectedPath)
-                    }
-                }
-
-                background: Rectangle {
-                    color: "transparent"
-                    border.color: "yellow"
-                    border.width: 1
-                    radius: 5
-                }
-
-                contentItem: Text {
-                    text: parent.displayText
-                    color: "white"
-                    font: parent.font
-                    verticalAlignment: Text.AlignVCenter
-                    leftPadding: 10
-                    elide: Text.ElideRight
-                }
-
-                indicator: Text {
-                    text: "▼"
-                    color: "yellow"
-                    font.pixelSize: 16
-                    anchors.verticalCenter: parent.verticalCenter
-                    anchors.right: parent.right
-                    anchors.rightMargin: 10
-                }
-            } // combobox
-
-            ListView { //hopefully stores the folders to be displayed on sidepanel
-                id: fileView
-                anchors.top: categoryCombo.bottom
-                anchors.left: parent.left
-                anchors.right: parent.right
-                anchors.bottom: parent.bottom
-                anchors.topMargin: 20
-                anchors.bottomMargin: 80
-                clip: true
-                model: fileSystemManager ? fileSystemManager.folders : []
-                property int currentIndex: -1
-                delegate: Item {
-                    width: fileView.width
-                    height: 40
-
-                    Rectangle {
-                        id: background
-                        anchors.fill: parent
-                        color: fileView.currentIndex === index ? "#555555" : "transparent" //dark grey colour
-                        radius: 5
-                    }
-
-                    Image {
-                        id: folderIcon
-                        //source: "file:///D:/PythonMusic/pythonproject2026/BehindTheScenes/music-new/images/icons/icons8-movie-liquid-glass-color/icons8-movie-32.png"
-                        
-                        //relative Path
-                        source: "../../images/icons/icons8-movie-liquid-glass-color/icons8-movie-32.png"
-
-                        width: 24 // Adjust size as needed
-                        height: 24 // Adjust size as needed
-                        anchors.verticalCenter: parent.verticalCenter
-                        anchors.left: parent.left
-                        anchors.leftMargin: 10
-                        fillMode: Image.PreserveAspectFit
-                    }
-
-                    Text {
-                        id: folderNameText
-                        text: modelData.folderName // Display folder name only
-                        color: "white"
-                        font.pixelSize: 16
-                        anchors.verticalCenter: parent.verticalCenter
-                        anchors.left: folderIcon.right
-                        anchors.leftMargin: 10 // Adjust margin between icon and text
-                    }
-
-                    MouseArea {
-                        anchors.fill: parent
-                        onClicked: {
-                            print("i just clicked an image folder")
-                            fileView.currentIndex = index
-                            var folderPath = modelData.folderPath // Get full pathname when folder is clicked
-                            console.log("Clicked folder:", folderPath)
-                            fileSystemManager.list_image_files_in_folder(folderPath)
-                            sidePanel.x = -sidePanel.width
-                            // Automatically load the view based on the toggle button state
-                            if (viewToggleButton.isGridView) {
-                                console.log("Auto-loading Grid View")
-                                //contentLoader.source = "ImageGridView.qml"
-                                contentLoader.setSource("ImageGridView.qml", { xmlDetails: xmlDetails })
-                                //reverse
-
-
-
-                            } else {
-                                console.log("Auto-loading Carousel View")
-                                contentLoader.source = "CarouselView.qml"
-                            }
-                        }
-                    }
-                }
-            }
-
-            Timer {//used by sliding objects
-                id: scrollTimer
-                interval: 50
-                repeat: true
-                property int scrollStep: 0
-                onTriggered: {
-                    fileView.contentY += scrollStep;
-                }
-            }
-
-            Row {//used for top row of buttons and icons
-                anchors.bottom: parent.bottom
-                anchors.horizontalCenter: parent.horizontalCenter
-                anchors.bottomMargin: 15
-                spacing: 10
-
-                Loader {//below is a Component being created which is a button in this case, it has a number of features built in
-                //Loader takes a copy of it and modifies and runs it
-                //its a way of creating bespoke buttons that are usable within a single file. To use it throughout the project you would create it in its own qml file
-                    sourceComponent: scrollButtonComponent
-                    onLoaded: {
-                        item.text = "▲";
-                        item.scrollAmount = -10;
-                    }
-                }
-                Loader {
-                    sourceComponent: scrollButtonComponent
-                    onLoaded: {
-                        item.text = "▼";
-                        item.scrollAmount = 10;
-                    }
-                }
-            }
-
-            Component {// This creates a bespoke component, in this case a special button we use for scrolling, it is the modifies and used by Loader above
-                id: scrollButtonComponent
-                Rectangle {
-                    property string text
-                    property int scrollAmount
-
-                    width: 80
-                    height: 50
-                    color: "#333"
-                    radius: 8
-                    border.color: "yellow"
-                    border.width: 1
-
-                    Text {
-                        anchors.centerIn: parent
-                        text: parent.text
-                        color: "white"
-                        font.pixelSize: 24
-                    }
-
-                    MouseArea {
-                        anchors.fill: parent
-                        hoverEnabled: true
-                        onEntered: {
-                            scrollTimer.scrollStep = scrollAmount;
-                            scrollTimer.start();
-                        }
-                        onExited: {
-                            scrollTimer.stop();
-                        }
-                    }
-                }
+        onViewRequested: function(viewType) {
+            if (viewType === "grid") {
+                contentLoader.setSource("ImageGridView.qml", { xmlDetails: xmlDetails })
+            } else {
+                contentLoader.source = "CarouselView.qml"
             }
         }
+
+        /*
+        onViewRequested: {
+            if (viewType === "grid")
+                contentLoader.setSource("ImageGridView.qml", { xmlDetails: xmlDetails })
+            else
+                contentLoader.source = "CarouselView.qml"
+        }
+        */
     }
 
-    GlowStyling {
-        //target: videoPanel
-    }
+
+    
     
     PlayerPanel {
         id: videoPanel
@@ -307,118 +191,75 @@ ApplicationWindow {
         }
     }
 
-    
+    function filenameFromCachePath(cachePath) {
+        // Decode %20, %28, etc.
+        var decoded = decodeURIComponent(cachePath)
+
+        // Strip file:/// prefix
+        if (decoded.startsWith("file:///")) {
+            decoded = decoded.substring(8)
+        }
+
+        // Return last path segment
+        var parts = decoded.split("/")
+        return parts[parts.length - 1]
+    }
 
     property bool isVideoPanelVisible: false
 
-    Row {
-        id: buttonRow
+    
+
+
+
+
+    Column {
+        id: buttonRows
+
+        width: parent.width * 0.75
         anchors.horizontalCenter: parent.horizontalCenter
-        anchors.top: parent.top
-        anchors.topMargin: 80
-        spacing: 40
 
-        Button {
-            id: menuButton
-            text: "Menu"
-            width: 320
-            height: 120
-            background: Rectangle {
-                implicitWidth: 320
-                implicitHeight: 120
-                radius: 8
-                color: "#333"
-                border.color: "yellow"
-                border.width: 1
-            }
-            onClicked: {
-                sidePanel.x = (sidePanel.x === 0) ? -sidePanel.width : 0
-                if (sidePanel.x === 0 && categoryCombo.currentIndex !== -1) {
-                    categoryCombo.activated(categoryCombo.currentIndex)
-                }
-                contentLoader.source = ""
-            }
+
+        //anchors.horizontalCenter: parent.horizontalCenter
+        //id: buttonRows
+        //anchors.left: parent.left
+        //anchors.right: parent.right
+
+        anchors.top: centralMenu.bottom
+        anchors.topMargin: 30
+        property int sideMargin: 50
+
+        spacing: 20   // space between top and bottom rows
+        //property int sideMargin: 50
+
+
+        // Top row: clickable buttons
+        RowButton {
+            id: rowButtons
+            width: parent.width - (2 * buttonRows.sideMargin)
+            //anchors.leftMargin: buttonRows.sideMargin
+            //anchors.rightMargin: buttonRows.sideMargin
+
+
+            //width: parent.width - 40   // stretch row across window
         }
-
-       
-
-
-        Button {
-            id: videoButton
-            text: "Video"
-            width: 320
-            height: 120
-            background: Rectangle {
-                implicitWidth: 320
-                implicitHeight: 120
-                radius: 8
-                color: "#333"
-                border.color: "yellow"
-                border.width: 1
-            }
-            onClicked: {
-                isVideoPanelVisible = !isVideoPanelVisible
-            }
-        }
-
-       
-
-        Button {
-            id: viewToggleButton
-            property bool isGridView: true
-            text: isGridView ? "Carousel View" : "Grid View"
-            width: 320
-            height: 120
-            background: Rectangle {
-                implicitWidth: 320
-                implicitHeight: 120
-                radius: 8
-                color: "#333"
-                border.color: "yellow"
-                border.width: 1
-            }
-            onClicked: {
-                isGridView = !isGridView;
-                if (isGridView) {
-                    //contentLoader.source = "ImageGridView.qml";
-                    contentLoader.setSource("ImageGridView.qml", { xmlDetails: xmlDetails })
-
-                } else {
-                    contentLoader.source = "CarouselView.qml";
-                }
-            }
-        }
-
-        Button {
-            text: "Close"
-            width: 320
-            height: 120
-
-            contentItem: Text {
-                text: parent.text
-                font: parent.font
-                color: "white"
-                horizontalAlignment: Text.AlignHCenter
-                verticalAlignment: Text.AlignVCenter
-            }
-
-            background: Rectangle {
-                radius: 8
-                color: "#333"
-                border.color: "yellow"
-                border.width: 1
-            }
-            onClicked: Qt.quit()
-        }
+        
     }
+
+    
+
+  
 
     Rectangle {
         id: contentContainer
-        anchors.top: buttonRow.bottom
+        anchors.top: buttonRows.bottom   // anchor to the column, not the row
+
+        //anchors.top: rowButtons.bottom   // anchor to the instance
+
+        //anchors.top: buttonRow.bottom
         anchors.bottom: parent.bottom
         anchors.left: parent.left
         anchors.right: parent.right
-        anchors.margins: 100
+        anchors.margins: 50
 
         radius: 25
         color: "transparent"
@@ -427,26 +268,94 @@ ApplicationWindow {
         border.width: 1
 
         // Loader for dynamically loading content like the GridView
+        // Loader for dynamically loading content like the GridView
         Loader {
             id: contentLoader
             anchors.fill: parent
             source: "ImageGridView.qml" // Set initial view
 
             onLoaded: {
-                if (contentLoader.item && contentLoader.item.imageClicked) {
-                    contentLoader.item.imageClicked.connect(function(path) {
-                        //contentLoader.setSource("Detail_View.qml", { imagePath: path })
+                // --- NEW: Handle Collections Gallery Data Hand-off ---
+                if (contentLoader.source.toString().includes("CollectionsGallery.qml")) {
+                    console.log("📂 Collections Gallery Loaded - Fetching data...")
+                    // This calls the Python slot we discussed and fills the Gallery model
+                    contentLoader.item.collectionsModel = collectionLogic.load_collections_list()
+                }
+
+                // --- Existing: Single-click connection ---
+                            if (contentLoader.item && contentLoader.item.imageClicked) {
+                                  console.log("✅ Connected imageClicked from current view")
+
+                    contentLoader.item.imageClicked.connect(function(cachePath, originalPath) {
+                        // Derive filename from cachePath
+                        var decoded = decodeURIComponent(cachePath)
+                        if (decoded.startsWith("file:///")) decoded = decoded.substring(8)
+                        var filename = decoded.split("/").pop()
+
+                        // Store filename for Video button
+                        window.selectedImageFile = filename
+                        console.log("🖼️ Stored filename for Video button:", filename)
 
                         contentLoader.setSource("Detail_View.qml", {
-                            imagePath: path,
-                                xmlDetails: xmlDetails
+                            imagePath: cachePath,
+                            xmlDetails: xmlDetails
                         })
+                    })
+                }
 
+                // --- Existing: Double‑click connection ---
+                if (contentLoader.item && contentLoader.item.launchVideoRequested) {
+                    console.log("✅ Connected launchVideoRequested from current view")
+
+                    contentLoader.item.launchVideoRequested.connect(function(cachePath) {
+                        console.log("🎯 Double‑click received cachePath:", cachePath)
+
+                        var filename = window.filenameFromCachePath(cachePath)
+                        window.selectedImageFile = filename
+
+                        var videoPath = fileSystemManager.findVideoInFolder(window.selectedFolderPath, filename)
+                        console.log("🎬 Resolved Video Path:", videoPath)
+
+                        // Launch PlayerPanel
+                        videoPanel.videoPath = videoPath
+                        videoPanel.isPlaying = true
+                        isVideoPanelVisible = true
                     })
                 }
             }
+        }
+    }//end contentcontainer
 
+    // ... [Existing code: contentContainer, videoPanel, etc.] ...
 
+    // ------------------------------------------------------------
+    // 1. UTILITY SIDEBAR INTEGRATION
+    // ------------------------------------------------------------
+    // This sits at the end of the file to ensure it's on top of all other layers
+    UtilitySidebar {
+        id: utilitySidebar
+        anchors.fill: parent
+        // Note: 'fontPathFA' is already available here 
+        // because you set it as a Context Property in main.py
+    }
+
+    // ------------------------------------------------------------
+    // 2. KEYBOARD TESTING SHORTCUT
+    // ------------------------------------------------------------
+    // Since you are using a keyboard, this is the fastest way to 
+    // test the UI without having to "bump" the mouse every time.
+    Shortcut {
+        sequence: "Ctrl+T"
+        onActivated: {
+            utilitySidebar.isOpen = !utilitySidebar.isOpen
+            console.log("MediaVerse: Sidebar toggled via keyboard. State: " + utilitySidebar.isOpen)
         }
     }
-}
+
+} // <--- This is the final closing brace of your ApplicationWindow
+
+
+
+
+
+

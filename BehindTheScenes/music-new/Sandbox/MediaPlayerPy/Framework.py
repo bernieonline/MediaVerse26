@@ -63,6 +63,7 @@ def main():
         # XML logic - Collections
         # ------------------------------------------------------------
         xml_logic = XMLCollections()
+        #xml_logic = XMLCollections(paths)
         xml_controller = XmlController()
         xml_provider = GetXMLDetails()
 
@@ -94,6 +95,9 @@ def main():
         )
         os.add_dll_directory(str(Path(sys.modules["PySide6"].__file__).parent))
 
+        # Convert all pathlib objects in your dictionary to strings so QML can read them
+        paths_stringified = {k: str(v) for k, v in paths.items()}
+
         # ------------------------------------------------------------
         # Load menu data
         # ------------------------------------------------------------
@@ -110,6 +114,7 @@ def main():
         engine.addImportPath(QLibraryInfo.path(QLibraryInfo.LibraryPath.Qml2ImportsPath))
 
         # Expose Python objects to QML
+        ctx.setContextProperty("_paths", paths_stringified)
         ctx.setContextProperty("collectionLogic", xml_logic)
         ctx.setContextProperty("todoManager", todo_manager)
         ctx.setContextProperty("imagesPath", Path(paths["assets"]).as_uri())

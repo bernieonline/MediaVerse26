@@ -298,6 +298,20 @@ class XMLCollections(QObject):
             except: pass
         return data
    
+    @Slot(str, result=list)
+    def get_collections_by_category(self, category_key):
+        # Use the path we just added to project_paths.py
+        json_file = self.paths["movies_coll_v2"] 
+        
+        if not json_file.exists():
+            return []
+
+        with open(json_file, 'r') as f:
+            all_data = json.load(f)
+
+        # Return only the ones matching the "primary_category"
+        return [item for item in all_data if item.get("primary_category") == category_key]
+    
     
     @Slot(str, str, result=list)
     def get_filtered_keywords(self, category, filter_text):
