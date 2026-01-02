@@ -297,63 +297,73 @@ class XMLCollections(QObject):
                     data["Actors"] = [a.strip() for a in act.split(";") if a.strip()][:5]
             except: pass
         return data
+   
+    
     @Slot(str, str, result=list)
     def get_filtered_keywords(self, category, filter_text):
-        """
-        Dynamically extracts and filters metadata for the Discovery Cloud.
-        category: "Actors", "Director", "Genre", "Keywords", "Series", "Decade"
-        filter_text: User input from the 10ft UI search bar
-        """
+        # SAFETY: If master_cache is empty, try to reload it once
+        if not self.master_cache:
+            self.load_data() 
+        
         if not self.master_cache:
             return []
 
         all_options = set()
         query = filter_text.lower().strip()
 
-        # 1. Extract values based on category
         for item in self.master_cache:
-            val = ""
+            # 1. Get the value safely
+            val = item.get(category)
+            
+            # 2. Handle Decade specifically
             if category == "Decade":
-                year = str(item.get("Year") or "")
+                year = str(item.get("Year") or item.get("year") or "")
                 if year.isdigit() and len(year) >= 4:
-                    val = year[:3] + "0s"
-            else:
-                # Standard fields: Actors (list), Genre (str), Keywords (str), etc.
-                val = item.get(category, "")
+                    all_options.add(year[:3] + "0s")
+                continue
 
-            # 2. Process data types (Lists vs Semicolon Strings)
+            # 3. Handle standard fields
+            if val is None:
+                continue
+                
             if isinstance(val, list):
-                all_options.update(val)
-            elif isinstance(val, str) and val:
-                # Split JRiver style strings "Action; Sci-Fi" -> ["Action", "Sci-Fi"]
-                parts = [p.strip() for p in val.split(";") if p.strip()]
-                all_options.update(parts)
+                all_options.update([str(v) for v in val if v])
+            elif isinstance(val, str):
+                if ";" in val:
+                    parts = [p.strip() for p in val.split(";") if p.strip()]
+                    all_options.update(parts)
+                elif val.strip():
+                    all_options.add(val.strip())
 
-        # 3. Filter and Sort
-        # Filter out "Unknown" or empty strings
+        # Filter out junk
         clean_list = [opt for opt in all_options if opt and str(opt).lower() != "unknown"]
         
         if not query:
-            # If no search, return alphabetically (or you could return most common)
-            return sorted(clean_list)[:100] 
+            return sorted(clean_list)[:100]
 
-        # Return only matches containing the search string
-        matches = [opt for opt in clean_list if query in opt.lower()]
+        matches = [opt for opt in clean_list if query in str(opt).lower()]
         return sorted(matches)[:50]
-    
+
     @Slot(result=list)
     def get_existing_collection_names(self):
-        # This must return a list of strings like ["John Wayne", "Action", "1990s"]
-        names = []
+        """
+        FIXED: Loads from the actual V2 file instead of a missing variable.
+        """
+        file_path = Path("W:/MediaVerse/Collections/Movies_Collections_v2.json")
+        if not file_path.exists():
+            return []
+            
         try:
-            # Check your specific registry variable (e.g., self.v2_registry)
-            for item in self.v2_registry:
-                names.append(str(item['name']))
-            print(f"DEBUG: Found {len(names)} existing collections.") # Look for this in your log
+            with open(file_path, 'r', encoding='utf-8') as f:
+                library = json.load(f)
+                return [str(item.get('name', '')) for item in library]
         except Exception as e:
-            print(f"DEBUG Error: {e}")
-        return names
-        
+            print(f"❌ Error reading collection names: {e}")
+            return []
+    
+    
+    
+    
     @Slot(str, 'QVariant', str, bool)
     def save_collection_v2(self, name, criteria, category, is_favorite):
         """Saves collection with extra V2 metadata."""

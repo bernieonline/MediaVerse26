@@ -85,7 +85,6 @@ Rectangle {
                 }
             }
         }
-
         // --- CATEGORIES ---
         Flow {
             width: parent.width; spacing: 12
@@ -95,10 +94,28 @@ Rectangle {
                     text: modelData
                     color: activeCategory === modelData ? "gold" : "#BBB"
                     font.pixelSize: 14; font.bold: activeCategory === modelData
-                    MouseArea { anchors.fill: parent; onClicked: { activeCategory = modelData; filterField.text = "" } }
+                    MouseArea { 
+                        anchors.fill: parent; 
+                        onClicked: { 
+                            // 1. Switch the tab
+                            activeCategory = modelData; 
+                            
+                            // 2. Clear the search text
+                            filterField.text = ""; 
+                            
+                            // 3. FIX: Clear the old filter criteria (e.g., remove Aaron Eckhart)
+                            // so you can search fresh in the new category
+                            currentCriteria = {}; 
+                            
+                            // 4. Update the "Matches" count to reflect the reset
+                            updateResults();
+                        } 
+                    }
                 }
             }
         }
+
+        
 
         // --- SEARCH SECTION ---
         Column {
@@ -117,6 +134,7 @@ Rectangle {
         }
 
         // --- DISCOVERY CLOUD ---
+        // --- DISCOVERY CLOUD ---
         Rectangle {
             width: parent.width; height: 400; color: "transparent"; clip: true
             Flickable {
@@ -124,8 +142,19 @@ Rectangle {
                 ScrollBar.vertical: ScrollBar { width: 4; policy: ScrollBar.AsNeeded }
                 Flow {
                     id: keywordFlow; width: parent.width - 10; spacing: 8
+                    
                     Repeater {
-                        model: (collectionLogic) ? collectionLogic.get_filtered_keywords(activeCategory, filterField.text) : []
+                        // FIX: We use a block to force QML to re-evaluate when 
+                        // activeCategory or filterField.text changes
+                        model: {
+                            var cat = activeCategory
+                            var text = filterField.text
+                            if (typeof collectionLogic !== 'undefined' && collectionLogic !== null) {
+                                return collectionLogic.get_filtered_keywords(cat, text)
+                            }
+                            return []
+                        }
+                        
                         delegate: Button {
                             background: Rectangle {
                                 implicitWidth: lbl.implicitWidth + 24; implicitHeight: 34
@@ -138,17 +167,27 @@ Rectangle {
                                 font.pixelSize: 12; font.bold: true
                             }
                             onClicked: {
+                                // 1. Set the collection name to the keyword automatically
                                 nameInput.text = modelData;
-                                if (currentCriteria[activeCategory] === modelData) delete currentCriteria[activeCategory]
-                                else currentCriteria[activeCategory] = modelData
-                                currentCriteria = Object.assign({}, currentCriteria)
-                                updateResults()
+
+                                // 2. THE FIX: Create a brand new, empty object
+                                // This ensures any previous category (like Actor) is wiped out
+                                let freshCriteria = {};
+                                
+                                // 3. Add ONLY the current selection to the fresh object
+                                freshCriteria[activeCategory] = modelData;
+                                
+                                // 4. Overwrite currentCriteria with our clean, single-parameter object
+                                currentCriteria = freshCriteria;
+
+                                // 5. Update the count (Matches: X Movies)
+                                updateResults();
                             }
                         }
                     }
                 }
             }
-        }
+        }//discovery cloud
 
         // --- FOOTER AREA ---
         Item {
