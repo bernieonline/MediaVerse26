@@ -419,3 +419,37 @@ class XMLCollections(QObject):
         except Exception as e:
             print(f"❌ V2 Save Error: {e}")
             return False
+        
+    @Slot(str, str, result=bool)
+    def rename_collection(self, old_name, new_name):
+        """
+        Rename a collection in Movies_Collections_v2.json.
+        """
+        try:
+            file_path = Path("W:/MediaVerse/Collections/Movies_Collections_v2.json")
+
+            if not file_path.exists():
+                return False
+
+            with open(file_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+
+            updated = False
+            for item in data:
+                if item.get("name") == old_name:
+                    item["name"] = new_name
+                    updated = True
+                    break
+
+            if not updated:
+                return False
+
+            with open(file_path, "w", encoding="utf-8") as f:
+                json.dump(data, f, indent=4)
+
+            print(f"✏️ Renamed '{old_name}' → '{new_name}'")
+            return True
+
+        except Exception as e:
+            print("❌ rename_collection error:", e)
+            return False
