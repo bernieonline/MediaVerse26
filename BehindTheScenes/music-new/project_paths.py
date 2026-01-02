@@ -40,6 +40,15 @@ font_path = (
 
 )
 
+#basic icons 
+svg_solid_path = (
+    project_root
+    / "Fonts"
+    / "fontawesome-free-7.1.0-desktop"
+    / "svgs"
+    / "solid"
+)
+
 # ---------------------------------------------------------
 # JSON CONFIG FILES
 # ---------------------------------------------------------
@@ -111,7 +120,9 @@ paths = {
     "local_display_v2": local_display_v2,
     "local_carousel_v2": local_carousel_v2,
     "collection_bg": collection_bg,
-    "movies_coll_v2": movies_coll_v2
+    "movies_coll_v2": movies_coll_v2,
+    "svg_solid": svg_solid_path
+    
 
 
 }

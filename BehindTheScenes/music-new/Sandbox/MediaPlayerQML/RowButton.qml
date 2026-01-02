@@ -10,7 +10,8 @@ Row {
 
     property int buttonWidth: 150
     property int buttonHeight: 60
-    property int buttonCount: 7 // Increased to 7 to accommodate the New Curations button
+    // Reduced to 6 after removing the legacy "View Collections" button
+    property int buttonCount: 6 
     property real spacingCalc: (width - (buttonCount * buttonWidth)) / (buttonCount - 1)
 
     spacing: spacingCalc
@@ -42,32 +43,20 @@ Row {
         }
     }
 
-    // --- 1. VIEW COLLECTIONS (The Legacy View) ---
+    // --- COLLECTIONS (Formerly Curations) ---
     StyledButton {
-        id: viewCollectionsButton
-        text: "View Collections"
+        id: collectionsButton
+        text: "Collections"
         fixedWidth: buttonRow.buttonWidth
         fixedHeight: buttonRow.buttonHeight
         onClicked: {
-            notificationManager.post_notification("Opening Collections Gallery...", false)
-            contentLoader.setSource("CollectionsGallery.qml") 
-        }
-    }
-
-    // --- NEW: COLLECTION CURATIONS (The Advanced Grid View) ---
-    StyledButton {
-        id: curationsButton
-        text: "Curations"
-        fixedWidth: buttonRow.buttonWidth
-        fixedHeight: buttonRow.buttonHeight
-        onClicked: {
-            notificationManager.post_notification("Loading Categorized Curations...", false)
-            // This loads our new 2x3 grid component
+            notificationManager.post_notification("Loading Collections...", false)
+            // Loads the CategoryMenu (the 2x3 grid) as the main collections entry
             contentLoader.setSource("CategoryMenu.qml")
         }
     }
 
-    // --- 2. CREATE COLLECTION ---
+    // --- CREATE COLLECTION ---
     StyledButton {
         id: createCollectionButton
         text: "Create Collection"
