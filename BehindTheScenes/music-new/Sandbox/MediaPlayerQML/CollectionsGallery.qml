@@ -126,7 +126,8 @@ GridView {
 
                         Icon {
                             name: "heart"
-                            iconColor: modelData.is_favorite ? "#FFD700" : "#888888"
+                            //iconColor: modelData.is_favorite ? "#FFD700" : "#888888"
+                            iconColor: modelData.favorite ? "#FFD700" : "#888888"
                         }
 
                         Text {

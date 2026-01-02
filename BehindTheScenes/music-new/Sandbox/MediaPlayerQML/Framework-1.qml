@@ -299,7 +299,8 @@ ApplicationWindow {
                     // If collectionsModel wasn't passed in (legacy call from the old button), load everything
                     if (!contentLoader.item.collectionsModel || contentLoader.item.collectionsModel.length === 0) {
                         console.log("📂 Legacy Call: Loading ALL Collections")
-                        contentLoader.item.collectionsModel = collectionLogic.load_collections_list()
+                        //contentLoader.item.collectionsModel = collectionLogic.load_collections_list()
+                        contentLoader.item.collectionsModel = collectionLogic.load_all_collections_v2()
                     }
                 }
 
