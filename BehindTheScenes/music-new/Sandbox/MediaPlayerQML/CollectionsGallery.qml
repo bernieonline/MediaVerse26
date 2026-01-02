@@ -6,43 +6,28 @@ GridView {
     id: collectionsGrid
     anchors.fill: parent
     anchors.margins: 30
-    
-    // Spacing adjusted for the "fan" width
     cellWidth: 280 
     cellHeight: 320
     clip: true
 
-    // This property is filled by the Loader in main.qml
     property var collectionsModel: []
     model: collectionsModel
+    
+    // Safety bridges to global objects
+    property var logic: (typeof collectionLogic !== "undefined") ? collectionLogic : null
 
     delegate: Item {
         width: 260; height: 300
 
-        // Fetch the 3 images from Python. 
-        // We do this once per delegate to keep it efficient.
-        //property var fanImages: (modelData.rules) ? collectionLogic.get_collection_images_by_rules(modelData.rules) : []
-        //property var fanImages: (modelData && modelData.rules && (typeof collectionLogic !== "undefined") && collectionLogic !== null) 
-              //           ? collectionLogic.get_collection_images_by_rules(modelData.rules) 
-                        // : []
-        property var fanImages: (modelData.rules) ? collectionLogic.get_collection_images_by_rules(modelData.rules) : []
-
-        
-        
-        
-        // --- 1. OUTER GLOW/SHADOW ---
-        DropShadow {
-            anchors.fill: cardRect
-            horizontalOffset: 0
-            verticalOffset: 8
-            radius: 15
-            samples: 20
-            color: cardMouse.containsMouse ? "#801E90FF" : "#99000000"
-            source: cardRect
-            Behavior on color { ColorAnimation { duration: 200 } }
+        property var fanImages: {
+            try {
+                if (modelData && modelData.rules && collectionsGrid.logic) {
+                    return collectionsGrid.logic.get_collection_images_by_rules(modelData.rules)
+                }
+            } catch(e) { return [] }
+            return []
         }
 
-        // --- 2. MAIN CARD BODY ---
         Rectangle {
             id: cardRect
             width: 240; height: 280
@@ -57,107 +42,97 @@ GridView {
                 anchors.margins: 15
                 spacing: 12
 
-                // --- THE FAN CONTAINER ---
                 Item {
                     id: fanContainer
-                    width: parent.width
-                    height: 180 // Box for the cards to sit in
-                    
+                    width: parent.width; height: 180 
                     Repeater {
                         model: fanImages.length
-
                         delegate: Item {
                             width: 110; height: 165
                             anchors.centerIn: parent
-                            
-                            // Transform logic for the "Playing Card" fan
-                            // index 0: Left (-20°), index 1: Center (0°), index 2: Right (+30°)
                             rotation: index === 0 ? -20 : (index === 1 ? 0 : 30)
                             x: index === 0 ? -30 : (index === 1 ? 0 : 35)
-                            z: index // Top card sits on top
-
                             Rectangle {
-                                id: cardBase
-                                anchors.fill: parent
-                                radius: 8
-                                color: "#000"
-                                border.color: "white"
-                                border.width: 2
-                                clip: true
-
+                                anchors.fill: parent; radius: 8; color: "#000"; border.color: "white"; border.width: 2; clip: true
                                 Image {
-                                    id: posterImg
-                                    anchors.fill: parent
-                                    anchors.margins: 2 // Margin shows the white border
-                                    source: fanImages[index]
-                                    fillMode: Image.PreserveAspectCrop
-                                    visible: false // Used by mask
+                                    anchors.fill: parent; anchors.margins: 2
+                                    source: fanImages[index] || ""; fillMode: Image.PreserveAspectCrop; visible: false
                                 }
-
-                                Rectangle {
-                                    id: maskRct
-                                    anchors.fill: parent
-                                    radius: 6
-                                    visible: false
-                                }
-
-                                OpacityMask {
-                                    anchors.fill: parent
-                                    source: posterImg
-                                    maskSource: maskRct
-                                }
-                            }
-
-                            // Subtle shadow for each card in the fan to separate them
-                            DropShadow {
-                                anchors.fill: cardBase
-                                radius: 4
-                                samples: 8
-                                color: "#AA000000"
-                                source: cardBase
+                                Rectangle { id: m; anchors.fill: parent; radius: 6; visible: false }
+                                OpacityMask { anchors.fill: parent; source: parent.children[0]; maskSource: m }
                             }
                         }
                     }
                 }
 
-                // --- COLLECTION NAME ---
                 Text {
-                    text: modelData.name
-                    width: parent.width
-                    color: "white"
-                    font.pixelSize: 18
-                    font.bold: true
-                    horizontalAlignment: Text.AlignHCenter
-                    elide: Text.ElideRight
-                    maximumLineCount: 1
+                    text: modelData.name || ""
+                    width: parent.width; color: "white"; font.pixelSize: 18; font.bold: true
+                    horizontalAlignment: Text.AlignHCenter; elide: Text.ElideRight
                 }
             }
 
-            // --- INTERACTION ---
+            // --- REVERTED ACTION LABELS ---
+            Row {
+                anchors.bottom: parent.bottom
+                anchors.bottomMargin: 14
+                anchors.horizontalCenter: parent.horizontalCenter
+                spacing: 25
+                opacity: cardMouse.containsMouse ? 1.0 : 0.0
+                Behavior on opacity { NumberAnimation { duration: 250 } }
+
+                // FAVORITE
+                Text {
+                    // Logic remains: Show "★" if favorite, "☆" if not (using standard text stars)
+                    text: (modelData.is_favorite === true) ? "★ FAV" : "☆ FAV"
+                    font.pixelSize: 14
+                    font.bold: true
+                    color: favM.containsMouse ? "#FFD700" : "#888888"
+                    MouseArea { id: favM; anchors.fill: parent; hoverEnabled: true;
+                        onClicked: if(collectionsGrid.logic) collectionsGrid.logic.toggle_favorite(modelData.name)
+                    }
+                }
+
+                // EDIT
+                Text {
+                    text: "EDIT"
+                    font.pixelSize: 14
+                    font.bold: true
+                    color: renM.containsMouse ? "#1E90FF" : "#888888"
+                    MouseArea { id: renM; anchors.fill: parent; hoverEnabled: true;
+                        onClicked: console.log("Rename: " + modelData.name)
+                    }
+                }
+
+                // DELETE
+                Text {
+                    text: "DEL"
+                    font.pixelSize: 14
+                    font.bold: true
+                    color: delM.containsMouse ? "#FF4444" : "#888888"
+                    MouseArea { id: delM; anchors.fill: parent; hoverEnabled: true;
+                        onClicked: if (typeof notificationManager !== "undefined") notificationManager.post_notification("Delete?", true)
+                    }
+                }
+            }
+
             MouseArea {
                 id: cardMouse
                 anchors.fill: parent
                 hoverEnabled: true
                 onClicked: {
-                    console.log("🚀 Opening Collection:", modelData.name)
-                    var filteredMovies = collectionLogic.get_collection_results(modelData.rules)
-    
-                    if (typeof contentLoader !== "undefined") {
+                    if (collectionsGrid.logic) {
+                        var filteredMovies = collectionsGrid.logic.get_collection_results(modelData.rules)
                         contentLoader.setSource("ImageGridView.qml", { "externalImageList": filteredMovies })
-                    } else {
-                        // Fallback root search
-                        var rootObj = collectionsGrid.parent
-                        while (rootObj.parent) { rootObj = rootObj.parent }
-                        if (rootObj.findChildLoader) {
-                            rootObj.findChildLoader("contentLoader").setSource("ImageGridView.qml", { "externalImageList": filteredMovies })
-                        }
                     }
                 }
             }
         }
-    }
-    
-    ScrollBar.vertical: ScrollBar {
-        policy: ScrollBar.AsNeeded
+
+        DropShadow {
+            anchors.fill: cardRect; radius: 15; samples: 20
+            color: cardMouse.containsMouse ? "#801E90FF" : "#99000000"
+            source: cardRect
+        }
     }
 }

@@ -17,6 +17,11 @@ class XMLCollections(QObject):
 
     def __init__(self):
         super().__init__()
+
+        # This stores the dictionary so get_collections_by_category can find it
+        self.paths = paths
+
+
         self.master_cache = []
         self.image_lookup = {} # Map for Filename -> Thumb Path
         
@@ -312,7 +317,7 @@ class XMLCollections(QObject):
         # Return only the ones matching the "primary_category"
         return [item for item in all_data if item.get("primary_category") == category_key]
     
-    
+
     @Slot(str, str, result=list)
     def get_filtered_keywords(self, category, filter_text):
         # SAFETY: If master_cache is empty, try to reload it once
