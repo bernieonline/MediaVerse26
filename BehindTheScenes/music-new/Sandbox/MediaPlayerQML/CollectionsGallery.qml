@@ -9,13 +9,11 @@ GridView {
     cellWidth: 280
     cellHeight: 320
     clip: true
-    // High Z-index ensures the grid isn't buried under background layers
-    z: 100 
+    z: 100
 
     property var collectionsModel: []
     model: collectionsModel
 
-    // Safety bridge to Python logic
     property var logic: (typeof collectionLogic !== "undefined") ? collectionLogic : null
 
     delegate: Item {
@@ -23,7 +21,6 @@ GridView {
         height: 300
         z: 101
 
-        // Fan images logic
         property var fanImages: {
             try {
                 if (modelData && modelData.rules && collectionsGrid.logic) {
@@ -40,15 +37,14 @@ GridView {
             anchors.centerIn: parent
             color: "#1A1A1A"
             radius: 20
-            // Glow border on hover
+
             border.color: (topMouse.containsMouse || actionRow.anyHover) ? "#1E90FF" : "#333333"
             border.width: (topMouse.containsMouse || actionRow.anyHover) ? 3 : 1
 
-            // --- 1. TOP CLICKABLE AREA (Main Card Body) ---
             MouseArea {
                 id: topMouse
                 width: parent.width
-                height: parent.height - 70 // Stops above the icon row
+                height: parent.height - 70
                 anchors.top: parent.top
                 hoverEnabled: true
                 onClicked: {
@@ -60,13 +56,11 @@ GridView {
                 }
             }
 
-            // --- 2. VISUAL CONTENT ---
             Column {
                 anchors.fill: parent
                 anchors.margins: 15
                 spacing: 12
 
-                // The Fan Stack
                 Item {
                     id: fanContainer
                     width: parent.width
@@ -114,42 +108,121 @@ GridView {
                     }
                 }
 
-                // Collection Title
-                Text {
-                    text: modelData.name || "Unnamed Collection"
+                // --- INLINE RENAME BLOCK ---
+                Item {
+                    id: renameBlock
                     width: parent.width
-                    color: "white"
-                    font.pixelSize: 18
-                    font.bold: true
-                    horizontalAlignment: Text.AlignHCenter
-                    elide: Text.ElideRight
+                    height: nameLabel.implicitHeight
+                    property bool editing: false
+
+                    // VIEW MODE
+                    Text {
+                        id: nameLabel
+                        visible: !renameBlock.editing
+                        text: modelData.name || "Unnamed Collection"
+                        width: parent.width
+                        color: "white"
+                        font.pixelSize: 18
+                        font.bold: true
+                        horizontalAlignment: Text.AlignHCenter
+                        elide: Text.ElideRight
+                    }
+
+                    
+                    // EDIT MODE
+                    // EDIT MODE
+                    // EDIT MODE
+                    TextField {
+                        id: nameEditor
+                        visible: renameBlock.editing
+                        text: modelData.name
+                        width: parent.width
+                        font.pixelSize: 18
+                        font.bold: true
+                        horizontalAlignment: Text.AlignHCenter
+                        verticalAlignment: Text.AlignVCenter
+                        selectByMouse: true
+                        focus: renameBlock.editing
+                        
+                        // --- TEXT CONTRAST FIXES ---
+                        color: "white"
+                        selectionColor: "#1E90FF"      // Bright blue selection
+                        selectedTextColor: "white"
+                        leftPadding: 10
+                        rightPadding: 10
+                        
+                        // --- HIGH CONTRAST BACKGROUND ---
+                        background: Rectangle {
+                            color: "#000000"           // Pure black for maximum contrast
+                            radius: 6
+                            border.color: "#1E90FF"    // Action Blue border
+                            border.width: 2            // Thicker border while editing
+                            
+                            // Add a slight glow effect to the input box
+                            layer.enabled: true
+                            layer.effect: DropShadow {
+                                transparentBorder: true
+                                color: "#401E90FF"
+                                radius: 8
+                                samples: 16
+                            }
+                        }
+
+                        onAccepted: renameBlock.finishRename()
+
+                        onFocusChanged: {
+                            if (!focus && renameBlock.editing)
+                                renameBlock.finishRename()
+                        }
+                    }
+                    //finishRename
+                    function finishRename() {
+                        renameBlock.editing = false
+                        let newName = nameEditor.text.trim()
+                        
+                        // 1. If it's the same or empty, do nothing
+                        if (newName.length === 0 || newName === modelData.name) return
+
+                        // 2. Capture the REAL old name before changing
+                        let oldName = modelData.name 
+
+                        // 3. Call Python to update the JSON
+                        if (collectionsGrid.logic) {
+                            collectionsGrid.logic.rename_collection(oldName, newName)
+                        }
+
+                        // 4. Update the local data
+                        modelData.name = newName
+                        
+                        // 5. REFRESH FIX: 
+                        // Instead of setting to [], just notify the grid the model has updated
+                        collectionsGrid.modelChanged() 
+                    }
                 }
             }
 
-            // --- 3. BOTTOM ACTION ROW (Icons) ---
             Row {
                 id: actionRow
                 anchors.bottom: parent.bottom
                 anchors.bottomMargin: 14
                 anchors.horizontalCenter: parent.horizontalCenter
                 spacing: 25
-                z: 110 // Ensure buttons are physically on top of everything
+                z: 110
 
                 property bool anyHover: favM.containsMouse || renM.containsMouse || delM.containsMouse
-                
+
                 opacity: (topMouse.containsMouse || anyHover) ? 1.0 : 0.0
                 Behavior on opacity { NumberAnimation { duration: 250 } }
 
-                // FAVORITE BUTTON
                 Item {
                     width: 60; height: 30
                     Row {
                         anchors.centerIn: parent; spacing: 6
-                        Icon { 
+                        Icon {
                             name: "heart"
                             iconColor: modelData.favorite ? "#FFD700" : (favM.containsMouse ? "#FFFFFF" : "#888888")
                         }
-                        Text { 
+                        Text {
                             text: "FAV"; font.pixelSize: 14; font.bold: true
                             color: favM.containsMouse ? "#FFD700" : "#888888"
                         }
@@ -166,16 +239,15 @@ GridView {
                     }
                 }
 
-                // EDIT BUTTON
                 Item {
                     width: 60; height: 30
                     Row {
                         anchors.centerIn: parent; spacing: 6
-                        Icon { 
+                        Icon {
                             name: "pen-to-square"
                             iconColor: renM.containsMouse ? "#1E90FF" : "#888888"
                         }
-                        Text { 
+                        Text {
                             text: "EDIT"; font.pixelSize: 14; font.bold: true
                             color: renM.containsMouse ? "#1E90FF" : "#888888"
                         }
@@ -183,22 +255,23 @@ GridView {
                     MouseArea {
                         id: renM; anchors.fill: parent; hoverEnabled: true
                         onClicked: {
-                            console.log("QML DEBUG: EDIT Button Clicked")
-                            // Future: Add Rename Dialog call here
+                            console.log("QML DEBUG: EDIT Button Clicked -> " + modelData.name)
+                            renameBlock.editing = true
+                            nameEditor.forceActiveFocus()
+                            nameEditor.selectAll()
                         }
                     }
                 }
 
-                // DELETE BUTTON
                 Item {
                     width: 60; height: 30
                     Row {
                         anchors.centerIn: parent; spacing: 6
-                        Icon { 
+                        Icon {
                             name: "trash"
                             iconColor: delM.containsMouse ? "#FF4444" : "#888888"
                         }
-                        Text { 
+                        Text {
                             text: "DEL"; font.pixelSize: 14; font.bold: true
                             color: delM.containsMouse ? "#FF4444" : "#888888"
                         }
@@ -211,17 +284,15 @@ GridView {
                             if (collectionsGrid.logic) {
                                 collectionsGrid.logic.delete_collection(modelData.name)
                             }
-                            // Remove from QML model so the UI updates
+
                             collectionsGrid.collectionsModel.splice(index, 1)
                             collectionsGrid.model = collectionsGrid.collectionsModel
-
                         }
                     }
                 }
             }
         }
 
-        // --- 4. DECORATION ---
         DropShadow {
             anchors.fill: cardRect
             radius: 15

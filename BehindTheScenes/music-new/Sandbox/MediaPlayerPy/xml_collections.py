@@ -485,3 +485,81 @@ class XMLCollections(QObject):
         except Exception as e:
             print(f"❌ Delete Error: {e}")
             return False
+
+    @Slot(str)
+    def toggle_favorite(self, name):
+        print(f"PYTHON DEBUG: toggle_favorite called for '{name}'")
+
+        try:
+            file_path = Path("W:/MediaVerse/Collections/Movies_Collections_v2.json")
+
+            if not file_path.exists():
+                print("⚠️ Favorite toggle failed: JSON file does not exist.")
+                return False
+
+            # Load existing library
+            with open(file_path, 'r', encoding='utf-8') as f:
+                try:
+                    library = json.load(f)
+                except:
+                    library = []
+
+            # Modify the matching entry
+            updated = False
+            for item in library:
+                if item.get("name") == name:
+                    item["favorite"] = not item.get("favorite", False)
+                    updated = True
+                    break
+
+            if not updated:
+                print(f"⚠️ Favorite toggle failed: '{name}' not found.")
+                return False
+
+            # Save back
+            with open(file_path, 'w', encoding='utf-8') as f:
+                json.dump(library, f, indent=4)
+
+            print(f"⭐ Favorite toggled for '{name}'.")
+            return True
+
+        except Exception as e:
+            print(f"❌ Favorite Toggle Error: {e}")
+            return False
+    @Slot(str, str)
+    def rename_collection(self, old_name, new_name):
+        print(f"PYTHON DEBUG: rename_collection '{old_name}' -> '{new_name}'")
+
+        try:
+            file_path = Path("W:/MediaVerse/Collections/Movies_Collections_v2.json")
+
+            if not file_path.exists():
+                print("⚠️ Rename failed: JSON file does not exist.")
+                return False
+
+            with open(file_path, 'r', encoding='utf-8') as f:
+                try:
+                    library = json.load(f)
+                except:
+                    library = []
+
+            updated = False
+            for item in library:
+                if item.get("name") == old_name:
+                    item["name"] = new_name
+                    updated = True
+                    break
+
+            if not updated:
+                print(f"⚠️ Rename failed: '{old_name}' not found.")
+                return False
+
+            with open(file_path, 'w', encoding='utf-8') as f:
+                json.dump(library, f, indent=4)
+
+            print(f"✏️ Collection renamed to '{new_name}'.")
+            return True
+
+        except Exception as e:
+            print(f"❌ Rename Error: {e}")
+            return False
