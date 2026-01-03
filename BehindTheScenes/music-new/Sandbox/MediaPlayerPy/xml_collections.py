@@ -563,3 +563,206 @@ class XMLCollections(QObject):
         except Exception as e:
             print(f"❌ Rename Error: {e}")
             return False
+        
+
+    # -------------------------------------------------------------------------
+# get_collection_results_v2(criteria, resolution)  →  list of dicts
+#
+# PURPOSE:
+#     This is the V2, resolution‑aware version of get_collection_results().
+#     It filters the master manifest (self.master_cache) using the same
+#     matching logic as V1, but returns image paths from the new cacheV2
+#     system instead of the old thumbnail lookup.
+#
+# WHY THIS EXISTS:
+#     • V1 always returned THUMBNAIL images (~8 KB) via image_lookup.
+#     • V2 needs higher‑quality images for GridView_v2 and CarouselView_v2.
+#     • The manifest already contains all three cache levels:
+#           cache.thumb      (~8 KB)
+#           cache.display    (~42 KB)
+#           cache.carousel   (~59 KB)
+#     • This method selects the correct resolution and maps it to the
+#       LOCAL cacheV2 path using project_paths (never hard‑coded).
+#
+# PARAMETERS:
+#     criteria   – dict of filter rules from QML (possibly a QJSValue)
+#     resolution – string: "thumb", "display", or "carousel"
+#                  Determines which cache level to use.
+#
+# HOW IT WORKS:
+#     1. Converts QJSValue → Python dict if needed.
+#     2. Filters master_cache using your existing matching logic
+#        (Decade logic + standard substring matching).
+#     3. For each matched item:
+#           • Reads manifest fields:
+#                 title, shared.video, shared.xml
+#                 cache.thumb / cache.display / cache.carousel
+#           • Selects the correct cache entry based on `resolution`.
+#           • Converts the manifest's relative cache path into a LOCAL
+#             cacheV2 path using project_paths (never hard‑coded).
+#           • Converts the local path into a QML‑friendly file:/// URI.
+#     4. Returns a list of dicts in the SAME SHAPE as V1:
+#           {
+#               "filePath": <local cacheV2 image URI>,
+#               "originalPath": <video file>,
+#               "xmlPath": <sidecar XML>,
+#               "fileName": <title>
+#           }
+#
+# RETURN VALUE:
+#     A list of dictionaries ready for QML GridView/Carousel delegates.
+#     This structure is intentionally identical to V1 so QML does not
+#     need to change when switching between V1 and V2.
+#
+# USED BY:
+#     • ImageGridView_v2 (resolution="display")
+#     • CarouselView_v2   (resolution="carousel")
+#     • Collection fan stacks (resolution="thumb")
+#
+# BENEFITS:
+#     • No hard‑coded paths
+#     • Fully resolution‑aware
+#     • Uses manifest as the single source of truth
+#     • Safe: does not modify or break V1 behaviour
+#     • Fast: uses local cacheV2 only
+# -------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
+# get_collection_results_v2(criteria, resolution)  →  list of dicts
+#
+# PURPOSE:
+#     Resolution‑aware version of get_collection_results().
+#     Uses manifest.json as the single source of truth and returns
+#     LOCAL cacheV2 image paths at the requested resolution.
+#
+# WHY:
+#     • V1 always returned thumbnails (~8 KB).
+#     • V2 needs higher‑quality images for GridView_v2 and CarouselView_v2.
+#     • Manifest already contains cache.thumb / cache.display / cache.carousel.
+#     • This method selects the correct cache level and maps it to the
+#       LOCAL cacheV2 directory using project_paths.
+#
+# PARAMETERS:
+#     criteria   – dict of filter rules from QML (possibly a QJSValue)
+#     resolution – "thumb", "display", or "carousel"
+#
+# RETURNS:
+#     A list of dicts in the SAME SHAPE as V1:
+#         {
+#             "filePath": <local cacheV2 image URI>,
+#             "originalPath": <video file>,
+#             "xmlPath": <sidecar XML>,
+#             "fileName": <title>,
+#             "year": <int>
+#         }
+#
+# NOTES:
+#     • Sorting is applied by YEAR (ascending: oldest → newest).
+#     • No randomness is used here — fan‑stack randomness stays isolated.
+#     • Safe: does not modify or break V1 behaviour.
+# -------------------------------------------------------------------------
+
+    @Slot('QVariant', str, result=list)
+    def get_collection_results_v2(self, criteria, resolution):
+        """
+        Filters master_cache and returns image data using cacheV2 paths.
+        resolution = 'thumb' | 'display' | 'carousel'
+        """
+
+        # Convert QJSValue → dict
+        if hasattr(criteria, 'toVariant'):
+            criteria = criteria.toVariant()
+
+        if not isinstance(criteria, dict) or not self.master_cache:
+            print(f"⚠️ XMLCollections V2: Invalid criteria type: {type(criteria)}")
+            return []
+
+        # ---------------------------------------------------------
+        # Choose the correct local cache path
+        # ---------------------------------------------------------
+        from project_paths import paths
+
+        if resolution == "carousel":
+            cache_root = paths["local_carousel_v2"]
+        elif resolution == "display":
+            cache_root = paths["local_display_v2"]
+        else:
+            cache_root = paths["local_thumb_v2"]
+
+        results = []
+
+        # ---------------------------------------------------------
+        # Filter master_cache using your existing logic
+        # ---------------------------------------------------------
+        for item in self.master_cache:
+            match = True
+            for key, value in criteria.items():
+
+                # --- DECADE LOGIC ---
+                if key == "Decade":
+                    target_decade_prefix = str(value).strip()[:3]
+                    item_year = str(item.get("metadata", {}).get("year", "")).strip()
+                    if not item_year.startswith(target_decade_prefix):
+                        match = False
+                        break
+
+                # --- STANDARD LOGIC ---
+                else:
+                    item_val = str(item.get(key, "")).lower()
+                    if str(value).lower() not in item_val:
+                        match = False
+                        break
+
+            if not match:
+                continue
+
+            # ---------------------------------------------------------
+            # Extract manifest fields
+            # ---------------------------------------------------------
+            title = item.get("title", "Unknown Title")
+            shared = item.get("shared", {})
+            cache = item.get("cache", {})
+            year = item.get("metadata", {}).get("year", 0)
+
+            video_path = shared.get("video")
+            xml_path = shared.get("xml")
+
+            # Choose the correct cache entry
+            if resolution == "carousel":
+                rel_cache_path = cache.get("carousel")
+            elif resolution == "display":
+                rel_cache_path = cache.get("display")
+            else:
+                rel_cache_path = cache.get("thumb")
+
+            if not rel_cache_path:
+                continue
+
+            # ---------------------------------------------------------
+            # Build LOCAL cache path
+            # ---------------------------------------------------------
+            import os
+            filename = os.path.basename(rel_cache_path)
+            local_path = cache_root / filename
+
+            # Convert to QML-friendly file URL
+            file_uri = "file:///" + str(local_path).replace("\\", "/")
+
+            # ---------------------------------------------------------
+            # Append result
+            # ---------------------------------------------------------
+            results.append({
+                "filePath": file_uri,
+                "originalPath": video_path,
+                "xmlPath": xml_path,
+                "fileName": title,
+                "year": year
+            })
+
+        # ---------------------------------------------------------
+        # Sort results by year (ascending: oldest → newest)
+        # ---------------------------------------------------------
+        results.sort(key=lambda x: x.get("year", 0))
+
+        print(f"🔍 V2 Builder: '{criteria}' → {len(results)} items (res={resolution})")
+        return results
+        

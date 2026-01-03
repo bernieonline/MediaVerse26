@@ -8,6 +8,7 @@ Rectangle {
     property var xmlDetails
     property string _pendingImagePath: ""
     property string currentFolderPath: ""
+    //property real verticalSpacing: 20
 
     color: "transparent"
 

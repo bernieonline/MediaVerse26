@@ -51,7 +51,7 @@ GridView {
                     console.log("QML DEBUG: Main Card Clicked -> " + modelData.name)
                     if (collectionsGrid.logic) {
                         var filteredMovies = collectionsGrid.logic.get_collection_results(modelData.rules)
-                        contentLoader.setSource("ImageGridView.qml", { "externalImageList": filteredMovies })
+                        contentLoader.setSource("ImageGridView_v2.qml", { "externalImageList": filteredMovies })
                     }
                 }
             }

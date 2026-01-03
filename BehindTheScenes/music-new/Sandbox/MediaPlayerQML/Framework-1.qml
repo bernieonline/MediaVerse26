@@ -97,7 +97,7 @@ ApplicationWindow {
     // A "Breadcrumb" style back button
     Button {
         text: "📁 Back to Gallery"
-        visible: contentLoader.source.toString().includes("ImageGridView.qml") && 
+        visible: contentLoader.source.toString().includes("ImageGridView_v2.qml") && 
                 contentLoader.item && contentLoader.item.externalImageList &&
                 contentLoader.item.externalImageList.length > 0
         
@@ -161,7 +161,7 @@ ApplicationWindow {
 
         onViewRequested: function(viewType) {
             if (viewType === "grid") {
-                contentLoader.setSource("ImageGridView.qml", { xmlDetails: xmlDetails })
+                contentLoader.setSource("ImageGridView_v2.qml", { xmlDetails: xmlDetails })
             } else {
                 contentLoader.source = "CarouselView.qml"
             }
@@ -170,7 +170,7 @@ ApplicationWindow {
         /*
         onViewRequested: {
             if (viewType === "grid")
-                contentLoader.setSource("ImageGridView.qml", { xmlDetails: xmlDetails })
+                contentLoader.setSource("ImageGridView_v2.qml", { xmlDetails: xmlDetails })
             else
                 contentLoader.source = "CarouselView.qml"
         }
@@ -245,10 +245,6 @@ ApplicationWindow {
         
     }
 
-    
-
-  
-
     Rectangle {
         id: contentContainer
         anchors.top: buttonRows.bottom   // anchor to the column, not the row
@@ -273,9 +269,19 @@ ApplicationWindow {
         Loader {
             id: contentLoader
             anchors.fill: parent
-            source: "ImageGridView.qml" // Set initial view
+            source: "ImageGridView_v2.qml" // Set initial view
+            onStatusChanged: {
+                console.log("📦 Loader status change:",
+                            "source =", source.toString(),
+                            "status =", status,
+                            "item =", item,
+                            "error =", errorString())
+            }
 
             onLoaded: {
+                //console.log("✅ Loader loaded:", source.toString(),
+                    //"item type =", item ? item.metaObject.className : "null")
+
                 // --- NEW: Handle the 2x3 Category Grid Connection ---
                 if (contentLoader.source.toString().includes("CategoryMenu.qml")) {
                     console.log("🎬 Category Menu Loaded")
