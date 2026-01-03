@@ -453,3 +453,35 @@ class XMLCollections(QObject):
         except Exception as e:
             print("❌ rename_collection error:", e)
             return False
+        
+    @Slot(str)
+    def delete_collection(self, name):
+        print(f"PYTHON DEBUG: delete_collection called for '{name}'")
+
+        try:
+            file_path = Path("W:/MediaVerse/Collections/Movies_Collections_v2.json")
+
+            if not file_path.exists():
+                print("⚠️ Delete failed: JSON file does not exist.")
+                return False
+
+            # Load existing library
+            with open(file_path, 'r', encoding='utf-8') as f:
+                try:
+                    library = json.load(f)
+                except:
+                    library = []
+
+            # Remove the entry
+            new_library = [item for item in library if item.get("name") != name]
+
+            # Save back
+            with open(file_path, 'w', encoding='utf-8') as f:
+                json.dump(new_library, f, indent=4)
+
+            print(f"🗑️ Collection '{name}' deleted successfully.")
+            return True
+
+        except Exception as e:
+            print(f"❌ Delete Error: {e}")
+            return False

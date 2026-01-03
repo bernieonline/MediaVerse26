@@ -206,9 +206,15 @@ GridView {
                     MouseArea {
                         id: delM; anchors.fill: parent; hoverEnabled: true
                         onClicked: {
-                            console.log("QML DEBUG: DEL Button Clicked")
-                            if (typeof notificationManager !== "undefined")
-                                notificationManager.post_notification("Delete " + modelData.name + "?", true)
+                            console.log("QML DEBUG: DEL Button Clicked -> " + modelData.name)
+
+                            if (collectionsGrid.logic) {
+                                collectionsGrid.logic.delete_collection(modelData.name)
+                            }
+                            // Remove from QML model so the UI updates
+                            collectionsGrid.collectionsModel.splice(index, 1)
+                            collectionsGrid.model = collectionsGrid.collectionsModel
+
                         }
                     }
                 }
