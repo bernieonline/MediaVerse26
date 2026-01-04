@@ -12,10 +12,13 @@ Rectangle {
     property int currentPage: 0
     property int itemsPerPage: 12
     property bool showLabels: true
+    property string sortMode: "oldest"   // ⭐ default sort order
 
+     
     MetadataTools {
         id: metadata
     }
+    property var sortedList: metadata.sortList(externalImageList, sortMode)
 
     // -------------------------------
     // HEIGHT-DRIVEN GEOMETRY ENGINE
@@ -31,11 +34,43 @@ Rectangle {
     // PAGE SLICE
     // -------------------------------
     property var pageItems: {
-        if (!externalImageList || externalImageList.length === 0) return [];
+        if (!sortedList || sortedList.length === 0) return [];
         let start = currentPage * itemsPerPage;
-        return externalImageList.slice(start, start + itemsPerPage);
+        return sortedList.slice(start, start + itemsPerPage);
+    }
+    Rectangle {
+        id: sortControl
+        width: 140
+        height: 40
+        anchors.bottom: parent.bottom
+        anchors.right: parent.right
+        anchors.bottomMargin: 10
+        anchors.rightMargin: 10
+        radius: 6
+        color: "#333333"
+        border.color: "white"
+        border.width: 1
+
+
+        Text {
+            anchors.centerIn: parent
+            text: "Sort: " + gridRoot.sortMode
+            color: "white"
+            font.pixelSize: 14
+        }
+
+        MouseArea {
+            anchors.fill: parent
+            onClicked: {
+                if (gridRoot.sortMode === "oldest")      gridRoot.sortMode = "recent"
+                else if (gridRoot.sortMode === "recent") gridRoot.sortMode = "added"
+                else if (gridRoot.sortMode === "added")  gridRoot.sortMode = "alpha"
+                else                                      gridRoot.sortMode = "oldest"
+            }
+        }
     }
 
+   
     // -------------------------------
     // MAIN LAYOUT
     // -------------------------------

@@ -56,14 +56,34 @@ QtObject {
             let yearA = extractYear(a.filePath);
             let yearB = extractYear(b.filePath);
 
-            if (mode === "year") {
+            let titleA = extractTitle(a.filePath).toLowerCase();
+            let titleB = extractTitle(b.filePath).toLowerCase();
+
+            // ⭐ MODE: oldest first
+            if (mode === "oldest") {
+                if (yearA !== yearB)
+                    return yearA - yearB;   // oldest first
+            }
+
+            // ⭐ MODE: recent first
+            if (mode === "recent") {
                 if (yearA !== yearB)
                     return yearB - yearA;   // newest first
             }
 
-            let titleA = extractTitle(a.filePath).toLowerCase();
-            let titleB = extractTitle(b.filePath).toLowerCase();
+            // ⭐ MODE: recently added (filesystem order)
+            if (mode === "added") {
+                // a.addedTime is provided by your Python backend
+                if (a.addedTime !== b.addedTime)
+                    return b.addedTime - a.addedTime;  // newest added first
+            }
 
+            // ⭐ MODE: alphabetical
+            if (mode === "alpha") {
+                return titleA.localeCompare(titleB);
+            }
+
+            // fallback: alphabetical
             return titleA.localeCompare(titleB);
         });
 
