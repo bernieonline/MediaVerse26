@@ -113,6 +113,10 @@ def main():
         engine.addImportPath(os.path.join(os.path.dirname(PySide6.__file__), "qml"))
         engine.addImportPath(QLibraryInfo.path(QLibraryInfo.LibraryPath.Qml2ImportsPath))
 
+        # ⭐ Add YOUR project’s QML folder
+        engine.addImportPath(str(paths["qml"]))
+
+
         # Expose Python objects to QML
         ctx.setContextProperty("_paths", paths_stringified)
         ctx.setContextProperty("collectionLogic", xml_logic)

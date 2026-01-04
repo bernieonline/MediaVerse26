@@ -1,6 +1,7 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
+//import "./MetadataTools.qml" as MetadataTools
 
 Rectangle {
     id: gridRoot
@@ -13,6 +14,11 @@ Rectangle {
     property int itemsPerPage: 12
     property bool showLabels: true
 
+
+    MetadataTools {
+        id: metadata
+    }   
+
     // -------------------------------
     // HEIGHT-DRIVEN GEOMETRY ENGINE
     // -------------------------------
@@ -20,17 +26,12 @@ Rectangle {
     readonly property real labelHeight: showLabels ? 45 : 0
     readonly property real rowSpacing: 20
 
-    // Each row gets half the available height
     readonly property real maxHeightPerRow: (gridRoot.height / 2) - rowSpacing
-
-    // Poster height is limited by available vertical space
     readonly property real posterHeight: Math.max(50, maxHeightPerRow - labelHeight)
-
-    // Width is derived from height (aspect ratio 2:3)
     readonly property real posterWidth: posterHeight / 1.5
 
     // -------------------------------
-    // PAGE SLICE
+    // PAGE SLICE (unchanged for now)
     // -------------------------------
     property var pageItems: {
         if (!externalImageList || externalImageList.length === 0) return [];
@@ -39,7 +40,7 @@ Rectangle {
     }
 
     // -------------------------------
-    // MAIN LAYOUT: LEFT ARROW | GRID | RIGHT ARROW
+    // MAIN LAYOUT
     // -------------------------------
     Row {
         anchors.fill: parent
@@ -86,33 +87,6 @@ Rectangle {
                         width: gridRoot.posterWidth
                         height: gridRoot.posterHeight + gridRoot.labelHeight
 
-                        // 🔍 DEBUG
-                        //Component.onCompleted: {
-                            //console.log("MODEL ENTRY:", JSON.stringify(modelData))
-                        //}
-
-                        // ------------------------------------
-                        // TITLE EXTRACTION FROM FILEPATH
-                        // ------------------------------------
-                        readonly property string titleFromPath: {
-                            if (!modelData.filePath) return "Unknown"
-
-                            // Remove file:/// prefix
-                            let url = modelData.filePath.replace("file:///", "")
-
-                            // Split into path segments
-                            let parts = url.split(/[\\/]/)
-                            let file = parts[parts.length - 1]
-
-                            // Remove extension
-                            file = file.replace(/\.[^/.]+$/, "")
-
-                            // Decode %20 etc....
-                            try { file = decodeURIComponent(file) } catch(e) {}
-
-                            return file
-                        }
-
                         Column {
                             anchors.fill: parent
                             spacing: 5
@@ -135,7 +109,8 @@ Rectangle {
 
                             Text {
                                 width: parent.width
-                                text: titleFromPath
+                                //text: MetadataTools.extractCleanTitle(modelData.filePath)   // ⭐ NEW
+                                text: metadata.extractCleanTitle(modelData.filePath)
                                 color: "white"
                                 font.pixelSize: 11
                                 horizontalAlignment: Text.AlignHCenter
