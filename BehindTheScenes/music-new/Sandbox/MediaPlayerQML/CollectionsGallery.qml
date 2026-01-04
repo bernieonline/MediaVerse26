@@ -48,7 +48,7 @@ GridView {
                 anchors.top: parent.top
                 hoverEnabled: true
                 onClicked: {
-                    console.log("QML DEBUG: Main Card Clicked -> " + modelData.name)
+                    //console.log("QML DEBUG: Main Card Clicked -> " + modelData.name)
                     if (collectionsGrid.logic) {
                         var filteredMovies = collectionsGrid.logic.get_collection_results(modelData.rules)
                         contentLoader.setSource("ImageGridView_v2.qml", { "externalImageList": filteredMovies })
@@ -255,7 +255,7 @@ GridView {
                     MouseArea {
                         id: renM; anchors.fill: parent; hoverEnabled: true
                         onClicked: {
-                            console.log("QML DEBUG: EDIT Button Clicked -> " + modelData.name)
+                            //console.log("QML DEBUG: EDIT Button Clicked -> " + modelData.name)
                             renameBlock.editing = true
                             nameEditor.forceActiveFocus()
                             nameEditor.selectAll()

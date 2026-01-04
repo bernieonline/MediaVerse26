@@ -67,7 +67,7 @@ Item {
             todoPanel.isShown = false
             collectionCreatorPanel.isShown = false 
             
-            console.log("Shield clicked: Closing all panels")
+            //console.log("Shield clicked: Closing all panels")
         }
     }
 

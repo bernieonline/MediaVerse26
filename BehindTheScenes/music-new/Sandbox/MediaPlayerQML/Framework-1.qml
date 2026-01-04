@@ -56,12 +56,12 @@ ApplicationWindow {
     Connections {
         target: manifestUpdater
         onRefreshStarted: {
-            console.log("Manifest refresh started")
+            //console.log("Manifest refresh started")
             refreshIndicator.running = true
             refreshIndicator.visible = true
         }
         onRefreshFinished: {
-            console.log("Manifest refresh finished")
+            //console.log("Manifest refresh finished")
             refreshIndicator.running = false
             refreshIndicator.visible = false
         }
@@ -85,12 +85,12 @@ ApplicationWindow {
         function onSettingsChanged() {
             let settings = SettingsManager.get_settings()
             currentPlayerIndex = settings["Preferred Player"]
-            console.log("Settings refreshed, Preferred Player:", currentPlayerIndex)
+            //console.log("Settings refreshed, Preferred Player:", currentPlayerIndex)
         }
 
         // Play video when Python emits the launch signal
         function onVideoLaunchRequested(videoPath) {
-            console.log("🎬 MiniPlayer received videoPath:", videoPath)
+            //console.log("🎬 MiniPlayer received videoPath:", videoPath)
             miniPlayer.play(videoPath)   // call your MiniPlayer’s play() method
         }
     }
@@ -270,13 +270,13 @@ ApplicationWindow {
             id: contentLoader
             anchors.fill: parent
             source: "ImageGridView_v2.qml" // Set initial view
-            onStatusChanged: {
+            /*onStatusChanged: {
                 console.log("📦 Loader status change:",
                             "source =", source.toString(),
                             "status =", status,
                             "item =", item,
                             "error =", errorString())
-            }
+            }*/
 
             onLoaded: {
                 //console.log("✅ Loader loaded:", source.toString(),
@@ -284,11 +284,11 @@ ApplicationWindow {
 
                 // --- NEW: Handle the 2x3 Category Grid Connection ---
                 if (contentLoader.source.toString().includes("CategoryMenu.qml")) {
-                    console.log("🎬 Category Menu Loaded")
+                    //console.log("🎬 Category Menu Loaded")
                     
                     // Connect the signal from the card click
                     contentLoader.item.categorySelected.connect(function(categoryKey) {
-                        console.log("📡 Signal Received: Filter by " + categoryKey)
+                        //console.log("📡 Signal Received: Filter by " + categoryKey)
                         
                         // 1. Fetch filtered list from Python
                         let filteredData = collectionLogic.get_collections_by_category(categoryKey)
@@ -304,7 +304,7 @@ ApplicationWindow {
                 if (contentLoader.source.toString().includes("CollectionsGallery.qml")) {
                     // If collectionsModel wasn't passed in (legacy call from the old button), load everything
                     if (!contentLoader.item.collectionsModel || contentLoader.item.collectionsModel.length === 0) {
-                        console.log("📂 Legacy Call: Loading ALL Collections")
+                        //console.log("📂 Legacy Call: Loading ALL Collections")
                         //contentLoader.item.collectionsModel = collectionLogic.load_collections_list()
                         contentLoader.item.collectionsModel = collectionLogic.load_all_collections_v2()
                     }

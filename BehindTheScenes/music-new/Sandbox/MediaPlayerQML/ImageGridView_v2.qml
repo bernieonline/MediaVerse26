@@ -76,7 +76,7 @@ Rectangle {
                 id: imageGrid
                 anchors.centerIn: parent
                 columns: 6
-                columnSpacing: 15
+                columnSpacing: 40
                 rowSpacing: gridRoot.rowSpacing
 
                 Repeater {
@@ -87,9 +87,9 @@ Rectangle {
                         height: gridRoot.posterHeight + gridRoot.labelHeight
 
                         // 🔍 DEBUG
-                        Component.onCompleted: {
-                            console.log("MODEL ENTRY:", JSON.stringify(modelData))
-                        }
+                        //Component.onCompleted: {
+                            //console.log("MODEL ENTRY:", JSON.stringify(modelData))
+                        //}
 
                         // ------------------------------------
                         // TITLE EXTRACTION FROM FILEPATH
