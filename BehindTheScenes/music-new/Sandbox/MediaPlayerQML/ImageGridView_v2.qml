@@ -1,7 +1,6 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
-//import "./MetadataTools.qml" as MetadataTools
 
 Rectangle {
     id: gridRoot
@@ -14,15 +13,13 @@ Rectangle {
     property int itemsPerPage: 12
     property bool showLabels: true
 
-
     MetadataTools {
         id: metadata
-    }   
+    }
 
     // -------------------------------
     // HEIGHT-DRIVEN GEOMETRY ENGINE
     // -------------------------------
-
     readonly property real labelHeight: showLabels ? 45 : 0
     readonly property real rowSpacing: 20
 
@@ -31,7 +28,7 @@ Rectangle {
     readonly property real posterWidth: posterHeight / 1.5
 
     // -------------------------------
-    // PAGE SLICE (unchanged for now)
+    // PAGE SLICE
     // -------------------------------
     property var pageItems: {
         if (!externalImageList || externalImageList.length === 0) return [];
@@ -91,7 +88,9 @@ Rectangle {
                             anchors.fill: parent
                             spacing: 5
 
+                            // POSTER CONTAINER
                             Rectangle {
+                                id: posterContainer
                                 width: parent.width
                                 height: gridRoot.posterHeight
                                 radius: 8
@@ -101,15 +100,38 @@ Rectangle {
                                 clip: true
 
                                 Image {
+                                    id: posterImage
                                     anchors.fill: parent
                                     source: modelData.filePath || ""
                                     fillMode: Image.PreserveAspectCrop
                                 }
+
+                                // ⭐ YEAR BADGE
+                                Rectangle {
+                                    id: yearBadge
+                                    width: 36
+                                    height: 20
+                                    radius: 4
+                                    color: "#66000000"
+                                    anchors.top: parent.top
+                                    anchors.right: parent.right
+                                    anchors.topMargin: 4
+                                    anchors.rightMargin: 4
+                                    visible: metadata.extractYear(modelData.filePath) > 0
+
+                                    Text {
+                                        anchors.centerIn: parent
+                                        text: metadata.extractYear(modelData.filePath)
+                                        color: "white"
+                                        font.pixelSize: 10
+                                        font.bold: true
+                                    }
+                                }
                             }
 
+                            // TITLE LABEL
                             Text {
                                 width: parent.width
-                                //text: MetadataTools.extractCleanTitle(modelData.filePath)   // ⭐ NEW
                                 text: metadata.extractCleanTitle(modelData.filePath)
                                 color: "white"
                                 font.pixelSize: 11
