@@ -664,11 +664,14 @@ class XMLCollections(QObject):
     @Slot('QVariant', str, result=list)
     def get_collection_results_v2(self, criteria, resolution):
         """
-        Filters master_cache and returns image data using cacheV2 paths.
-        resolution = 'thumb' | 'display' | 'carousel'
+        Tier-aware version of get_collection_results().
+        Reuses the same filtering logic but swaps the image path
+        to the correct cache tier (thumb, display, carousel).
         """
 
-        # Convert QJSValue → dict
+        # ------------------------------------------------------------
+        # 1. Convert QJSValue → dict if needed
+        # ------------------------------------------------------------
         if hasattr(criteria, 'toVariant'):
             criteria = criteria.toVariant()
 
@@ -676,23 +679,27 @@ class XMLCollections(QObject):
             print(f"⚠️ XMLCollections V2: Invalid criteria type: {type(criteria)}")
             return []
 
-        # ---------------------------------------------------------
-        # Choose the correct local cache path
-        # ---------------------------------------------------------
-        from project_paths import paths
+        print(f"\n[V2] get_collection_results_v2 called")
+        print(f"[V2] Requested resolution = '{resolution}'")
 
+        # ------------------------------------------------------------
+        # 2. Choose cache root based on resolution
+        # ------------------------------------------------------------
         if resolution == "carousel":
-            cache_root = paths["local_carousel_v2"]
+            cache_root = self.paths["local_carousel_v2"]
         elif resolution == "display":
-            cache_root = paths["local_display_v2"]
+            cache_root = self.paths["local_display_v2"]
         else:
-            cache_root = paths["local_thumb_v2"]
+            cache_root = self.paths["local_thumb_v2"]
+
+        print(f"[V2] Selected cache root = {cache_root}")
 
         results = []
 
-        # ---------------------------------------------------------
-        # Filter master_cache using your existing logic
-        # ---------------------------------------------------------
+        # ------------------------------------------------------------
+        # 3. FILTERING LOGIC (copied from V1)
+        # ------------------------------------------------------------
+        filtered_items = []
         for item in self.master_cache:
             match = True
             for key, value in criteria.items():
@@ -700,7 +707,7 @@ class XMLCollections(QObject):
                 # --- DECADE LOGIC ---
                 if key == "Decade":
                     target_decade_prefix = str(value).strip()[:3]
-                    item_year = str(item.get("metadata", {}).get("year", "")).strip()
+                    item_year = str(item.get("Year") or item.get("year") or "").strip()
                     if not item_year.startswith(target_decade_prefix):
                         match = False
                         break
@@ -712,57 +719,30 @@ class XMLCollections(QObject):
                         match = False
                         break
 
-            if not match:
-                continue
+            if match:
+                filtered_items.append(item)
 
-            # ---------------------------------------------------------
-            # Extract manifest fields
-            # ---------------------------------------------------------
-            title = item.get("title", "Unknown Title")
-            shared = item.get("shared", {})
-            cache = item.get("cache", {})
-            year = item.get("metadata", {}).get("year", 0)
+        print(f"[V2] Items matched by criteria = {len(filtered_items)}")
 
-            video_path = shared.get("video")
-            xml_path = shared.get("xml")
+        # ------------------------------------------------------------
+        # 4. Build final model with tier-aware paths
+        # ------------------------------------------------------------
+        for item in filtered_items:
+            video_path = item.get("Filename")
+            rel_cache_path = self.image_lookup.get(video_path, "")
 
-            # Choose the correct cache entry
-            if resolution == "carousel":
-                rel_cache_path = cache.get("carousel")
-            elif resolution == "display":
-                rel_cache_path = cache.get("display")
-            else:
-                rel_cache_path = cache.get("thumb")
-
-            if not rel_cache_path:
-                continue
-
-            # ---------------------------------------------------------
-            # Build LOCAL cache path
-            # ---------------------------------------------------------
-            import os
             filename = os.path.basename(rel_cache_path)
             local_path = cache_root / filename
 
-            # Convert to QML-friendly file URL
             file_uri = "file:///" + str(local_path).replace("\\", "/")
 
-            # ---------------------------------------------------------
-            # Append result
-            # ---------------------------------------------------------
+            print(f"[V2] Final path → {file_uri}")
+
             results.append({
                 "filePath": file_uri,
                 "originalPath": video_path,
-                "xmlPath": xml_path,
-                "fileName": title,
-                "year": year
+                "fileName": item.get("Title", "Unknown")
             })
 
-        # ---------------------------------------------------------
-        # Sort results by year (ascending: oldest → newest)
-        # ---------------------------------------------------------
-        results.sort(key=lambda x: x.get("year", 0))
-
-        print(f"🔍 V2 Builder: '{criteria}' → {len(results)} items (res={resolution})")
+        print(f"[V2] Total results returned = {len(results)}\n")
         return results
-        

@@ -14,7 +14,7 @@ GridView {
 
     property var collectionsModel: []
     model: collectionsModel
-
+    // this just guarantees availability of backend xml_collection instance
     property var logic: (typeof collectionLogic !== "undefined") ? collectionLogic : null
 
     delegate: Item {
@@ -49,15 +49,49 @@ GridView {
                 anchors.top: parent.top
                 hoverEnabled: true
                 onClicked: {
-                    if (collectionsGrid.logic) {
-                        var filteredMovies = collectionsGrid.logic.get_collection_results(modelData.rules)
+                    console.log("---- COLLECTION CLICKED ----")
 
-                        // ⭐ NEW: Emit the signal so Loader can auto-switch views
-                        collectionsGrid.collectionSelected(filteredMovies)
 
-                        // ⭐ Existing behavior (kept exactly as-is)
-                        //contentLoader.setSource("ImageGridView_v2.qml", { "externalImageList": filteredMovies })
-                    }
+                    if (!collectionsGrid.logic)
+                        return
+
+                    // 1. Extract the collection rules and item count
+                    const rules = modelData.rules
+
+                    // First call: get matches using thumb (fast)
+                    const tempResults = collectionsGrid.logic.get_collection_results_v2(
+                        rules,
+                        "thumb"
+                    )
+
+                    const count = tempResults.length
+                    console.log("Computed item count:", count)
+
+                    //const count = modelData.itemCount
+
+                    console.log("Rules:", JSON.stringify(rules))
+                    console.log("Item count:", count)
+
+
+                    // 2. Decide which image tier to load
+                    const resolution = (count <= 14) ? "display" : "thumb"
+                    console.log("Selected resolution:", resolution)
+
+
+                    // 3. Call the V2 builder with the correct tier
+                    var filteredMovies = collectionsGrid.logic.get_collection_results_v2(
+                        rules,
+                        resolution
+                    )
+
+                    console.log("Returned", filteredMovies.length, "movies from V2")
+
+                    console.log("Emitting collectionSelected()")
+
+                    // 4. Emit the signal so the Loader can switch views
+                    collectionsGrid.collectionSelected(filteredMovies)
+                    console.log("---- END CLICK HANDLER ----")
+
 
                 }
             }

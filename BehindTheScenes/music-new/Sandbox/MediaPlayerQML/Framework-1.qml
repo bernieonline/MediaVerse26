@@ -396,9 +396,3 @@ ApplicationWindow {
     }
 
 } // <--- This is the final closing brace of your ApplicationWindow
-
-
-
-
-
-
