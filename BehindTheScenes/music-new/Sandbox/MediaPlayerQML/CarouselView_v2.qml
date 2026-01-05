@@ -31,7 +31,7 @@ Rectangle {
         let dist = Math.abs(carouselView.currentIndex - i)
         if (dist === 0) return 1.1      // centre
         if (dist === 1) return 0.88     // inner
-        if (dist === 2) return 0.32     // outer
+        if (dist === 2) return 0.75     // outer
         return 0.0
     }
 
