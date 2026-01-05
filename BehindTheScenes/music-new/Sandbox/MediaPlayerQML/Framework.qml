@@ -12,6 +12,7 @@ import QtQuick.Controls
 //1.0.3 centre button moved to toolbar
 //1.0.4 final adjustments made before applying styling to panels
 //1.0.5 Glow effects added to main window
+//simple bug fix
 
 ApplicationWindow {
     id: window
@@ -25,6 +26,10 @@ ApplicationWindow {
     // 🔑 Add these two here from signals emitted on clicking a folder
     property string selectedFolderPath: ""
     property string selectedImageFile: ""
+
+    // 🔑 NEW: collection-driven display state
+    property var currentCollectionItems: []
+    property bool useCarouselView: false
 
 
 
@@ -55,12 +60,12 @@ ApplicationWindow {
     Connections {
         target: manifestUpdater
         onRefreshStarted: {
-            console.log("Manifest refresh started")
+            //console.log("Manifest refresh started")
             refreshIndicator.running = true
             refreshIndicator.visible = true
         }
         onRefreshFinished: {
-            console.log("Manifest refresh finished")
+            //console.log("Manifest refresh finished")
             refreshIndicator.running = false
             refreshIndicator.visible = false
         }
@@ -84,16 +89,29 @@ ApplicationWindow {
         function onSettingsChanged() {
             let settings = SettingsManager.get_settings()
             currentPlayerIndex = settings["Preferred Player"]
-            console.log("Settings refreshed, Preferred Player:", currentPlayerIndex)
+            //console.log("Settings refreshed, Preferred Player:", currentPlayerIndex)
         }
 
         // Play video when Python emits the launch signal
         function onVideoLaunchRequested(videoPath) {
-            console.log("🎬 MiniPlayer received videoPath:", videoPath)
+            //console.log("🎬 MiniPlayer received videoPath:", videoPath)
             miniPlayer.play(videoPath)   // call your MiniPlayer’s play() method
         }
     }
-
+    // A "Breadcrumb" style back button
+    Button {
+        text: "📁 Back to Gallery"
+        visible: contentLoader.source.toString().includes("ImageGridView_v2.qml") && 
+                contentLoader.item && contentLoader.item.externalImageList &&
+                contentLoader.item.externalImageList.length > 0
+        
+        anchors.left: parent.left
+        anchors.top: parent.top
+        anchors.margins: 10
+        z: 100 // High Z-index to stay above the grid
+        
+        onClicked: contentLoader.setSource("CollectionsGallery.qml")
+    }
 
     Rectangle {
         id: logoFrame
@@ -147,7 +165,7 @@ ApplicationWindow {
 
         onViewRequested: function(viewType) {
             if (viewType === "grid") {
-                contentLoader.setSource("ImageGridView.qml", { xmlDetails: xmlDetails })
+                contentLoader.setSource("ImageGridView_v2.qml", { xmlDetails: xmlDetails })
             } else {
                 contentLoader.source = "CarouselView.qml"
             }
@@ -156,7 +174,7 @@ ApplicationWindow {
         /*
         onViewRequested: {
             if (viewType === "grid")
-                contentLoader.setSource("ImageGridView.qml", { xmlDetails: xmlDetails })
+                contentLoader.setSource("ImageGridView_v2.qml", { xmlDetails: xmlDetails })
             else
                 contentLoader.source = "CarouselView.qml"
         }
@@ -231,10 +249,6 @@ ApplicationWindow {
         
     }
 
-    
-
-  
-
     Rectangle {
         id: contentContainer
         anchors.top: buttonRows.bottom   // anchor to the column, not the row
@@ -254,70 +268,112 @@ ApplicationWindow {
         border.width: 1
 
         // Loader for dynamically loading content like the GridView
+        // Loader for dynamically loading content like the GridView
+        // Loader for dynamically loading content like the GridView
         Loader {
             id: contentLoader
             anchors.fill: parent
-            source: "ImageGridView.qml" // Set initial view
+            source: "ImageGridView_v2.qml" // Set initial view
+            /*onStatusChanged: {
+                console.log("📦 Loader status change:",
+                            "source =", source.toString(),
+                            "status =", status,
+                            "item =", item,
+                            "error =", errorString())
+            }*/
 
             onLoaded: {
-                if (contentLoader.item && contentLoader.item.imageClicked) {
-                    // Log that the signal is connected
-                    console.log("✅ Connected imageClicked from ImageGridView")
+                //console.log("✅ Loader loaded:", source.toString(),
+                    //"item type =", item ? item.metaObject.className : "null")
 
+                // --- NEW: Handle the 2x3 Category Grid Connection ---
+                if (contentLoader.source.toString().includes("CategoryMenu.qml")) {
+                    //console.log("🎬 Category Menu Loaded")
+                    
+                    // Connect the signal from the card click
+                    contentLoader.item.categorySelected.connect(function(categoryKey) {
+                        //console.log("📡 Signal Received: Filter by " + categoryKey)
+                        
+                        // 1. Fetch filtered list from Python
+                        let filteredData = collectionLogic.get_collections_by_category(categoryKey)
+                        
+                        // 2. Load the Gallery, passing the filtered data
+                        contentLoader.setSource("CollectionsGallery.qml", { "collectionsModel": filteredData })
+                        
+                        notificationManager.post_notification("Showing " + categoryKey + " Collections", false)
+                    })
+                }
+
+                // --- UPDATED: Handle Collections Gallery Data Hand-off ---
+                if (contentLoader.source.toString().includes("CollectionsGallery.qml")) {
+                    // If collectionsModel wasn't passed in (legacy call from the old button), load everything
+                    if (!contentLoader.item.collectionsModel || contentLoader.item.collectionsModel.length === 0) {
+                        //console.log("📂 Legacy Call: Loading ALL Collections")
+                        //contentLoader.item.collectionsModel = collectionLogic.load_collections_list()
+                        contentLoader.item.collectionsModel = collectionLogic.load_all_collections_v2()
+                    }
+                }
+
+                // --- Existing: Single-click connection ---
+                if (contentLoader.item && contentLoader.item.imageClicked) {
                     contentLoader.item.imageClicked.connect(function(cachePath, originalPath) {
-                        // Derive filename from cachePath
                         var decoded = decodeURIComponent(cachePath)
                         if (decoded.startsWith("file:///")) decoded = decoded.substring(8)
                         var filename = decoded.split("/").pop()
-
-                        // Store filename for Video button
-                    window.selectedImageFile = filename
-                    console.log("🖼️ Stored filename for Video button:", filename)
-
-                    // Optional: also store folder path from cachePath (redundant if SlidingPanel already sets it)
-                    // window.selectedFolderPath = decoded.split("/").slice(0, -1).join("/")
-
-
-
-
-
-                        //contentLoader.setSource("Detail_View.qml", { imagePath: path })
+                        window.selectedImageFile = filename
 
                         contentLoader.setSource("Detail_View.qml", {
                             imagePath: cachePath,
                             xmlDetails: xmlDetails
                         })
-
                     })
                 }
 
-                // Double‑click connection (new)
+                // --- Existing: Double‑click connection ---
                 if (contentLoader.item && contentLoader.item.launchVideoRequested) {
-                    console.log("✅ Connected launchVideoRequested from ImageGridView")
-
                     contentLoader.item.launchVideoRequested.connect(function(cachePath) {
-                        console.log("🎯 Double‑click received cachePath:", cachePath)
-
-                        // Derive filename from cachePath
                         var filename = window.filenameFromCachePath(cachePath)
                         window.selectedImageFile = filename
-
-
-                        // ✅ Use the existing Python slot
-
                         var videoPath = fileSystemManager.findVideoInFolder(window.selectedFolderPath, filename)
-
-                        console.log("🎬 Resolved Video Path:", videoPath)
-
-                        // Launch PlayerPanel
                         videoPanel.videoPath = videoPath
                         videoPanel.isPlaying = true
                         isVideoPanelVisible = true
                     })
                 }
+            } // End of onLoaded
+        } // End of Loader    
+    }//end contentcontainer
 
-            }
+    // ... [Existing code: contentContainer, videoPanel, etc.] ...
 
+    // ------------------------------------------------------------
+    // 1. UTILITY SIDEBAR INTEGRATION
+    // ------------------------------------------------------------
+    // This sits at the end of the file to ensure it's on top of all other layers
+    UtilitySidebar {
+        id: utilitySidebar
+        anchors.fill: parent
+        // Note: 'fontPathFA' is already available here 
+        // because you set it as a Context Property in main.py
+    }
+
+    // ------------------------------------------------------------
+    // 2. KEYBOARD TESTING SHORTCUT
+    // ------------------------------------------------------------
+    // Since you are using a keyboard, this is the fastest way to 
+    // test the UI without having to "bump" the mouse every time.
+    Shortcut {
+        sequence: "Ctrl+T"
+        onActivated: {
+            utilitySidebar.isOpen = !utilitySidebar.isOpen
+            console.log("MediaVerse: Sidebar toggled via keyboard. State: " + utilitySidebar.isOpen)
         }
     }
-}
+
+} // <--- This is the final closing brace of your ApplicationWindow
+
+
+
+
+
+

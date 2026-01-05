@@ -27,6 +27,10 @@ ApplicationWindow {
     property string selectedFolderPath: ""
     property string selectedImageFile: ""
 
+    // 🔑 NEW: collection-driven display state
+    property var currentCollectionItems: []
+    property bool useCarouselView: false
+
 
 
 
@@ -163,7 +167,7 @@ ApplicationWindow {
             if (viewType === "grid") {
                 contentLoader.setSource("ImageGridView_v2.qml", { xmlDetails: xmlDetails })
             } else {
-                contentLoader.source = "CarouselView.qml"
+                contentLoader.source = "CarouselView_v2.qml"
             }
         }
 
@@ -172,7 +176,7 @@ ApplicationWindow {
             if (viewType === "grid")
                 contentLoader.setSource("ImageGridView_v2.qml", { xmlDetails: xmlDetails })
             else
-                contentLoader.source = "CarouselView.qml"
+                contentLoader.source = "CarouselView_v2.qml"
         }
         */
     }
@@ -307,6 +311,31 @@ ApplicationWindow {
                         //console.log("📂 Legacy Call: Loading ALL Collections")
                         //contentLoader.item.collectionsModel = collectionLogic.load_collections_list()
                         contentLoader.item.collectionsModel = collectionLogic.load_all_collections_v2()
+                    }
+                }
+                // --- NEW: Auto-switch Grid/Carousel when a collection is selected ---
+                if (contentLoader.source.toString().includes("CollectionsGallery.qml")) {
+
+                    if (contentLoader.item && contentLoader.item.collectionSelected) {
+
+                        contentLoader.item.collectionSelected.connect(function(collectionItems) {
+
+                            window.currentCollectionItems = collectionItems
+
+                            if (collectionItems.length > 14) {
+                                window.useCarouselView = false
+                                contentLoader.setSource("ImageGridView_v2.qml", {
+                                    externalImageList: window.currentCollectionItems
+                                })
+                            } else {
+                                window.useCarouselView = true
+                                contentLoader.setSource("CarouselView_v2.qml", {
+                                    externalImageList: window.currentCollectionItems,
+                                    sortMode: "year",
+                                    showLabels: false
+                                })
+                            }
+                        })
                     }
                 }
 

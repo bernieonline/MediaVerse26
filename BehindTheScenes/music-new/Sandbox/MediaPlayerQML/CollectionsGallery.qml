@@ -4,6 +4,7 @@ import Qt5Compat.GraphicalEffects
 
 GridView {
     id: collectionsGrid
+    signal collectionSelected(var items)
     anchors.fill: parent
     anchors.margins: 30
     cellWidth: 280
@@ -48,11 +49,16 @@ GridView {
                 anchors.top: parent.top
                 hoverEnabled: true
                 onClicked: {
-                    //console.log("QML DEBUG: Main Card Clicked -> " + modelData.name)
                     if (collectionsGrid.logic) {
                         var filteredMovies = collectionsGrid.logic.get_collection_results(modelData.rules)
-                        contentLoader.setSource("ImageGridView_v2.qml", { "externalImageList": filteredMovies })
+
+                        // ⭐ NEW: Emit the signal so Loader can auto-switch views
+                        collectionsGrid.collectionSelected(filteredMovies)
+
+                        // ⭐ Existing behavior (kept exactly as-is)
+                        //contentLoader.setSource("ImageGridView_v2.qml", { "externalImageList": filteredMovies })
                     }
+
                 }
             }
 

@@ -3,125 +3,102 @@ import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
 
 Rectangle {
-    id: root
-    property var externalImageList: []
-    property var xmlDetails
-    property string _pendingImagePath: ""
-    property string currentFolderPath: ""
-
+    id: carouselRoot
+    anchors.fill: parent
     color: "transparent"
+
+    //
+    // --- GEOMETRY FOUNDATION ---
+    //
+
+    // Center poster = 2/3 of container height
+    property real posterHeight: height * 0.66
+    property real posterWidth: posterHeight * (2/3)
+
+    // Scale rules for the 5 visible items:
+    // Center = 1.0, next two = 0.5, outer two = 0.3
+   
+    property var scaleForIndex: function(i) {
+        let dist = Math.abs(carouselView.currentIndex - i)
+        if (dist === 0) return 1.1      // centre
+        if (dist === 1) return 0.88     // inner (10% larger)
+        if (dist === 2) return 0.75    // outer (10% smaller)
+        return 0.0                      // anything beyond 2 should not be visible
+    }
+
+
+    // Total width of the 5 scaled posters
+    //property real totalPosterWidth: posterWidth * (1.0 + 0.5 + 0.5 + 0.3 + 0.3)
+    
+    property real totalPosterWidth: posterWidth * 3.4
+
+    // Perfect spacing for exactly 5 posters across
+    //property real spacingValue: (width - totalPosterWidth) / 4
+    property real spacingValue: ((width - totalPosterWidth) / 4) * 0.25
+
+
+    //
+    // --- YOUR ORIGINAL PROPERTIES ---
+    //
+
+    property var externalImageList: []
+    property string sortMode: "year"
+    property bool showLabels: false
 
     signal launchVideoRequested(string cachePath)
     signal imageClicked(string cachePath, string originalPath)
 
-    ColumnLayout {
+    MetadataTools { id: metadata }
+
+    property var sortedList: metadata.sortList(externalImageList, sortMode)
+
+
+    //
+    // --- LISTVIEW (pure geometry, no effects) ---
+    //
+
+    ListView {
+        id: carouselView
         anchors.fill: parent
-        spacing: 10
+        orientation: ListView.Horizontal
+        spacing: carouselRoot.spacingValue
+        model: sortedList
+        clip: true
 
-        GridView {
-            id: imageGridView
-            // --- FIXED: Combined Priority Model ---
-            model: (externalImageList && externalImageList.length > 0) 
-                   ? externalImageList 
-                   : (fileSystemManager ? fileSystemManager.imageFiles : [])
-            
-            Layout.fillWidth: true
-            Layout.fillHeight: true
-            Layout.margins: 10
-            clip: true
-            flickableDirection: Flickable.VerticalFlick
+        preferredHighlightBegin: width / 2 - (carouselRoot.posterWidth / 2)
+        preferredHighlightEnd: width / 2 + (carouselRoot.posterWidth / 2)
+        highlightRangeMode: ListView.StrictlyEnforceRange
 
-            ScrollBar.vertical: ScrollBar { policy: ScrollBar.AlwaysOn }
+        leftMargin: carouselRoot.spacingValue
+        rightMargin: carouselRoot.spacingValue
 
-            cellWidth: imageGridView.width / 6
-            cellHeight: (imageGridView.width / 6) * 1.5
+        Component.onCompleted: currentIndex = Math.floor(count / 2)
 
-            delegate: ImageHolder {
-                width: imageGridView.width / 6
-                height: (imageGridView.width / 6) * 1.5
+        //
+        // --- DELEGATE (scaled geometry only) ---
+        //
+        delegate: Item {
+            width: carouselRoot.posterWidth * carouselRoot.scaleForIndex(index)
+            height: carouselRoot.posterHeight * carouselRoot.scaleForIndex(index)
 
-                // Uses the filePath provided by either Python or FileSystemManager
-                source: modelData.filePath
+            Rectangle {
+                anchors.fill: parent
+                radius: 8
+                color: "#111"
+                border.color: "white"
+                border.width: 1
+                clip: true
 
-                property bool doubleClickActive: false
+                Image {
+                    anchors.fill: parent
+                    source: modelData.filePath
+                    fillMode: Image.PreserveAspectFit
+                }
 
                 MouseArea {
                     anchors.fill: parent
-                    acceptedButtons: Qt.LeftButton
-
-                    property Timer singleClickTimer: Timer {
-                        interval: 250
-                        repeat: false
-                        onTriggered: {
-                            if (!parent.doubleClickActive) {
-                                root.imageClicked(modelData.filePath, modelData.originalPath)
-                            }
-                            parent.doubleClickActive = false
-                        }
-                    }
-
-                    onClicked: {
-                        singleClickTimer.stop()
-                        singleClickTimer.start()
-                    }
-
-                    onDoubleClicked: {
-                        parent.doubleClickActive = true
-                        singleClickTimer.stop()
-
-                        // --- DIAGNOSTIC INSPECTION ---
-                        console.log("-----------------i just double clicked grid view------------------------")
-                        console.log("🔎 [D-Click Debug] Raw modelData:", JSON.stringify(modelData))
-                        console.log("🔎 [D-Click Debug] Type:", typeof modelData)
-
-                        // Check the specific properties we are trying to use
-                        if (typeof modelData === "object" && modelData !== null) {
-                            console.log("🔎 [Property Check] fileName:", modelData.fileName)
-                            console.log("🔎 [Property Check] filePath:", modelData.filePath)
-                            console.log("🔎 [Property Check] originalPath:", modelData.originalPath)
-                        }
-                        // ----------------------------
-                        
-                        // Use originalPath/videoPath logic
-                        let videoPath = modelData.originalPath 
-                        // Fallback to your old search if originalPath isn't direct
-                        if (!videoPath && fileSystemManager) {
-                             videoPath = fileSystemManager.findVideoInFolder(window.selectedFolderPath, modelData.fileName)
-                        }
-
-                        console.log("🎯 Launching:", videoPath)
-                        SettingsManager.launch_video_with_preferred_player(videoPath)
-                    }
+                    onClicked: carouselRoot.imageClicked(modelData.filePath, modelData.originalPath)
                 }
-            }
-        }
-
-        Loader {
-            id: detailLoader
-            Layout.fillWidth: true
-            Layout.fillHeight: true
-            active: false
-            onLoaded: {
-                if (!item || !xmlDetails) return
-                item.xmlDetails = xmlDetails
-                item.imagePath = root._pendingImagePath
-                xmlDetails.loadXML(root._pendingImagePath)
-            }
-        }
-    }
-
-    Connections {
-        target: root
-        function onImageClicked(cachePath, originalPath) {
-            root._pendingImagePath = cachePath
-            detailLoader.source = "Detail_View.qml"
-            detailLoader.active = true
-            
-            if (detailLoader.item) {
-                detailLoader.item.imagePath = cachePath
-                detailLoader.item.originalXmlPath = originalPath
-                var vid = fileSystemManager.findVideoForImage(cachePath)
-                detailLoader.item.videoPath = vid
             }
         }
     }
