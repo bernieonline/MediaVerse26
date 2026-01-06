@@ -8,16 +8,18 @@ Rectangle {
     height: parent ? parent.height : 800
     color: "transparent"
 
+    // ----------------------------------------------------------------
+    // 1. PROPERTIES & LOGIC
+    // ----------------------------------------------------------------
     property var externalImageList: []
     property int currentPage: 0
     property int itemsPerPage: 12
     property bool showLabels: true
     property string sortMode: "oldest"
 
-    // Component from your MetadataTools.qml
     MetadataTools { id: metadata }
 
-    // This triggers a re-sort whenever sortMode or externalImageList changes
+    // Re-sorts whenever sortMode or list changes
     property var sortedList: metadata.sortList(externalImageList, sortMode)
 
     readonly property real labelHeight: showLabels ? 45 : 0
@@ -32,13 +34,13 @@ Rectangle {
         return sortedList.slice(start, start + itemsPerPage);
     }
 
-    // ============================================================
-    // MAIN LAYOUT (Moved up so it's behind the drawer)
-    // ============================================================
+    // ----------------------------------------------------------------
+    // 2. MAIN LAYOUT
+    // ----------------------------------------------------------------
     Row {
         anchors.fill: parent
         spacing: 0
-        z: 1 // Base layer
+        z: 1
 
         // LEFT NAV
         Rectangle {
@@ -77,20 +79,66 @@ Rectangle {
                         Column {
                             anchors.fill: parent
                             spacing: 5
-                            Rectangle {
-                                width: parent.width; height: gridRoot.posterHeight
-                                radius: 8; color: "#111"; border.color: "white"; border.width: 1; clip: true
-                                Image {
+
+                            // POSTER WRAPPER (Allows Badge to float over clipped Image)
+                            Item {
+                                width: parent.width
+                                height: gridRoot.posterHeight
+
+                                Rectangle {
+                                    id: posterRect
                                     anchors.fill: parent
-                                    source: modelData.filePath || ""
-                                    fillMode: Image.PreserveAspectCrop
+                                    radius: 8
+                                    color: "#111"
+                                    border.color: "white"
+                                    border.width: 1
+                                    clip: true
+
+                                    Image {
+                                        anchors.fill: parent
+                                        source: modelData.filePath || ""
+                                        fillMode: Image.PreserveAspectCrop
+                                        asynchronous: true
+                                    }
+                                }
+
+                                // YEAR BADGE
+                                Rectangle {
+                                    id: yearBadge
+                                    width: 38
+                                    height: 20
+                                    radius: 4
+                                    color: "#CC000000" // 80% opacity black
+                                    anchors.top: parent.top
+                                    anchors.right: parent.right
+                                    anchors.topMargin: 6
+                                    anchors.rightMargin: 6
+                                    z: 10 // Force visibility over the image
+
+                                    // Safely extract year
+                                    property int yearVal: metadata.extractYear(modelData.filePath)
+                                    visible: yearVal !== 0
+
+                                    Text {
+                                        anchors.centerIn: parent
+                                        text: parent.yearVal
+                                        color: "white"
+                                        font.pixelSize: 10
+                                        font.bold: true
+                                    }
                                 }
                             }
+
+                            // TITLE LABEL
                             Text {
                                 width: parent.width
                                 text: metadata.extractCleanTitle(modelData.filePath)
-                                color: "white"; font.pixelSize: 11; horizontalAlignment: Text.AlignHCenter
-                                elide: Text.ElideRight; maximumLineCount: 2; wrapMode: Text.WordWrap
+                                color: "white"
+                                font.pixelSize: 11
+                                horizontalAlignment: Text.AlignHCenter
+                                elide: Text.ElideRight
+                                maximumLineCount: 2
+                                wrapMode: Text.WordWrap
                                 visible: gridRoot.showLabels
                             }
                         }
@@ -117,64 +165,51 @@ Rectangle {
         }
     }
 
-    // ============================================================
-    // SLIDE-UP SORT DRAWER (Placed LAST and with Z: 100)
-    // ============================================================
+    // ----------------------------------------------------------------
+    // 3. SORT DRAWER
+    // ----------------------------------------------------------------
     Rectangle {
         id: sortDrawer
-        z: 100 // FORCES IT TO BE ON TOP OF THE GRID
+        z: 100
         width: 110
-        height: drawerOpen ? 160 : 30 // Slightly taller for easier clicking
-
-        anchors.bottom: gridRoot.bottom
-        anchors.right: gridRoot.right
+        height: drawerOpen ? 160 : 35
+        anchors.bottom: parent.bottom
+        anchors.right: parent.right
         anchors.bottomMargin: 16
         anchors.rightMargin: 16
-
-        visible: sortedList && sortedList.length > 0
-        color: drawerOpen ? "#222222" : "#33000000" // Subtle tint when closed
+        color: drawerOpen ? "#222" : "#44000000"
         border.color: drawerOpen ? "white" : "transparent"
         border.width: 1
         radius: 8
-
         property bool drawerOpen: false
 
-        // Animation for smoothness
         Behavior on height { NumberAnimation { duration: 200; easing.type: Easing.InOutQuad } }
 
         MouseArea {
-            id: toggleArea
-            anchors.fill: parent // Fill entire drawer area
-            // We only want to toggle if the drawer is closed OR if clicking the top bar
-            onClicked: {
-                sortDrawer.drawerOpen = !sortDrawer.drawerOpen
-            }
-
-            // HAMBURGER ICON
+            anchors.fill: parent
+            onClicked: sortDrawer.drawerOpen = !sortDrawer.drawerOpen
+            
             Column {
                 anchors.right: parent.right
                 anchors.top: parent.top
                 anchors.rightMargin: 10
-                anchors.topMargin: 10
+                anchors.topMargin: 12
                 spacing: 3
-
-                Rectangle { width: 18; height: 2; radius: 1; color: "white" }
-                Rectangle { width: 18; height: 2; radius: 1; color: "white" }
-                Rectangle { width: 18; height: 2; radius: 1; color: "white" }
+                Rectangle { width: 16; height: 2; color: "white" }
+                Rectangle { width: 16; height: 2; color: "white" }
+                Rectangle { width: 16; height: 2; color: "white" }
             }
         }
 
-        // STACKED OPTIONS
         Column {
             anchors.top: parent.top
-            anchors.topMargin: 40 // Push down below hamburger
+            anchors.topMargin: 40
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.margins: 10
             spacing: 12
             visible: sortDrawer.drawerOpen
 
-            // Helper component for sort buttons
             Repeater {
                 model: [
                     { name: "Oldest First", mode: "oldest" },
@@ -185,10 +220,9 @@ Rectangle {
                 delegate: Text {
                     text: modelData.name
                     color: gridRoot.sortMode === modelData.mode ? "yellow" : "white"
-                    font.pixelSize: 12
+                    font.pixelSize: 11
                     font.bold: gridRoot.sortMode === modelData.mode
                     width: parent.width
-                    
                     MouseArea {
                         anchors.fill: parent
                         onClicked: {
