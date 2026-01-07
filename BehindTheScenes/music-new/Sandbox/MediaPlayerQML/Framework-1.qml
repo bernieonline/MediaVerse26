@@ -353,6 +353,30 @@ ApplicationWindow {
                     })
                 }
 
+                // --- NEW: V2 Grid → Detail View connection ---
+                if (contentLoader.item && contentLoader.item.v2OpenDetail) {
+                    contentLoader.item.v2OpenDetail.connect(function(movie) {
+
+                        console.log("📌 V2 Grid clicked →", movie.display)
+
+                        // 1. Resolve full-size image + XML via Python
+                        let resolved = _xmlController.resolve_paths(movie.display)
+
+                        console.log("   → resolved.image =", resolved.image)
+                        console.log("   → resolved.xml   =", resolved.xml)
+
+                        // 2. Load the V2 Detail View
+                        contentLoader.setSource("Detail_View_v2.qml", {
+                            imagePath: resolved.image,
+                            xmlPath: resolved.xml
+                        })
+                    })
+                }
+
+
+
+
+
                 // --- Existing: Double‑click connection ---
                 if (contentLoader.item && contentLoader.item.launchVideoRequested) {
                     contentLoader.item.launchVideoRequested.connect(function(cachePath) {

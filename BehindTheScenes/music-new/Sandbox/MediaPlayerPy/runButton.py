@@ -29,8 +29,8 @@ Rectangle {
                 // --------------------------------------------------------
                 // 1. Test image (DISPLAY tier — correct 2:3 ratio)
                 // --------------------------------------------------------
-                let testImagePath =
-                    "file:///D:/MediaVerse1.0/BehindTheScenes/BehindTheScenes/music-new/cacheV2/images/display/Chisum (1970).jpg"
+                let testImagePath =  _paths.local_display_v2 + "/Chisum (1970).jpg"
+                    //"file:///D:/MediaVerse1.0/BehindTheScenes/BehindTheScenes/music-new/cacheV2/images/display/Chisum (1970).jpg"
 
                 // --------------------------------------------------------
                 // 2. Test XML path (server path)

@@ -75,17 +75,22 @@ Row {
         fixedHeight: buttonRow.buttonHeight
 
         onClicked: {
-            // Hardcoded carousel-tier poster for Step 1
-            let testImagePath =
-                "file:///D:/MediaVerse1.0/BehindTheScenes/BehindTheScenes/music-new/cacheV2/images/display/Chisum (1970).jpg"
+            // 1. The manifest-style relative path (exactly as stored in manifest.json)
+            let manifestDisplayPath = "Cache/display/Chisum (1970).jpg"
 
-            console.log("DEBUG: Loading Detail_View_v2 with image =", testImagePath)
+            // 2. Ask Python to resolve BOTH the absolute image path and the XML path
+            let resolved = _xmlController.resolve_paths(manifestDisplayPath)
 
-            // Load the detail view with ONLY the image path
+            console.log("DEBUG: resolved.image =", resolved.image)
+            console.log("DEBUG: resolved.xml   =", resolved.xml)
+
+            // 3. Load the detail view with the resolved absolute paths
             contentLoader.setSource("Detail_View_v2.qml", {
-                imagePath: testImagePath
+                imagePath: resolved.image,
+                xmlPath: resolved.xml
             })
         }
+
     }
 
     // --- Close Button ---

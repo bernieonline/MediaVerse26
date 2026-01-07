@@ -126,7 +126,12 @@ Rectangle {
                                         )
                                         singleClickTimer.triggered.connect(function() {
                                             if (!doubleClickActive) {
-                                                gridRoot.v2OpenDetail(modelData)
+                                                gridRoot.v2OpenDetail({
+                                                    display: modelData.display,                     // manifest key
+                                                    filePath: modelData.filePath,                   // local thumbnail (grid only)
+                                                    title: metadata.extractCleanTitle(modelData.filePath),
+                                                    year: metadata.extractYear(modelData.filePath)
+                                                })
                                             }
                                             doubleClickActive = false
                                         })

@@ -188,3 +188,93 @@ class XmlController(QObject):
             print(f"    Error: {e}")
             print("────────────────────────────────────────────")
             self._xml_fields = {}
+
+    @Slot(str, result="QVariantMap")
+    def resolve_paths(self, manifest_display_path):
+        import urllib.parse
+        import os
+        from pathlib import Path
+
+        print("\n==============================")
+        print("[resolve_paths] START")
+        print(f"[resolve_paths] manifest_display_path = {manifest_display_path}")
+
+        # ------------------------------------------------------------
+        # 0. Normalize and decode the incoming path
+        # ------------------------------------------------------------
+        raw = manifest_display_path or ""
+        raw = urllib.parse.unquote(raw)  # decode %20 etc.
+
+        # Strip file:/// prefix if present
+        if raw.startswith("file:///"):
+            raw = raw[8:]
+
+        raw_norm = raw.replace("\\", "/")
+        print(f"[resolve_paths] normalized input = {raw_norm}")
+
+        # ------------------------------------------------------------
+        # 1. Determine whether this is a thumb or display path
+        # ------------------------------------------------------------
+        is_thumb = "cacheV2/images/thumb" in raw_norm
+        is_display = "cacheV2/images/display" in raw_norm
+
+        # Extract filename
+        filename = os.path.basename(raw_norm)
+        print(f"[resolve_paths] filename = {filename}")
+        print(f"[resolve_paths] is_thumb={is_thumb}, is_display={is_display}")
+
+        # ------------------------------------------------------------
+        # 2. Build the correct display image path
+        # ------------------------------------------------------------
+        display_root = Path(paths["local_display_v2"])
+        print(f"[resolve_paths] local_display_v2 = {display_root}")
+
+        if is_thumb:
+            # Convert thumb → display
+            display_path = display_root / filename
+        else:
+            # Already a display path
+            display_path = Path(raw_norm)
+
+        # Always convert to file:/// URI
+        image_path = "file:///" + str(display_path).replace("\\", "/")
+        print(f"[resolve_paths] resolved image_path = {image_path}")
+
+        # ------------------------------------------------------------
+        # 3. Manifest lookup for XML
+        # ------------------------------------------------------------
+        manifest_file = Path(paths["server_manifest_v2"])
+        print(f"[resolve_paths] manifest file = {manifest_file}")
+
+        xml_path = ""
+
+        try:
+            with open(manifest_file, "r", encoding="utf-8") as f:
+                manifest = json.load(f)
+
+            items = manifest.get("items", [])
+            print(f"[resolve_paths] manifest loaded, items = {len(items)}")
+
+            # Match by filename only (most reliable)
+            for item in items:
+                manifest_display = item["cache"]["display"]
+                manifest_filename = os.path.basename(manifest_display)
+
+                if manifest_filename == filename:
+                    xml_path = Path(item["shared"]["xml"]).as_uri()
+                    print(f"[resolve_paths] MATCH FOUND → xml_path = {xml_path}")
+                    break
+
+            if not xml_path:
+                print("[resolve_paths] WARNING: No matching XML entry found in manifest")
+
+        except Exception as e:
+            print(f"[resolve_paths] ERROR reading manifest: {e}")
+
+        print("[resolve_paths] END")
+        print("==============================\n")
+
+        return {
+            "image": image_path,
+            "xml": xml_path
+        }

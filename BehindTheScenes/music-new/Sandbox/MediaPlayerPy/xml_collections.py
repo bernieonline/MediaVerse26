@@ -766,7 +766,8 @@ class XMLCollections(QObject):
                 "originalPath": video_path,
                 "fileName": item.get("Title", "Unknown"),
                 # Expose year if QML ever wants it directly
-                "year": year_value
+                "year": year_value,
+                "display": rel_cache_path
             })
 
         print(f"[V2] Total results returned = {len(results)}\n")

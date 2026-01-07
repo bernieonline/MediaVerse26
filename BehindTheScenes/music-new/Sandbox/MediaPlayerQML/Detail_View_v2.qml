@@ -7,8 +7,53 @@ Rectangle {
     anchors.fill: parent
     color: "transparent"
 
+    property string xmlPath: ""
+
+
+
     Component.onCompleted: {
         console.log("DEBUG: xmlController =", xmlController)
+        console.log("DEBUG: xmlPath received =", xmlPath)
+
+        // 1) Start from the QML imagePath
+        var decoded = decodeURIComponent(imagePath)
+        if (decoded.startsWith("file:///"))
+            decoded = decoded.substring(8)
+
+        console.log("DEBUG: raw imagePath =", decoded)
+
+        // 2) Extract the cache-local path used as manifest key
+        //    e.g. from:
+        //    D:/MediaVerse1.0/.../cacheV2/images/display/Western HD/Chisum (1970).jpg
+        //    to:
+        //    Western HD/Chisum (1970).jpg
+        var marker = "cacheV2/images/display/"
+        var keyPath = decoded
+        var idx = decoded.indexOf(marker)
+        if (idx !== -1)
+            keyPath = decoded.substring(idx + marker.length)
+
+        console.log("DEBUG: manifest lookup key (local image path) =", keyPath)
+
+        // 🔒 No xmlController lookup here yet — just printing what we *would* pass in
+
+
+        if (xmlPath && xmlPath.length > 0) {
+            xmlController.loadXML(xmlPath)
+
+            var cats = xmlController.getCategories()
+            if (cats.length > 0) {
+                tabBar.currentIndex = 0
+                xmlController.requestCategoryContent(cats[0])
+            }
+        }
+
+
+
+
+
+
+
     }
 
     // ============================================================
