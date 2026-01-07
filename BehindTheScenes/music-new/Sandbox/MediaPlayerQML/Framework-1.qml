@@ -373,19 +373,24 @@ ApplicationWindow {
                     })
                 }
 
+                if (contentLoader.item && contentLoader.item.v2PlayMovie) {
+                    contentLoader.item.v2PlayMovie.connect(function(videoPath) {
 
+                        console.log("🎬 V2 PlayMovie →", videoPath)
 
-
+                        // 1. Call Python to launch JRiver / fallback player
+                        _xmlController.play_movie(videoPath)
+                    })
+                }
 
                 // --- Existing: Double‑click connection ---
-                if (contentLoader.item && contentLoader.item.launchVideoRequested) {
-                    contentLoader.item.launchVideoRequested.connect(function(cachePath) {
-                        var filename = window.filenameFromCachePath(cachePath)
-                        window.selectedImageFile = filename
-                        var videoPath = fileSystemManager.findVideoInFolder(window.selectedFolderPath, filename)
-                        videoPanel.videoPath = videoPath
-                        videoPanel.isPlaying = true
-                        isVideoPanelVisible = true
+                if (contentLoader.item && contentLoader.item.v2PlayMovie) {
+                    contentLoader.item.v2PlayMovie.connect(function(videoPath) {
+
+                        console.log("🎬 V2 PlayMovie →", videoPath)
+
+                        // Call Python to launch JRiver / fallback player
+                        _xmlController.play_movie(videoPath)
                     })
                 }
             } // End of onLoaded

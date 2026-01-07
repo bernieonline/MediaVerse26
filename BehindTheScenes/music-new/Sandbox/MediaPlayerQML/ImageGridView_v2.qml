@@ -141,8 +141,14 @@ Rectangle {
                                     onDoubleClicked: {
                                         doubleClickActive = true
                                         if (singleClickTimer) singleClickTimer.stop()
-                                        gridRoot.v2PlayMovie(modelData)
-                                    }
+
+                                        // ⭐ Resolve full V2 paths (image, xml, video)
+                                        let resolved = _xmlController.resolve_paths(modelData.display)
+
+                                        // ⭐ Play the movie using the manifest video path
+                                         gridRoot.v2PlayMovie(resolved.video)
+                                        
+                                    }//click
                                 }
 
                                 // YEAR BADGE

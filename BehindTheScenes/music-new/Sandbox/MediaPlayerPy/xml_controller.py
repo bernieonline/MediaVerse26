@@ -262,7 +262,10 @@ class XmlController(QObject):
 
                 if manifest_filename == filename:
                     xml_path = Path(item["shared"]["xml"]).as_uri()
+                    video_path = item["shared"].get("video", "")
                     print(f"[resolve_paths] MATCH FOUND → xml_path = {xml_path}")
+                    video_path = str(item["shared"].get("video", "") or "")
+
                     break
 
             if not xml_path:
@@ -276,5 +279,8 @@ class XmlController(QObject):
 
         return {
             "image": image_path,
-            "xml": xml_path
+            "xml": xml_path,
+            "video": video_path
+
+
         }
