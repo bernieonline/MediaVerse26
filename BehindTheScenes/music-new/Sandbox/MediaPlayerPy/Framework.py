@@ -128,7 +128,7 @@ def main():
         ctx.setContextProperty("fontPathFA", font_url)
         ctx.setContextProperty("notificationManager", notifier)
         ctx.setContextProperty("manifestUpdater", manifest_updater)
-        ctx.setContextProperty("xmlController", xml_controller)
+        ctx.setContextProperty("_xmlController", xml_controller)
         ctx.setContextProperty("xmlDetails", xml_provider)
         ctx.setContextProperty("myLibraryModel", myLibrary)
         ctx.setContextProperty("thumbsPath", paths["thumbs"].as_uri())

@@ -31,8 +31,7 @@ ApplicationWindow {
     property var currentCollectionItems: []
     property bool useCarouselView: false
 
-
-
+    property var xmlController: _xmlController
 
     Material.theme: Material.Dark
     Material.accent: Material.Yellow

@@ -81,7 +81,7 @@ class XmlController(QObject):
 
     # ---------------- XML parsing ----------------
     @Slot(str)
-    def loadXML(self, image_path: str):
+    def loadXMLOld(self, image_path: str):
         """Parse XML sidecar file for the given image path."""
         try:
             print(f"🔎 loadXML called with image_path: {image_path}")
@@ -154,3 +154,37 @@ class XmlController(QObject):
             new_index = (currentIndex - 1 + totalTabs) % totalTabs
             print(f"🔎 prevTab → {new_index}")
             self.tabChangeRequested.emit(new_index)
+
+
+    @Slot(str)
+    def loadXML(self, xml_path_str: str):
+        """Load XML directly from the provided server path."""
+        try:
+            print("────────────────────────────────────────────")
+            print(f"📥 [XmlController] loadXML() called")
+            print(f"    Raw xmlPath: {xml_path_str}")
+
+            xml_fs_path = self._file_url_to_path(xml_path_str)
+            print(f"    Resolved filesystem path: {xml_fs_path}")
+
+            tree = ET.parse(xml_fs_path)
+            root = tree.getroot()
+
+            parsed = {}
+            for field in root.findall(".//Field"):
+                name = field.get("Name")
+                value = field.text.strip() if field.text else ""
+                if name:
+                    parsed[name] = value
+
+            self._xml_fields = parsed
+            print(f"    Parsed fields: {len(parsed)} entries")
+            print("📄 [XmlController] XML load complete")
+            print("────────────────────────────────────────────")
+
+        except Exception as e:
+            print("❌ [XmlController] XML load FAILED")
+            print(f"    Path: {xml_path_str}")
+            print(f"    Error: {e}")
+            print("────────────────────────────────────────────")
+            self._xml_fields = {}

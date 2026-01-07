@@ -10,8 +10,7 @@ Row {
 
     property int buttonWidth: 150
     property int buttonHeight: 60
-    // Reduced to 6 after removing the legacy "View Collections" button
-    property int buttonCount: 6 
+    property int buttonCount: 6
     property real spacingCalc: (width - (buttonCount * buttonWidth)) / (buttonCount - 1)
 
     spacing: spacingCalc
@@ -43,7 +42,7 @@ Row {
         }
     }
 
-    // --- COLLECTIONS (Formerly Curations) ---
+    // --- Collections Button ---
     StyledButton {
         id: collectionsButton
         text: "Collections"
@@ -51,12 +50,11 @@ Row {
         fixedHeight: buttonRow.buttonHeight
         onClicked: {
             notificationManager.post_notification("Loading Collections...", false)
-            // Loads the CategoryMenu (the 2x3 grid) as the main collections entry
             contentLoader.setSource("CategoryMenu.qml")
         }
     }
 
-    // --- CREATE COLLECTION ---
+    // --- Create Collection ---
     StyledButton {
         id: createCollectionButton
         text: "Create Collection"
@@ -67,20 +65,26 @@ Row {
         }
     }
 
-    // --- View Toggle Button ---
+    // ============================================================
+    //  TEMPORARY TEST BUTTON — loads Detail_View_v2 with poster
+    // ============================================================
     StyledButton {
         id: viewToggleButton
-        property bool isGridView: true
-        text: isGridView ? "Carousel View" : "Grid View"
+        text: "Test Detail View"
         fixedWidth: buttonRow.buttonWidth
         fixedHeight: buttonRow.buttonHeight
+
         onClicked: {
-            isGridView = !isGridView
-            if (isGridView) {
-                contentLoader.setSource("ImageGridView.qml", { xmlDetails: xmlDetails })
-            } else {
-                contentLoader.source = "CarouselView.qml"
-            }
+            // Hardcoded carousel-tier poster for Step 1
+            let testImagePath =
+                "file:///D:/MediaVerse1.0/BehindTheScenes/BehindTheScenes/music-new/cacheV2/images/display/Chisum (1970).jpg"
+
+            console.log("DEBUG: Loading Detail_View_v2 with image =", testImagePath)
+
+            // Load the detail view with ONLY the image path
+            contentLoader.setSource("Detail_View_v2.qml", {
+                imagePath: testImagePath
+            })
         }
     }
 

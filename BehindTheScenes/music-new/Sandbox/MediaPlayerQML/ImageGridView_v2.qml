@@ -9,6 +9,12 @@ Rectangle {
     color: "transparent"
 
     // ----------------------------------------------------------------
+    // 0. V2 CLICK SIGNALS (NEW)
+    // ----------------------------------------------------------------
+    signal v2OpenDetail(var movie)
+    signal v2PlayMovie(var movie)
+
+    // ----------------------------------------------------------------
     // 1. PROPERTIES & LOGIC
     // ----------------------------------------------------------------
     property var externalImageList: []
@@ -72,6 +78,7 @@ Rectangle {
 
                 Repeater {
                     model: gridRoot.pageItems
+
                     delegate: Item {
                         width: gridRoot.posterWidth
                         height: gridRoot.posterHeight + gridRoot.labelHeight
@@ -80,7 +87,7 @@ Rectangle {
                             anchors.fill: parent
                             spacing: 5
 
-                            // POSTER WRAPPER (Allows Badge to float over clipped Image)
+                            // POSTER WRAPPER
                             Item {
                                 width: parent.width
                                 height: gridRoot.posterHeight
@@ -102,20 +109,50 @@ Rectangle {
                                     }
                                 }
 
+                                // ----------------------------------------------------
+                                // CLICK HANDLER (NEW — V2)
+                                // ----------------------------------------------------
+                                MouseArea {
+                                    anchors.fill: parent
+                                    acceptedButtons: Qt.LeftButton
+                                    property bool doubleClickActive: false
+                                    property var singleClickTimer: null
+
+                                    onClicked: {
+                                        if (singleClickTimer) singleClickTimer.stop()
+                                        singleClickTimer = Qt.createQmlObject(
+                                            'import QtQuick 2.15; Timer { interval: 250; repeat: false }',
+                                            gridRoot
+                                        )
+                                        singleClickTimer.triggered.connect(function() {
+                                            if (!doubleClickActive) {
+                                                gridRoot.v2OpenDetail(modelData)
+                                            }
+                                            doubleClickActive = false
+                                        })
+                                        singleClickTimer.start()
+                                    }
+
+                                    onDoubleClicked: {
+                                        doubleClickActive = true
+                                        if (singleClickTimer) singleClickTimer.stop()
+                                        gridRoot.v2PlayMovie(modelData)
+                                    }
+                                }
+
                                 // YEAR BADGE
                                 Rectangle {
                                     id: yearBadge
                                     width: 38
                                     height: 20
                                     radius: 4
-                                    color: "#CC000000" // 80% opacity black
+                                    color: "#CC000000"
                                     anchors.top: parent.top
                                     anchors.right: parent.right
                                     anchors.topMargin: 6
                                     anchors.rightMargin: 6
-                                    z: 10 // Force visibility over the image
+                                    z: 10
 
-                                    // Safely extract year
                                     property int yearVal: metadata.extractYear(modelData.filePath)
                                     visible: yearVal !== 0
 
@@ -188,7 +225,7 @@ Rectangle {
         MouseArea {
             anchors.fill: parent
             onClicked: sortDrawer.drawerOpen = !sortDrawer.drawerOpen
-            
+
             Column {
                 anchors.right: parent.right
                 anchors.top: parent.top

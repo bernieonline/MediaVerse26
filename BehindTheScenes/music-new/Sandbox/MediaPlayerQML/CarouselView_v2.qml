@@ -9,6 +9,7 @@ Rectangle {
 
     property var externalImageList: []
     property string sortMode: "year"
+    
 
     // --- METADATA TOOLS (real title + year) ---
     MetadataTools { id: metadata }
