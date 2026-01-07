@@ -7,11 +7,13 @@ Rectangle {
     height: parent ? parent.height : 800
     color: "transparent"
 
+    // --- NEW: V2 click signal ---
+    signal v2OpenDetail(var movie)
+
     property var externalImageList: []
     property string sortMode: "year"
-    
 
-    // --- METADATA TOOLS (real title + year) ---
+    // --- METADATA TOOLS ---
     MetadataTools { id: metadata }
 
     // If you later re-enable sort, swap this line:
@@ -91,6 +93,19 @@ Rectangle {
                             anchors.fill: parent
                             source: modelData.filePath || ""
                             fillMode: Image.PreserveAspectFit
+                        }
+
+                        // --- NEW: CLICK HANDLER FOR CAROUSEL ---
+                        MouseArea {
+                            anchors.fill: parent
+                            onClicked: {
+                                carouselRoot.v2OpenDetail({
+                                    display: modelData.filePath,   // already a display path
+                                    filePath: modelData.filePath,  // optional but consistent
+                                    title: metadata.extractCleanTitle(modelData.filePath),
+                                    year: metadata.extractYear(modelData.filePath)
+                                })
+                            }
                         }
                     }
                 }
