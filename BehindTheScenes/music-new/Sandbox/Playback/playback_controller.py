@@ -86,27 +86,91 @@ class PlaybackController:
             logger.error(f"Search error: {e}")
             return None
 
+    def _execute_sequence(self, path):
+        try:
+            self._is_processing = True
+            # Use the key we know is correct for this file
+            file_key = "402939" 
+            
+            logger.info("Step 1: Clearing JRiver state...")
+            # Use a very long timeout for the first 'Wake up' call
+            try:
+                requests.get(f"{self.url}/Playback/Stop", timeout=5)
+            except:
+                pass # If JRiver is sluggish, just keep going
+            
+            time.sleep(2) 
+
+            # Step 2: Trigger Play (The command that worked)
+            mcc_url = f"{self.url}/Control/MCC?Command=10001&Parameter={file_key}"
+            logger.info(f"Step 2: Sending Play Command for Key {file_key}")
+            
+            # Fire and forget - don't wait for JRiver to finish loading the video
+            requests.get(mcc_url, timeout=2)
+            
+            # Step 3: Silence. Give JRiver 30 seconds of pure peace to load the .m2ts
+            logger.info("Step 3: Playback triggered. Silencing API for 30s to prevent crash...")
+            self._run_watchdog()
+
+        except Exception as e:
+            logger.error(f"Bridge connection error: {e}. Is JRiver running?")
+        finally:
+            self._is_processing = False
+
     def _run_watchdog(self):
-        """The 'Hand-back' loop. Waits for movie to stop then tells Mediaverse to pop up."""
-        time.sleep(10) # Wait for JRiver to initialize the video
+        # We wait 30 seconds before we even ASK JRiver for its status
+        time.sleep(30) 
         while True:
             try:
-                # Check JRiver Status
                 r = requests.get(f"{self.url}/Playback/Info", timeout=5)
                 root = ET.fromstring(r.text)
-                
-                state = "0" 
+                state = "0"
                 for item in root.findall(".//Item"):
                     if item.get("Name") == "State":
                         state = item.text
                         break
                 
-                if state == "0": # 0 = Stopped
-                    logger.info("Playback Stopped. Emitting finish signal.")
+                if state == "0":
+                    logger.info("Movie finished. Returning focus.")
                     self.bridge.playbackFinished.emit()
                     break
+                time.sleep(10) # Check very infrequently (every 10s)
+            except:
+                # If JRiver blips, just wait 10s and try again
+                time.sleep(10)
+
+    def _run_watchdog(self):
+        """Monitors JRiver without crashing on initial timeouts."""
+        # INCREASED WAIT: Give JRiver 15 seconds to fully load the video engine
+        logger.info("Waiting 15s for JRiver engine to stabilize...")
+        time.sleep(15) 
+        
+        logger.info("Watchdog Active: Monitoring playback status...")
+        
+        while True:
+            try:
+                # Check JRiver status with a short timeout so we don't hang
+                r = requests.get(f"{self.url}/Playback/Info", timeout=2)
                 
+                if r.status_code == 200:
+                    root = ET.fromstring(r.text)
+                    state = "0"
+                    for item in root.findall(".//Item"):
+                        if item.get("Name") == "State":
+                            state = item.text
+                            break
+                    
+                    # If state is 0, the movie has been stopped
+                    if state == "0":
+                        logger.info("Stop detected. Signaling Mediaverse.")
+                        self.bridge.playbackFinished.emit()
+                        break
+                
+                time.sleep(5) # Check every 5 seconds (gentler on the CPU)
+
+            except requests.exceptions.RequestException:
+                # If we get a timeout here, JRiver is just busy. 
+                # Don't crash, just wait and try again.
+                logger.debug("JRiver busy (timeout)... retrying in 5s.")
                 time.sleep(5)
-            except Exception as e:
-                logger.error(f"Watchdog error: {e}")
-                break
+                continue
