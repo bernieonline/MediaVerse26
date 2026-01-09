@@ -1,39 +1,78 @@
-import subprocess
-import os
+import requests
+import time
+import xml.etree.ElementTree as ET
+import ctypes
 
-def launch_jriver(video_path, jriver_path):
-    """
-    Launch JRiver Media Center with a given video file.
-    
-    :param video_path: Path to the video file (string)
-    :param jriver_path: Path to JRiver executable (string)
-    """
-    
-    
+URL = "http://localhost:52199/MCWS/v1"
+# The filename from your selection
+TARGET_FILE = "For a Fistful of Dollars (1964).m2ts"
 
-    if not os.path.exists(video_path):
-        print(f"❌ Video file not found: {video_path}")
-        return
+def test_jriver_robust():
+    print(f"Targeting JRiver: {URL}")
     
-    if not os.path.exists(jriver_path):
-        print(f"❌ JRiver executable not found: {jriver_path}")
-        return
+    # Use a simpler query: just the filename without the path
+    # This avoids the W:/ vs W:\ slash conflict
+    search_url = f"{URL}/Files/Search?Query=[Filename]=[{TARGET_FILE}]"
     
     try:
-        # Launch JRiver with the video file
-        subprocess.Popen([jriver_path, video_path])
-        print(f"🎥 Launched JRiver with: {video_path}")
-    except Exception as e:
-        print(f"❌ Failed to launch JRiver: {e}")
+        print(f"Searching for: {TARGET_FILE}...")
+        r = requests.get(search_url)
+        root = ET.fromstring(r.text)
+        
+        file_key = None
+        # Look for the Key in the results
+        for item in root.findall(".//Item"):
+            for field in item.findall("Field"):
+                if field.get("Name") == "Key":
+                    file_key = field.text
+                    break
+        
+        if not file_key:
+            print("File not found. Attempting a 'Like' search...")
+            # Fallback: Search for the title alone
+            fallback_url = f"{URL}/Files/Search?Query=Fistful of Dollars"
+            r = requests.get(fallback_url)
+            root = ET.fromstring(r.text)
+            # Take the first result
+            item = root.find(".//Item")
+            if item is not None:
+                for field in item.findall("Field"):
+                    if field.get("Name") == "Key":
+                        file_key = field.text
+                        break
 
+        if not file_key:
+            print("CRITICAL: File not found in JRiver Library. Please check JRiver import.")
+            return
+
+        print(f"SUCCESS: Found File Key {file_key}")
+
+        # 1. Trigger Playback
+        requests.get(f"{URL}/Playback/PlayById?Key={file_key}")
+        print("Playback triggered in JRiver.")
+
+        # 2. The Watchdog (The Transition Bridge)
+        time.sleep(3) # Let the engine warm up
+        while True:
+            status_resp = requests.get(f"{URL}/Playback/Info")
+            status_xml = ET.fromstring(status_resp.text)
+            
+            state = "0"
+            for item in status_xml.findall(".//Item"):
+                if item.get("Name") == "State":
+                    state = item.text
+                    break
+            
+            if state == "0":
+                print("\nPlayback Stopped. Returning to Mediaverse...")
+                ctypes.windll.user32.MessageBoxW(0, "Handing back to Mediaverse", "Done", 0)
+                break
+            
+            print(f"Movie is playing (State {state})...", end="\r")
+            time.sleep(2)
+
+    except Exception as e:
+        print(f"Error: {e}")
 
 if __name__ == "__main__":
-    # Your video file path
-    video_file = r"W:\Collection\Caine\Cider House Rules (1999).m2ts"
-    
-    # Replace this with the actual JRiver executable path on your system
-    jriver_exe = r"C:\Program Files\J River\Media Center 33\MC33.exe"
-
-   
-    
-    launch_jriver(video_file, jriver_exe)
+    test_jriver_robust()

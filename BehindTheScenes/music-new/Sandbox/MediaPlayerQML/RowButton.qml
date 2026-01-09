@@ -7,10 +7,11 @@ Row {
     anchors.left: parent.left
     anchors.right: parent.right
     anchors.margins: 50   
+    //property var play_video_from_qml
 
     property int buttonWidth: 150
     property int buttonHeight: 60
-    property int buttonCount: 6
+    property int buttonCount: 7   // UPDATED: now 7 buttons total
     property real spacingCalc: (width - (buttonCount * buttonWidth)) / (buttonCount - 1)
 
     spacing: spacingCalc
@@ -75,22 +76,38 @@ Row {
         fixedHeight: buttonRow.buttonHeight
 
         onClicked: {
-            // 1. The manifest-style relative path (exactly as stored in manifest.json)
             let manifestDisplayPath = "Cache/display/Chisum (1970).jpg"
-
-            // 2. Ask Python to resolve BOTH the absolute image path and the XML path
             let resolved = _xmlController.resolve_paths(manifestDisplayPath)
 
             console.log("DEBUG: resolved.image =", resolved.image)
             console.log("DEBUG: resolved.xml   =", resolved.xml)
 
-            // 3. Load the detail view with the resolved absolute paths
             contentLoader.setSource("Detail_View_v2.qml", {
                 imagePath: resolved.image,
                 xmlPath: resolved.xml
             })
         }
+    }
 
+    // ============================================================
+    //  NEW — TEMPORARY PLAYBACK TEST BUTTON
+    // ============================================================
+    StyledButton {
+        id: playbackTestButton
+        text: "Playback Test"
+        fixedWidth: buttonRow.buttonWidth
+        fixedHeight: buttonRow.buttonHeight
+
+
+
+        onClicked: {
+            let testPath = "W:\\Collection\\Western HD\\For a Fistful of Dollars (1964).m2ts"
+            console.log("Calling playVideo")
+
+            playbackBridge.playVideo("W:/Collection/Western HD/For a Fistful of Dollars (1964).m2ts")
+
+
+        }
     }
 
     // --- Close Button ---
