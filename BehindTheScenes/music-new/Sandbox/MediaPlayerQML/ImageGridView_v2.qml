@@ -144,9 +144,40 @@ Rectangle {
 
                                         // ⭐ Resolve full V2 paths (image, xml, video)
                                         let resolved = _xmlController.resolve_paths(modelData.display)
+                                        
+                                        
+                                        
+                                        console.log("Resolved Path: " + resolved.video)
+                                        console.log("-----------------------------------------")
+                                        
+                                        if (resolved && resolved.video) {
+                                            // 2. Standardize slashes to forward slashes (matching your successful test button)
+                                            let cleanPath = resolved.video.toString().replace(/\\/g, "/")
+                                            
+                                            //console.log("-----------------------------------------")
+                                            //console.log("EXECUTION: Double-Click Playback")
+                                            //console.log("Original: " + resolved.video)
+                                            //console.log("Cleaned:  " + cleanPath)
+                                            //console.log("-----------------------------------------")
 
+                                            // 3. Call the Bridge directly (same as your test button)
+                                            playbackBridge.playVideo(cleanPath)
+                                            
+                                            // 4. Also emit the signal if other parts of the UI need to know
+                                            gridRoot.v2PlayMovie(cleanPath)
+                                        } else {
+                                            console.log("QML ERROR: No video path resolved for " + modelData.display)
+                                        }
+
+
+
+
+
+
+
+                                        
                                         // ⭐ Play the movie using the manifest video path
-                                         gridRoot.v2PlayMovie(resolved.video)
+                                         //gridRoot.v2PlayMovie(resolved.video)
                                         
                                     }//click
                                 }
