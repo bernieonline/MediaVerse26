@@ -8,84 +8,44 @@ Rectangle {
     color: "transparent"
 
     property string xmlPath: ""
+    property string imagePath: ""
+    property var movie: null
+    property bool tenFootMode: false
 
+    // Key used to look up the movie in the manifest
+    property string manifestKey: ""
 
+    signal v2PlayMovie(var movie)
 
     Component.onCompleted: {
-        console.log("DEBUG: xmlController =", xmlController)
-        console.log("DEBUG: xmlPath received =", xmlPath)
-
-        // 1) Start from the QML imagePath
         var decoded = decodeURIComponent(imagePath)
         if (decoded.startsWith("file:///"))
             decoded = decoded.substring(8)
 
-        console.log("DEBUG: raw imagePath =", decoded)
-
-        // 2) Extract the cache-local path used as manifest key
-        //    e.g. from:
-        //    D:/MediaVerse1.0/.../cacheV2/images/display/Western HD/Chisum (1970).jpg
-        //    to:
-        //    Western HD/Chisum (1970).jpg
         var marker = "cacheV2/images/display/"
         var keyPath = decoded
         var idx = decoded.indexOf(marker)
         if (idx !== -1)
             keyPath = decoded.substring(idx + marker.length)
 
-        console.log("DEBUG: manifest lookup key (local image path) =", keyPath)
-
-        // 🔒 No xmlController lookup here yet — just printing what we *would* pass in
-
+        manifestKey = keyPath
 
         if (xmlPath && xmlPath.length > 0) {
             xmlController.loadXML(xmlPath)
-
             var cats = xmlController.getCategories()
             if (cats.length > 0) {
                 tabBar.currentIndex = 0
                 xmlController.requestCategoryContent(cats[0])
             }
         }
-
-
-
-
-
-
-
     }
 
-    // ============================================================
-    //  STEP 1 TEST PATCH
-    //  Accept a simple imagePath directly from the button
-    // ============================================================
-    property string imagePath: ""
-
-    // ============================================================
-    //  V2 MOVIE OBJECT (unused in Step 1, kept for later)
-    // ============================================================
-    property var movie: null
-    property bool tenFootMode: false
-
-    signal v2PlayMovie(var movie)
-
-    // ============================================================
-    //  PUBLIC API — used later when movie objects are passed
-    // ============================================================
     function loadMovie(m) {
         movie = m
-
-        if (!movie)
-            return
-
-        // Poster from V2 movie object (not used in Step 1)
+        if (!movie) return
         posterImage.source = movie.posterPath
-
-        // XML loading (disabled for Step 1)
         if (movie.xmlPath && movie.xmlPath.length > 0) {
             xmlController.loadXML(movie.xmlPath)
-
             var cats = xmlController.getCategories()
             if (cats.length > 0) {
                 tabBar.currentIndex = 0
@@ -94,9 +54,6 @@ Rectangle {
         }
     }
 
-    // ============================================================
-    //  XML CONTENT UPDATES (inactive in Step 1)
-    // ============================================================
     Connections {
         target: xmlController
         function onCategoryContentUpdated(category, lines) {
@@ -104,16 +61,13 @@ Rectangle {
         }
     }
 
-    // ============================================================
-    //  LAYOUT
-    // ============================================================
     RowLayout {
         anchors.fill: parent
         anchors.margins: 50
         spacing: 50
 
         // --------------------------------------------------------
-        // LEFT PANEL — LARGE POSTER
+        // LEFT PANEL — LARGE POSTER (Now with Playback)
         // --------------------------------------------------------
         Rectangle {
             id: leftPanel
@@ -126,29 +80,62 @@ Rectangle {
             Image {
                 id: posterImage
                 anchors.fill: parent
-
-                // ⭐ STEP 1: Use the direct imagePath
                 source: imagePath
-
                 fillMode: Image.PreserveAspectCrop
                 smooth: true
-            }
 
-            MouseArea {
-                anchors.fill: parent
-                acceptedButtons: Qt.LeftButton
+                MouseArea {
+                    anchors.fill: parent
+                    acceptedButtons: Qt.LeftButton
+                    
+                    property bool doubleClickActive: false
+                    property var singleClickTimer: null
 
-                onDoubleClicked: {
-                    if (movie) {
-                        console.log("Detail_View_v2 double-click → play:", movie.originalPath)
-                        detailViewRoot.v2PlayMovie(movie)
+                    onClicked: {
+                        if (singleClickTimer) singleClickTimer.stop()
+                        singleClickTimer = Qt.createQmlObject(
+                            'import QtQuick 2.15; Timer { interval: 250; repeat: false }',
+                            detailViewRoot
+                        )
+                        singleClickTimer.triggered.connect(function() {
+                            if (!doubleClickActive) {
+                                // Potential future single-click action (e.g. zoom)
+                                console.log("DETAIL VIEW: Single click")
+                            }
+                            doubleClickActive = false
+                        })
+                        singleClickTimer.start()
+                    }
+
+                    onDoubleClicked: {
+                        doubleClickActive = true
+                        if (singleClickTimer) singleClickTimer.stop()
+
+                        // 1. Resolve paths using manifestKey
+                        let resolved = xmlController.resolve_paths(detailViewRoot.manifestKey)
+                        
+                        if (resolved && resolved.video) {
+                            // 2. Clean slashes for Python
+                            let cleanPath = resolved.video.toString().replace(/\\/g, "/")
+                            
+                            console.log("!!! DETAIL VIEW PLAYBACK TRIGGERED !!!")
+                            console.log("Path: " + cleanPath)
+
+                            // 3. SEND TO BRIDGE
+                            playbackBridge.playVideo(cleanPath)
+                            
+                            // 4. Emit signal
+                            detailViewRoot.v2PlayMovie(cleanPath)
+                        } else {
+                            console.log("DETAIL ERROR: No video found for " + detailViewRoot.manifestKey)
+                        }
                     }
                 }
             }
         }
 
         // --------------------------------------------------------
-        // RIGHT PANEL — TABS + XML CONTENT (inactive in Step 1)
+        // RIGHT PANEL — TABS + XML CONTENT
         // --------------------------------------------------------
         ColumnLayout {
             Layout.fillWidth: true
@@ -158,7 +145,6 @@ Rectangle {
             TabBar {
                 id: tabBar
                 Layout.fillWidth: true
-
                 Repeater {
                     model: xmlController.getCategories()
                     TabButton {
@@ -201,7 +187,6 @@ Rectangle {
                         anchors.top: scrollArea.top
                         anchors.bottom: scrollArea.bottom
                         z: 10
-
                         background: Rectangle { color: "#262626"; radius: 6 }
                         contentItem: Rectangle {
                             implicitWidth: vbar.width
