@@ -7,20 +7,19 @@ Rectangle {
     height: parent ? parent.height : 800
     color: "transparent"
 
-    // --- NEW: V2 click signal ---
+    // --- Signals ---
     signal v2OpenDetail(var movie)
+    signal v2PlayMovie(var movie)
 
     property var externalImageList: []
     property string sortMode: "year"
 
-    // --- METADATA TOOLS ---
+    // --- Metadata Tools ---
     MetadataTools { id: metadata }
 
-    // If you later re-enable sort, swap this line:
-    // property var sortedList: metadata.sortList(externalImageList, sortMode)
     property var sortedList: externalImageList
 
-    // --- GEOMETRY ---
+    // --- Geometry & Scaling ---
     readonly property real posterAreaHeight: height * 0.8
     property real posterHeight: posterAreaHeight * 0.75
     property real posterWidth: posterHeight * (2/3)
@@ -36,13 +35,11 @@ Rectangle {
     property real totalPosterWidth: posterWidth * 3.5
     property real spacingValue: ((carouselCenter.width - totalPosterWidth) / 4) * 0.25
 
-    // --- DERIVED PROPERTIES FOR CURRENT ITEM ---
+    // --- Derived Properties for Center Item ---
     property string currentFilePath: {
-        if (!sortedList || sortedList.length === 0)
-            return ""
+        if (!sortedList || sortedList.length === 0) return ""
         let idx = carouselView.currentIndex
-        if (idx < 0 || idx >= sortedList.length)
-            return ""
+        if (idx < 0 || idx >= sortedList.length) return ""
         return sortedList[idx].filePath || ""
     }
 
@@ -52,14 +49,14 @@ Rectangle {
     Row {
         anchors.fill: parent
 
-        // LEFT BUTTON
+        // Left Navigation
         Rectangle {
             width: 80; height: parent.height; color: "transparent"
             Text { anchors.centerIn: parent; text: "❮"; color: "white"; font.pixelSize: 45 }
             MouseArea { anchors.fill: parent; onClicked: carouselView.decrementCurrentIndex() }
         }
 
-        // CENTER AREA
+        // Carousel Container
         Item {
             id: carouselCenter
             width: parent.width - 160
@@ -95,23 +92,64 @@ Rectangle {
                             fillMode: Image.PreserveAspectFit
                         }
 
-                        // --- NEW: CLICK HANDLER FOR CAROUSEL ---
+                        // --- FINAL PLAYBACK CLICK HANDLER ---
                         MouseArea {
                             anchors.fill: parent
+                            acceptedButtons: Qt.LeftButton
+                            property bool doubleClickActive: false
+                            property var singleClickTimer: null
+
                             onClicked: {
-                                carouselRoot.v2OpenDetail({
-                                    display: modelData.filePath,   // already a display path
-                                    filePath: modelData.filePath,  // optional but consistent
-                                    title: metadata.extractCleanTitle(modelData.filePath),
-                                    year: metadata.extractYear(modelData.filePath)
+                                if (singleClickTimer) singleClickTimer.stop()
+                                
+                                singleClickTimer = Qt.createQmlObject(
+                                    'import QtQuick 2.15; Timer { interval: 250; repeat: false }',
+                                    carouselRoot
+                                )
+                                
+                                singleClickTimer.triggered.connect(function() {
+                                    if (!doubleClickActive) {
+                                        carouselRoot.v2OpenDetail({
+                                            display: modelData.filePath,
+                                            filePath: modelData.filePath,
+                                            title: metadata.extractCleanTitle(modelData.filePath),
+                                            year: metadata.extractYear(modelData.filePath)
+                                        })
+                                    }
+                                    doubleClickActive = false
                                 })
+                                singleClickTimer.start()
+                            }
+
+                            onDoubleClicked: {
+                                doubleClickActive = true
+                                if (singleClickTimer) singleClickTimer.stop()
+
+                                // 1. Resolve full V2 paths
+                                let resolved = _xmlController.resolve_paths(modelData.filePath)
+                                
+                                if (resolved && resolved.video) {
+                                    // 2. Clean slashes for the Python Bridge
+                                    let cleanPath = resolved.video.toString().replace(/\\/g, "/")
+                                    
+                                    console.log("!!! CAROUSEL PLAYBACK TRIGGERED !!!")
+                                    console.log("Target: " + cleanPath)
+
+                                    // 3. EXECUTE PLAYBACK
+                                    playbackBridge.playVideo(cleanPath)
+                                    
+                                    // 4. Signal UI (optional)
+                                    carouselRoot.v2PlayMovie(cleanPath)
+                                } else {
+                                    console.log("CAROUSEL ERROR: No video found for " + modelData.filePath)
+                                }
                             }
                         }
                     }
                 }
             }
 
-            // --- TITLE + YEAR FOR CURRENT (CENTER) ITEM ---
+            // Labels
             Column {
                 anchors.bottom: parent.bottom
                 anchors.bottomMargin: 40
@@ -119,7 +157,6 @@ Rectangle {
                 z: 2000
                 spacing: 4
 
-                // TITLE
                 Text {
                     width: carouselCenter.width * 0.6
                     text: carouselRoot.currentTitle
@@ -133,7 +170,6 @@ Rectangle {
                     visible: carouselRoot.currentTitle !== ""
                 }
 
-                // YEAR
                 Text {
                     width: carouselCenter.width * 0.6
                     text: carouselRoot.currentYear === 0 ? "" : carouselRoot.currentYear
@@ -145,7 +181,7 @@ Rectangle {
             }
         }
 
-        // RIGHT BUTTON
+        // Right Navigation
         Rectangle {
             width: 80; height: parent.height; color: "transparent"
             Text { anchors.centerIn: parent; text: "❯"; color: "white"; font.pixelSize: 45 }
