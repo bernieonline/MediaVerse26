@@ -30,6 +30,10 @@ class JRiverController:
     @staticmethod
     def get_media_id(file_path: str) -> Optional[str]:
         """Lookup Media ID using the robust filename search we verified."""
+
+        # NEVER CALLED
+
+        print("..............get media id ............")
         try:
             # Extract just the filename to avoid the slash direction issue
             filename = file_path.replace('\\', '/').split('/')[-1]
