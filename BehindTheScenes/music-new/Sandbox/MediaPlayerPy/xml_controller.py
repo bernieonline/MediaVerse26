@@ -195,9 +195,9 @@ class XmlController(QObject):
         import os
         from pathlib import Path
 
-        print("\n==============================")
-        print("[resolve_paths] START")
-        print(f"[resolve_paths] manifest_display_path = {manifest_display_path}")
+        #print("\n==============================")
+        #print("[resolve_paths] START")
+        #print(f"[resolve_paths] manifest_display_path = {manifest_display_path}")
 
         # ------------------------------------------------------------
         # 0. Normalize and decode the incoming path

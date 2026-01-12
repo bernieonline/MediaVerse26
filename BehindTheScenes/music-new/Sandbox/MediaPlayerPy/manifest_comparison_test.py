@@ -50,15 +50,15 @@ def build_manifest(out_path: Path) -> dict:
     with out_path.open("w", encoding="utf-8") as f:
         json.dump(manifest, f, indent=2)
 
-    print(f"Saved: {out_path} ({len(manifest.get('items', []))} items), hash={manifest['manifest_hash']}")
+    #print(f"Saved: {out_path} ({len(manifest.get('items', []))} items), hash={manifest['manifest_hash']}")
     return manifest
 
 
 if __name__ == "__main__":
-    print(f"Server manifest dir: {manifest_dir.resolve()}")
-    print(f"Server manifest path: {server_manifest_path.resolve()}")
-    print(f"Manifest A path: {manifest_A_path.resolve()}")
-    print(f"Manifest B path: {manifest_B_path.resolve()}")
+    #print(f"Server manifest dir: {manifest_dir.resolve()}")
+    #print(f"Server manifest path: {server_manifest_path.resolve()}")
+    #print(f"Manifest A path: {manifest_A_path.resolve()}")
+    #print(f"Manifest B path: {manifest_B_path.resolve()}")
 
     # Build two manifests back-to-back, both saved under W:\MediaVerse\manifest
     manifest_A = build_manifest(manifest_A_path)
@@ -77,12 +77,12 @@ if __name__ == "__main__":
         print("❌ Hashes DO NOT MATCH — manifests differ.")
 
     # One sample record from each
-    print("\nSample record from Manifest A:")
+    #print("\nSample record from Manifest A:")
     sample_A = manifest_A["items"][0]
-    print(f"Title: {sample_A.get('title')}")
-    print(f"Original path: {sample_A.get('shared', {}).get('original') or 'zzz'}")
+    #print(f"Title: {sample_A.get('title')}")
+    #print(f"Original path: {sample_A.get('shared', {}).get('original') or 'zzz'}")
 
-    print("\nSample record from Manifest B:")
+    #print("\nSample record from Manifest B:")
     sample_B = manifest_B["items"][0]
-    print(f"Title: {sample_B.get('title')}")
-    print(f"Original path: {sample_B.get('shared', {}).get('original') or 'zzz'}")
+    #print(f"Title: {sample_B.get('title')}")
+    #print(f"Original path: {sample_B.get('shared', {}).get('original') or 'zzz'}")

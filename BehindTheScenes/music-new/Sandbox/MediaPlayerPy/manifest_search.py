@@ -11,8 +11,8 @@ items = manifest.get("items", [])
 # Find items where shared.original is missing or null
 missing_original = [item for item in items if not item.get("shared", {}).get("original")]
 
-print(f"Total items: {len(items)}")
-print(f"Items with missing/null original: {len(missing_original)}")
+#print(f"Total items: {len(items)}")
+#print(f"Items with missing/null original: {len(missing_original)}")
 
 # Show a few examples
 for i, item in enumerate(missing_original[:5], start=1):

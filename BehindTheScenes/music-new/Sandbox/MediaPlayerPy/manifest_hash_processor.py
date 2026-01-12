@@ -55,5 +55,5 @@ def process_and_save(path: Path) -> dict:
     with path.open("w", encoding="utf-8") as f:
         json.dump(manifest, f, indent=2)
 
-    print(f"{path.name}: {len(manifest.get('items', []))} items, hash={manifest['manifest_hash']}")
+    #print(f"{path.name}: {len(manifest.get('items', []))} items, hash={manifest['manifest_hash']}")
     return manifest

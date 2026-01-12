@@ -759,7 +759,7 @@ class XMLCollections(QObject):
 
             year_value = safe_year(item)
 
-            print(f"[V2] Final path → {file_uri} (Year={year_value})")
+            #print(f"[V2] Final path → {file_uri} (Year={year_value})")
 
             results.append({
                 "filePath": file_uri,

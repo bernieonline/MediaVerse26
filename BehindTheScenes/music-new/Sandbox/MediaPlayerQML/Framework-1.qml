@@ -68,9 +68,19 @@ ApplicationWindow {
 
     SlidingPanel {
         id: libraryPanel
+        libraryModel: myLibraryModel 
+
+        // CHANGE: Use 'folders' instead of 'current_folders'
+        folderModel: fileSystemManager.folders 
+
         onFolderSelected: function(folderPath) {
-            fileSystemManager.list_image_files_in_folder(folderPath)
             window.selectedFolderPath = folderPath
+            
+            // This triggers the Worker thread in FileSystem.py
+            fileSystemManager.update_folders(folderPath)
+            
+            // This triggers the image scan
+            fileSystemManager.list_image_files_in_folder(folderPath)
         }
     }
 

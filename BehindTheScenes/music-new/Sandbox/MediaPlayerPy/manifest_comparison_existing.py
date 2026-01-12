@@ -30,12 +30,12 @@ def load_process_and_save(path: Path) -> dict:
     with path.open("w", encoding="utf-8") as f:
         json.dump(manifest, f, indent=2)
 
-    print(f"{path.name}: {len(manifest.get('items', []))} items, hash={manifest['manifest_hash']}")
+    #print(f"{path.name}: {len(manifest.get('items', []))} items, hash={manifest['manifest_hash']}")
     return manifest
 
 if __name__ == "__main__":
-    print(f"Manifest A path: {manifest_A_path.resolve()}")
-    print(f"Manifest B path: {manifest_B_path.resolve()}")
+    #print(f"Manifest A path: {manifest_A_path.resolve()}")
+    #print(f"Manifest B path: {manifest_B_path.resolve()}")
 
     manifest_A = load_process_and_save(manifest_A_path)
     manifest_B = load_process_and_save(manifest_B_path)

@@ -15,6 +15,8 @@ sys.path.insert(0, str(sandbox_root))              # Ensure Sandbox is found fir
 project_root = sandbox_root.parent                 # BehindTheScenes
 sys.path.append(str(project_root))                 # Optional: higher-level modules
 
+# Silences the font warning messages in the terminal
+os.environ["QT_LOGGING_RULES"] = "qt.qpa.fonts=false"
 
 # --- Add sandbox to sys.path ---
 #sandbox_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
