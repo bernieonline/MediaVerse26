@@ -19,7 +19,7 @@ thumbnails/
 *.webp
 *.svg
 
-
+BehindTheScenes/music-new/.gitignore
 
 BehindTheScenes/venv
 
@@ -61,3 +61,19 @@ BehindTheScenes/music-new/Assets/xml_collection_dataB.json
 BehindTheScenes/music-new/.gitignoreOLD
 BehindTheScenes/music-new/application.log
 BehindTheScenes/music-new/Sandbox/MediaPlayerQML/CollectionsGallery copy.qml
+BehindTheScenes/music-new/Sandbox/MediaPlayerQML/UtilityFileOLD.qml
+BehindTheScenes/music-new/Sandbox/MediaPlayerQML/RowButtonOLD.qml
+BehindTheScenes/music-new/application.log
+__pycache__
+BehindTheScenes/music-new/Sandbox/MediaPlayerPy/Manifest_v1.py
+BehindTheScenes/music-new/Sandbox/MediaPlayerPy/manifest_v2_woring.py
+BehindTheScenes/music-new/Sandbox/MediaPlayerPy/search_controller copy.py
+BehindTheScenes/music-new/Sandbox/MediaPlayerPy/testJriver.py
+BehindTheScenes/music-new/Sandbox/MediaPlayerPy/tets
+BehindTheScenes/music-new/Sandbox/MediaPlayerPy/xml_collections copy.py
+BehindTheScenes/music-new/Sandbox/MediaPlayerPy/xml_controller copy.py
+BehindTheScenes/music-new/Sandbox/MediaPlayerPy/xml_collections copy.py
+BehindTheScenes/music-new/Sandbox/MediaPlayerQML/CarouselView.qml
+BehindTheScenes/music-new/Sandbox/MediaPlayerQML/Detail_View_working_old.qml
+BehindTheScenes/music-new/Sandbox/MediaPlayerQML/ImageGridViewV2GOOD.qml
+BehindTheScenes/music-new/Sandbox/Playback/c

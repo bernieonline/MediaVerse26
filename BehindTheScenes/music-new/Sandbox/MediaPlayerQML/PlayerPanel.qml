@@ -14,6 +14,12 @@ Rectangle {
     width: parent ? parent.width * 0.5 * 0.8 : 512
     height: parent ? parent.height * 0.5 : 360
 
+    Component.onCompleted: {
+        console.log("DEBUG: ROOT play_video_from_qml =", play_video_from_qml)
+        console.log("DEBUG: TYPE =", typeof play_video_from_qml)
+    }
+
+
     anchors.horizontalCenter: parent ? parent.horizontalCenter : undefined
     y: isVisible ? (parent ? parent.height - height : 0) : (parent ? parent.height : 0)
     z: 2

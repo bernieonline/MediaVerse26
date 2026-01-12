@@ -86,6 +86,7 @@ Rectangle {
                         Column {
                             anchors.fill: parent
                             spacing: 5
+                            Component.onCompleted: console.log("DEBUG PATH BBGG: " + modelData.filePath)
 
                             // POSTER WRAPPER
                             Item {

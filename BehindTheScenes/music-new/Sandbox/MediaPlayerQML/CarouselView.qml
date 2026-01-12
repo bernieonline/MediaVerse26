@@ -1,169 +1,155 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
-import "."
-import Qt5Compat.GraphicalEffects 6.0
-//import UltraGlowFrame.qml
 
-FocusScope {
-    id: root
-    width: parent.width
-    height: parent.height
+Rectangle {
+    id: carouselRoot
+    width: parent ? parent.width : 1000
+    height: parent ? parent.height : 800
+    color: "transparent"
 
-    signal imageClicked(string filePath)
-    signal launchVideoRequested(string cachePath)
+    // --- NEW: V2 click signal ---
+    signal v2OpenDetail(var movie)
 
-    property var imageList: fileSystemManager.imageFiles
-    property int currentIndex: 0
+    property var externalImageList: []
+    property string sortMode: "year"
 
-    property real baseWidth: root.width / 8
-    property real baseHeight: baseWidth * 1.5
+    // --- METADATA TOOLS ---
+    MetadataTools { id: metadata }
 
-    function scrollLeft() {
-        if (currentIndex > 0) currentIndex--
+    // If you later re-enable sort, swap this line:
+    // property var sortedList: metadata.sortList(externalImageList, sortMode)
+    property var sortedList: externalImageList
+
+    // --- GEOMETRY ---
+    readonly property real posterAreaHeight: height * 0.8
+    property real posterHeight: posterAreaHeight * 0.75
+    property real posterWidth: posterHeight * (2/3)
+
+    property var scaleForIndex: function(i) {
+        let dist = Math.abs(carouselView.currentIndex - i)
+        if (dist === 0) return 1.1
+        if (dist === 1) return 0.88
+        if (dist === 2) return 0.75
+        return 0.0
     }
 
-    function scrollRight() {
-        if (currentIndex < imageList.length - 1) currentIndex++
+    property real totalPosterWidth: posterWidth * 3.5
+    property real spacingValue: ((carouselCenter.width - totalPosterWidth) / 4) * 0.25
+
+    // --- DERIVED PROPERTIES FOR CURRENT ITEM ---
+    property string currentFilePath: {
+        if (!sortedList || sortedList.length === 0)
+            return ""
+        let idx = carouselView.currentIndex
+        if (idx < 0 || idx >= sortedList.length)
+            return ""
+        return sortedList[idx].filePath || ""
     }
 
-    Rectangle {
-        id: carouselFrame
-        width: baseWidth * 10
-        height: baseHeight * 1.4
-        anchors.centerIn: parent
-        color: "transparent"
+    property string currentTitle: metadata.extractCleanTitle(currentFilePath)
+    property int currentYear: metadata.extractYear(currentFilePath)
 
-        Row {
-            id: imageRow
-            spacing: 75
-            anchors.centerIn: parent
+    Row {
+        anchors.fill: parent
 
-            Repeater {
-                model: 5
+        // LEFT BUTTON
+        Rectangle {
+            width: 80; height: parent.height; color: "transparent"
+            Text { anchors.centerIn: parent; text: "❮"; color: "white"; font.pixelSize: 45 }
+            MouseArea { anchors.fill: parent; onClicked: carouselView.decrementCurrentIndex() }
+        }
+
+        // CENTER AREA
+        Item {
+            id: carouselCenter
+            width: parent.width - 160
+            height: parent.height
+            clip: true
+
+            ListView {
+                id: carouselView
+                anchors.fill: parent
+                orientation: ListView.Horizontal
+                model: sortedList
+                spacing: carouselRoot.spacingValue
+                preferredHighlightBegin: width / 2 - (carouselRoot.posterWidth / 2)
+                preferredHighlightEnd: width / 2 + (carouselRoot.posterWidth / 2)
+                highlightRangeMode: ListView.StrictlyEnforceRange
+
                 delegate: Item {
-                    property int offset: index - 2
-                    property int imageIndex: currentIndex + offset
-                    property bool valid: imageIndex >= 0 && imageIndex < imageList.length
+                    width: carouselRoot.posterWidth * carouselRoot.scaleForIndex(index)
+                    height: carouselRoot.posterHeight * carouselRoot.scaleForIndex(index)
+                    anchors.verticalCenter: parent.verticalCenter
 
-                    width: {
-                        switch (Math.abs(offset)) {
-                            case 0: return baseWidth * 1.6
-                            case 1: return baseWidth * 1.3
-                            default: return baseWidth
-                        }
-                    }
-                    height: width * 1.5
-
-                    UltraGlowFrame {
+                    Rectangle {
                         anchors.fill: parent
-                        source: valid ? imageList[imageIndex].filePath : ""
-                        glowRadius: (Math.abs(offset) === 0) ? 60 : 30
-                        glowColor: "#256c40"
-                        smooth: true
-                        opacity: 0.3
-                    }
+                        color: "#222"
+                        border.color: "white"
+                        border.width: 1
+                        radius: 12
+                        clip: true
 
-                    MouseArea {
-                        property bool doubleClickActive: false
-                        property var singleClickTimer: null
-
-                        anchors.fill: parent
-                        enabled: valid
-
-                        onClicked: {
-                            if (!valid) return
-                            let idx = imageIndex
-                            if (singleClickTimer) singleClickTimer.stop()
-                            singleClickTimer = Qt.createQmlObject(
-                                'import QtQuick 2.15; Timer { interval: 250; repeat: false }',
-                                root
-                            )
-                            singleClickTimer.triggered.connect(function() {
-                                if (!doubleClickActive) {
-                                    console.log("✅ Single click confirmed in CarouselView")
-                                    root.imageClicked(imageList[idx].filePath)
-                                }
-                                doubleClickActive = false
-                            })
-                            singleClickTimer.start()
-                            currentIndex = idx
-                            console.log("Clicked image:", imageList[idx].filePath)
+                        Image {
+                            anchors.fill: parent
+                            source: modelData.filePath || ""
+                            fillMode: Image.PreserveAspectFit
                         }
-                        onDoubleClicked: {
-                            if (!valid) return
-                            let idx = imageIndex
-                            console.log("🎯 Double‑clicked in CarouselView:", imageList[idx].filePath)
-                            doubleClickActive = true
-                            if (singleClickTimer) singleClickTimer.stop()
-                            root.launchVideoRequested(imageList[idx].filePath)
+
+                        // --- NEW: CLICK HANDLER FOR CAROUSEL ---
+                        MouseArea {
+                            anchors.fill: parent
+                            onClicked: {
+                                carouselRoot.v2OpenDetail({
+                                    display: modelData.filePath,   // already a display path
+                                    filePath: modelData.filePath,  // optional but consistent
+                                    title: metadata.extractCleanTitle(modelData.filePath),
+                                    year: metadata.extractYear(modelData.filePath)
+                                })
+                            }
                         }
                     }
                 }
             }
-        }
-    }
 
-    // Scroll buttons wrapped in a Row
-    Row {
-        id: scrollButtonsRow
-        anchors.horizontalCenter: carouselFrame.horizontalCenter
-        anchors.verticalCenter: carouselFrame.verticalCenter
-        anchors.verticalCenterOffset: baseHeight * 0.9
-        spacing: 50
+            // --- TITLE + YEAR FOR CURRENT (CENTER) ITEM ---
+            Column {
+                anchors.bottom: parent.bottom
+                anchors.bottomMargin: 40
+                anchors.horizontalCenter: parent.horizontalCenter
+                z: 2000
+                spacing: 4
 
-        Button {
-            id: leftScrollButton
-            text: "◀"
-            width: 400
-            height: 60
-            onClicked: scrollLeft()
+                // TITLE
+                Text {
+                    width: carouselCenter.width * 0.6
+                    text: carouselRoot.currentTitle
+                    color: "#FFD86B"
+                    font.pixelSize: 18
+                    font.bold: true
+                    horizontalAlignment: Text.AlignHCenter
+                    wrapMode: Text.WordWrap
+                    maximumLineCount: 2
+                    elide: Text.ElideRight
+                    visible: carouselRoot.currentTitle !== ""
+                }
 
-            background: Rectangle {
-                color: "transparent"
-                border.color: "yellow"
-                border.width: 3
-                radius: 10
-            }
-
-            contentItem: Text {
-                text: parent.text
-                color: "white"
-                font.pixelSize: 60
-                verticalAlignment: Text.AlignVCenter
-                horizontalAlignment: Text.AlignHCenter
-            }
-        }
-
-        Button {
-            id: rightScrollButton
-            text: "▶"
-            width: 400
-            height: 60
-            onClicked: scrollRight()
-
-            background: Rectangle {
-                color: "transparent"
-                border.color: "yellow"
-                border.width: 3
-                radius: 10
-            }
-
-            contentItem: Text {
-                text: parent.text
-                color: "white"
-                font.pixelSize: 60
-                verticalAlignment: Text.AlignVCenter
-                horizontalAlignment: Text.AlignHCenter
+                // YEAR
+                Text {
+                    width: carouselCenter.width * 0.6
+                    text: carouselRoot.currentYear === 0 ? "" : carouselRoot.currentYear
+                    color: "#FFD86B"
+                    font.pixelSize: 14
+                    horizontalAlignment: Text.AlignHCenter
+                    visible: carouselRoot.currentYear !== 0
+                }
             }
         }
-    }
 
-    // Message when no images are available
-    Text {
-        text: "No images to display."
-        anchors.centerIn: parent
-        color: "white"
-        font.pixelSize: 24
-        visible: !imageList || imageList.length === 0
+        // RIGHT BUTTON
+        Rectangle {
+            width: 80; height: parent.height; color: "transparent"
+            Text { anchors.centerIn: parent; text: "❯"; color: "white"; font.pixelSize: 45 }
+            MouseArea { anchors.fill: parent; onClicked: carouselView.incrementCurrentIndex() }
+        }
     }
 }

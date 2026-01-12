@@ -5,6 +5,7 @@
   "PlayerPaths": {
     "MiniPlayer": "",
     "JRiver": "C:\\Program Files\\J River\\Media Center 34\\MC34.exe",
-    "PowerDVD": "C:\\Program Files\\CyberLink\\PowerDVD20\\PowerDVD.exe"
+    "PowerDVD": "C:\\Program Files\\CyberLink\\PowerDVD20\\PowerDVD.exe",
+    "JRiverPort": "52199"
   }
 }
