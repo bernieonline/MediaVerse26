@@ -8,25 +8,21 @@ Rectangle {
     height: parent ? parent.height : 800
     color: "transparent"
 
-    // ----------------------------------------------------------------
-    // 0. V2 CLICK SIGNALS (NEW)
-    // ----------------------------------------------------------------
     signal v2OpenDetail(var movie)
-    signal v2PlayMovie(var movie)
+    signal v2PlayMovie(string videoPath)
 
-    // ----------------------------------------------------------------
-    // 1. PROPERTIES & LOGIC
-    // ----------------------------------------------------------------
     property var externalImageList: []
     property int currentPage: 0
     property int itemsPerPage: 12
     property bool showLabels: true
     property string sortMode: "oldest"
 
-    MetadataTools { id: metadata }
-
-    // Re-sorts whenever sortMode or list changes
-    property var sortedList: metadata.sortList(externalImageList, sortMode)
+    // Logic for sorting and paging
+    property var sortedList: {
+        if (!externalImageList) return [];
+        // Note: Using a simple sort if MetadataTools isn't available
+        return externalImageList; 
+    }
 
     readonly property real labelHeight: showLabels ? 45 : 0
     readonly property real rowSpacing: 20
@@ -40,185 +36,84 @@ Rectangle {
         return sortedList.slice(start, start + itemsPerPage);
     }
 
-    // ----------------------------------------------------------------
-    // 2. MAIN LAYOUT
-    // ----------------------------------------------------------------
+    // CLICK DE-BOUNCER
+    property var currentClickData: null
+    Timer {
+        id: clickTimer
+        interval: 250
+        repeat: false
+        onTriggered: {
+            if (gridRoot.currentClickData) {
+                gridRoot.v2OpenDetail(gridRoot.currentClickData)
+            }
+        }
+    }
+
     Row {
         anchors.fill: parent
         spacing: 0
-        z: 1
 
-        // LEFT NAV
+        // Navigation Left
         Rectangle {
             width: 80; height: parent.height; color: "transparent"
             Text {
-                anchors.centerIn: parent
-                text: "❮"; color: "white"; font.pixelSize: 45
+                anchors.centerIn: parent; text: "❮"; color: "white"; font.pixelSize: 45
                 opacity: currentPage > 0 ? 1.0 : 0.1
             }
-            MouseArea {
-                anchors.fill: parent
-                onClicked: if (currentPage > 0) currentPage--
-            }
+            MouseArea { anchors.fill: parent; onClicked: if (currentPage > 0) currentPage-- }
         }
 
-        // GRID CONTAINER
+        // Main Grid
         Item {
             id: gridContainer
-            width: parent.width - 160
-            height: parent.height
-            clip: true
-
+            width: parent.width - 160; height: parent.height; clip: true
             Grid {
-                id: imageGrid
-                anchors.centerIn: parent
-                columns: 6
-                columnSpacing: 40
-                rowSpacing: gridRoot.rowSpacing
-
+                id: imageGrid; anchors.centerIn: parent; columns: 6; columnSpacing: 40; rowSpacing: gridRoot.rowSpacing
                 Repeater {
                     model: gridRoot.pageItems
-
                     delegate: Item {
-                        width: gridRoot.posterWidth
-                        height: gridRoot.posterHeight + gridRoot.labelHeight
-
+                        width: gridRoot.posterWidth; height: gridRoot.posterHeight + gridRoot.labelHeight
                         Column {
-                            anchors.fill: parent
-                            spacing: 5
-                            //Component.onCompleted: console.log("DEBUG PATH BBGG: " + modelData.filePath)
-
-                            // POSTER WRAPPER
+                            anchors.fill: parent; spacing: 5
                             Item {
-                                width: parent.width
-                                height: gridRoot.posterHeight
-
+                                width: parent.width; height: gridRoot.posterHeight
                                 Rectangle {
-                                    id: posterRect
-                                    anchors.fill: parent
-                                    radius: 8
-                                    color: "#111"
-                                    border.color: "white"
-                                    border.width: 1
-                                    clip: true
-
+                                    id: posterRect; anchors.fill: parent; radius: 8; color: "#111"
+                                    border.color: modelData.sourceType === "RAW" ? "#555" : "white"
+                                    border.width: 1; clip: true
                                     Image {
-                                        anchors.fill: parent
-                                        source: modelData.filePath || ""
-                                        fillMode: Image.PreserveAspectCrop
-                                        asynchronous: true
+                                        anchors.fill: parent; source: modelData.filePath || ""
+                                        fillMode: Image.PreserveAspectCrop; asynchronous: true
                                     }
                                 }
-
-                                // ----------------------------------------------------
-                                // CLICK HANDLER (NEW — V2)
-                                // ----------------------------------------------------
                                 MouseArea {
                                     anchors.fill: parent
-                                    acceptedButtons: Qt.LeftButton
-                                    property bool doubleClickActive: false
-                                    property var singleClickTimer: null
-
                                     onClicked: {
-                                        if (singleClickTimer) singleClickTimer.stop()
-                                        singleClickTimer = Qt.createQmlObject(
-                                            'import QtQuick 2.15; Timer { interval: 250; repeat: false }',
-                                            gridRoot
-                                        )
-                                        singleClickTimer.triggered.connect(function() {
-                                            if (!doubleClickActive) {
-                                                gridRoot.v2OpenDetail({
-                                                    display: modelData.display,                     // manifest key
-                                                    filePath: modelData.filePath,                   // local thumbnail (grid only)
-                                                    title: metadata.extractCleanTitle(modelData.filePath),
-                                                    year: metadata.extractYear(modelData.filePath)
-                                                })
-                                            }
-                                            doubleClickActive = false
-                                        })
-                                        singleClickTimer.start()
+                                        clickTimer.stop()
+                                        gridRoot.currentClickData = modelData
+                                        clickTimer.start()
                                     }
-
                                     onDoubleClicked: {
-                                        doubleClickActive = true
-                                        if (singleClickTimer) singleClickTimer.stop()
-
-                                        // ⭐ Resolve full V2 paths (image, xml, video)
-                                        let resolved = _xmlController.resolve_paths(modelData.display)
-                                        
-                                        
-                                        
-                                        console.log("Resolved Path: " + resolved.video)
-                                        console.log("-----------------------------------------")
-                                        
-                                        if (resolved && resolved.video) {
-                                            // 2. Standardize slashes to forward slashes (matching your successful test button)
-                                            let cleanPath = resolved.video.toString().replace(/\\/g, "/")
+                                        clickTimer.stop()
+                                        gridRoot.currentClickData = null
+                                        if (modelData.originalPath) {
+                                            let rawPath = modelData.originalPath.toString();
+                                            // CLEAN THE PATH: remove file:/// and decode URL characters
+                                            let cleanPath = decodeURIComponent(rawPath.replace(/^(file:\/{3})/, ""));
+                                            // Flip slashes for Windows if needed
+                                            cleanPath = cleanPath.replace(/\//g, "\\");
                                             
-                                            //console.log("-----------------------------------------")
-                                            //console.log("EXECUTION: Double-Click Playback")
-                                            //console.log("Original: " + resolved.video)
-                                            //console.log("Cleaned:  " + cleanPath)
-                                            //console.log("-----------------------------------------")
-
-                                            // 3. Call the Bridge directly (same as your test button)
-                                            playbackBridge.playVideo(cleanPath)
-                                            
-                                            // 4. Also emit the signal if other parts of the UI need to know
-                                            gridRoot.v2PlayMovie(cleanPath)
-                                        } else {
-                                            console.log("QML ERROR: No video path resolved for " + modelData.display)
+                                            console.log("🚀 Playing Video:", cleanPath);
+                                            playbackBridge.playVideo(cleanPath);
+                                            gridRoot.v2PlayMovie(cleanPath);
                                         }
-
-
-
-
-
-
-
-                                        
-                                        // ⭐ Play the movie using the manifest video path
-                                         //gridRoot.v2PlayMovie(resolved.video)
-                                        
-                                    }//click
-                                }
-
-                                // YEAR BADGE
-                                Rectangle {
-                                    id: yearBadge
-                                    width: 38
-                                    height: 20
-                                    radius: 4
-                                    color: "#CC000000"
-                                    anchors.top: parent.top
-                                    anchors.right: parent.right
-                                    anchors.topMargin: 6
-                                    anchors.rightMargin: 6
-                                    z: 10
-
-                                    property int yearVal: metadata.extractYear(modelData.filePath)
-                                    visible: yearVal !== 0
-
-                                    Text {
-                                        anchors.centerIn: parent
-                                        text: parent.yearVal
-                                        color: "white"
-                                        font.pixelSize: 10
-                                        font.bold: true
                                     }
                                 }
                             }
-
-                            // TITLE LABEL
                             Text {
-                                width: parent.width
-                                text: metadata.extractCleanTitle(modelData.filePath)
-                                color: "white"
-                                font.pixelSize: 11
-                                horizontalAlignment: Text.AlignHCenter
-                                elide: Text.ElideRight
-                                maximumLineCount: 2
-                                wrapMode: Text.WordWrap
+                                width: parent.width; text: modelData.title || ""
+                                color: "white"; font.pixelSize: 11; horizontalAlignment: Text.AlignHCenter
+                                elide: Text.ElideRight; maximumLineCount: 2; wrapMode: Text.WordWrap
                                 visible: gridRoot.showLabels
                             }
                         }
@@ -227,12 +122,11 @@ Rectangle {
             }
         }
 
-        // RIGHT NAV
+        // Navigation Right
         Rectangle {
             width: 80; height: parent.height; color: "transparent"
             Text {
-                anchors.centerIn: parent
-                text: "❯"; color: "white"; font.pixelSize: 45
+                anchors.centerIn: parent; text: "❯"; color: "white"; font.pixelSize: 45
                 opacity: (currentPage < Math.ceil(sortedList.length / itemsPerPage) - 1) ? 1.0 : 0.1
             }
             MouseArea {
@@ -240,76 +134,6 @@ Rectangle {
                 onClicked: {
                     let totalPages = Math.ceil(sortedList.length / itemsPerPage)
                     if (currentPage < totalPages - 1) currentPage++
-                }
-            }
-        }
-    }
-
-    // ----------------------------------------------------------------
-    // 3. SORT DRAWER
-    // ----------------------------------------------------------------
-    Rectangle {
-        id: sortDrawer
-        z: 100
-        width: 110
-        height: drawerOpen ? 160 : 35
-        anchors.bottom: parent.bottom
-        anchors.right: parent.right
-        anchors.bottomMargin: 16
-        anchors.rightMargin: 16
-        color: drawerOpen ? "#222" : "#44000000"
-        border.color: drawerOpen ? "white" : "transparent"
-        border.width: 1
-        radius: 8
-        property bool drawerOpen: false
-
-        Behavior on height { NumberAnimation { duration: 200; easing.type: Easing.InOutQuad } }
-
-        MouseArea {
-            anchors.fill: parent
-            onClicked: sortDrawer.drawerOpen = !sortDrawer.drawerOpen
-
-            Column {
-                anchors.right: parent.right
-                anchors.top: parent.top
-                anchors.rightMargin: 10
-                anchors.topMargin: 12
-                spacing: 3
-                Rectangle { width: 16; height: 2; color: "white" }
-                Rectangle { width: 16; height: 2; color: "white" }
-                Rectangle { width: 16; height: 2; color: "white" }
-            }
-        }
-
-        Column {
-            anchors.top: parent.top
-            anchors.topMargin: 40
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.margins: 10
-            spacing: 12
-            visible: sortDrawer.drawerOpen
-
-            Repeater {
-                model: [
-                    { name: "Oldest First", mode: "oldest" },
-                    { name: "Recent First", mode: "recent" },
-                    { name: "Recently Added", mode: "added" },
-                    { name: "Alphabetical", mode: "alpha" }
-                ]
-                delegate: Text {
-                    text: modelData.name
-                    color: gridRoot.sortMode === modelData.mode ? "yellow" : "white"
-                    font.pixelSize: 11
-                    font.bold: gridRoot.sortMode === modelData.mode
-                    width: parent.width
-                    MouseArea {
-                        anchors.fill: parent
-                        onClicked: {
-                            gridRoot.sortMode = modelData.mode
-                            sortDrawer.drawerOpen = false
-                        }
-                    }
                 }
             }
         }

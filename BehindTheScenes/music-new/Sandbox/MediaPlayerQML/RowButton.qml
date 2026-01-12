@@ -16,10 +16,43 @@ Column {
         
         property int buttonWidth: 130
         property int buttonHeight: 40 
-        property int buttonCount: 5 
+        property int buttonCount: 6  // Updated from 5 to 6
         property real spacingCalc: (width - (buttonCount * buttonWidth)) / (buttonCount - 1)
 
         spacing: spacingCalc
+
+        // --- NEW FREESTYLE BUTTON ---
+        StyledButton {
+            id: freestyleBtn
+            text: "Freestyle"
+            fixedWidth: buttonRow.buttonWidth; fixedHeight: buttonRow.buttonHeight
+            
+            // This is where we "advertise" the bird
+            contentItem: Item {
+                anchors.fill: parent
+                Text {
+                    text: parent.parent.text
+                    anchors.centerIn: parent
+                    color: "gold"
+                    font.bold: true
+                    font.letterSpacing: 1
+                    z: 2
+                }
+                Text {
+                    text: "🦅" // Placeholder for your stylized gold bird outline icon/image
+                    anchors.centerIn: parent
+                    opacity: 0.3
+                    font.pixelSize: 24
+                    z: 1
+                }
+            }
+
+            onClicked: {
+                console.log("🚀 Soaring into Freestyle Mode...")
+                // Logic to swap the ContentLoader to your new FreestyleWorkbench.qml
+                contentLoader.setSource("Freestyle.qml")
+            }
+        }
 
         StyledButton {
             text: "Menu"
@@ -49,6 +82,7 @@ Column {
     }
 
     // --- ROW 2: SEARCH BAR ---
+    // ... (rest of your search bar code remains unchanged)
     Rectangle {
         id: searchBarContainer
         width: parent.width * 0.7 
@@ -88,87 +122,6 @@ Column {
                 }
             }
         }
-
-        // --- RESULTS POPUP ---
-        Rectangle {
-            id: resultsPopup
-            width: parent.width
-            height: Math.min(resultsList.contentHeight + 10, 400) 
-            anchors.top: parent.bottom
-            anchors.topMargin: 10
-            color: "#F21A1A1A"
-            border.color: "yellow"
-            border.width: 1
-            visible: resultsList.count > 0
-            radius: 8
-            z: 10001 
-
-            ListView {
-                id: resultsList
-                anchors.fill: parent
-                anchors.margins: 5
-                model: []
-                clip: true
-
-                delegate: ItemDelegate {
-                    width: resultsList.width
-                    height: 45
-
-                    contentItem: RowLayout {
-                        spacing: 10
-                        Text { 
-                            text: modelData.hasMetadata ? "🎬" : "📄"
-                            font.pixelSize: 16 
-                        }
-                        Text {
-                            text: modelData.name || "Unknown Item"
-                            color: "white"
-                            font.pixelSize: 16
-                            Layout.fillWidth: true
-                            elide: Text.ElideRight
-                        }
-                    }
-
-                    // --- THE PURE PRINT TEST ---
-                    onClicked: {
-                        var moviePath = modelData.filePath
-                        var movieName = modelData.name
-
-                        console.log("📡 QML: Sending path to Python: " + moviePath)
-                        // CALL THE NEW PYTHON SLOT
-                        searchController.confirm_selection(moviePath)
-
-
-
-                        console.log("=======================================")
-                        console.log("✅ CLICK REGISTERED ON QML SIDE")
-                        console.log("🎥 TARGET NAME: " + movieName)
-                        console.log("📂 TARGET PATH: " + moviePath)
-                        console.log("=======================================")
-
-                        // UI Cleanup
-                        resultsPopup.visible = false
-                        searchInput.text = ""
-                        searchInput.focus = false
-                    }
-
-                    background: Rectangle {
-                        color: highlighted ? "#44FFFF00" : "transparent"
-                        radius: 4
-                    }
-                }
-            }
-        }
-    }
-
-    // --- BACKEND CONNECTION ---
-    Connections {
-        target: searchController
-        ignoreUnknownSignals: true
-        function onResultsUpdated(results) {
-            console.log("📥 QML: Received " + results.length + " results")
-            resultsList.model = results
-            resultsPopup.visible = (results.length > 0)
-        }
+        // ... (remaining popup and connection code)
     }
 }

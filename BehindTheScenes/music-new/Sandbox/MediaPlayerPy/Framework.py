@@ -52,6 +52,7 @@ from todo_manager import ToDoManager
 from cacheBuilderOnServer_v2 import CacheBuilder_v2
 from xml_collections import XMLCollections
 from Sandbox.Playback.playback_qml_bridge import PlaybackQmlBridge
+from DriveManager import DriveManager
 
 # ------------------------------------------------------------
 # MAIN
@@ -87,6 +88,7 @@ def main():
         font_url = paths["fonts"].as_uri()
         settings_manager.load_settings()
         print(">>> Framework: settings loaded")
+        drive_logic = DriveManager()
 
         # --------------------------------------------------------
         # Manifest updater and ToDo manager
@@ -151,6 +153,9 @@ def main():
         # --- Expose the bridge ---
         playback_bridge = PlaybackQmlBridge()
         engine.rootContext().setContextProperty("playbackBridge", playback_bridge)
+
+        # The string "driveManager" MUST match what is inside Freestyle.qml
+        engine.rootContext().setContextProperty("driveManager", drive_logic)
 
         # 1. Instantiate the Search Controller
         search_controller = SearchController()

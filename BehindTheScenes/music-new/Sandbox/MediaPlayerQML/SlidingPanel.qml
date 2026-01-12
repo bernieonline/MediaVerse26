@@ -56,6 +56,7 @@ Rectangle {
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.topMargin: 10
         }
+
         ComboBox {
             id: categoryCombo
             anchors.top: chooseLocationLabel.bottom
@@ -68,6 +69,7 @@ Rectangle {
 
             onActivated: function(index) {
                 if (model[index]) {
+                    // Triggers the update_folders thread in Python
                     folderSelected(model[index].path)
                 }
             }
@@ -111,8 +113,6 @@ Rectangle {
             model: folderModel ? folderModel : []
             property int currentIndex: -1
 
-            //Component.onCompleted: console.log("SlidingPanel folderModel contents:", folderModel)
-
             delegate: Item {
                 width: fileView.width
                 height: 40
@@ -133,7 +133,7 @@ Rectangle {
                 }
 
                 Text {
-                    text: modelData.folderName   // ✅ matches Python backend
+                    text: modelData.folderName
                     color: "white"
                     font.pixelSize: 16
                     anchors.verticalCenter: parent.verticalCenter
@@ -145,15 +145,28 @@ Rectangle {
                     anchors.fill: parent
                     onClicked: {
                         fileView.currentIndex = index
-                        folderSelected(modelData.folderPath)   // ✅ matches Python backend
+                        
+                        // --- V2 LOGIC START ---
+                        console.log("QML: Triggering V2 Scan for: " + modelData.folderPath)
+                        
+                        // Check for the Python bridge name from main.py
+                        if (typeof fileSystemManager !== "undefined") {
+                            // Call the specific V2 method we created
+                            fileSystemManager.list_folder_content_v2(modelData.folderPath)
+                        } else {
+                            console.log("QML ERROR: fileSystemManager bridge not found!")
+                        }
+
+                        // Close panel and request the grid display
                         root.x = -root.width
-                        viewRequested("grid") // or "carousel"
+                        viewRequested("grid") 
+                        // --- V2 LOGIC END ---
                     }
                 }
             }
         }
 
-        // Scroll buttons row
+        // Scroll controls
         Row {
             anchors.bottom: parent.bottom
             anchors.horizontalCenter: parent.horizontalCenter
