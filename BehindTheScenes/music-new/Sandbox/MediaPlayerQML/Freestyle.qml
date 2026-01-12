@@ -1,142 +1,102 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
-import Qt5Compat.GraphicalEffects
 
 Rectangle {
     id: freestyleRoot
     anchors.fill: parent
-    color: "#121212" // Deep dark background
+    color: "#121212"
 
-    // 1. DATA TRACKER: The "Flight Path"
     ListModel { id: pathStack }
 
-    // 2. STYLIZED WATERMARK: The Gold Bird
-    Image {
-        id: birdWatermark
-        source: "assets/gold_bird_outline.svg" 
-        anchors.centerIn: parent
-        width: parent.width * 0.5
-        fillMode: Image.PreserveAspectFit
-        opacity: 0.05 // Very subtle, barely there
-        z: 0
-    }
-
-    // 3. THE UNFOLDING ENGINE
     Flickable {
         id: mainFlick
         anchors.fill: parent
         contentWidth: unfoldingRow.width
-        boundsBehavior: Flickable.StopAtBounds
         clip: true
-
-        // Smoothly slides view to the right when a new pane opens
         Behavior on contentX { NumberAnimation { duration: 400; easing.type: Easing.OutCubic } }
 
         Row {
             id: unfoldingRow
             height: parent.height
-            spacing: 2
 
-            // --- PANE 0: THE DRIVE DOCK ---
+            // --- PANE 0: DRIVE DOCK ---
             Rectangle {
-                width: 320
-                height: freestyleRoot.height
-                color: "#D9121212"
-                border.color: "#66D4AF37"
-                border.width: 1
-
+                width: 300; height: parent.height; color: "#161616"; border.color: "#33D4AF37"
                 Column {
-                    anchors.fill: parent
-                    anchors.margins: 25
-                    spacing: 20
-
-                    Text {
-                        text: "FREESTYLE"
-                        color: "gold"
-                        font.pixelSize: 22
-                        font.bold: true
-                        font.letterSpacing: 4
-                    }
-
-                    Text { text: "SELECT ENTRY POINT"; color: "#888"; font.pixelSize: 10 }
-
+                    anchors.fill: parent; anchors.margins: 20; spacing: 15
+                    Text { text: "FREESTYLE"; color: "gold"; font.pixelSize: 22; font.bold: true; font.letterSpacing: 2 }
                     Flow {
-                        width: parent.width
-                        spacing: 12
+                        width: parent.width; spacing: 8
                         Repeater {
                             model: driveManager.get_available_drives()
                             delegate: Button {
                                 text: modelData.label
                                 onClicked: {
                                     pathStack.clear();
-                                    pathStack.append({"folderPath": modelData.path, "folderName": modelData.label});
+                                    // Ensure path is treated as a string and has the trailing slash
+                                    pathStack.append({
+                                        "targetPath": String(modelData.path), 
+                                        "displayName": String(modelData.label)
+                                    });
                                 }
-                                // ... (Insert the Gold Pill styling from earlier here)
                             }
                         }
                     }
                 }
             }
 
-            // --- DYNAMIC FOLDER PANES ---
+            // --- UNFOLDING FOLDERS ---
             Repeater {
                 model: pathStack
                 delegate: Rectangle {
-                    width: 320
-                    height: freestyleRoot.height
-                    color: "#F2121212" 
-                    border.color: "#33D4AF37"
-                    border.width: 1
+                    id: pane
+                    width: 320; height: freestyleRoot.height
+                    color: "#1A1A1A"; border.color: "#33D4AF37"; border.width: 1
 
                     Column {
-                        anchors.fill: parent
-                        anchors.margins: 20
-                        spacing: 15
-
+                        anchors.fill: parent; anchors.margins: 15; spacing: 12
+                        
+                        // Header: Uses the displayName from our append
                         Text {
-                            text: folderName.toUpperCase()
-                            color: "gold"
-                            font.pixelSize: 14
-                            font.bold: true
-                            elide: Text.ElideRight
-                            width: parent.width
+                            text: displayName.toUpperCase()
+                            color: "gold"; font.pixelSize: 12; font.bold: true
                         }
 
                         ListView {
                             id: folderList
-                            width: parent.width
-                            height: parent.height - 100
-                            clip: true
-                            model: driveManager.get_subfolders(folderPath)
+                            width: parent.width; height: parent.height - 80; clip: true
+                            // Use targetPath here - this is the key link to Python
+                            model: driveManager.get_subfolders(targetPath)
                             
                             delegate: ItemDelegate {
-                                width: folderList.width
-                                height: 40
-                                
-                                contentItem: Text {
+                                width: folderList.width; height: 35
+                                contentItem: Text { 
                                     text: "📁  " + modelData.name
-                                    color: highlighted ? "gold" : "white"
-                                    font.pixelSize: 13
-                                    verticalAlignment: Text.AlignVCenter
+                                    color: "white"; verticalAlignment: Text.AlignVCenter 
                                 }
-
+                                
                                 onClicked: {
-                                    // Remove panes to the right of this one
-                                    while (pathStack.count > index + 1) {
-                                        pathStack.remove(pathStack.count - 1);
+                                    // index is the pane index. Clear everything after this pane.
+                                    while (pathStack.count > (index + 1)) { 
+                                        pathStack.remove(pathStack.count - 1); 
                                     }
-                                    // Add new folder
-                                    pathStack.append({"folderPath": modelData.path, "folderName": modelData.name});
-                                    // Slide view to focus on the new panel
-                                    mainFlick.contentX = unfoldingRow.width - mainFlick.width;
+                                    
+                                    pathStack.append({
+                                        "targetPath": String(modelData.path), 
+                                        "displayName": String(modelData.name)
+                                    });
+                                    scrollTimer.restart();
                                 }
                             }
                         }
                     }
-                    // Entrance animation
-                    NumberAnimation on width { from: 0; to: 320; duration: 250; easing.type: Easing.OutQuad }
                 }
             }
         }
+    }
+
+    Timer { 
+        id: scrollTimer; interval: 50; 
+        onTriggered: mainFlick.contentX = Math.max(0, unfoldingRow.width - mainFlick.width) 
     }
 }
