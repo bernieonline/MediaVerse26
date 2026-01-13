@@ -2,19 +2,24 @@ import os
 import re
 import psutil
 import ctypes
+import mimetypes
 from pathlib import Path
 from PySide6.QtCore import QObject, Slot
-from project_paths import paths # We need this for the cache lookup
 
 class DriveManager(QObject):
     def __init__(self):
         super().__init__()
-        # Reference the local thumb cache from your project_paths.py
-        self.local_thumb_v2 = Path(paths["local_thumb_v2"])
+        # Internal path for the Library Standard matching rule
+        try:
+            from project_paths import paths
+            self.local_thumb_v2 = Path(paths["local_thumb_v2"])
+        except ImportError:
+            # Absolute fallback for your specific environment
+            self.local_thumb_v2 = Path("D:/MediaVerse1.0/BehindTheScenes/BehindTheScenes/music-new/cacheV2/images/thumb")
 
     @Slot(result=dict)
     def get_grouped_drives(self):
-        """RESTORED: Detects all system drives dynamically."""
+        """Detects all system drives dynamically."""
         kernel32 = ctypes.windll.kernel32
         grouped = {"local": [], "network": []}
         
@@ -44,22 +49,25 @@ class DriveManager(QObject):
                     grouped["network"].append(drive_data)
                 else:
                     grouped["local"].append(drive_data)
-            except:
+            except Exception:
                 continue
         return grouped
 
     @Slot(str, result=dict)
     def get_folder_contents(self, parent_path):
-        """RESTORED: Your original folder splitter."""
+        """Standard file/folder splitter for the Panel view."""
         if not parent_path: 
             return {"files": [], "folders": []}
             
         files = []
         folders = []
-        video_exts = {'.mp4', '.mkv', '.avi', '.mov', '.wmv', '.m4v'}
+        video_exts = {'.mp4', '.mkv', '.avi', '.mov', '.wmv', '.m4v', '.jpg', '.jpeg', '.png'}
         
         try:
             normalized = os.path.normpath(parent_path)
+            if not os.path.exists(normalized):
+                return {"files": [], "folders": []}
+
             for item in os.listdir(normalized):
                 if item.startswith('$') or item.startswith('System Volume Information'):
                     continue
@@ -80,36 +88,102 @@ class DriveManager(QObject):
             }
         except Exception as e:
             return {"files": [], "folders": []}
-
+        
     @Slot(str, result=list)
     def get_video_triage_data(self, folder_path):
-        """NEW: Added to support the spacing/text standout view."""
+        """Advanced Deduplication: Groups video/image pairs and cleans titles."""
         video_data = []
-        video_exts = {'.mp4', '.mkv', '.avi', '.mov', '.m4v'}
+        video_exts = {'.mp4', '.mkv', '.avi', '.mov', '.wmv', '.m4v'}
+        image_exts = {'.jpg', '.jpeg', '.png', '.webp', '.bmp'}
+        
         try:
             normalized = Path(folder_path)
-            for item in normalized.iterdir():
-                if item.is_file() and item.suffix.lower() in video_exts:
-                    has_year = bool(re.search(r'\(\d{4}\)', item.name))
+            if not normalized.exists():
+                return []
+
+            all_items = list(normalized.iterdir())
+            
+            # Map to keep track of what we've processed
+            # Key: lowercase stem (e.g., "gladiator")
+            # Value: boolean (True if we've already added a video for this stem)
+            processed_stems = {}
+
+            # --- PASS 1: COLLECT VIDEOS ---
+            for item in all_items:
+                if not item.is_file() or item.name.startswith(('.', '$')):
+                    continue
+
+                ext = item.suffix.lower()
+                stem_key = item.stem.lower()
+
+                if ext in video_exts:
+                    processed_stems[stem_key] = True
                     
-                    # Cache-First Image Logic
+                    has_year = bool(re.search(r'\(\d{4}\)', item.name))
                     thumb_source = ""
+                    
+                    # Look for thumb in Cache V2
                     cache_thumb = self.local_thumb_v2 / f"{item.stem}.jpg"
-                    if has_year and cache_thumb.exists():
+                    if cache_thumb.exists():
                         thumb_source = cache_thumb.as_posix()
                     else:
-                        local_jpg = item.with_suffix(".jpg")
-                        if local_jpg.exists():
-                            thumb_source = local_jpg.as_posix()
+                        # Look for ANY image with the same stem (jpg, jpeg, or png)
+                        for img_ext in image_exts:
+                            local_img = item.with_suffix(img_ext)
+                            if local_img.exists():
+                                thumb_source = local_img.as_posix()
+                                break
 
                     video_data.append({
-                        "filename": item.name,
+                        "filename": item.stem, # <--- REMOVED EXTENSION FOR UI
+                        "extension": ext.replace('.', '').upper(),
                         "path": item.as_posix(),
-                        "folder": item.parent.as_posix(),
+                        "folder": item.parent.name,
                         "thumb": f"file:///{thumb_source}" if thumb_source else "",
-                        "size": f"{round(item.stat().st_size / (1024**3), 2)} GB",
+                        "size": self._get_size_str(item),
                         "isStandard": has_year
                     })
+
+            # --- PASS 2: COLLECT STANDALONE IMAGES ---
+            for item in all_items:
+                if not item.is_file() or item.name.startswith(('.', '$')):
+                    continue
+                    
+                ext = item.suffix.lower()
+                stem_key = item.stem.lower()
+
+                if ext in image_exts:
+                    # If we already have a video with this name, SKIP THIS IMAGE
+                    if stem_key in processed_stems:
+                        continue
+                    
+                    # If this is the first time seeing this stem, add it and mark it
+                    processed_stems[stem_key] = True
+                    
+                    video_data.append({
+                        "filename": item.stem, # <--- REMOVED EXTENSION FOR UI
+                        "extension": ext.replace('.', '').upper(),
+                        "path": item.as_posix(),
+                        "folder": item.parent.name,
+                        "thumb": item.as_uri(),
+                        "size": self._get_size_str(item),
+                        "isStandard": False
+                    })
+
             return sorted(video_data, key=lambda x: x["filename"].lower())
-        except:
+
+        except Exception as e:
+            print(f"DEBUG ERROR: {str(e)}")
             return []
+
+    
+
+    def _get_size_str(self, path_obj):
+        """Helper to format size: GB for movies, KB/MB for images."""
+        size_bytes = path_obj.stat().st_size
+        if size_bytes > 1024**3:
+            return f"{round(size_bytes / (1024**3), 2)} GB"
+        elif size_bytes > 1024**2:
+            return f"{round(size_bytes / (1024**2), 1)} MB"
+        else:
+            return f"{round(size_bytes / 1024, 0)} KB"
