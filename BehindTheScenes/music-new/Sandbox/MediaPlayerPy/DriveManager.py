@@ -1,92 +1,69 @@
 import os
 import psutil
+import ctypes
 from PySide6.QtCore import QObject, Slot
 
 class DriveManager(QObject):
     def __init__(self):
         super().__init__()
 
-    @Slot(result=list)
-    def get_available_drives(self):
-        import psutil
-        import os
-        drives = []
+    @Slot(result=dict)
+    def get_grouped_drives(self):
+        """Detects drives, fetches Volume Names, and groups by Local vs Network."""
+        kernel32 = ctypes.windll.kernel32
+        grouped = {"local": [], "network": []}
         
-        # 1. Use all=True to catch Network/Mapped drives
-        partitions = psutil.disk_partitions(all=True)
-        
-        for partition in partitions:
+        # 'all=True' is critical for seeing mapped network drives
+        for partition in psutil.disk_partitions(all=True):
             try:
-                # Filter out system/virtual drives that aren't useful
+                # Skip empty drives and system reserved
                 if partition.fstype == '' or 'cdrom' in partition.opts:
                     continue
                 
-                drive_path = partition.mountpoint
-                # Ensure we have a clean letter (e.g., "W:")
-                drive_label = partition.device.replace("\\", "") if partition.device else drive_path
+                path = partition.mountpoint
+                letter = partition.device.replace("\\", "")
                 
-                drives.append({
-                    "label": drive_label.strip(),
-                    "path": drive_path,
-                    "isCollection": "W:" in drive_path.upper()
-                })
+                # Fetch the Volume Label (e.g., "Collection")
+                buf = ctypes.create_unicode_buffer(1024)
+                volume_name = ""
+                if kernel32.GetVolumeInformationW(path, buf, 1024, None, None, None, None, 0):
+                    volume_name = buf.value
+                
+                # Determine if Local (Fixed) or Network (Remote)
+                # 3 = DRIVE_FIXED, 4 = DRIVE_REMOTE
+                d_type = kernel32.GetDriveTypeW(path)
+                
+                drive_data = {
+                    "label": volume_name if volume_name else "Local Disk",
+                    "letter": letter,
+                    "path": path.replace("\\", "/"),
+                    "isCollection": "W:" in path.upper()
+                }
+
+                if d_type == 4:
+                    grouped["network"].append(drive_data)
+                else:
+                    grouped["local"].append(drive_data)
             except:
                 continue
-
-        # 2. EMERGENCY FALLBACK: If W: is still missing (sometimes happens with mapped drives)
-        if not any("W:" in d["label"].upper() for d in drives):
-            if os.path.exists("W:/"):
-                drives.append({
-                    "label": "W:",
-                    "path": "W:/",
-                    "isCollection": True
-                })
                 
-        return sorted(drives, key=lambda x: x['label'])
+        return grouped
 
     @Slot(str, result=list)
     def get_subfolders(self, parent_path):
-        """Returns a list of subfolders for the unfolding panes."""
-        if not parent_path:
-            return []
-            
+        """Returns subfolders for the unfolding panels."""
+        if not parent_path: return []
         folders = []
         try:
-            # Clean path for Windows
-            normalized_path = os.path.normpath(parent_path)
-            
-            for item in os.listdir(normalized_path):
-                full_path = os.path.join(normalized_path, item)
-                
-                # Only include directories and skip hidden system folders
+            # Add trailing slash if missing for root drives
+            normalized = os.path.normpath(parent_path)
+            for item in os.listdir(normalized):
+                full_path = os.path.join(normalized, item)
                 if os.path.isdir(full_path) and not item.startswith('$'):
                     folders.append({
                         "name": item,
-                        "path": full_path.replace("\\", "/") # Normalize for QML
+                        "path": full_path.replace("\\", "/")
                     })
-            
-            # Sort alphabetically for a clean UI
             return sorted(folders, key=lambda x: x['name'].lower())
-            
-        except Exception as e:
-            print(f"⚠️ Freestyle Error reading folders at {parent_path}: {e}")
-            return []
-
-    @Slot(str, result=bool)
-    def has_media(self, folder_path):
-        """Checks if a folder contains video files to trigger the Preview Pane."""
-        video_extensions = ('.mp4', '.mkv', '.avi', '.mov', '.wmv')
-        try:
-            return any(f.lower().endswith(video_extensions) for f in os.listdir(folder_path))
         except:
-            return False
-
-    @Slot(str, result=str)
-    def get_thumb_for_video(self, video_path):
-        """
-        Implementation of the matching rule: 
-        Shared Video Path -> Converted Cache Key -> Thumb Path
-        """
-        # Example conversion: W:\Collection\Movie.mp4 -> cached_thumb_path
-        # You can plug your specific cache-lookup logic here
-        return video_path # Placeholder
+            return []
