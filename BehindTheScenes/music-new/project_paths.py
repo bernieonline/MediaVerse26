@@ -81,6 +81,8 @@ local_manifest_v2 = project_root / "manifestV2"
 local_cache_v2 = project_root / "cacheV2"
 local_cache_images_v2 = local_cache_v2 / "images"
 
+fallback_image = project_root / "Assets" / "MediaVerse 1.jpg"
+
 local_thumb_v2 = local_cache_images_v2 / "thumb"
 local_display_v2 = local_cache_images_v2 / "display"
 local_carousel_v2 = local_cache_images_v2 / "carousel"
@@ -121,7 +123,8 @@ paths = {
     "local_carousel_v2": local_carousel_v2,
     "collection_bg": collection_bg,
     "movies_coll_v2": movies_coll_v2,
-    "svg_solid": svg_solid_path
+    "svg_solid": svg_solid_path,
+    "fallback_image": fallback_image,
     
 
 
