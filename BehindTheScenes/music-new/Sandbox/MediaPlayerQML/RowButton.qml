@@ -16,7 +16,7 @@ Column {
         
         property int buttonWidth: 130
         property int buttonHeight: 40 
-        property int buttonCount: 6  // Updated from 5 to 6
+        property int buttonCount: 6
         property real spacingCalc: (width - (buttonCount * buttonWidth)) / (buttonCount - 1)
 
         spacing: spacingCalc
@@ -27,7 +27,6 @@ Column {
             text: "Freestyle"
             fixedWidth: buttonRow.buttonWidth; fixedHeight: buttonRow.buttonHeight
             
-            // This is where we "advertise" the bird
             contentItem: Item {
                 anchors.fill: parent
                 Text {
@@ -39,7 +38,7 @@ Column {
                     z: 2
                 }
                 Text {
-                    text: "🦅" // Placeholder for your stylized gold bird outline icon/image
+                    text: "🦅"
                     anchors.centerIn: parent
                     opacity: 0.3
                     font.pixelSize: 24
@@ -49,7 +48,6 @@ Column {
 
             onClicked: {
                 console.log("🚀 Soaring into Freestyle Mode...")
-                // Logic to swap the ContentLoader to your new FreestyleWorkbench.qml
                 contentLoader.setSource("Freestyle.qml")
             }
         }
@@ -82,7 +80,6 @@ Column {
     }
 
     // --- ROW 2: SEARCH BAR ---
-    // ... (rest of your search bar code remains unchanged)
     Rectangle {
         id: searchBarContainer
         width: parent.width * 0.7 
@@ -117,11 +114,70 @@ Column {
                         console.log("📡 QML: Requesting Search for ->", text)
                         searchController.perform_search(text)
                     } else {
-                        resultsPopup.visible = false
+                        resultsPopup.close()
                     }
                 }
             }
         }
-        // ... (remaining popup and connection code)
+
+        // Connect to Python SearchController signals
+        Connections {
+            target: searchController
+            
+            // Matches resultsUpdated = Signal(list)
+            function onResultsUpdated(results) {
+                resultsModel.clear()
+                for (var i = 0; i < results.length; i++) {
+                    resultsModel.append(results[i])
+                }
+                if (results.length > 0) {
+                    resultsPopup.open()
+                } else {
+                    resultsPopup.close()
+                }
+            }
+        }
+
+        Popup {
+            id: resultsPopup
+            y: parent.height + 5
+            width: parent.width
+            height: Math.min(resultsModel.count * 40, 400)
+            padding: 0
+            background: Rectangle { 
+                color: "#F21A1A1A"
+                border.color: "gold"
+                radius: 10
+            }
+
+            ListView {
+                id: resultsList
+                anchors.fill: parent
+                model: ListModel { id: resultsModel }
+                clip: true
+                delegate: ItemDelegate {
+                    width: parent.width
+                    height: 40
+                    contentItem: Text {
+                        // Uses 'name' from your Python dict
+                        text: "🎬  " + model.name 
+                        color: hovered ? "gold" : "white"
+                        font.pixelSize: 16
+                        verticalAlignment: Text.AlignVCenter
+                        leftPadding: 15
+                    }
+                    background: Rectangle {
+                        color: hovered ? "#33D4AF37" : "transparent"
+                    }
+                    onClicked: {
+                        console.log("🎥 Selecting:", model.filePath)
+                        // Trigger the selection logic in Python
+                        searchController.confirm_selection(model.filePath)
+                        resultsPopup.close()
+                        searchInput.text = ""
+                    }
+                }
+            }
+        }
     }
 }
