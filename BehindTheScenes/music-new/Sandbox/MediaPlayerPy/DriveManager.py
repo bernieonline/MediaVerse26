@@ -9,28 +9,23 @@ class DriveManager(QObject):
 
     @Slot(result=dict)
     def get_grouped_drives(self):
-        """Detects drives, fetches Volume Names, and groups by Local vs Network."""
+        """Detects drives, fetches Volume Names, and groups them."""
         kernel32 = ctypes.windll.kernel32
         grouped = {"local": [], "network": []}
         
-        # 'all=True' is critical for seeing mapped network drives
         for partition in psutil.disk_partitions(all=True):
             try:
-                # Skip empty drives and system reserved
                 if partition.fstype == '' or 'cdrom' in partition.opts:
                     continue
                 
                 path = partition.mountpoint
                 letter = partition.device.replace("\\", "")
                 
-                # Fetch the Volume Label (e.g., "Collection")
                 buf = ctypes.create_unicode_buffer(1024)
                 volume_name = ""
                 if kernel32.GetVolumeInformationW(path, buf, 1024, None, None, None, None, 0):
                     volume_name = buf.value
                 
-                # Determine if Local (Fixed) or Network (Remote)
-                # 3 = DRIVE_FIXED, 4 = DRIVE_REMOTE
                 d_type = kernel32.GetDriveTypeW(path)
                 
                 drive_data = {
@@ -40,30 +35,53 @@ class DriveManager(QObject):
                     "isCollection": "W:" in path.upper()
                 }
 
-                if d_type == 4:
+                if d_type == 4: # DRIVE_REMOTE
                     grouped["network"].append(drive_data)
                 else:
                     grouped["local"].append(drive_data)
             except:
                 continue
-                
         return grouped
 
-    @Slot(str, result=list)
-    def get_subfolders(self, parent_path):
-        """Returns subfolders for the unfolding panels."""
-        if not parent_path: return []
+    @Slot(str, result=dict)
+    def get_folder_contents(self, parent_path):
+        """The heart of Freestyle: Splits contents into files and folders."""
+        if not parent_path: 
+            return {"files": [], "folders": []}
+            
+        files = []
         folders = []
+        video_exts = {'.mp4', '.mkv', '.avi', '.mov', '.wmv', '.m4v'}
+        
         try:
-            # Add trailing slash if missing for root drives
             normalized = os.path.normpath(parent_path)
+            if not os.path.exists(normalized):
+                return {"files": [], "folders": []}
+
             for item in os.listdir(normalized):
+                if item.startswith('$') or item.startswith('System Volume Information'):
+                    continue
+                    
                 full_path = os.path.join(normalized, item)
-                if os.path.isdir(full_path) and not item.startswith('$'):
+                
+                if os.path.isdir(full_path):
                     folders.append({
-                        "name": item,
+                        "name": item, 
                         "path": full_path.replace("\\", "/")
                     })
-            return sorted(folders, key=lambda x: x['name'].lower())
-        except:
-            return []
+                else:
+                    ext = os.path.splitext(item)[1].lower()
+                    files.append({
+                        "name": item,
+                        "path": full_path.replace("\\", "/"),
+                        "ext": ext,
+                        "isVideo": ext in video_exts
+                    })
+            
+            return {
+                "folders": sorted(folders, key=lambda x: x['name'].lower()),
+                "files": sorted(files, key=lambda x: x['name'].lower())
+            }
+        except Exception as e:
+            print(f"Error scanning {parent_path}: {e}")
+            return {"files": [], "folders": []}
