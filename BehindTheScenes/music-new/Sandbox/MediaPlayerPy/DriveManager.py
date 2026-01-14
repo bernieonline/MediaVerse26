@@ -18,71 +18,83 @@ class DriveManager(QObject):
 
     @Slot(str, result=list)
     def get_video_triage_data(self, folder_path):
-        """
-        Scans folder and matches keys to FreestyleView.qml.
-        FIX: Extension now correctly reflects the video type (MP4/MKV)
-        even when a JPG/PNG thumbnail is loaded.
-        """
         video_data = []
-        video_exts = {'.mp4', '.mkv', '.avi', '.mov', '.wmv', '.m4v'}
+        video_exts = {'.mp4', '.m2ts','.TS','.mkv', '.avi', '.mov', '.wmv', '.m4v'}
+        
+        # --- Debug Counters ---
+        total_files_seen = 0
+        videos_found = 0
+        manifest_matches = 0
+        local_jpg_matches = 0
+        fallback_matches = 0
 
         try:
             p = Path(folder_path)
             if not p.exists():
+                print(f"❌ Path does not exist: {folder_path}")
                 return []
 
             for item in p.iterdir():
+                total_files_seen += 1
                 if not item.is_file():
                     continue
 
-                # Capture the original video extension first
                 raw_ext = item.suffix.lower()
 
                 if raw_ext in video_exts:
-                    # LOCK THE VIDEO TYPE FOR THE LABEL (e.g., MP4)
+                    videos_found += 1
                     display_ext = raw_ext.replace('.', '').upper()
-
+                    
+                    # Normalizing for manifest lookup
                     video_key = str(item).replace('/', '\\')
                     image_path = ""
 
-                    # 🔍 Look up thumb in manifest → LOCAL CACHE V2
+                    # 1. Try Manifest
                     if self.folder_mapper:
                         record = self.folder_mapper.get_record(video_key)
                         if record and "cache" in record:
                             rel_cache_path = record["cache"].get("thumb", "")
                             if rel_cache_path:
-                                # manifest gives e.g. "Cache/thumb/She Wore A Yellow Ribbon (1949).jpg"
                                 filename = Path(rel_cache_path).name
-                                local_thumb_dir = paths["local_thumb_v2"]
-                                full_path = local_thumb_dir / filename
-
+                                full_path = paths["local_thumb_v2"] / filename
                                 if full_path.exists():
                                     image_path = full_path.as_uri()
+                                    manifest_matches += 1
 
-                    # Fallback to local .jpg next to the video
+                    # 2. Try Local JPG
                     if not image_path:
                         local_jpg = item.with_suffix('.jpg')
                         if local_jpg.exists():
                             image_path = "file:///" + str(local_jpg).replace("\\", "/")
+                            local_jpg_matches += 1
 
-                    # FINAL FALLBACK: global default image via project_paths
+                    # 3. Final Fallback
                     if not image_path:
                         fallback = paths.get("fallback_image")
                         if fallback and Path(fallback).exists():
                             image_path = Path(fallback).as_uri()
+                            fallback_matches += 1
 
                     video_data.append({
                         "title": str(item.stem),
-                        "filename": str(item.stem),
                         "thumb": str(image_path),
-                        "filePath": str(image_path),
                         "videoPath": str(item.as_posix()),
-                        "originalPath": str(item.as_posix()),
-                        "extension": display_ext,  # FIXED: Shows Video Ext, not Image Ext
-                        "sourceType": "PROCESSED" if image_path else "RAW"
+                        "extension": display_ext,
+                        "sourceType": "MANIFEST" if manifest_matches > 0 else "LOCAL/FALLBACK"
                     })
 
+            # --- PRINT THE DEBUG SUMMARY ---
+            print(f"\n--- TRIAGE DEBUG FOR: {p.name} ---")
+            print(f"Total items in folder: {total_files_seen}")
+            print(f"Video files detected:  {videos_found}")
+            print(f"  └─ Manifest Thumbs:  {manifest_matches}")
+            print(f"  └─ Local JPG Thumbs: {local_jpg_matches}")
+            print(f"  └─ Fallback Thumbs:  {fallback_matches}")
+            print(f"Total results sent to QML: {len(video_data)}")
+            print("---------------------------------\n")
+
             return sorted(video_data, key=lambda x: x["title"].lower())
+            
         except Exception as e:
             print(f"❌ DriveManager Triage Error: {e}")
             return []
