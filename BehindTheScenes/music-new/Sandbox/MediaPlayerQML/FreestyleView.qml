@@ -29,7 +29,7 @@ Rectangle {
     Rectangle {
         id: topBar
         width: parent.width; height: 60
-        color: "#121212"; z: 1000 // Ensure it stays on top
+        color: "#121212"; z: 1000 
         
         Text {
             anchors.left: parent.left; anchors.leftMargin: 85
@@ -57,7 +57,7 @@ Rectangle {
         }
     }
 
-    // --- NAVIGATION CONTROLS (Defined first to provide anchor points) ---
+    // --- NAVIGATION ---
     Rectangle {
         id: navLeft
         anchors.left: parent.left; width: 65; height: parent.height; z: 800
@@ -89,34 +89,55 @@ Rectangle {
         }
     }
 
-    // --- THE CAROUSEL (Now anchored strictly BETWEEN the buttons) ---
+    // --- CAROUSEL ---
     ListView {
         id: carousel
         anchors.top: topBar.bottom
         anchors.bottom: parent.bottom
         anchors.left: navLeft.right
         anchors.right: navRight.left
-        anchors.topMargin: 15
-        anchors.bottomMargin: 15
-        
+        anchors.topMargin: 15; anchors.bottomMargin: 15
         orientation: ListView.Horizontal
         spacing: 15
         model: triageRoot.videoData
-        clip: true // This property now strictly shears pixels at the navLeft/navRight boundaries
-        
-        snapMode: ListView.NoSnap 
+        clip: true 
         boundsBehavior: Flickable.StopAtBounds
-        
         Behavior on contentX { NumberAnimation { duration: 500; easing.type: Easing.OutCubic } }
 
         delegate: Rectangle {
-            // Width is now a clean division of the gap between the buttons
+            id: cardDelegate
             width: Math.floor((carousel.width - (carousel.spacing * 6)) / 7)
             height: carousel.height - 10
             anchors.verticalCenter: parent.verticalCenter
-            color: "#151515"; radius: 6
-            border.color: modelData.isStandard ? "#33D4AF37" : "#55FF3333"
-            border.width: 1
+            color: delegateMA.hovered ? "#202020" : "#151515"
+            radius: 6
+            border.color: delegateMA.hovered ? "gold" : (modelData.isStandard ? "#33D4AF37" : "#55FF3333")
+            border.width: delegateMA.hovered ? 2 : 1
+
+            MouseArea {
+                id: delegateMA
+                anchors.fill: parent
+                hoverEnabled: true
+                
+                onDoubleClicked: {
+                    if (modelData.videoPath) {
+                        // 1. Standardize slashes to forward slashes 
+                        // This matches the exact transformation in your working grid code
+                        let cleanPath = modelData.videoPath.toString().replace(/\\/g, "/");
+                        
+                        console.log("--- Freestyle Playback Sequence ---");
+                        console.log("Original Path: " + modelData.videoPath);
+                        console.log("Standardized for Bridge: " + cleanPath);
+
+                        // 2. Call the Bridge that handles the Path -> ID -> Play complex logic
+                        if (typeof playbackBridge !== "undefined") {
+                            playbackBridge.playVideo(cleanPath);
+                        } else {
+                            console.log("CRITICAL: playbackBridge not found in FreestyleView");
+                        }
+                    }
+                }
+            }
 
             Column {
                 anchors.fill: parent
@@ -135,30 +156,26 @@ Rectangle {
 
                 Column {
                     width: parent.width; spacing: 8
-                    
                     Text { 
-                        text: modelData.filename 
+                        text: modelData.filename || "Unknown"
                         color: "white"; font.bold: true; font.pixelSize: 10
                         width: parent.width; horizontalAlignment: Text.AlignHCenter
                         elide: Text.ElideRight; maximumLineCount: 2; wrapMode: Text.WrapAnywhere
                     }
-
                     Flow {
                         width: parent.width; spacing: 6
                         leftPadding: Math.max(0, (parent.width - 102) / 2)
-                        
                         Rectangle {
                             width: 48; height: 18; color: "gold"; radius: 3
-                            Text { text: modelData.size; color: "black"; anchors.centerIn: parent; font.bold: true; font.pixelSize: 9 }
+                            Text { text: modelData.size || ""; color: "black"; anchors.centerIn: parent; font.bold: true; font.pixelSize: 9 }
                         }
                         Rectangle {
                             width: 48; height: 18; color: "#222"; radius: 3; border.color: "gold"
-                            Text { text: modelData.extension; color: "gold"; anchors.centerIn: parent; font.bold: true; font.pixelSize: 9 }
+                            Text { text: modelData.extension || ""; color: "gold"; anchors.centerIn: parent; font.bold: true; font.pixelSize: 9 }
                         }
                     }
-
                     Text { 
-                        text: modelData.folder; color: "#444"; font.pixelSize: 8; width: parent.width
+                        text: modelData.folder || ""; color: "#444"; font.pixelSize: 8; width: parent.width
                         horizontalAlignment: Text.AlignHCenter; elide: Text.ElideMiddle
                     }
                 }
