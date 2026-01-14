@@ -168,6 +168,7 @@ Rectangle {
                         Rectangle {
                             width: 48; height: 18; color: "gold"; radius: 3
                             Text { text: modelData.size || ""; color: "black"; anchors.centerIn: parent; font.bold: true; font.pixelSize: 9 }
+                            //Text { text: modelData.Size || ""; color: "gold"; anchors.centerIn: parent; font.bold: true; font.pixelSize: 9 }
                         }
                         Rectangle {
                             width: 48; height: 18; color: "#222"; radius: 3; border.color: "gold"
