@@ -82,7 +82,7 @@ Rectangle {
                     model: pathStack
                     delegate: Rectangle {
                         id: pane
-                        property int stackLevel: index // Store column level
+                        property int stackLevel: index 
                         property bool isActive: index === pathStack.count - 1
                         width: isActive ? 400 : 100
                         height: freestyleRoot.height
@@ -100,11 +100,14 @@ Rectangle {
                             }
                         }
 
-                        Column {
-                            anchors.fill: parent; anchors.margins: 15; spacing: 12
+                        // Use an Item to manage the vertical layout of Title, List, and Button
+                        Item {
+                            anchors.fill: parent; anchors.margins: 15
                             
+                            // Header Row
                             Row {
-                                width: parent.width; spacing: 10
+                                id: headerPart
+                                width: parent.width; height: 30; spacing: 10
                                 Text { 
                                     text: "←"; color: "gold"; font.pixelSize: 18; visible: pane.isActive
                                     MouseArea { 
@@ -120,12 +123,24 @@ Rectangle {
                                 }
                             }
 
+                            // The Scrollable List
                             Flickable {
                                 id: scrollArea
-                                width: parent.width; height: parent.height - 120; clip: true
+                                width: parent.width; 
+                                anchors.top: headerPart.bottom
+                                anchors.topMargin: 10
+                                anchors.bottom: displayBtn.visible ? displayBtn.top : parent.bottom
+                                anchors.bottomMargin: 10
+                                clip: true
                                 contentHeight: contentCol.height
                                 visible: pane.isActive
                                 boundsBehavior: Flickable.StopAtBounds
+
+                                // ⭐ THE SCROLLBAR
+                                ScrollBar.vertical: ScrollBar { 
+                                    id: vBar; active: true; 
+                                    contentItem: Rectangle { implicitWidth: 4; color: "gold"; radius: 2 } 
+                                }
 
                                 Column {
                                     id: contentCol
@@ -160,7 +175,6 @@ Rectangle {
                                                 font.pixelSize: 12; verticalAlignment: Text.AlignVCenter; elide: Text.ElideRight 
                                             }
                                             onClicked: {
-                                                // FIX: use stackLevel to avoid jumping
                                                 while (pathStack.count > (pane.stackLevel + 1)) { 
                                                     pathStack.remove(pathStack.count - 1); 
                                                 }
@@ -175,9 +189,11 @@ Rectangle {
                                 }
                             }
 
+                            // ⭐ DISPLAY BUTTON (Fixed at bottom)
                             Button {
                                 id: displayBtn
                                 width: parent.width - 10; height: 40
+                                anchors.bottom: parent.bottom
                                 visible: pane.isActive && (contentCol.folderData.files || []).some(f => f.isVideo)
                                 anchors.horizontalCenter: parent.horizontalCenter
                                 background: Rectangle { 
