@@ -57,6 +57,9 @@ menu_json_path = project_root / "Assets" / "MainMenu.json"
 config_json = project_root / "Assets" / "Config.json"
 coll_data = project_root / "Assets" / "xml_collection_data.json"
 coll_json = project_root / "Assets" /"xml_collection.json"
+splash_json = project_root / "Assets" / "Splash.json"
+
+
 
 #collections paths
 collection_bg = project_root / "Assets" / "Collections.jpg"
@@ -82,6 +85,8 @@ local_cache_v2 = project_root / "cacheV2"
 local_cache_images_v2 = local_cache_v2 / "images"
 
 fallback_image = project_root / "Assets" / "MediaVerse 1.jpg"
+splash_path = project_root / "Assets" / "Splash"
+
 
 local_thumb_v2 = local_cache_images_v2 / "thumb"
 local_display_v2 = local_cache_images_v2 / "display"
@@ -93,6 +98,8 @@ local_carousel_v2 = local_cache_images_v2 / "carousel"
 paths = {
     "project_root": project_root,
     "assets": assets_path,
+    "splash": splash_path,
+    "splash_images": splash_path,
     "qml": qml_path,
     "db": db_path,
     "log": log_path,
@@ -125,6 +132,8 @@ paths = {
     "movies_coll_v2": movies_coll_v2,
     "svg_solid": svg_solid_path,
     "fallback_image": fallback_image,
+    "splash_json": splash_json,
+
     
 
 

@@ -9,25 +9,22 @@ from pathlib import Path
 # PATHS
 # ------------------------------------------------------------
 this_dir = Path(__file__).resolve().parent         # MediaPlayerPy
-sandbox_root = this_dir.parent                      # Sandbox
-sys.path.insert(0, str(sandbox_root))              # Ensure Sandbox is found first
+sandbox_root = this_dir.parent                    # Sandbox
+sys.path.insert(0, str(sandbox_root))             # Ensure Sandbox is found first
 
-project_root = sandbox_root.parent                 # BehindTheScenes
-sys.path.append(str(project_root))                 # Optional: higher-level modules
+project_root = sandbox_root.parent                # BehindTheScenes
+sys.path.append(str(project_root))                # Optional: higher-level modules
 
 # Silences the font warning messages in the terminal
 os.environ["QT_LOGGING_RULES"] = "qt.qpa.fonts=false"
 
-# --- Add sandbox to sys.path ---
-#sandbox_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-#sys.path.insert(0, sandbox_root)
 # ------------------------------------------------------------
 # Playback import
 # ------------------------------------------------------------
 from Playback.playback_qml_bridge import PlaybackQmlBridge
 
 from search_controller import SearchController
-
+from SplashModel import SplashModel
 
 # ------------------------------------------------------------
 # Standard PySide6 imports
@@ -69,11 +66,11 @@ def main():
             format="%(asctime)s - %(levelname)s - %(message)s",
         )
 
+        # --------------------------------------------------------
+        # Splash model
+        # --------------------------------------------------------
+        splash_model = SplashModel(paths["splash_json"], paths["splash"])
 
-
-
-
-        
         # --------------------------------------------------------
         # Database connection
         # --------------------------------------------------------
@@ -143,33 +140,25 @@ def main():
         engine = QQmlApplicationEngine()
         ctx = engine.rootContext()
 
+        # --------------------------------------------------------
+        # IMPORTANT: expose splashModel BEFORE ANYTHING ELSE touches QML
+        # --------------------------------------------------------
+        ctx.setContextProperty("splashModel", splash_model)
 
-        # Register the PlaybackQmlBridge class under the name "PlaybackQmlBridge" for QML
-        #engine.rootContext().setContextProperty("PlaybackQmlBridge", PlaybackQmlBridge)
-
-        #engine.load("Sandbox/MediaPlayerQML/Framework-1.qml")
-
-
-        # --- Expose the bridge ---
+        # --------------------------------------------------------
+        # Expose other Python objects
+        # --------------------------------------------------------
         playback_bridge = PlaybackQmlBridge()
-        engine.rootContext().setContextProperty("playbackBridge", playback_bridge)
+        ctx.setContextProperty("playbackBridge", playback_bridge)
 
-        # The string "driveManager" MUST match what is inside Freestyle.qml
-        engine.rootContext().setContextProperty("driveManager", drive_logic)
+        ctx.setContextProperty("driveManager", drive_logic)
 
-        # 1. Instantiate the Search Controller
         search_controller = SearchController()
-
-
+        ctx.setContextProperty("searchController", search_controller)
 
         engine.addImportPath(os.path.join(os.path.dirname(PySide6.__file__), "qml"))
         engine.addImportPath(QLibraryInfo.path(QLibraryInfo.LibraryPath.Qml2ImportsPath))
-        engine.rootContext().setContextProperty("searchController", search_controller)
 
-        # --------------------------------------------------------
-        # Expose Python objects to QML
-        # --------------------------------------------------------
-        ctx.setContextProperty("playbackBridge", playback_bridge)      # For playback
         ctx.setContextProperty("_paths", paths_stringified)
         ctx.setContextProperty("collectionLogic", xml_logic)
         ctx.setContextProperty("todoManager", todo_manager)
@@ -191,7 +180,6 @@ def main():
         # --------------------------------------------------------
         engine.load(QUrl.fromLocalFile(str(paths["qml"] / "Framework-1.qml")))
 
-
         if not engine.rootObjects():
             logging.error("QML FAILED TO LOAD")
             return -1
@@ -202,6 +190,7 @@ def main():
         # Start manifest work after Qt event loop
         # --------------------------------------------------------
         server_manifest_path = paths["server_manifest_v2"]
+
         def start_manifest_work():
             if not server_manifest_path.exists():
                 notifier.post_notification("Building manifest for the first time…", False)

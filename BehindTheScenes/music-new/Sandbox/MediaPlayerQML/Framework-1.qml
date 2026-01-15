@@ -1,6 +1,7 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Controls.Material 2.15
+import Qt5Compat.GraphicalEffects
 
 ApplicationWindow {
     id: window
@@ -18,6 +19,8 @@ ApplicationWindow {
     Material.theme: Material.Dark
     Material.accent: Material.Yellow
 
+
+    
     Rectangle { 
         id: background
         anchors.fill: parent
@@ -106,8 +109,17 @@ ApplicationWindow {
         border.color: "#2566c2"
         border.width: 1
 
+        SplashScreen {
+            id: splash
+            anchors.fill: parent
+            z: 9999
+            visible: true
+            
+        }
+
         Loader {
             id: contentLoader
+
             anchors.fill: parent
             source: "ImageGridView_v2.qml"
 

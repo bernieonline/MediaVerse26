@@ -1,0 +1,19 @@
+[
+  {
+    "image": "Lawrence.jpeg",
+    "quote": [
+      " He was not worth it.",
+      " He was not of my tribe. He was of the Howeitat.",
+      " It is written."
+    ],
+    "delay": 10
+  },
+  {
+    "image": "ben hur.jpg",
+    "quote": [
+      "May God grant me vengeance! ",
+      "I will pray that you live until I return!"
+    ],
+    "delay": 10
+  }
+]
