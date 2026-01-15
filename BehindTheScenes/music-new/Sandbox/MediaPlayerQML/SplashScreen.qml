@@ -19,16 +19,45 @@ Item {
         fadeOutMain.start()
     }
 
-    // Fade in the entire splash container
+    // --- Component Lifecycle ---
+    Component.onCompleted: {
+        splashData = splashModel.get_splash_data()
+        if (splashData.length > 0) {
+            updateData()
+            // Start the initial entry sequence
+            fadeInMain.start()
+        }
+    }
+
+    function updateData() {
+        if (!splashData[index]) return;
+        currentImage = splashModel.resolve_image(splashData[index].image)
+        currentQuote = splashData[index].quote
+        currentTitle = splashData[index].title
+        rotateTimer.interval = splashData[index].delay * 1000
+    }
+
+    // --- Initial Entry Animations ---
     NumberAnimation {
         id: fadeInMain
         target: splashRoot
         property: "opacity"
         to: 1.0
         duration: 2000
+        easing.type: Easing.InOutQuad
+        onStopped: firstTitleFade.start() // Trigger title after splash is visible
     }
 
-    // Fade out the entire splash container
+    NumberAnimation {
+        id: firstTitleFade
+        target: titleText
+        property: "opacity"
+        to: 1.0
+        duration: 4000
+        easing.type: Easing.OutCubic
+        onStopped: rotateTimer.start() // Start the loop ONLY after first title shows
+    }
+
     NumberAnimation {
         id: fadeOutMain
         target: splashRoot
@@ -38,24 +67,7 @@ Item {
         onStopped: splashRoot.visible = false
     }
 
-    Component.onCompleted: {
-        splashData = splashModel.get_splash_data()
-        if (splashData.length > 0) {
-            updateData()
-            fadeInMain.start()
-        }
-    }
-
-    function updateData() {
-        currentImage = splashModel.resolve_image(splashData[index].image)
-        currentQuote = splashData[index].quote
-        currentTitle = splashData[index].title
-        rotateTimer.interval = splashData[index].delay * 1000
-    }
-
-    // ---------------------------------------------------------
-    // Background with Radial Vignette + Minimal Overscan Crop
-    // ---------------------------------------------------------
+    // --- Background Layer (Vignette + Image) ---
     Rectangle {
         id: splashMask
         anchors.fill: parent
@@ -67,7 +79,7 @@ Item {
         Image {
             id: bg
             anchors.fill: parent
-            anchors.margins: -12
+            anchors.margins: -12 // Slight overscan for cinematic feel
             source: currentImage
             fillMode: Image.PreserveAspectCrop
             visible: false
@@ -76,11 +88,9 @@ Item {
         OpacityMask {
             anchors.fill: parent
             source: bg
-
             maskSource: RadialGradient {
                 width: splashMask.width
                 height: splashMask.height
-
                 gradient: Gradient {
                     GradientStop { position: 0.0; color: "white" }
                     GradientStop { position: 0.35; color: "white" }
@@ -90,18 +100,16 @@ Item {
         }
     }
 
-    // ---------------------------------------------------------
-    // Cinematic Movie Title (Top-Left, Gold + Black Edge)
-    // ---------------------------------------------------------
+    // --- Cinematic Title (Top-Left) ---
     Text {
         id: titleText
         text: currentTitle
         font.pixelSize: 70
         font.bold: true
-        color: "#FFD700"          // bright gold
+        color: "#FFD700" // Gold
         style: Text.Outline
-        styleColor: "black"       // black edge
-        opacity: 0.0
+        styleColor: "black"
+        opacity: 0.0 // Starts invisible, controlled by firstTitleFade or crossFadeAnim
 
         anchors.left: parent.left
         anchors.top: parent.top
@@ -109,9 +117,7 @@ Item {
         anchors.topMargin: 40
     }
 
-    // ---------------------------------------------------------
-    // Quote Block
-    // ---------------------------------------------------------
+    // --- Quote Block (Bottom) ---
     Column {
         id: quoteBlock
         anchors.horizontalCenter: parent.horizontalCenter
@@ -128,20 +134,18 @@ Item {
                 font.italic: true
                 horizontalAlignment: Text.AlignHCenter
                 width: splashRoot.width * 0.8
-                wrapMode: Text.WordWrap
+                wrapMode: Text.WrapAnywhere
                 style: Text.Outline
                 styleColor: "black"
             }
         }
     }
 
-    // ---------------------------------------------------------
-    // Crossfade + Title Fade-In Animation
-    // ---------------------------------------------------------
+    // --- Main Rotation Animation Loop ---
     SequentialAnimation {
         id: crossFadeAnim
 
-        // Fade OUT whole splash
+        // 1. Fade OUT everything
         NumberAnimation {
             target: splashRoot
             property: "opacity"
@@ -150,14 +154,12 @@ Item {
             easing.type: Easing.InOutQuad
         }
 
-        // Reset title opacity
+        // 2. Prepare next slide while invisible
         PropertyAction { target: titleText; property: "opacity"; value: 0.0 }
-
-        // Change data
         PropertyAction { target: splashRoot; property: "index"; value: (index + 1) % splashData.length }
         ScriptAction { script: updateData() }
 
-        // Fade IN whole splash
+        // 3. Fade IN background/quotes
         NumberAnimation {
             target: splashRoot
             property: "opacity"
@@ -166,10 +168,8 @@ Item {
             easing.type: Easing.InOutQuad
         }
 
-        // ⭐ Critical fix: allow first frame to render before title fade-in
+        // 4. Slight pause then fade IN title slowly
         PauseAnimation { duration: 400 }
-
-        // ⭐ Slow title fade-in (4 seconds)
         NumberAnimation {
             target: titleText
             property: "opacity"
@@ -179,22 +179,11 @@ Item {
         }
     }
 
-    // ---------------------------------------------------------
-    // Rotation Timer (starts AFTER first slide is visible)
-    // ---------------------------------------------------------
+    // --- Timer Logic ---
     Timer {
         id: rotateTimer
-        running: false
+        running: false // Controlled by firstTitleFade.onStopped
         repeat: true
         onTriggered: crossFadeAnim.start()
-    }
-
-    // ⭐ One-time startup delay to fix first slide
-    Timer {
-        id: firstRunDelay
-        interval: 500
-        running: true
-        repeat: false
-        onTriggered: rotateTimer.start()
     }
 }
