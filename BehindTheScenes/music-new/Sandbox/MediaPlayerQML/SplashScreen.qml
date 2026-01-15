@@ -5,75 +5,97 @@ import Qt5Compat.GraphicalEffects
 Item {
     id: splashRoot
     anchors.fill: parent
-    visible: true
-    opacity: 0.0     // start invisible so fade-in works
-
-    // Fade animation for the entire splash screen
-    Behavior on opacity {
-        NumberAnimation { duration: 5000; easing.type: Easing.InOutQuad }
-    }
+    opacity: 0.0
 
     property var splashData: []
     property int index: 0
     property string currentImage: ""
     property var currentQuote: []
-    property int currentDelay: 3000
+    property int currentDelay: 8000 // Total time per slide
 
-    // ---------------------------------------------------------
-    // Shutdown function (Option 3 core)
-    // ---------------------------------------------------------
     function deactivate() {
         rotateTimer.stop()
-        splashRoot.opacity = 0.0
-        Qt.callLater(() => splashRoot.visible = false)
+        fadeOutMain.start()
     }
+
+    // Smooth fade in for the whole component at startup
+    NumberAnimation { id: fadeInMain; target: splashRoot; property: "opacity"; to: 1.0; duration: 2000 }
+    NumberAnimation { id: fadeOutMain; target: splashRoot; property: "opacity"; to: 0.0; duration: 1000; onStopped: splashRoot.visible = false }
 
     Component.onCompleted: {
         splashData = splashModel.get_splash_data()
-
         if (splashData.length > 0) {
-            currentImage = splashModel.resolve_image(splashData[index].image)
-            currentQuote = splashData[index].quote
-            currentDelay = splashData[index].delay * 1000
-
-            // Fade-in AFTER component is ready
-            Qt.callLater(() => splashRoot.opacity = 1.0)
-
-        } else {
-            console.log("SplashScreen: No splash entries found")
+            updateData()
+            fadeInMain.start()
         }
     }
 
-    // ---------------------------------------------------------
-    // Background image
-    // ---------------------------------------------------------
-    Image {
-        id: bg
-        anchors.fill: parent
-        source: currentImage
-        opacity: 1.0
-        fillMode: Image.Stretch
-
-        // Slow fade for crossfades
-        Behavior on opacity {
-            NumberAnimation { duration: 5000; easing.type: Easing.InOutQuad }
-        }
+    function updateData() {
+        currentImage = splashModel.resolve_image(splashData[index].image)
+        currentQuote = splashData[index].quote
+        // Subtract animation times from the delay to keep rotation timing consistent
+        rotateTimer.interval = (splashData[index].delay * 1000)
     }
 
-    // ---------------------------------------------------------
-    // Soft gradient overlay
-    // ---------------------------------------------------------
+    // --- Background with Radial Vignette ---
     Rectangle {
+        id: splashMask
         anchors.fill: parent
-        gradient: Gradient {
-            GradientStop { position: 0.0; color: "#00000000" }
-            GradientStop { position: 1.0; color: "#80000000" }
+        anchors.margins: 8
+        radius: 20
+        color: "black" // Background behind the image
+
+        Image {
+            id: bg
+            anchors.fill: parent
+            source: currentImage
+            fillMode: Image.PreserveAspectCrop
+            visible: false
+        }
+
+        OpacityMask {
+            id: vignetteEffect
+            anchors.fill: parent
+            source: bg
+            maskSource: RadialGradient {
+                width: splashMask.width
+                height: splashMask.height
+                gradient: Gradient {
+                    GradientStop { position: 0.0; color: "white" }
+                    GradientStop { position: 0.4; color: "white" } // Center clear
+                    GradientStop { position: 0.7; color: "transparent" } // Soft fade out
+                }
+            }
         }
     }
 
-    // ---------------------------------------------------------
-    // Quote text block
-    // ---------------------------------------------------------
+    // --- Rotation Animation ---
+    SequentialAnimation {
+        id: crossFadeAnim
+        
+        // 1. Fade OUT
+        NumberAnimation { target: splashRoot; property: "opacity"; to: 0.0; duration: 2500; easing.type: Easing.InOutQuad }
+        
+        // 2. Change Data while invisible
+        PropertyAction { 
+            target: splashRoot; 
+            property: "index"; 
+            value: (index + 1) % splashData.length 
+        }
+        ScriptAction { script: updateData() }
+        
+        // 3. Fade IN
+        NumberAnimation { target: splashRoot; property: "opacity"; to: 1.0; duration: 2500; easing.type: Easing.InOutQuad }
+    }
+
+    Timer {
+        id: rotateTimer
+        running: true
+        repeat: true
+        onTriggered: crossFadeAnim.start()
+    }
+
+    // --- Quote Block ---
     Column {
         id: quoteBlock
         anchors.horizontalCenter: parent.horizontalCenter
@@ -82,46 +104,17 @@ Item {
         spacing: 8
 
         Repeater {
-            model: currentQuote.length
+            model: currentQuote
             delegate: Text {
-                text: currentQuote[index]
+                text: modelData
                 font.pixelSize: 28
                 color: "white"
+                font.italic: true
                 horizontalAlignment: Text.AlignHCenter
+                width: splashRoot.width * 0.8
                 wrapMode: Text.WordWrap
-                opacity: 0.0
-
-                Behavior on opacity {
-                    NumberAnimation { duration: 5000 }
-                }
+                style: Text.Outline; styleColor: "black"
             }
-        }
-    }
-
-    // ---------------------------------------------------------
-    // Timer to rotate splash entries
-    // ---------------------------------------------------------
-    Timer {
-        id: rotateTimer
-        interval: currentDelay
-        running: true
-        repeat: true
-
-        onTriggered: {
-
-            // Step 1: fade OUT current image
-            bg.opacity = 0.0
-
-            // Step 2: after fade-out completes, change image + fade IN
-            Qt.callLater(() => {
-                index = (index + 1) % splashData.length
-                currentImage = splashModel.resolve_image(splashData[index].image)
-                currentQuote = splashData[index].quote
-                currentDelay = splashData[index].delay * 1000
-
-                // Step 3: fade IN new image
-                bg.opacity = 1.0
-            })
         }
     }
 }

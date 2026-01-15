@@ -47,6 +47,7 @@ Column {
             }
 
             onClicked: {
+                splash.deactivate()
                 console.log("🚀 Soaring into Freestyle Mode...")
                 contentLoader.setSource("Freestyle.qml")
             }
@@ -55,23 +56,39 @@ Column {
         StyledButton {
             text: "Menu"
             fixedWidth: buttonRow.buttonWidth; fixedHeight: buttonRow.buttonHeight
-            onClicked: libraryPanel.x = (libraryPanel.x === 0) ? -libraryPanel.width : 0
+            onClicked: {
+                splash.deactivate()
+                libraryPanel.x = (libraryPanel.x === 0) ? -libraryPanel.width : 0
+            }
         }
+
         StyledButton {
             text: "Video"
             fixedWidth: buttonRow.buttonWidth; fixedHeight: buttonRow.buttonHeight
-            onClicked: isVideoPanelVisible = !isVideoPanelVisible
+            onClicked: {
+                splash.deactivate()
+                isVideoPanelVisible = !isVideoPanelVisible
+            }
         }
+
         StyledButton {
             text: "Collections"
             fixedWidth: buttonRow.buttonWidth; fixedHeight: buttonRow.buttonHeight
-            onClicked: contentLoader.setSource("CategoryMenu.qml")
+            onClicked: {
+                splash.deactivate()
+                contentLoader.setSource("CategoryMenu.qml")
+            }
         }
+
         StyledButton {
             text: "Create"
             fixedWidth: buttonRow.buttonWidth; fixedHeight: buttonRow.buttonHeight
-            onClicked: utilitySidebar.showCollectionCreator()
+            onClicked: {
+                splash.deactivate()
+                utilitySidebar.showCollectionCreator()
+            }
         }
+
         StyledButton {
             text: "Close"
             fixedWidth: buttonRow.buttonWidth; fixedHeight: buttonRow.buttonHeight
@@ -124,7 +141,6 @@ Column {
         Connections {
             target: searchController
             
-            // Matches resultsUpdated = Signal(list)
             function onResultsUpdated(results) {
                 resultsModel.clear()
                 for (var i = 0; i < results.length; i++) {
@@ -159,7 +175,6 @@ Column {
                     width: parent.width
                     height: 40
                     contentItem: Text {
-                        // Uses 'name' from your Python dict
                         text: "🎬  " + model.name 
                         color: hovered ? "gold" : "white"
                         font.pixelSize: 16
@@ -171,7 +186,6 @@ Column {
                     }
                     onClicked: {
                         console.log("🎥 Selecting:", model.filePath)
-                        // Trigger the selection logic in Python
                         searchController.confirm_selection(model.filePath)
                         resultsPopup.close()
                         searchInput.text = ""

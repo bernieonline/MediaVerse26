@@ -108,6 +108,7 @@ ApplicationWindow {
         color: "transparent"
         border.color: "#2566c2"
         border.width: 1
+        clip: true
 
         SplashScreen {
             id: splash
