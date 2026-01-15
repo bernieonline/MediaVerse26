@@ -34,7 +34,7 @@ Rectangle {
         Text {
             anchors.left: parent.left; anchors.leftMargin: 85
             anchors.verticalCenter: parent.verticalCenter
-            text: "TRIAGE: " + getFolderName(targetPath).toUpperCase()
+            text: "FOLDER: " + getFolderName(targetPath).toUpperCase()
             color: "gold"; font.pixelSize: 14; font.bold: true; font.letterSpacing: 1
         }
         
@@ -118,25 +118,46 @@ Rectangle {
                 id: delegateMA
                 anchors.fill: parent
                 hoverEnabled: true
-                
-                onDoubleClicked: {
-                    if (modelData.videoPath) {
-                        // 1. Standardize slashes to forward slashes 
-                        // This matches the exact transformation in your working grid code
-                        let cleanPath = modelData.videoPath.toString().replace(/\\/g, "/");
-                        
-                        console.log("--- Freestyle Playback Sequence ---");
-                        console.log("Original Path: " + modelData.videoPath);
-                        console.log("Standardized for Bridge: " + cleanPath);
 
-                        // 2. Call the Bridge that handles the Path -> ID -> Play complex logic
-                        if (typeof playbackBridge !== "undefined") {
-                            playbackBridge.playVideo(cleanPath);
-                        } else {
-                            console.log("CRITICAL: playbackBridge not found in FreestyleView");
-                        }
+                onDoubleClicked: {
+                    let rawPath  = modelData.videoPath.toString();    
+                    let cleanPath = modelData.videoPath.toString().replace(/\\/g, "/");
+
+                    console.log("DEBUG isMaster =", modelData.isMaster);
+                    console.log("RAW PATH =", rawPath);
+                    console.log("CLEAN PATH =", cleanPath);
+
+
+                    if (modelData.isMaster) {
+                        // Existing HTTP → ID → Play logic
+                         console.log("--- Freestyle Playback  Library ---");
+                        playbackBridge.playVideo(cleanPath);
+                    } else {
+                        // Direct subprocess launch for freestyle folders
+                        console.log("--- Freestyle Playback Non Library ---");
+
+                        driveManager.play_via_subprocess(rawPath);
                     }
                 }
+                //if
+                //onDoubleClicked: {
+                    //if (modelData.videoPath) {
+                        // 1. Standardize slashes to forward slashes 
+                        // This matches the exact transformation in your working grid code
+                        //let cleanPath = modelData.videoPath.toString().replace(/\\/g, "/");
+                        
+                        //console.log("--- Freestyle Playback Sequence ---");
+                        //console.log("Original Path: " + modelData.videoPath);
+                        //console.log("Standardized for Bridge: " + cleanPath);
+
+                        // 2. Call the Bridge that handles the Path -> ID -> Play complex logic
+                        //if (typeof playbackBridge !== "undefined") {
+                            //playbackBridge.playVideo(cleanPath);
+                        //} else {
+                            //console.log("CRITICAL: playbackBridge not found in FreestyleView");
+                        //}
+                    //}
+                //}
             }
 
             Column {
