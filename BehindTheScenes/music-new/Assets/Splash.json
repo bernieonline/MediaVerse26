@@ -1,36 +1,61 @@
 [
   {
     "image": "Lawrence.jpeg",
+    "title": "Lawrence of Arabia",
     "quote": [
-      " He was not worth it.",
-      " He was not of my tribe. He was of the Howeitat.",
-      " It is written."
+      "He was not worth it.",
+      "He was not of my tribe. He was of the Howeitat.",
+      "It is written."
     ],
     "delay": 10
   },
   {
     "image": "ben hur.jpg",
+    "title": "Ben-Hur",
     "quote": [
-      "May God grant me vengeance! ",
+      "May God grant me vengeance!",
       "I will pray that you live until I return!"
     ],
     "delay": 10
   },
   {
     "image": "Rocky.jpg",
+    "title": "Rocky Balboa",
     "quote": [
-      "Life's not about how hard of a hit you can give.... ",
+      "Life's not about how hard of a hit you can give....",
       "It's about how many you can take!",
-       "and still keep moving forward."
+      "and still keep moving forward."
     ],
     "delay": 10
   },
   {
     "image": "Jaws.jpg",
+    "title": "Jaws",
     "quote": [
-      "You're gonna need a bigger boat ",
+      "You're gonna need a bigger boat",
       "Just when you thought it was safe to go back in the water!"
     ],
     "delay": 10
+  },
+  {
+    "image": "Dances.jpg",
+    "title": "Dances with Wolves",
+    "quote": [
+      "Nothing I've been told about these people is correct",
+      "They are not thieves or beggars",
+      "They are not the bogeymen they are made out to"
+    ],
+    "delay": 10
+  },
+  {
+    "image": "Avatar.jpg",
+    "title": "Avatar",
+    "quote": [
+      "Tell them Toruk Macto calls to them",
+      "You fly now, with me! My brothers! Sisters!",
+      "and we will show the Sky People that they cannot take whatever they want!",
+      "And that this... this is our land!"
+    ],
+    "delay": 15
   }
 ]
