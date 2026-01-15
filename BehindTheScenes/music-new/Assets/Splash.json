@@ -15,5 +15,22 @@
       "I will pray that you live until I return!"
     ],
     "delay": 10
+  },
+  {
+    "image": "Rocky.jpg",
+    "quote": [
+      "Life's not about how hard of a hit you can give.... ",
+      "It's about how many you can take!",
+       "and still keep moving forward."
+    ],
+    "delay": 10
+  },
+  {
+    "image": "Jaws.jpg",
+    "quote": [
+      "You're gonna need a bigger boat ",
+      "Just when you thought it was safe to go back in the water!"
+    ],
+    "delay": 10
   }
 ]

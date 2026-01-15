@@ -33,57 +33,62 @@ Item {
     function updateData() {
         currentImage = splashModel.resolve_image(splashData[index].image)
         currentQuote = splashData[index].quote
-        // Subtract animation times from the delay to keep rotation timing consistent
         rotateTimer.interval = (splashData[index].delay * 1000)
     }
 
-    // --- Background with Radial Vignette ---
+    // ---------------------------------------------------------
+    // Background with Radial Vignette + Minimal Overscan Crop
+    // ---------------------------------------------------------
     Rectangle {
         id: splashMask
         anchors.fill: parent
-        anchors.margins: 8
+        anchors.margins: 8        // reveal blue border
         radius: 20
-        color: "black" // Background behind the image
+        color: "black"            // ensures clipping works
+        clip: true
 
+        // Base image with tiny overscan crop
         Image {
             id: bg
             anchors.fill: parent
+            anchors.margins: -12      // <--- minimal crop to hide square corners
             source: currentImage
             fillMode: Image.PreserveAspectCrop
-            visible: false
+            visible: false            // used only as mask source
         }
 
+        // Radial vignette mask (aggressive fade)
         OpacityMask {
             id: vignetteEffect
             anchors.fill: parent
             source: bg
+
             maskSource: RadialGradient {
                 width: splashMask.width
                 height: splashMask.height
+
                 gradient: Gradient {
                     GradientStop { position: 0.0; color: "white" }
-                    GradientStop { position: 0.4; color: "white" } // Center clear
-                    GradientStop { position: 0.7; color: "transparent" } // Soft fade out
+                    GradientStop { position: 0.35; color: "white" }       // center clear
+                    GradientStop { position: 0.65; color: "transparent" } // strong fade
                 }
             }
         }
     }
 
-    // --- Rotation Animation ---
+    // ---------------------------------------------------------
+    // Rotation Animation
+    // ---------------------------------------------------------
     SequentialAnimation {
         id: crossFadeAnim
-        
+
         // 1. Fade OUT
         NumberAnimation { target: splashRoot; property: "opacity"; to: 0.0; duration: 2500; easing.type: Easing.InOutQuad }
-        
+
         // 2. Change Data while invisible
-        PropertyAction { 
-            target: splashRoot; 
-            property: "index"; 
-            value: (index + 1) % splashData.length 
-        }
+        PropertyAction { target: splashRoot; property: "index"; value: (index + 1) % splashData.length }
         ScriptAction { script: updateData() }
-        
+
         // 3. Fade IN
         NumberAnimation { target: splashRoot; property: "opacity"; to: 1.0; duration: 2500; easing.type: Easing.InOutQuad }
     }
@@ -95,7 +100,9 @@ Item {
         onTriggered: crossFadeAnim.start()
     }
 
-    // --- Quote Block ---
+    // ---------------------------------------------------------
+    // Quote Block
+    // ---------------------------------------------------------
     Column {
         id: quoteBlock
         anchors.horizontalCenter: parent.horizontalCenter
@@ -113,7 +120,8 @@ Item {
                 horizontalAlignment: Text.AlignHCenter
                 width: splashRoot.width * 0.8
                 wrapMode: Text.WordWrap
-                style: Text.Outline; styleColor: "black"
+                style: Text.Outline
+                styleColor: "black"
             }
         }
     }
