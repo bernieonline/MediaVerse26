@@ -67,7 +67,10 @@ Column {
             fixedWidth: buttonRow.buttonWidth; fixedHeight: buttonRow.buttonHeight
             onClicked: {
                 splash.deactivate()
-                isVideoPanelVisible = !isVideoPanelVisible
+                // Explicitly targeting 'window' ensures this button toggles 
+                // the variable in Framework-1.qml
+                window.isVideoPanelVisible = !window.isVideoPanelVisible
+                console.log("🎬 Video Panel Toggle: " + window.isVideoPanelVisible)
             }
         }
 

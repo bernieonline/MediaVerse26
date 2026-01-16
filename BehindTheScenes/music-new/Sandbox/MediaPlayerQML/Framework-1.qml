@@ -12,15 +12,17 @@ ApplicationWindow {
     property string selectedFolderPath: ""
     property string selectedImageFile: ""
     property var currentCollectionItems: []
-    property bool useCarouselView: false // This is now a manual override; the 14-item logic is primary
+    property bool useCarouselView: false 
     property var xmlController: _xmlController
     property bool isVideoPanelVisible: false
+
+    // ⭐ SCOPE FIX: Create a reference to splash at the window level 
+    // so RowButton can see it without a ReferenceError.
+    property alias splashAlias: splash
 
     Material.theme: Material.Dark
     Material.accent: Material.Yellow
 
-
-    
     Rectangle { 
         id: background
         anchors.fill: parent
@@ -39,7 +41,6 @@ ApplicationWindow {
     Connections {
         target: searchController
         function onDetailRequested(result) {
-            console.log("🔥 SEARCH DETAIL REQUEST RECEIVED:", JSON.stringify(result))
             if (result.error || !result.xml) {
                 contentLoader.setSource("NoDetails.qml")
             } else {
@@ -72,18 +73,32 @@ ApplicationWindow {
     SlidingPanel {
         id: libraryPanel
         libraryModel: myLibraryModel 
-
-        // CHANGE: Use 'folders' instead of 'current_folders'
         folderModel: fileSystemManager.folders 
 
         onFolderSelected: function(folderPath) {
             window.selectedFolderPath = folderPath
-            
-            // This triggers the Worker thread in FileSystem.py
             fileSystemManager.update_folders(folderPath)
-            
-            // This triggers the image scan
             fileSystemManager.list_image_files_in_folder(folderPath)
+        }
+    }
+
+    // --- THE VIDEO PLAYER PANEL ---
+    // Placed here so it sits on top of the content but below the sidebar
+    PlayerPanel {
+        id: videoPanel
+        width: parent.width * 0.66
+        height: parent.height * 0.55
+        anchors.horizontalCenter: parent.horizontalCenter
+        
+        // Use the property we defined at the top
+        isVideoPanelVisible: window.isVideoPanelVisible 
+
+        // Sliding logic
+        y: window.isVideoPanelVisible ? window.height - height - 20 : window.height + 50
+        z: 100 
+
+        Behavior on y {
+            NumberAnimation { duration: 600; easing.type: Easing.OutQuart }
         }
     }
 
@@ -115,19 +130,16 @@ ApplicationWindow {
             anchors.fill: parent
             z: 9999
             visible: true
-            
         }
 
         Loader {
             id: contentLoader
-
             anchors.fill: parent
             source: "ImageGridView_v2.qml"
 
             onLoaded: {
                 if (!contentLoader.item) return;
 
-                // 1. Category Logic
                 if (contentLoader.source.toString().includes("CategoryMenu.qml")) {
                     contentLoader.item.categorySelected.connect(function(categoryKey) {
                         let filteredData = collectionLogic.get_collections_by_category(categoryKey)
@@ -135,27 +147,19 @@ ApplicationWindow {
                     })
                 }
 
-                // 2. Collection Logic (RELOADED WITH 14-ITEM LOGIC)
                 if (contentLoader.source.toString().includes("CollectionsGallery.qml")) {
                     contentLoader.item.collectionSelected.connect(function(collectionItems) {
                         window.currentCollectionItems = collectionItems
-                        
-                        // RESTORED: Decide view based on count
                         let targetFile = (collectionItems.length <= 14) ? "CarouselView_v2.qml" : "ImageGridView_v2.qml"
-                        console.log("📊 Item count:", collectionItems.length, "Choosing:", targetFile)
-                        
                         contentLoader.setSource(targetFile, { "externalImageList": collectionItems })
                     })
                 }
 
-                // 3. Unified Signal Connections (Works for Grid and Carousel)
                 try {
-                    // Single Click -> Detail View
                     if (contentLoader.item.v2OpenDetail !== undefined) {
                         contentLoader.item.v2OpenDetail.connect(openMovieDetail)
                     }
 
-                    // Double Click -> JRiver Play
                     if (contentLoader.item.launchVideoRequested !== undefined) {
                         contentLoader.item.launchVideoRequested.connect(playMovieNow)
                     }
@@ -163,8 +167,6 @@ ApplicationWindow {
             }
         }
     }
-
-    // --- Logic Functions ---
 
     function openMovieDetail(movie) {
         let resolved = _xmlController.resolve_paths(movie.display)
@@ -185,7 +187,10 @@ ApplicationWindow {
         var videoPath = fileSystemManager.findVideoInFolder(window.selectedFolderPath, filename)
         
         if (videoPath) {
-            // This sends the command to Python to talk to JRiver HTTP
+            // Updated: Set the local videoPanel path and show it
+            videoPanel.videoPath = videoPath
+            window.isVideoPanelVisible = true
+            // Also keep your JRiver call if you want dual playback or external control
             playbackBridge.play_video_via_jriver(videoPath)
         }
     }
