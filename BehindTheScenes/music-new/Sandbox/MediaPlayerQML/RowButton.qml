@@ -169,6 +169,7 @@ Column {
         Popup {
             id: resultsPopup
             y: parent.height + 5
+            //y: isVisible ? (parent.height - height * 1.30) : parent.height
             width: parent.width
             height: Math.min(resultsModel.count * 40, 400)
             padding: 0

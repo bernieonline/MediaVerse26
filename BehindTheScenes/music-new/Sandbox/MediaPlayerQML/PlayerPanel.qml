@@ -6,6 +6,31 @@ import QtMultimedia 5.15
 Rectangle {
     id: playerPanel
 
+    // --- THE THEATER DIMMER ---
+    Rectangle {
+        id: theaterDimmer
+        // Use a massive size to ensure it covers the entire application window
+        width: 5000; height: 5000
+        anchors.centerIn: parent
+        
+        color: "black"
+        // Fade in when visible, fade out when hidden
+        opacity: playerPanel.isVisible ? 0.85 : 0.0
+        z: -1 // Sits behind the gold-bordered player
+        
+        visible: opacity > 0
+
+        Behavior on opacity {
+            NumberAnimation { duration: 500; easing.type: Easing.InOutQuad }
+        }
+
+        // Clicking the darkened area closes the player
+        MouseArea {
+            anchors.fill: parent
+            onClicked: playerPanel.isVisible = false
+        }
+    }
+
     // REVERSED 2: We keep isVisible, but add an ALIAS so the runButton doesn't crash the app
     property alias isVideoPanelVisible: playerPanel.isVisible 
     
@@ -13,12 +38,13 @@ Rectangle {
     property bool isPlaying: false
     property string videoPath: ""
 
-    width: parent ? parent.width * 0.5 * 0.8 : 512
-    height: parent ? parent.height * 0.5 : 360
-
+   
+    height: parent ? parent.height * 1.20 : 1000
+    width: height * 1.333
     anchors.horizontalCenter: parent ? parent.horizontalCenter : undefined
     
     // REVERSED 3: Kept your original y logic exactly as written
+    
     y: isVisible ? (parent ? parent.height - height : 0) : (parent ? parent.height : 0)
     z: 2
 
@@ -59,6 +85,9 @@ Rectangle {
             left: parent.left; leftMargin: 15
             right: parent.right; rightMargin: 15
             bottom: timelineSlider.top; bottomMargin: 15
+            //bottom: timelineSlider.top; bottomMargin: -50
+
+
         }
         radius: 16
         color: "#000000"
@@ -96,7 +125,7 @@ Rectangle {
         id: timelineSlider
         anchors {
             left: parent.left; right: parent.right
-            bottom: buttonArea.top; bottomMargin: 10
+            bottom: buttonArea.top; bottomMargin: -50
             leftMargin: 15; rightMargin: 15
         }
         from: 0
