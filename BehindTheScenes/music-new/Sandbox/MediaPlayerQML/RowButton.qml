@@ -64,13 +64,22 @@ Column {
 
         StyledButton {
             text: "Video"
-            fixedWidth: buttonRow.buttonWidth; fixedHeight: buttonRow.buttonHeight
+            fixedWidth: buttonRow.buttonWidth
+            fixedHeight: buttonRow.buttonHeight
             onClicked: {
                 splash.deactivate()
-                // Explicitly targeting 'window' ensures this button toggles 
-                // the variable in Framework-1.qml
-                window.isVideoPanelVisible = !window.isVideoPanelVisible
-                console.log("🎬 Video Panel Toggle: " + window.isVideoPanelVisible)
+                
+                // 1. Target 'videoPanel' (the ID you used in main.qml)
+                videoPanel.videoPath = "file:///W:/Collection/Western HD/She Wore A Yellow Ribbon (1949).mp4"
+                
+                // 2. We use 'window.isVideoPanelVisible' because your main.qml 
+                //    uses that variable to control the Y-position (sliding).
+                window.isVideoPanelVisible = true
+                
+                // 3. Start the internal video engine
+                videoPanel.isPlaying = true
+                
+                console.log("🎬 Video Panel Launched. Path: " + videoPanel.videoPath)
             }
         }
 

@@ -2,143 +2,165 @@ import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
 import QtMultimedia 5.15
-import Qt5Compat.GraphicalEffects 1.0
 
-Item {
-    id: playerRoot
-    anchors.fill: parent
+Rectangle {
+    id: playerPanel
 
-    property bool isVideoPanelVisible: false
+    // REVERSED 2: We keep isVisible, but add an ALIAS so the runButton doesn't crash the app
+    property alias isVideoPanelVisible: playerPanel.isVisible 
+    
+    property bool isVisible: false // Set to false so it starts hidden
     property bool isPlaying: false
     property string videoPath: ""
 
-    // --- 1. THEATER DIMMER ---
-    Rectangle {
-        id: theaterDimmer
-        anchors.fill: parent
-        color: "black"
-        opacity: playerRoot.isVideoPanelVisible ? 0.92 : 0.0
-        z: 1
-        visible: opacity > 0
-        Behavior on opacity { NumberAnimation { duration: 500 } }
+    width: parent ? parent.width * 0.5 * 0.8 : 512
+    height: parent ? parent.height * 0.5 : 360
 
-        MouseArea {
-            anchors.fill: parent
-            onClicked: playerRoot.isVideoPanelVisible = false
+    anchors.horizontalCenter: parent ? parent.horizontalCenter : undefined
+    
+    // REVERSED 3: Kept your original y logic exactly as written
+    y: isVisible ? (parent ? parent.height - height : 0) : (parent ? parent.height : 0)
+    z: 2
+
+    color: "#1e1e1e80"
+    radius: 25
+    border.color: "gold"
+    border.width: 2
+
+    Behavior on y {
+        NumberAnimation { duration: 400; easing.type: Easing.InOutQuad }
+    }
+
+    function filenameFromVideoPath(path) {
+        if (!path || path === "") return ""
+        var decoded = decodeURIComponent(path)
+        if (decoded.startsWith("file:///")) decoded = decoded.substring(8)
+        var parts = decoded.split("/")
+        return parts[parts.length - 1]
+    }
+
+    onIsPlayingChanged: {
+        if (isPlaying && videoPath !== "") {
+            console.log("🎥 Auto‑playing video:", videoPath)
+            videoPlayer.play()
+        } else {
+            videoPlayer.pause()
         }
     }
 
-    // --- 2. PLAYER PANEL ---
+    onVideoPathChanged: {
+        console.log("🎥 PlayerPanel received videoPath:", videoPath)
+    }
+
     Rectangle {
-        id: playerPanel
-        width: parent.width * 0.7
-        height: width * 0.75
-        anchors.horizontalCenter: parent.horizontalCenter
-        z: 2
-
-        y: isVideoPanelVisible ? (parent.height - height) / 2 : parent.height + 100
-
-        color: "#1e1e1e"
-        radius: 25
-        border.color: "gold"
-        border.width: 2
+        id: videoScreen
+        anchors {
+            top: parent.top; topMargin: 15
+            left: parent.left; leftMargin: 15
+            right: parent.right; rightMargin: 15
+            bottom: timelineSlider.top; bottomMargin: 15
+        }
+        radius: 16
+        color: "#000000"
         clip: true
 
-        Behavior on y { NumberAnimation { duration: 400 } }
-
-        // --- VIDEO SCREEN ---
-        Rectangle {
-            id: videoScreen
-            anchors {
-                top: parent.top; topMargin: 15
-                left: parent.left; right: parent.right
-                leftMargin: 15; rightMargin: 15
-                bottom: buttonArea.top; bottomMargin: 15
-            }
-            radius: 16
-            color: "black"
-            clip: true
-
-            Video {
-                id: videoPlayer
-                anchors.fill: parent
-                source: playerRoot.formatPath(playerRoot.videoPath)
-                autoPlay: false
-                fillMode: Video.PreserveAspectFit
-            }
-
-            FastBlur {
-                anchors.fill: parent
-                source: videoPlayer
-                radius: 4
-                visible: playerRoot.isVideoPanelVisible
-            }
-
-            Rectangle {
-                anchors.fill: parent
-                color: "#CC000000"
-                visible: !playerRoot.isPlaying
-                radius: 16
-
-                Text {
-                    anchors.centerIn: parent
-                    text: "FOOTBALL: 1965 ARSENAL v MAN UTD"
-                    color: "gold"
-                    font.pixelSize: 20
-                    font.bold: true
-                }
-            }
+        // REVERSED 4: Put your original Video element back exactly as it was
+        Video {
+            id: videoPlayer
+            anchors.fill: parent
+            source: playerPanel.videoPath
+            autoPlay: false
+            muted: false
+            volume: 1.0
         }
 
-        // --- BUTTON AREA ---
         Rectangle {
-            id: buttonArea
-            anchors { left: parent.left; right: parent.right; bottom: parent.bottom; margins: 15 }
-            height: 100
-            radius: 10
-            color: "#33FFFFFF"
+            anchors.fill: parent
+            radius: parent.radius
+            visible: !playerPanel.isPlaying
+            color: "#00000040"
+        }
 
-            RowLayout {
-                anchors.fill: parent
-                anchors.margins: 15
-                spacing: 20
+        Text {
+            anchors.centerIn: parent
+            text: playerPanel.videoPath === "" ? "No movie selected"
+                                               : (videoPlayer.hasAudio ? "Ready: " + filenameFromVideoPath(playerPanel.videoPath)
+                                                                       : "No audio track detected")
+            color: "white"
+            font.pixelSize: 20
+            visible: !playerPanel.isPlaying
+        }
+    }
 
-                Button {
-                    text: playerRoot.isPlaying ? "PAUSE" : "PLAY MATCH"
-                    Layout.fillWidth: true
-                    Layout.fillHeight: true
+    Slider {
+        id: timelineSlider
+        anchors {
+            left: parent.left; right: parent.right
+            bottom: buttonArea.top; bottomMargin: 10
+            leftMargin: 15; rightMargin: 15
+        }
+        from: 0
+        to: videoPlayer.duration
+        value: videoPlayer.position
+        onMoved: videoPlayer.seek(value)
 
-                    onClicked: {
-                        if (playerRoot.isPlaying) {
-                            videoPlayer.pause()
-                            playerRoot.isPlaying = false
-                        } else {
-                            videoPlayer.source = playerRoot.formatPath(playerRoot.videoPath)
-                            videoPlayer.play()
-                            playerRoot.isPlaying = true
-                        }
-                    }
-                }
-
-                Button {
-                    text: "CLOSE"
-                    Layout.preferredWidth: 120
-                    Layout.fillHeight: true
-
-                    onClicked: {
-                        videoPlayer.stop()
-                        playerRoot.isPlaying = false
-                        playerRoot.isVideoPanelVisible = false
-                    }
-                }
+        Connections {
+            target: videoPlayer
+            function onPositionChanged() {
+                timelineSlider.value = videoPlayer.position
             }
         }
     }
 
-    function formatPath(path) {
-        if (!path || path === "") return ""
-        var p = path.replace(/\\/g, "/")
-        if (!p.startsWith("file:///")) p = "file:///" + p
-        return p
+    Rectangle {
+        id: buttonArea
+        anchors {
+            left: parent.left; right: parent.right; bottom: parent.bottom
+            leftMargin: 15; rightMargin: 15; bottomMargin: 15
+        }
+        height: 100
+        radius: 10
+        color: "#1e1e1e80"
+        border.color: "gold"
+        border.width: 1
+
+        RowLayout {
+            anchors.fill: parent
+            anchors.margins: 15
+            spacing: 15
+
+            Button {
+                text: "Play"
+                Layout.fillWidth: true
+                onClicked: {
+                    if (playerPanel.videoPath !== "") {
+                        videoPlayer.play()
+                        playerPanel.isPlaying = true
+                    }
+                }
+            }
+            Button { text: "Pause"; Layout.fillWidth: true; onClicked: videoPlayer.pause() }
+            Button { text: "Stop"; Layout.fillWidth: true; onClicked: { videoPlayer.stop(); playerPanel.isPlaying = false } }
+            Button { text: "Full Screen"; Layout.fillWidth: true; onClicked: console.log("Full screen requested") }
+
+            Button {
+                text: "Volume +"
+                Layout.fillWidth: true
+                onClicked: {
+                    if (videoPlayer.volume < 1.0) {
+                        videoPlayer.volume += 0.1
+                    }
+                }
+            }
+            Button {
+                text: "Volume -"
+                Layout.fillWidth: true
+                onClicked: {
+                    if (videoPlayer.volume > 0.0) {
+                        videoPlayer.volume -= 0.1
+                    }
+                }
+            }
+        }
     }
 }
