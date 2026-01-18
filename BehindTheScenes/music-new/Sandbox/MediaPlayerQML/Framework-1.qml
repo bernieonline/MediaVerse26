@@ -106,6 +106,16 @@ ApplicationWindow {
             fileSystemManager.list_image_files_in_folder(folderPath)
         }
     }
+
+
+    // close mini player
+    function closePlayer() {
+        videoPlayer.stop()
+        playerPanel.isPlaying = false
+        window.isVideoPanelVisible = false   // ⭐ THIS is the real controller
+        console.log("🛑 MiniPlayer closed")
+    }
+    
     // ----------------------------------------------------
     // Function called from Python (PlaybackRouter)
     // ----------------------------------------------------

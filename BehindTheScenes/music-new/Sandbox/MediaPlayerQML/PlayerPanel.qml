@@ -5,19 +5,30 @@ import QtMultimedia 5.15
 
 Rectangle {
     id: playerPanel
+    property var rootWindow   // ⭐ REQUIRED
+
+    //rootWindow: window     // ⭐ pass the window into the component
+
+
+    // ----------------------------------------------------
+    // Close function (clean, deterministic)
+    // ----------------------------------------------------
+    function closePlayer() {
+        videoPlayer.stop()
+        playerPanel.isPlaying = false
+        playerPanel.isVisible = false
+        console.log("🛑 MiniPlayer closed")
+    }
 
     // --- THE THEATER DIMMER ---
     Rectangle {
         id: theaterDimmer
-        // Use a massive size to ensure it covers the entire application window
         width: 5000; height: 5000
         anchors.centerIn: parent
         
         color: "black"
-        // Fade in when visible, fade out when hidden
         opacity: playerPanel.isVisible ? 0.85 : 0.0
-        z: -1 // Sits behind the gold-bordered player
-        
+        z: -1
         visible: opacity > 0
 
         Behavior on opacity {
@@ -27,25 +38,28 @@ Rectangle {
         // Clicking the darkened area closes the player
         MouseArea {
             anchors.fill: parent
-            onClicked: playerPanel.isVisible = false
+            onClicked: playerPanel.closePlayer()
         }
     }
 
-    // REVERSED 2: We keep isVisible, but add an ALIAS so the runButton doesn't crash the app
-    property alias isVideoPanelVisible: playerPanel.isVisible 
+    // Alias for main.qml
+    property alias isVideoPanelVisible: playerPanel.isVisible
     
-    property bool isVisible: false // Set to false so it starts hidden
+    property bool isVisible: false
     property bool isPlaying: false
     property string videoPath: ""
 
-   
     height: parent ? parent.height * 1.20 : 1000
     width: height * 1.333
     anchors.horizontalCenter: parent ? parent.horizontalCenter : undefined
     
-    // REVERSED 3: Kept your original y logic exactly as written
-    
-    y: isVisible ? (parent ? parent.height - height : 0) : (parent ? parent.height : 0)
+    //y: isVisible ? (parent ? parent.height - height : 0)
+                 //: (parent ? parent.height : 0)
+
+    y: window.isVideoPanelVisible ? (parent ? parent.height - height : 0)
+                : (parent ? parent.height : 0)
+
+
     z: 2
 
     color: "#1e1e1e80"
@@ -85,15 +99,11 @@ Rectangle {
             left: parent.left; leftMargin: 15
             right: parent.right; rightMargin: 15
             bottom: timelineSlider.top; bottomMargin: 15
-            //bottom: timelineSlider.top; bottomMargin: -50
-
-
         }
         radius: 16
         color: "#000000"
         clip: true
 
-        // REVERSED 4: Put your original Video element back exactly as it was
         Video {
             id: videoPlayer
             anchors.fill: parent
@@ -168,9 +178,27 @@ Rectangle {
                     }
                 }
             }
-            Button { text: "Pause"; Layout.fillWidth: true; onClicked: videoPlayer.pause() }
-            Button { text: "Stop"; Layout.fillWidth: true; onClicked: { videoPlayer.stop(); playerPanel.isPlaying = false } }
-            Button { text: "Full Screen"; Layout.fillWidth: true; onClicked: console.log("Full screen requested") }
+
+            Button {
+                text: "Pause"
+                Layout.fillWidth: true
+                onClicked: videoPlayer.pause()
+            }
+
+            Button {
+                text: "Stop"
+                Layout.fillWidth: true
+                onClicked: {
+                    videoPlayer.stop()
+                    playerPanel.isPlaying = false
+                }
+            }
+
+            Button {
+                text: "Full Screen"
+                Layout.fillWidth: true
+                onClicked: console.log("Full screen requested")
+            }
 
             Button {
                 text: "Volume +"
@@ -181,6 +209,7 @@ Rectangle {
                     }
                 }
             }
+
             Button {
                 text: "Volume -"
                 Layout.fillWidth: true
@@ -189,6 +218,13 @@ Rectangle {
                         videoPlayer.volume -= 0.1
                     }
                 }
+            }
+
+            // ⭐ NEW: Close button inside the row
+            Button {
+                text: "Close"
+                Layout.fillWidth: true
+                onClicked: playerPanel.closePlayer()
             }
         }
     }
