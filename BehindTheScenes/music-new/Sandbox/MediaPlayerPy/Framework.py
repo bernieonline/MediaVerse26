@@ -51,6 +51,10 @@ from xml_collections import XMLCollections
 from Sandbox.Playback.playback_qml_bridge import PlaybackQmlBridge
 from DriveManager import DriveManager
 
+import subprocess
+import os
+
+
 # ------------------------------------------------------------
 # MAIN
 # ------------------------------------------------------------
@@ -86,6 +90,36 @@ def main():
         settings_manager.load_settings()
         print(">>> Framework: settings loaded")
         drive_logic = DriveManager()
+
+
+        #start jriver
+        #1. Access the "Garage" (PlayerPaths)
+        settings = settings_manager.get_settings()
+        player_list = settings.get("PlayerPaths", {})
+
+        # 2. Only proceed if 'JRiver' is actually a registered player
+        if "JRiver" in player_list:
+            jriver_exe = player_list["JRiver"]
+            
+            # 3. Check if the path actually exists on your hard drive
+            if jriver_exe and os.path.exists(jriver_exe):
+                try:
+                    # Check if it's already running to avoid "Already Running" popups
+                    check_tasks = subprocess.check_output('tasklist', shell=True).decode()
+                    if "Media Center" not in check_tasks:
+                        print(f"[STARTUP] JRiver found in players list. Launching...")
+                        subprocess.Popen([jriver_exe], creationflags=subprocess.DETACHED_PROCESS)
+                    else:
+                        print("[STARTUP] JRiver is already active.")
+                except Exception as e:
+                    print(f"[STARTUP] Error checking/launching JRiver: {e}")
+            else:
+                print("[STARTUP] JRiver path in config is invalid or empty.")
+        else:
+            print("[STARTUP] JRiver is not in the player list. Skipping auto-launch.")
+
+        ###################################################################
+
 
         # --------------------------------------------------------
         # Manifest updater and ToDo manager

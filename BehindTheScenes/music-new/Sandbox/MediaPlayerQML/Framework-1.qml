@@ -2,6 +2,7 @@ import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Controls.Material 2.15
 import Qt5Compat.GraphicalEffects
+import QtQuick.Dialogs // No version number for PySide6
 
 ApplicationWindow {
     id: window
@@ -28,13 +29,36 @@ ApplicationWindow {
         anchors.fill: parent
         color: "#1e1e1e"
     }
+    // 1. Add the actual FileDialog component here
+    FileDialog {
+        id: playerExeBrowser
+        title: "Select Media Player Executable"
+        // In Qt 6/PySide6, nameFilters is still used, 
+        // but 'selectedFile' is the standard way to get the path
+        nameFilters: ["Executable files (*.exe)"]
+        
+        onAccepted: {
+            console.log("File selected: " + selectedFile)
+            SettingsManager.add_new_player(selectedFile.toString())
+        }
+    }
 
+    // 2. Update your StyledMenu block
     StyledMenu {
         id: centralMenu
         anchors.top: parent.top
         anchors.topMargin: 20
         anchors.horizontalCenter: parent.horizontalCenter
         menuData: centralMenuData
+
+        // Fixed the "Parameter label is not declared" error by using formal parameter
+        onMenuItemTriggered: function(label) { 
+            console.log("qml: Clicked: " + label)
+            
+            if (label === "Manage Players ...") {
+                playerExeBrowser.open() // Now this ID is defined!
+            }
+        }
     }
 
     // --- Search Controller Connection ---

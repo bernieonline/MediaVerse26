@@ -8,7 +8,6 @@ Item {
     signal menuItemTriggered(string label)
     signal playerSelected(int index)
 
-
     height: 40
     anchors.horizontalCenter: parent ? parent.horizontalCenter : undefined
     anchors.top: parent.top
@@ -60,7 +59,6 @@ Item {
                     }
                 }
 
-                // Top-level dropdown
                 Popup {
                     id: dropdown
                     property var items: []
@@ -92,7 +90,7 @@ Item {
 
                             delegate: Item {
                                 id: subItem
-                                width: 200
+                                width: 220 
                                 height: 32
                                 property var subItems: modelData.items || []
 
@@ -118,9 +116,9 @@ Item {
 
                                     onClicked: {
                                         if (subItems.length > 0) {
-                                            // Special case for Media Player submenu
                                             if (modelData.label === "Media Player") {
-                                                mediaPlayerPopup.items = subItems
+                                                // CRITICAL: Bind items directly from modelData
+                                                mediaPlayerPopup.items = modelData.items
                                                 mediaPlayerPopup.openBelow(subItem)
                                             } else {
                                                 submenu.items = subItems
@@ -133,7 +131,6 @@ Item {
                                     }
                                 }
 
-                                // Submenu for other items
                                 Popup {
                                     id: submenu
                                     property var items: []
@@ -158,34 +155,27 @@ Item {
                                     contentItem: Column {
                                         spacing: 2
                                         padding: 4
-
                                         Repeater {
                                             model: submenu.items
-
                                             delegate: Item {
                                                 width: 180
                                                 height: 32
-
                                                 Rectangle {
                                                     anchors.fill: parent
                                                     color: mouse2.containsMouse ? "#505050" : "transparent"
                                                     radius: 4
                                                 }
-
                                                 Text {
-                                                    anchors.left: parent.left
-                                                    anchors.leftMargin: 8
+                                                    anchors.left: parent.left; anchors.leftMargin: 8
                                                     anchors.verticalCenter: parent.verticalCenter
                                                     text: modelData.label
                                                     color: mouse2.containsMouse ? "gold" : "white"
                                                     font.pixelSize: 14
                                                 }
-
                                                 MouseArea {
                                                     id: mouse2
                                                     anchors.fill: parent
                                                     hoverEnabled: true
-
                                                     onClicked: {
                                                         centralMenu.menuItemTriggered(modelData.label)
                                                         submenu.close()
@@ -204,12 +194,11 @@ Item {
         }
     }
 
-    // Media Player horizontal radio buttons
-    
+    // ✅ Media Player Selection Popup
     Popup {
         id: mediaPlayerPopup
-        property var items: []                // model for your radio buttons
-        property int currentPlayerIndex: -1   // holds the saved index from JSON
+        property var items: []                
+        property int currentPlayerIndex: -1   
 
         modal: false
         focus: true
@@ -223,47 +212,56 @@ Item {
         }
 
         function openBelow(item) {
-            var pos = item.mapToGlobal(0, item.height)
+            // Map to the right of the menu item
+            var pos = item.mapToGlobal(item.width, 0) 
             x = pos.x
             y = pos.y
             open()
         }
 
-        // ✅ Load settings when the popup is created
         Component.onCompleted: {
             let settings = SettingsManager.get_settings()
-            currentPlayerIndex = settings["Preferred Player"]
-            console.log("Startup Preferred Player:", currentPlayerIndex)
-        }
-
-        // ✅ Listen for Python signal whenever settings change
-        Connections {
-            target: SettingsManager
-            onSettingsChanged: {
-                let settings = SettingsManager.get_settings()
+            if (settings && settings["Preferred Player"] !== undefined) {
                 currentPlayerIndex = settings["Preferred Player"]
-                console.log("Preferred Player refreshed:", currentPlayerIndex)
             }
         }
 
-        contentItem: Row {
-            spacing: 12
+        Connections {
+            target: SettingsManager
+            function onSettingsChanged() {
+                let settings = SettingsManager.get_settings()
+                if (settings && settings["Preferred Player"] !== undefined) {
+                    currentPlayerIndex = settings["Preferred Player"]
+                }
+            }
+        }
+
+        contentItem: Column {
+            id: mediaColumn
+            spacing: 5
             padding: 8
+            width: 180 
+            // Force the column to wrap its children so the Popup has a height
+            height: childrenRect.height + 16
 
             Repeater {
                 model: mediaPlayerPopup.items
 
                 delegate: RadioButton {
+                    id: playerRadio
                     text: modelData.label
-
-                    // ✅ checked state bound to saved index
                     checked: (index === mediaPlayerPopup.currentPlayerIndex)
+                    width: 160
+
+                    contentItem: Text {
+                        text: playerRadio.text
+                        font.pixelSize: 14
+                        color: playerRadio.checked ? "gold" : "white"
+                        leftPadding: playerRadio.indicator.width + playerRadio.spacing
+                        verticalAlignment: Text.AlignVCenter
+                    }
 
                     onClicked: {
-                        console.log("Selected index:", index)
-                        console.log("Selected BG Media Player:", modelData.label)
-
-                        // ✅ generic update method in Python
                         SettingsManager.update_setting("Preferred Player", index)
                     }
                 }

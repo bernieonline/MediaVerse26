@@ -31,8 +31,7 @@
         {
           "label": "Media Apps",
           "items": [
-            { "label": "VideoProc" },
-            { "label": "Pot Player" }
+            { "label": "Manage Players ..." }
           ]
         },
         { "label": "MySql" },
