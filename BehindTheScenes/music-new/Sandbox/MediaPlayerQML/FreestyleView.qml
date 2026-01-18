@@ -120,24 +120,22 @@ Rectangle {
                 hoverEnabled: true
 
                 onDoubleClicked: {
-                    let rawPath  = modelData.videoPath.toString();    
-                    let cleanPath = modelData.videoPath.toString().replace(/\\/g, "/");
-
-                    console.log("DEBUG isMaster =", modelData.isMaster);
-                    console.log("RAW PATH =", rawPath);
-                    console.log("CLEAN PATH =", cleanPath);
+                    //let rawPath = modelData.videoPath.toString()
+                    //console.log("Freestyle TEST: sending to PlaybackRouter =", rawPath)
+                    //playbackRouter.playVideo(rawPath)
 
 
-                    if (modelData.isMaster) {
-                        // Existing HTTP → ID → Play logic
-                         console.log("--- Freestyle Playback  Library ---");
-                        playbackBridge.playVideo(cleanPath);
-                    } else {
-                        // Direct subprocess launch for freestyle folders
-                        console.log("--- Freestyle Playback Non Library ---");
+                    //RAWPATH USES SUBPROCESS PLAYBACK
 
-                        driveManager.play_via_subprocess(rawPath);
-                    }
+                    let rawPath  = modelData.videoPath.toString()
+                    let isMaster = modelData.isMaster
+
+                    console.log("Freestyle TEST: sending to PlaybackRouter")
+                    console.log("   RAW PATH   =", rawPath)
+                    console.log("   isMaster   =", isMaster)
+
+                    playbackRouter.playVideo(rawPath, isMaster)
+
                 }
                 //if
                 //onDoubleClicked: {

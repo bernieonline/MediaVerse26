@@ -22,6 +22,8 @@ from PySide6.QtWidgets import QApplication
 from PySide6.QtCore import QCoreApplication, QUrl, QLibraryInfo, QTimer
 from PySide6.QtQml import QQmlApplicationEngine
 
+from Playback.PlaybackRouter import PlaybackRouter
+
 # Project-specific imports
 from project_paths import paths
 from XML_Details import GetXMLDetails
@@ -104,11 +106,12 @@ def main():
         if os.name == 'nt':
             os.add_dll_directory(str(pyside_dir))
 
-        
-
-
         engine = QQmlApplicationEngine()
         ctx = engine.rootContext()
+
+        #playbackManager
+        router = PlaybackRouter()
+        ctx.setContextProperty("playbackRouter", router)
 
         # --------------------------------------------------------
         # Menu Data Handling (The Source of Truth)
@@ -156,6 +159,9 @@ def main():
 
         if not engine.rootObjects():
             return -1
+        
+        root = engine.rootObjects()[0]
+        router.launchMiniPlayer.connect(root.openMiniPlayer)
 
         # Background Manifest Work
         def start_manifest_work():

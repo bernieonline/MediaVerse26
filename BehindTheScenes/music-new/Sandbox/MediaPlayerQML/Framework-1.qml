@@ -106,6 +106,18 @@ ApplicationWindow {
             fileSystemManager.list_image_files_in_folder(folderPath)
         }
     }
+    // ----------------------------------------------------
+    // Function called from Python (PlaybackRouter)
+    // ----------------------------------------------------
+    function openMiniPlayer(path) {
+        splash.deactivate()
+
+        videoPanel.videoPath = path
+        window.isVideoPanelVisible = true
+        videoPanel.isPlaying = true
+
+        console.log("🎬 MiniPlayer launched via PlaybackRouter:", path)
+    }
 
     // --- THE VIDEO PLAYER PANEL ---
     // Placed here so it sits on top of the content but below the sidebar
