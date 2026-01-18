@@ -168,6 +168,29 @@ def main():
         with open(paths["menu"], encoding="utf-8") as f:
             menu_data = json.load(f)
 
+        # --- ADD THIS BLOCK RIGHT HERE ---
+        # Get the keys from the PlayerPaths dictionary we loaded earlier
+        actual_player_names = list(player_list.keys()) 
+
+        for top_item in menu_data.get("menu", []):
+            if top_item.get("label") == "Settings":
+                for sub_item in top_item.get("items", []):
+                    if sub_item.get("label") == "Media Player":
+                        # This fills the empty [] we just created in menu.json
+                        sub_item["items"] = [{"label": name} for name in actual_player_names]
+                        print(f">>> Menu Injection: Added {actual_player_names}")
+# ----------------------------------
+
+
+
+
+
+
+
+
+
+
+
         # --------------------------------------------------------
         # QML engine setup
         # --------------------------------------------------------

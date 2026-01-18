@@ -38,9 +38,7 @@
         {
           "label": "Media Player",
           "items": [
-            { "label": "Mini Player" },
-            { "label": "JRiver" },
-            { "label": "PowerDVD" }
+           
           ]
         }
       ]
