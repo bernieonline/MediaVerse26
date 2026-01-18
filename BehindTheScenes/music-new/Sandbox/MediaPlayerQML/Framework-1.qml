@@ -86,8 +86,9 @@ ApplicationWindow {
     // Placed here so it sits on top of the content but below the sidebar
     PlayerPanel {
         id: videoPanel
+        //controls size of the main player componet
         width: parent.width * 0.66
-        height: parent.height * 0.55
+        height: parent.height * 0.80
         anchors.horizontalCenter: parent.horizontalCenter
         
         // Use the property we defined at the top
@@ -200,4 +201,5 @@ ApplicationWindow {
         sequence: "Ctrl+T"
         onActivated: utilitySidebar.isOpen = !utilitySidebar.isOpen
     }
+   
 }
