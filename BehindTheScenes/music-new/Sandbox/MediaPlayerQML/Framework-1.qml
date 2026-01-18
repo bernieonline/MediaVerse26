@@ -76,6 +76,7 @@ ApplicationWindow {
             }
         }
     }
+    
 
     // --- UI Elements ---
     Rectangle {

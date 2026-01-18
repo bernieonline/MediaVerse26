@@ -7,6 +7,9 @@ class SettingsManager(QObject):
     # Signals QML can connect to
     settingsChanged = Signal()
     videoLaunchRequested = Signal(str)
+    
+    # CHANGED: Now using (str) to pass a JSON string to avoid Shiboken/C++ conversion errors
+    playerMenuChanged = Signal(str)
 
     def __init__(self, config_path, fileSystem, parent=None):
         super().__init__(parent)
@@ -15,6 +18,7 @@ class SettingsManager(QObject):
         self._settings = {}
         # Assumes menu.json is in the same folder as config.json
         self.menu_path = os.path.join(os.path.dirname(self.config_path), "menu.json")
+        self.menu_data = {} # Will be populated by Framework.py at startup
         self.load_settings(emit_signal=False)
 
     def load_settings(self, emit_signal=True):
@@ -52,7 +56,7 @@ class SettingsManager(QObject):
 
     @Slot(str)
     def add_new_player(self, file_path):
-        """Adds a new player EXE, updates config and menu JSONs, and refreshes UI."""
+        """Adds a new player EXE, updates config, and triggers a live UI refresh."""
         print(f"[DEBUG] Raw path received from QML: {file_path}")
 
         # 1. Normalize the Windows path
@@ -62,47 +66,26 @@ class SettingsManager(QObject):
         
         display_name = os.path.splitext(os.path.basename(clean_path))[0]
 
-        # 2. Update Config Dictionary
+        # 2. Update internal dictionary
         if "PlayerPaths" not in self._settings:
             self._settings["PlayerPaths"] = {}
+        
         self._settings["PlayerPaths"][display_name] = clean_path
         
+        # 3. Save to config.json
         try:
             with open(self.config_path, "w", encoding="utf-8") as f:
                 json.dump(self._settings, f, indent=2)
+            print(f"[INFO] Config saved with new player: {display_name}")
         except Exception as e:
             print(f"[ERROR] Failed to save config.json: {e}")
+            return
 
-        # 3. Update Menu JSON (Atomic Update)
-        try:
-            with open(self.menu_path, "r", encoding="utf-8") as f:
-                menu_data = json.load(f)
-
-            updated = False
-            # We look for "Media Player" list inside "Settings"
-            for top_item in menu_data.get("menu", []):
-                if top_item["label"] == "Settings":
-                    for sub_item in top_item.get("items", []):
-                        # Support both labels in case you renamed it
-                        if sub_item["label"] in ["Media Player", "Media Apps"]:
-                            if not any(i["label"] == display_name for i in sub_item.get("items", [])):
-                                if "items" not in sub_item:
-                                    sub_item["items"] = []
-                                sub_item["items"].append({"label": display_name})
-                                updated = True
-            
-            if updated:
-                with open(self.menu_path, "w", encoding="utf-8") as f:
-                    json.dump(menu_data, f, indent=2)
-                print(f"[INFO] Menu updated with {display_name}")
-
-        except Exception as e:
-            print(f"[ERROR] Failed to update menu.json: {e}")
-
-        # 4. Final Refresh (Trigger signal once)
-        self.load_settings(emit_signal=False)
+        # 4. Trigger the live menu sync and settings refresh
+        self.sync_menu_players() 
         self.settingsChanged.emit()
-        print(f"[SUCCESS] {display_name} added and UI notified.")
+        
+        print(f"[SUCCESS] {display_name} added. Menu refreshed.")
 
     @Slot(str)
     def delete_player(self, player_name):
@@ -112,29 +95,15 @@ class SettingsManager(QObject):
             with open(self.config_path, "w", encoding="utf-8") as f:
                 json.dump(self._settings, f, indent=2)
 
-        try:
-            with open(self.menu_path, "r", encoding="utf-8") as f:
-                menu_data = json.load(f)
-
-            for top_item in menu_data.get("menu", []):
-                if top_item["label"] == "Settings":
-                    for sub_item in top_item.get("items", []):
-                        if sub_item["label"] in ["Media Player", "Media Apps"]:
-                            sub_item["items"] = [i for i in sub_item.get("items", []) if i["label"] != player_name]
-            
-            with open(self.menu_path, "w", encoding="utf-8") as f:
-                json.dump(menu_data, f, indent=2)
-        except Exception as e:
-            print(f"[ERROR] Delete from menu failed: {e}")
-
-        self.load_settings(emit_signal=True)
+        # Sync the menu data object and emit the change to QML
+        self.sync_menu_players()
+        self.settingsChanged.emit()
 
     @Slot(str)
     def launch_video_with_preferred_player(self, video_path: str):
         if not video_path:
             return
         
-        # Using the fileSystem normalization logic if available
         if hasattr(self.fileSystem, 'normalize_path'):
             video_path = self.fileSystem.normalize_path(video_path)
             
@@ -154,3 +123,26 @@ class SettingsManager(QObject):
                     print(f"[INFO] Launched with {player_name}")
                 except Exception as e:
                     print(f"[ERROR] Could not launch {player_name}: {e}")
+
+    def sync_menu_players(self):
+        """Refreshes the player list inside the menu data and notifies QML via JSON string."""
+        if not self.menu_data:
+            print("[WARNING] sync_menu_players called but self.menu_data is empty.")
+            return
+
+        # 1. Get the current players
+        actual_player_names = list(self._settings.get("PlayerPaths", {}).keys())
+        player_items = [{"label": name} for name in actual_player_names]
+        
+        # 2. Inject into the menu structure
+        for top_item in self.menu_data.get("menu", []):
+            if top_item.get("label") == "Settings":
+                for sub_item in top_item.get("items", []):
+                    if sub_item.get("label") == "Media Player":
+                        sub_item["items"] = player_items
+                        break
+        
+        # 3. Emit as JSON String to bypass Shiboken errors
+        json_payload = json.dumps(self.menu_data)
+        self.playerMenuChanged.emit(json_payload)
+        print(f">>> SettingsManager: Menu synced with {len(player_items)} players.")
