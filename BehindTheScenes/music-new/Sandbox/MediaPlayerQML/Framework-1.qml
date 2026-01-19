@@ -2,13 +2,17 @@ import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Controls.Material 2.15
 import Qt5Compat.GraphicalEffects
-import QtQuick.Dialogs // No version number for PySide6
+import QtQuick.Dialogs
 
 ApplicationWindow {
     id: window
     visibility: ApplicationWindow.FullScreen
+    visible: true
     title: "MediaVerse"
     
+    // --------------------------------------------------------
+    // Global Properties
+    // --------------------------------------------------------
     property var xmlDetails: null
     property string selectedFolderPath: ""
     property string selectedImageFile: ""
@@ -17,33 +21,44 @@ ApplicationWindow {
     property var xmlController: _xmlController
     property bool isVideoPanelVisible: false
 
-    // ⭐ SCOPE FIX: Create a reference to splash at the window level 
-    // so RowButton can see it without a ReferenceError.
     property alias splashAlias: splash
 
     Material.theme: Material.Dark
     Material.accent: Material.Yellow
 
+    // --- Background Layer ---
     Rectangle { 
         id: background
         anchors.fill: parent
         color: "#1e1e1e"
     }
-    // 1. Add the actual FileDialog component here
+
+    // --- Global Shortcuts ---
+    Shortcut {
+        sequence: "Ctrl+T"
+        onActivated: utilitySidebar.isOpen = !utilitySidebar.isOpen
+    }
+
+    Shortcut {
+        sequence: "Escape"
+        enabled: window.isVideoPanelVisible
+        onActivated: closePlayer()
+    }
+
+    // --------------------------------------------------------
+    // UI Components & Logic
+    // --------------------------------------------------------
+
     FileDialog {
         id: playerExeBrowser
         title: "Select Media Player Executable"
-        // In Qt 6/PySide6, nameFilters is still used, 
-        // but 'selectedFile' is the standard way to get the path
         nameFilters: ["Executable files (*.exe)"]
-        
         onAccepted: {
             console.log("File selected: " + selectedFile)
             SettingsManager.add_new_player(selectedFile.toString())
         }
     }
 
-    // 2. Update your StyledMenu block
     StyledMenu {
         id: centralMenu
         anchors.top: parent.top
@@ -51,17 +66,14 @@ ApplicationWindow {
         anchors.horizontalCenter: parent.horizontalCenter
         menuData: centralMenuData
 
-        // Fixed the "Parameter label is not declared" error by using formal parameter
         onMenuItemTriggered: function(label) { 
             console.log("qml: Clicked: " + label)
-            
             if (label === "Manage Players ...") {
-                playerExeBrowser.open() // Now this ID is defined!
+                playerExeBrowser.open()
             }
         }
     }
 
-    // --- Search Controller Connection ---
     Connections {
         target: searchController
         function onDetailRequested(result) {
@@ -76,9 +88,7 @@ ApplicationWindow {
             }
         }
     }
-    
 
-    // --- UI Elements ---
     Rectangle {
         id: logoFrame
         width: buttonRows.height * 1.5
@@ -107,48 +117,58 @@ ApplicationWindow {
         }
     }
 
-
-    // close mini player
+    // ----------------------------------------------------
+    // Playback Logic Functions
+    // ----------------------------------------------------
+    
     function closePlayer() {
-        videoPlayer.stop()
-        playerPanel.isPlaying = false
-        window.isVideoPanelVisible = false   // ⭐ THIS is the real controller
-        console.log("🛑 MiniPlayer closed")
+        if (videoPanel.videoPlayer) {
+            videoPanel.videoPlayer.stop()
+        }
+        videoPanel.isPlaying = false
+        window.isVideoPanelVisible = false
+        console.log("🛑 MiniPlayer closed via Framework-1")
     }
     
-    // ----------------------------------------------------
-    // Function called from Python (PlaybackRouter)
-    // ----------------------------------------------------
     function openMiniPlayer(path) {
-        splash.deactivate()
+        if (splash) splash.deactivate()
 
         videoPanel.videoPath = path
         window.isVideoPanelVisible = true
         videoPanel.isPlaying = true
 
-        console.log("🎬 MiniPlayer launched via PlaybackRouter:", path)
+        console.log("🎬 MiniPlayer launched via Framework-1:", path)
     }
 
-    // --- THE VIDEO PLAYER PANEL ---
-    // Placed here so it sits on top of the content but below the sidebar
-    PlayerPanel {
-        id: videoPanel
-        //controls size of the main player componet
-        width: parent.width * 0.66
-        height: parent.height * 0.80
-        anchors.horizontalCenter: parent.horizontalCenter
+    function playMovieNow(cachePath) {
+        var decoded = decodeURIComponent(cachePath)
+        if (decoded.startsWith("file:///")) decoded = decoded.substring(8)
+        var filename = decoded.split("/").pop()
         
-        // Use the property we defined at the top
-        isVideoPanelVisible: window.isVideoPanelVisible 
-
-        // Sliding logic
-        y: window.isVideoPanelVisible ? window.height - height - 20 : window.height + 50
-        z: 100 
-
-        Behavior on y {
-            NumberAnimation { duration: 600; easing.type: Easing.OutQuart }
+        var videoPath = fileSystemManager.findVideoInFolder(window.selectedFolderPath, filename)
+        
+        if (videoPath) {
+            // Open internal player
+            openMiniPlayer(videoPath)
+            // Send to JRiver (External)
+            playbackBridge.play_video_via_jriver(videoPath)
         }
     }
+
+    function openMovieDetail(movie) {
+        let resolved = _xmlController.resolve_paths(movie.display)
+        if (resolved && resolved.xml) {
+            contentLoader.setSource("Detail_View_v2.qml", {
+                "imagePath": resolved.image,
+                "xmlPath": resolved.xml,
+                "moviePath": resolved.video
+            })
+        }
+    }
+
+    // ----------------------------------------------------
+    // Main UI Layout
+    // ----------------------------------------------------
 
     Column {
         id: buttonRows
@@ -188,6 +208,7 @@ ApplicationWindow {
             onLoaded: {
                 if (!contentLoader.item) return;
 
+                // Handle category/collection signals from loaded items
                 if (contentLoader.source.toString().includes("CategoryMenu.qml")) {
                     contentLoader.item.categorySelected.connect(function(categoryKey) {
                         let filteredData = collectionLogic.get_collections_by_category(categoryKey)
@@ -207,7 +228,6 @@ ApplicationWindow {
                     if (contentLoader.item.v2OpenDetail !== undefined) {
                         contentLoader.item.v2OpenDetail.connect(openMovieDetail)
                     }
-
                     if (contentLoader.item.launchVideoRequested !== undefined) {
                         contentLoader.item.launchVideoRequested.connect(playMovieNow)
                     }
@@ -216,37 +236,18 @@ ApplicationWindow {
         }
     }
 
-    function openMovieDetail(movie) {
-        let resolved = _xmlController.resolve_paths(movie.display)
-        if (resolved && resolved.xml) {
-            contentLoader.setSource("Detail_View_v2.qml", {
-                "imagePath": resolved.image,
-                "xmlPath": resolved.xml,
-                "moviePath": resolved.video
-            })
-        }
+    // --- THE MINI VIDEO PLAYER PANEL ---
+    PlayerPanel {
+        id: videoPanel
+        rootWindow: window
+        width: parent.width * 0.70
+        height: parent.height * 0.85
+        anchors.horizontalCenter: parent.horizontalCenter
+        z: 1000 // Ensure it's on top of contentContainer
     }
 
-    function playMovieNow(cachePath) {
-        var decoded = decodeURIComponent(cachePath)
-        if (decoded.startsWith("file:///")) decoded = decoded.substring(8)
-        var filename = decoded.split("/").pop()
-        
-        var videoPath = fileSystemManager.findVideoInFolder(window.selectedFolderPath, filename)
-        
-        if (videoPath) {
-            // Updated: Set the local videoPanel path and show it
-            videoPanel.videoPath = videoPath
-            window.isVideoPanelVisible = true
-            // Also keep your JRiver call if you want dual playback or external control
-            playbackBridge.play_video_via_jriver(videoPath)
-        }
+    UtilitySidebar { 
+        id: utilitySidebar
+        anchors.fill: parent 
     }
-
-    UtilitySidebar { id: utilitySidebar; anchors.fill: parent }
-    Shortcut {
-        sequence: "Ctrl+T"
-        onActivated: utilitySidebar.isOpen = !utilitySidebar.isOpen
-    }
-   
 }

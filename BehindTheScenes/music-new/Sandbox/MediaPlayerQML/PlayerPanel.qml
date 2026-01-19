@@ -5,70 +5,51 @@ import QtMultimedia 5.15
 
 Rectangle {
     id: playerPanel
-    property var rootWindow   // ⭐ REQUIRED
-
-    //rootWindow: window     // ⭐ pass the window into the component
-
 
     // ----------------------------------------------------
-    // Close function (clean, deterministic)
+    // Properties & Connections
     // ----------------------------------------------------
-    function closePlayer() {
-        videoPlayer.stop()
-        playerPanel.isPlaying = false
-        playerPanel.isVisible = false
-        console.log("🛑 MiniPlayer closed")
-    }
-
-    // --- THE THEATER DIMMER ---
-    Rectangle {
-        id: theaterDimmer
-        width: 5000; height: 5000
-        anchors.centerIn: parent
-        
-        color: "black"
-        opacity: playerPanel.isVisible ? 0.85 : 0.0
-        z: -1
-        visible: opacity > 0
-
-        Behavior on opacity {
-            NumberAnimation { duration: 500; easing.type: Easing.InOutQuad }
-        }
-
-        // Clicking the darkened area closes the player
-        MouseArea {
-            anchors.fill: parent
-            onClicked: playerPanel.closePlayer()
-        }
-    }
-
-    // Alias for main.qml
-    property alias isVideoPanelVisible: playerPanel.isVisible
-    
-    property bool isVisible: false
+    property var rootWindow                  // Linked to 'window' in Framework-1.qml
     property bool isPlaying: false
     property string videoPath: ""
+    property alias videoPlayer: videoPlayer  // Allows Framework-1 to control the engine
 
-    height: parent ? parent.height * 1.20 : 1000
-    width: height * 1.333
+    // Helper to check the source of truth in the main window
+    readonly property bool isActuallyVisible: rootWindow ? rootWindow.isVideoPanelVisible : false
+
+    // ----------------------------------------------------
+    // Panel Dimensions & Positioning
+    // ----------------------------------------------------
+    width: parent ? parent.width * 0.70 : 800
+    height: parent ? parent.height * 0.85 : 600
     anchors.horizontalCenter: parent ? parent.horizontalCenter : undefined
     
-    //y: isVisible ? (parent ? parent.height - height : 0)
-                 //: (parent ? parent.height : 0)
+    // Y Position: Slides up when visible, slides off-screen when hidden
+    y: isActuallyVisible ? (parent.height - height - 20) : (parent.height + 100)
+    z: 1000
 
-    y: window.isVideoPanelVisible ? (parent ? parent.height - height : 0)
-                : (parent ? parent.height : 0)
-
-
-    z: 2
-
-    color: "#1e1e1e80"
+    color: "#1e1e1e"
     radius: 25
     border.color: "gold"
     border.width: 2
 
+    // Smooth movement for the slide effect
     Behavior on y {
-        NumberAnimation { duration: 400; easing.type: Easing.InOutQuad }
+        NumberAnimation { duration: 500; easing.type: Easing.OutQuart }
+    }
+
+    // ----------------------------------------------------
+    // Internal Logic Functions
+    // ----------------------------------------------------
+    function closePlayer() {
+        console.log("🛑 PlayerPanel: Stopping video and closing")
+        videoPlayer.stop()
+        playerPanel.isPlaying = false
+        
+        // Tells Framework-1.qml to update window.isVideoPanelVisible
+        if (rootWindow) {
+            rootWindow.isVideoPanelVisible = false
+        }
     }
 
     function filenameFromVideoPath(path) {
@@ -79,25 +60,48 @@ Rectangle {
         return parts[parts.length - 1]
     }
 
+    // Auto-play/pause based on the isPlaying property
     onIsPlayingChanged: {
         if (isPlaying && videoPath !== "") {
-            console.log("🎥 Auto‑playing video:", videoPath)
             videoPlayer.play()
         } else {
             videoPlayer.pause()
         }
     }
 
-    onVideoPathChanged: {
-        console.log("🎥 PlayerPanel received videoPath:", videoPath)
+    // ----------------------------------------------------
+    // UI Elements
+    // ----------------------------------------------------
+
+    // --- 1. THE THEATER DIMMER (Background) ---
+    Rectangle {
+        id: theaterDimmer
+        width: 5000; height: 5000
+        anchors.centerIn: parent
+        color: "black"
+        // Fades in/out based on the panel's visibility
+        opacity: playerPanel.isActuallyVisible ? 0.85 : 0.0
+        z: -1 
+        visible: opacity > 0
+
+        Behavior on opacity {
+            NumberAnimation { duration: 400; easing.type: Easing.InOutQuad }
+        }
+
+        // Clicking the dark area also closes the player
+        MouseArea {
+            anchors.fill: parent
+            onClicked: playerPanel.closePlayer()
+        }
     }
 
+    // --- 2. THE VIDEO SCREEN ---
     Rectangle {
         id: videoScreen
         anchors {
-            top: parent.top; topMargin: 15
-            left: parent.left; leftMargin: 15
-            right: parent.right; rightMargin: 15
+            top: parent.top; topMargin: 20
+            left: parent.left; leftMargin: 20
+            right: parent.right; rightMargin: 20
             bottom: timelineSlider.top; bottomMargin: 15
         }
         radius: 16
@@ -109,121 +113,101 @@ Rectangle {
             anchors.fill: parent
             source: playerPanel.videoPath
             autoPlay: false
-            muted: false
-            volume: 1.0
+            volume: volumeSlider.value // Linked to the volume slider below
         }
 
+        // Dark overlay and text when no video is playing
         Rectangle {
             anchors.fill: parent
             radius: parent.radius
             visible: !playerPanel.isPlaying
-            color: "#00000040"
-        }
-
-        Text {
-            anchors.centerIn: parent
-            text: playerPanel.videoPath === "" ? "No movie selected"
-                                               : (videoPlayer.hasAudio ? "Ready: " + filenameFromVideoPath(playerPanel.videoPath)
-                                                                       : "No audio track detected")
-            color: "white"
-            font.pixelSize: 20
-            visible: !playerPanel.isPlaying
-        }
-    }
-
-    Slider {
-        id: timelineSlider
-        anchors {
-            left: parent.left; right: parent.right
-            bottom: buttonArea.top; bottomMargin: -50
-            leftMargin: 15; rightMargin: 15
-        }
-        from: 0
-        to: videoPlayer.duration
-        value: videoPlayer.position
-        onMoved: videoPlayer.seek(value)
-
-        Connections {
-            target: videoPlayer
-            function onPositionChanged() {
-                timelineSlider.value = videoPlayer.position
+            color: "#00000090"
+            
+            Text {
+                anchors.centerIn: parent
+                text: playerPanel.videoPath === "" ? "No movie selected" : "Ready: " + filenameFromVideoPath(playerPanel.videoPath)
+                color: "white"
+                font.pixelSize: 22
+                font.bold: true
             }
         }
     }
 
+    // --- 3. THE TIMELINE SLIDER (Scrubbing) ---
+    Slider {
+        id: timelineSlider
+        anchors.bottom: buttonArea.top
+        anchors.bottomMargin: 10
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.leftMargin: 40
+        anchors.rightMargin: 40
+        
+        from: 0
+        to: videoPlayer.duration
+        value: videoPlayer.position
+        
+        // Allows the user to seek through the movie
+        onMoved: videoPlayer.seek(value)
+    }
+
+    // --- 4. THE CONTROL BUTTON AREA ---
     Rectangle {
         id: buttonArea
-        anchors {
-            left: parent.left; right: parent.right; bottom: parent.bottom
-            leftMargin: 15; rightMargin: 15; bottomMargin: 15
-        }
+        anchors.bottom: parent.bottom
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.margins: 20
+        width: parent.width - 40
         height: 100
-        radius: 10
-        color: "#1e1e1e80"
-        border.color: "gold"
+        color: "#2a2a2a"
+        radius: 15
+        border.color: "#3d3d3d"
         border.width: 1
 
         RowLayout {
             anchors.fill: parent
-            anchors.margins: 15
-            spacing: 15
+            anchors.margins: 20
+            spacing: 30
 
+            // Standard Play/Pause Button
             Button {
-                text: "Play"
-                Layout.fillWidth: true
+                text: playerPanel.isPlaying ? "Pause" : "Play"
+                Layout.preferredWidth: 120
                 onClicked: {
-                    if (playerPanel.videoPath !== "") {
+                    if (playerPanel.isPlaying) {
+                        videoPlayer.pause()
+                        playerPanel.isPlaying = false
+                    } else if (playerPanel.videoPath !== "") {
                         videoPlayer.play()
                         playerPanel.isPlaying = true
                     }
                 }
             }
 
-            Button {
-                text: "Pause"
-                Layout.fillWidth: true
-                onClicked: videoPlayer.pause()
-            }
-
-            Button {
-                text: "Stop"
-                Layout.fillWidth: true
-                onClicked: {
-                    videoPlayer.stop()
-                    playerPanel.isPlaying = false
+            // Audio Volume Control
+            RowLayout {
+                spacing: 15
+                Text { text: "VOL"; color: "white"; font.pixelSize: 14; font.bold: true }
+                Slider {
+                    id: volumeSlider
+                    from: 0.0
+                    to: 1.0
+                    value: 0.8 // Starts at 80% volume
+                    Layout.preferredWidth: 150
+                }
+                Text { 
+                    text: Math.round(volumeSlider.value * 100) + "%"
+                    color: "white"; font.pixelSize: 14 
                 }
             }
 
-            Button {
-                text: "Full Screen"
-                Layout.fillWidth: true
-                onClicked: console.log("Full screen requested")
-            }
+            // Pushes the Close button to the far right
+            Item { Layout.fillWidth: true } 
 
-            Button {
-                text: "Volume +"
-                Layout.fillWidth: true
-                onClicked: {
-                    if (videoPlayer.volume < 1.0) {
-                        videoPlayer.volume += 0.1
-                    }
-                }
-            }
-
-            Button {
-                text: "Volume -"
-                Layout.fillWidth: true
-                onClicked: {
-                    if (videoPlayer.volume > 0.0) {
-                        videoPlayer.volume -= 0.1
-                    }
-                }
-            }
-
-            // ⭐ NEW: Close button inside the row
+            // Standard Close Button (Matched Style)
             Button {
                 text: "Close"
-                Layout.fillWidth: true
+                Layout.preferredWidth: 120
                 onClicked: playerPanel.closePlayer()
             }
         }
