@@ -79,6 +79,13 @@ class PlaybackRouter(QObject):
     @Slot(str, bool)
     def playVideo(self, video_path, is_master):
         print("\n==============================")
+        print("Refresh video player")
+        print("==============================")
+
+        # ⭐ Always reload config before routing
+        self.refresh_config()
+
+        print("\n==============================")
         print("PlaybackRouter.playVideo CALLED")
         print("==============================")
         print("Incoming video path:", video_path)
@@ -264,3 +271,30 @@ class PlaybackRouter(QObject):
         except Exception as e:
             print("❌ PowerDVD Subprocess Launch Failed:", e)
             traceback.print_exc()
+
+    def refresh_config(self):
+        print("\n=== REFRESHING CONFIG ===")
+
+        try:
+            with open(self.config_path, "r") as f:
+                self.config = json.load(f)
+            print("Config refreshed.")
+        except Exception as e:
+            print("ERROR refreshing config:", e)
+            return
+
+        # Update preferred player
+        pref_index = self.config.get("Preferred Player", 1)
+        player_map = {0: "MiniPlayer", 1: "JRiver", 2: "PowerDVD", 3: "vlc"}
+        self.preferred_player = player_map.get(pref_index, "JRiver")
+        print("Updated preferred player:", self.preferred_player)
+
+        # Update player paths
+        self.player_paths = self.config.get("PlayerPaths", {})
+        self.jriver_exe = self.player_paths.get("JRiver", "")
+        self.vlc_exe = self.player_paths.get("vlc", "")
+        self.powerdvd_exe = self.player_paths.get("PowerDVD", "")
+
+        print("Updated JRiver EXE:", self.jriver_exe)
+        print("Updated VLC EXE:", self.vlc_exe)
+        print("Updated PowerDVD EXE:", self.powerdvd_exe)
