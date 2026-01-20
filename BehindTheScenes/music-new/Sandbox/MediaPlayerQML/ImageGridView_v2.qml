@@ -104,7 +104,8 @@ Rectangle {
                                             cleanPath = cleanPath.replace(/\//g, "\\");
                                             
                                             console.log("🚀 Playing Video:", cleanPath);
-                                            playbackBridge.playVideo(cleanPath);
+                                            playbackRouter.playVideo(cleanPath, false)
+                                            //playbackBridge.playVideo(cleanPath);
                                             gridRoot.v2PlayMovie(cleanPath);
                                         }
                                     }

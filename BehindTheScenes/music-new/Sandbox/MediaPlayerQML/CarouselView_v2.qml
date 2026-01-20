@@ -136,7 +136,10 @@ Rectangle {
                                     console.log("Target: " + cleanPath)
 
                                     // 3. EXECUTE PLAYBACK
-                                    playbackBridge.playVideo(cleanPath)
+                                    //playbackBridge.playVideo(cleanPath)
+                                    playbackRouter.playVideo(cleanPath, false)
+                                    
+                                    
                                     
                                     // 4. Signal UI (optional)
                                     carouselRoot.v2PlayMovie(cleanPath)

@@ -114,6 +114,11 @@ Rectangle {
                         // 1. Resolve paths using manifestKey
                         let resolved = xmlController.resolve_paths(detailViewRoot.manifestKey)
                         
+                        console.log("DETAIL VIEW — RESOLVED =", resolved)
+                        console.log("DETAIL VIEW — RESOLVED (JSON) =", JSON.stringify(resolved))
+                        console.log("DETAIL VIEW — TYPE =", typeof resolved)
+
+                        
                         if (resolved && resolved.video) {
                             // 2. Clean slashes for Python
                             let cleanPath = resolved.video.toString().replace(/\\/g, "/")
@@ -122,13 +127,27 @@ Rectangle {
                             console.log("Path: " + cleanPath)
 
                             // 3. SEND TO BRIDGE
-                            playbackBridge.playVideo(cleanPath)
+                            //playbackBridge.playVideo(cleanPath)
+                            playbackRouter.playVideo(cleanPath, false)
                             
                             // 4. Emit signal
                             detailViewRoot.v2PlayMovie(cleanPath)
                         } else {
                             console.log("DETAIL ERROR: No video found for " + detailViewRoot.manifestKey)
                         }
+                         //RAWPATH USES SUBPROCESS PLAYBACK
+
+                        //let rawPath  = modelData.videoPath.toString()
+                        //let isMaster = modelData.isMaster
+                        //playbackRouter.playVideo(rawPath, isMaster)
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
                     }
                 }
             }
