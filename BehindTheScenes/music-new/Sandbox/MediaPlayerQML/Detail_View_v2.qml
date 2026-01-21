@@ -19,20 +19,35 @@ Rectangle {
         var path = manifestKey !== "" ? manifestKey : imagePath
         var decoded = decodeURIComponent(path)
         var filename = decoded.split("/").pop().split("\\").pop()
-        return filename.replace(/\.[^/.]+$/, "")
+        return filename.replace(/\.[^/.]+$/, "").trim()
+    }
+
+    // --- ⭐ FIXED XML DATA LISTENER ---
+    Connections {
+        target: xmlController
+        function onCategoryContentUpdated(category, lines) {
+            // Check if we are currently on the AI tab (the last tab)
+            // If NOT on the last tab, allow the XML data to fill the text area
+            if (tabBar.currentIndex !== (tabBar.count - 1)) {
+                xmlTextArea.text = lines.join("\n\n")
+            }
+        }
+    }
+
+    // --- AI SIGNAL LISTENERS ---
+    Connections {
+        target: aiController
+        function onAnswerReady(answer) { xmlTextArea.text = answer }
+        function onLoadingStatus(isLoading) { aiSpinner.running = isLoading }
     }
 
     Component.onCompleted: {
         var decoded = decodeURIComponent(imagePath)
-        if (decoded.startsWith("file:///"))
-            decoded = decoded.substring(8)
-
+        if (decoded.startsWith("file:///")) decoded = decoded.substring(8)
         var marker = "cacheV2/images/display/"
         var keyPath = decoded
         var idx = decoded.indexOf(marker)
-        if (idx !== -1)
-            keyPath = decoded.substring(idx + marker.length)
-
+        if (idx !== -1) keyPath = decoded.substring(idx + marker.length)
         manifestKey = keyPath
 
         if (xmlPath && xmlPath.length > 0) {
@@ -41,30 +56,6 @@ Rectangle {
             if (cats.length > 0) {
                 tabBar.currentIndex = 0
                 xmlController.requestCategoryContent(cats[0])
-            }
-        }
-    }
-
-    function loadMovie(m) {
-        movie = m
-        if (!movie) return
-        posterImage.source = movie.posterPath
-        if (movie.xmlPath && movie.xmlPath.length > 0) {
-            xmlController.loadXML(movie.xmlPath)
-            var cats = xmlController.getCategories()
-            if (cats.length > 0) {
-                tabBar.currentIndex = 0
-                xmlController.requestCategoryContent(cats[0])
-            }
-        }
-    }
-
-    Connections {
-        target: xmlController
-        function onCategoryContentUpdated(category, lines) {
-            // Only update text if we aren't on the AiQ tab
-            if (tabBar.currentItem && tabBar.currentItem.text !== "AiQ") {
-                xmlTextArea.text = lines.join("\n\n")
             }
         }
     }
@@ -79,28 +70,14 @@ Rectangle {
             id: leftPanel
             Layout.fillHeight: true
             Layout.preferredWidth: leftPanel.height * 2 / 3
-            Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
             radius: 15
             color: "transparent"
-
             Image {
                 id: posterImage
                 anchors.fill: parent
                 source: imagePath
                 fillMode: Image.PreserveAspectCrop
                 smooth: true
-
-                MouseArea {
-                    anchors.fill: parent
-                    onDoubleClicked: {
-                        let resolved = xmlController.resolve_paths(detailViewRoot.manifestKey)
-                        if (resolved && resolved.video) {
-                            let cleanPath = resolved.video.toString().replace(/\\/g, "/")
-                            playbackRouter.playVideo(cleanPath, false)
-                            detailViewRoot.v2PlayMovie(cleanPath)
-                        }
-                    }
-                }
             }
         }
 
@@ -110,34 +87,59 @@ Rectangle {
             Layout.fillHeight: true
             spacing: 15
 
+            // --- ⭐ RESTORED TABBAR LOGIC ---
             TabBar {
                 id: tabBar
                 Layout.fillWidth: true
                 
-                // 1. Dynamic Tabs from XML
                 Repeater {
                     model: xmlController.getCategories()
                     TabButton {
                         text: modelData
+                        // When an XML tab is clicked, tell the controller to fetch that category
                         onClicked: xmlController.requestCategoryContent(modelData)
                     }
                 }
-
-                // 2. ⭐ NEW: Static AiQ Tab
-                TabButton {
-                    text: "AiQ"
+                TabButton { 
+                    text: "AiQ" 
                     onClicked: {
-                        xmlTextArea.text = "AI Analysis for " + getSearchTitle() + "...\n\n(Waiting for AI metadata...)"
-                        // You can trigger a python call here later for your AI analysis
+                        // Clear text area or show AI instructions when switching to AI tab
+                        if (!xmlTextArea.text.includes("AI Analysis")) {
+                             xmlTextArea.text = "AI Analysis Mode for " + getSearchTitle()
+                        }
                     }
                 }
             }
 
+            // AI SHORTCUT PANEL (Only visible on last tab)
+            Rectangle {
+                id: aiqPanel
+                visible: tabBar.currentIndex === (tabBar.count - 1)
+                color: "#1a1a1a"
+                radius: 5
+                Layout.fillWidth: true
+                implicitHeight: aiFlow.implicitHeight + 20
+
+                Flow {
+                    id: aiFlow
+                    anchors.fill: parent
+                    anchors.margins: 10
+                    spacing: 10
+                    Button { text: "Trivia"; onClicked: aiController.ask(getSearchTitle(), "Give me 3 cool trivia facts.") }
+                    Button { text: "Locations"; onClicked: aiController.ask(getSearchTitle(), "Where was this filmed?") }
+                    Button { text: "Actor Thoughts"; onClicked: aiController.ask(getSearchTitle(), "What did the lead actors say about filming this?") }
+                    Button { text: "Director's Next"; onClicked: aiController.ask(getSearchTitle(), "What movie did the director make after this?") }
+                }
+            }
+
+            // TEXT AREA WITH SCROLLING, SPINNER & TIMER
             Rectangle {
                 color: "#151515"
                 radius: 10
                 Layout.fillWidth: true
                 Layout.fillHeight: true
+                border.color: aiqPanel.visible ? "cyan" : "transparent"
+                border.width: 1
 
                 ScrollView {
                     id: scrollArea
@@ -147,52 +149,68 @@ Rectangle {
                         id: xmlTextArea
                         width: scrollArea.width
                         readOnly: true
-                        wrapMode: Text.Wrap
+                        wrapMode: Text.WordWrap
                         color: "white"
-                        font.pixelSize: detailViewRoot.tenFootMode ? 48 : 16
+                        opacity: aiSpinner.running ? 0.3 : 1.0
+                        font.pixelSize: detailViewRoot.tenFootMode ? 32 : 16
                         padding: 20
+                        background: Item {}
                     }
+                }
+
+                BusyIndicator {
+                    id: aiSpinner
+                    anchors.centerIn: parent
+                    visible: running
+                    running: false
+                }
+
+                Text {
+                    anchors.top: aiSpinner.bottom
+                    anchors.horizontalCenter: aiSpinner.horizontalCenter
+                    anchors.topMargin: 10
+                    text: "Thinking... " + aiTimer.seconds + "s"
+                    color: "cyan"
+                    visible: aiSpinner.running
+                }
+
+                Timer {
+                    id: aiTimer
+                    interval: 1000
+                    running: aiSpinner.running
+                    repeat: true
+                    property int seconds: 0
+                    onTriggered: seconds++
+                    onRunningChanged: if (!running) seconds = 0
                 }
             }
 
-            // WEB LINKS ROW
+            // WEB LINKS ROW (IMDb, Rotten, TMDB, Wiki)
             Rectangle {
                 Layout.fillWidth: true
-                height: 60
+                height: 50
                 color: "transparent"
-
                 RowLayout {
                     anchors.fill: parent
                     spacing: 10
-
-                    function openWeb(url) {
-                        var fullUrl = url + encodeURIComponent(getSearchTitle())
-                        Qt.openUrlExternally(fullUrl)
-                    }
-
-                    component WebLinkButton : Button {
-                        Layout.fillWidth: true
-                        Layout.fillHeight: true
+                    function openWeb(url) { Qt.openUrlExternally(url + encodeURIComponent(getSearchTitle())) }
+                    
+                    component WebButton : Button {
+                        Layout.fillWidth: true; Layout.fillHeight: true
+                        background: Rectangle { color: parent.hovered ? "#333" : "#222"; radius: 5 }
                         contentItem: Text {
                             text: parent.text
-                            font.bold: true
-                            color: parent.down ? "gold" : "white"
+                            color: "white"
                             horizontalAlignment: Text.AlignHCenter
                             verticalAlignment: Text.AlignVCenter
-                        }
-                        background: Rectangle {
-                            color: parent.hovered ? "#333" : "#222"
-                            border.color: parent.hovered ? "gold" : "#444"
-                            border.width: 1
-                            radius: 8
+                            font.bold: true
                         }
                     }
 
-                    WebLinkButton { text: "IMDb"; onClicked: parent.openWeb("https://www.imdb.com/find?q=") }
-                    WebLinkButton { text: "Rotten"; onClicked: parent.openWeb("https://www.rottentomatoes.com/search?search=") }
-                    WebLinkButton { text: "TMDB"; onClicked: parent.openWeb("https://www.themoviedb.org/search?query=") }
-                    WebLinkButton { text: "Wiki"; onClicked: parent.openWeb("https://en.wikipedia.org/wiki/Special:Search?search=") }
-                    WebLinkButton { text: "Blu-ray"; onClicked: parent.openWeb("https://www.blu-ray.com/search/?action=search&keyword=") }
+                    WebButton { text: "IMDb"; onClicked: parent.openWeb("https://www.imdb.com/find?q=") }
+                    WebButton { text: "Rotten"; onClicked: parent.openWeb("https://www.rottentomatoes.com/search?search=") }
+                    WebButton { text: "TMDB"; onClicked: parent.openWeb("https://www.themoviedb.org/search?query=") }
+                    WebButton { text: "Wiki"; onClicked: parent.openWeb("https://en.wikipedia.org/wiki/Special:Search?search=") }
                 }
             }
         }

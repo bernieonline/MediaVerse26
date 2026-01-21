@@ -5,6 +5,7 @@ import json
 import threading
 import subprocess
 from pathlib import Path
+from ai_controller import AIController
 
 # ------------------------------------------------------------
 # PATHS & CONFIG
@@ -111,7 +112,15 @@ def main():
 
         #playbackManager
         router = PlaybackRouter()
+
+        #AI#
+        gemini_key = "AIzaSyDVS2NSnWypr8YXtTgY7G_ZrmatuIoIIYo"
+        ai_controller = AIController(api_key=gemini_key)
+
+
         ctx.setContextProperty("playbackRouter", router)
+
+        ctx.setContextProperty("aiController", ai_controller)
 
         # --------------------------------------------------------
         # Menu Data Handling (The Source of Truth)
@@ -131,6 +140,7 @@ def main():
         ctx.setContextProperty("centralMenuData", settings_manager.menu_data) # Point to manager's data
         
         playback_bridge = PlaybackQmlBridge()
+
         search_controller = SearchController()
         ctx.setContextProperty("playbackBridge", playback_bridge)
         ctx.setContextProperty("driveManager", drive_logic)
