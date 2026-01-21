@@ -11,11 +11,16 @@ Rectangle {
     property string imagePath: ""
     property var movie: null
     property bool tenFootMode: false
-
-    // Key used to look up the movie in the manifest
     property string manifestKey: ""
 
     signal v2PlayMovie(var movie)
+
+    function getSearchTitle() {
+        var path = manifestKey !== "" ? manifestKey : imagePath
+        var decoded = decodeURIComponent(path)
+        var filename = decoded.split("/").pop().split("\\").pop()
+        return filename.replace(/\.[^/.]+$/, "")
+    }
 
     Component.onCompleted: {
         var decoded = decodeURIComponent(imagePath)
@@ -57,7 +62,10 @@ Rectangle {
     Connections {
         target: xmlController
         function onCategoryContentUpdated(category, lines) {
-            xmlTextArea.text = lines.join("\n\n")
+            // Only update text if we aren't on the AiQ tab
+            if (tabBar.currentItem && tabBar.currentItem.text !== "AiQ") {
+                xmlTextArea.text = lines.join("\n\n")
+            }
         }
     }
 
@@ -66,9 +74,7 @@ Rectangle {
         anchors.margins: 50
         spacing: 50
 
-        // --------------------------------------------------------
-        // LEFT PANEL — LARGE POSTER (Now with Playback)
-        // --------------------------------------------------------
+        // LEFT PANEL (Poster)
         Rectangle {
             id: leftPanel
             Layout.fillHeight: true
@@ -86,84 +92,29 @@ Rectangle {
 
                 MouseArea {
                     anchors.fill: parent
-                    acceptedButtons: Qt.LeftButton
-                    
-                    property bool doubleClickActive: false
-                    property var singleClickTimer: null
-
-                    onClicked: {
-                        if (singleClickTimer) singleClickTimer.stop()
-                        singleClickTimer = Qt.createQmlObject(
-                            'import QtQuick 2.15; Timer { interval: 250; repeat: false }',
-                            detailViewRoot
-                        )
-                        singleClickTimer.triggered.connect(function() {
-                            if (!doubleClickActive) {
-                                // Potential future single-click action (e.g. zoom)
-                                console.log("DETAIL VIEW: Single click")
-                            }
-                            doubleClickActive = false
-                        })
-                        singleClickTimer.start()
-                    }
-
                     onDoubleClicked: {
-                        doubleClickActive = true
-                        if (singleClickTimer) singleClickTimer.stop()
-
-                        // 1. Resolve paths using manifestKey
                         let resolved = xmlController.resolve_paths(detailViewRoot.manifestKey)
-                        
-                        console.log("DETAIL VIEW — RESOLVED =", resolved)
-                        console.log("DETAIL VIEW — RESOLVED (JSON) =", JSON.stringify(resolved))
-                        console.log("DETAIL VIEW — TYPE =", typeof resolved)
-
-                        
                         if (resolved && resolved.video) {
-                            // 2. Clean slashes for Python
                             let cleanPath = resolved.video.toString().replace(/\\/g, "/")
-                            
-                            console.log("!!! DETAIL VIEW PLAYBACK TRIGGERED !!!")
-                            console.log("Path: " + cleanPath)
-
-                            // 3. SEND TO BRIDGE
-                            //playbackBridge.playVideo(cleanPath)
                             playbackRouter.playVideo(cleanPath, false)
-                            
-                            // 4. Emit signal
                             detailViewRoot.v2PlayMovie(cleanPath)
-                        } else {
-                            console.log("DETAIL ERROR: No video found for " + detailViewRoot.manifestKey)
                         }
-                         //RAWPATH USES SUBPROCESS PLAYBACK
-
-                        //let rawPath  = modelData.videoPath.toString()
-                        //let isMaster = modelData.isMaster
-                        //playbackRouter.playVideo(rawPath, isMaster)
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
                     }
                 }
             }
         }
 
-        // --------------------------------------------------------
-        // RIGHT PANEL — TABS + XML CONTENT
-        // --------------------------------------------------------
+        // RIGHT PANEL
         ColumnLayout {
             Layout.fillWidth: true
             Layout.fillHeight: true
-            spacing: 10
+            spacing: 15
 
             TabBar {
                 id: tabBar
                 Layout.fillWidth: true
+                
+                // 1. Dynamic Tabs from XML
                 Repeater {
                     model: xmlController.getCategories()
                     TabButton {
@@ -171,10 +122,20 @@ Rectangle {
                         onClicked: xmlController.requestCategoryContent(modelData)
                     }
                 }
+
+                // 2. ⭐ NEW: Static AiQ Tab
+                TabButton {
+                    text: "AiQ"
+                    onClicked: {
+                        xmlTextArea.text = "AI Analysis for " + getSearchTitle() + "...\n\n(Waiting for AI metadata...)"
+                        // You can trigger a python call here later for your AI analysis
+                    }
+                }
             }
 
             Rectangle {
-                color: "transparent"
+                color: "#151515"
+                radius: 10
                 Layout.fillWidth: true
                 Layout.fillHeight: true
 
@@ -182,38 +143,56 @@ Rectangle {
                     id: scrollArea
                     anchors.fill: parent
                     clip: true
-
                     TextArea {
                         id: xmlTextArea
                         width: scrollArea.width
                         readOnly: true
                         wrapMode: Text.Wrap
-                        text: "No details available"
-                        background: null
                         color: "white"
                         font.pixelSize: detailViewRoot.tenFootMode ? 48 : 16
-                        font.bold: true
                         padding: 20
-                        rightPadding: vbar.width + 10
+                    }
+                }
+            }
+
+            // WEB LINKS ROW
+            Rectangle {
+                Layout.fillWidth: true
+                height: 60
+                color: "transparent"
+
+                RowLayout {
+                    anchors.fill: parent
+                    spacing: 10
+
+                    function openWeb(url) {
+                        var fullUrl = url + encodeURIComponent(getSearchTitle())
+                        Qt.openUrlExternally(fullUrl)
                     }
 
-                    ScrollBar.vertical: ScrollBar {
-                        id: vbar
-                        policy: ScrollBar.AlwaysOn
-                        interactive: true
-                        width: detailViewRoot.tenFootMode ? 30 : 14
-                        anchors.right: scrollArea.right
-                        anchors.top: scrollArea.top
-                        anchors.bottom: scrollArea.bottom
-                        z: 10
-                        background: Rectangle { color: "#262626"; radius: 6 }
-                        contentItem: Rectangle {
-                            implicitWidth: vbar.width
-                            implicitHeight: 100
-                            radius: 6
-                            color: "#3a3a3a"
+                    component WebLinkButton : Button {
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+                        contentItem: Text {
+                            text: parent.text
+                            font.bold: true
+                            color: parent.down ? "gold" : "white"
+                            horizontalAlignment: Text.AlignHCenter
+                            verticalAlignment: Text.AlignVCenter
+                        }
+                        background: Rectangle {
+                            color: parent.hovered ? "#333" : "#222"
+                            border.color: parent.hovered ? "gold" : "#444"
+                            border.width: 1
+                            radius: 8
                         }
                     }
+
+                    WebLinkButton { text: "IMDb"; onClicked: parent.openWeb("https://www.imdb.com/find?q=") }
+                    WebLinkButton { text: "Rotten"; onClicked: parent.openWeb("https://www.rottentomatoes.com/search?search=") }
+                    WebLinkButton { text: "TMDB"; onClicked: parent.openWeb("https://www.themoviedb.org/search?query=") }
+                    WebLinkButton { text: "Wiki"; onClicked: parent.openWeb("https://en.wikipedia.org/wiki/Special:Search?search=") }
+                    WebLinkButton { text: "Blu-ray"; onClicked: parent.openWeb("https://www.blu-ray.com/search/?action=search&keyword=") }
                 }
             }
         }
