@@ -1,7 +1,7 @@
 {
   "name": "Bernard",
   "_comment": "This file provides persistence for user settings choices",
-  "Preferred Player": 0,
+  "Preferred Player": 1,
   "JRiverPort": "52199",
   "PlayerPaths": {
     "MiniPlayer": "",

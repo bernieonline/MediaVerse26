@@ -114,7 +114,7 @@ def main():
         router = PlaybackRouter()
 
         #AI#
-        gemini_key = "AIzaSyDVS2NSnWypr8YXtTgY7G_ZrmatuIoIIYo"
+        gemini_key = "AIzaSyCginHbhMqHOHnHzVuyXi_w1V1TTtNXNkk"
         ai_controller = AIController(api_key=gemini_key)
 
 
