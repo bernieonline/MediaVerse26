@@ -22,19 +22,15 @@ Rectangle {
         return filename.replace(/\.[^/.]+$/, "").trim()
     }
 
-    // --- ⭐ FIXED XML DATA LISTENER ---
     Connections {
         target: xmlController
         function onCategoryContentUpdated(category, lines) {
-            // Check if we are currently on the AI tab (the last tab)
-            // If NOT on the last tab, allow the XML data to fill the text area
             if (tabBar.currentIndex !== (tabBar.count - 1)) {
                 xmlTextArea.text = lines.join("\n\n")
             }
         }
     }
 
-    // --- AI SIGNAL LISTENERS ---
     Connections {
         target: aiController
         function onAnswerReady(answer) { xmlTextArea.text = answer }
@@ -87,23 +83,19 @@ Rectangle {
             Layout.fillHeight: true
             spacing: 15
 
-            // --- ⭐ RESTORED TABBAR LOGIC ---
             TabBar {
                 id: tabBar
                 Layout.fillWidth: true
-                
                 Repeater {
                     model: xmlController.getCategories()
                     TabButton {
                         text: modelData
-                        // When an XML tab is clicked, tell the controller to fetch that category
                         onClicked: xmlController.requestCategoryContent(modelData)
                     }
                 }
                 TabButton { 
                     text: "AiQ" 
                     onClicked: {
-                        // Clear text area or show AI instructions when switching to AI tab
                         if (!xmlTextArea.text.includes("AI Analysis")) {
                              xmlTextArea.text = "AI Analysis Mode for " + getSearchTitle()
                         }
@@ -111,7 +103,7 @@ Rectangle {
                 }
             }
 
-            // AI SHORTCUT PANEL (Only visible on last tab)
+            // AI SHORTCUT PANEL
             Rectangle {
                 id: aiqPanel
                 visible: tabBar.currentIndex === (tabBar.count - 1)
@@ -185,32 +177,64 @@ Rectangle {
                 }
             }
 
-            // WEB LINKS ROW (IMDb, Rotten, TMDB, Wiki)
+            // --- ⭐ STYLIZED WEB LINKS ROW ---
             Rectangle {
                 Layout.fillWidth: true
                 height: 50
                 color: "transparent"
                 RowLayout {
                     anchors.fill: parent
-                    spacing: 10
+                    spacing: 8
                     function openWeb(url) { Qt.openUrlExternally(url + encodeURIComponent(getSearchTitle())) }
                     
+                    // Styled component with dynamic colors
                     component WebButton : Button {
+                        property color brandColor: "#222"
+                        property color textColor: "white"
                         Layout.fillWidth: true; Layout.fillHeight: true
-                        background: Rectangle { color: parent.hovered ? "#333" : "#222"; radius: 5 }
+                        
+                        background: Rectangle { 
+                            color: parent.hovered ? Qt.lighter(parent.brandColor, 1.2) : parent.brandColor
+                            radius: 4
+                            border.color: parent.hovered ? "white" : "transparent"
+                            border.width: 1
+                        }
                         contentItem: Text {
                             text: parent.text
-                            color: "white"
+                            color: parent.textColor
+                            font.bold: true
+                            font.pixelSize: 13
                             horizontalAlignment: Text.AlignHCenter
                             verticalAlignment: Text.AlignVCenter
-                            font.bold: true
                         }
                     }
 
-                    WebButton { text: "IMDb"; onClicked: parent.openWeb("https://www.imdb.com/find?q=") }
-                    WebButton { text: "Rotten"; onClicked: parent.openWeb("https://www.rottentomatoes.com/search?search=") }
-                    WebButton { text: "TMDB"; onClicked: parent.openWeb("https://www.themoviedb.org/search?query=") }
-                    WebButton { text: "Wiki"; onClicked: parent.openWeb("https://en.wikipedia.org/wiki/Special:Search?search=") }
+                    WebButton { 
+                        text: "IMDb"
+                        brandColor: "#f5c518" // IMDb Yellow
+                        textColor: "black"    // IMDb Text is black on yellow
+                        onClicked: parent.openWeb("https://www.imdb.com/find?q=") 
+                    }
+                    WebButton { 
+                        text: "Rotten"
+                        brandColor: "#fa320a" // RT Red
+                        onClicked: parent.openWeb("https://www.rottentomatoes.com/search?search=") 
+                    }
+                    WebButton { 
+                        text: "TMDB"
+                        brandColor: "#01b4e4" // TMDB Blue
+                        onClicked: parent.openWeb("https://www.themoviedb.org/search?query=") 
+                    }
+                    WebButton { 
+                        text: "Wiki"
+                        brandColor: "#333333" // Wiki Dark Grey
+                        onClicked: parent.openWeb("https://en.wikipedia.org/wiki/Special:Search?search=") 
+                    }
+                    WebButton { 
+                        text: "Blu-ray"
+                        brandColor: "#0071bd" // Blu-ray Disc Blue
+                        onClicked: parent.openWeb("https://www.blu-ray.com/search/?action=search&keyword=") 
+                    }
                 }
             }
         }
