@@ -42,13 +42,17 @@ from DriveManager import DriveManager
 from search_controller import SearchController
 from SplashModel import SplashModel
 
-
+from dotenv import load_dotenv
 
 os.environ["QT_LOGGING_RULES"] = "qt.qpa.fonts=false"
 os.environ["QT_QUICK_CONTROLS_STYLE"] = "Material"
 
 def main():
     try:
+        # Locate the .env file relative to this script
+        # Going up two levels from Sandbox/MediaPlayerPy to the root
+        env_path = Path(__file__).resolve().parent.parent.parent / "sqlCreds.env"
+        load_dotenv(dotenv_path=env_path)
         # --------------------------------------------------------
         # Logging & Splash
         # --------------------------------------------------------
@@ -113,10 +117,15 @@ def main():
         #playbackManager
         router = PlaybackRouter()
 
-        #AI#
-        gemini_key = "AIzaSyCginHbhMqHOHnHzVuyXi_w1V1TTtNXNkk"
-        ai_controller = AIController(api_key=gemini_key)
+     
 
+        # --- AI ---
+        gemini_key = os.getenv("GOOGLE_AI_KEY")
+
+        if not gemini_key:
+            print("WARNING: GOOGLE_AI_KEY not found in sqlCreds.env")
+
+        ai_controller = AIController(api_key=gemini_key)
 
         ctx.setContextProperty("playbackRouter", router)
 
