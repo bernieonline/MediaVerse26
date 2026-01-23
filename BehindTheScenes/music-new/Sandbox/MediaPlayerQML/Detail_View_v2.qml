@@ -7,6 +7,7 @@ Rectangle {
     anchors.fill: parent
     color: "transparent"
 
+    // --- PROPERTIES ---
     property string xmlPath: ""
     property string imagePath: ""
     property var movie: null
@@ -15,6 +16,7 @@ Rectangle {
 
     signal v2PlayMovie(var movie)
 
+    // --- HELPER FUNCTIONS ---
     function getSearchTitle() {
         var path = manifestKey !== "" ? manifestKey : imagePath
         var decoded = decodeURIComponent(path)
@@ -22,6 +24,7 @@ Rectangle {
         return filename.replace(/\.[^/.]+$/, "").trim()
     }
 
+    // --- LOGIC & CONNECTIONS ---
     Connections {
         target: xmlController
         function onCategoryContentUpdated(category, lines) {
@@ -56,24 +59,92 @@ Rectangle {
         }
     }
 
+    // --- LAYOUT ---
     RowLayout {
         anchors.fill: parent
         anchors.margins: 50
         spacing: 50
 
-        // LEFT PANEL (Poster)
+        // LEFT PANEL (Poster with Double-Click Play)
         Rectangle {
             id: leftPanel
             Layout.fillHeight: true
             Layout.preferredWidth: leftPanel.height * 2 / 3
             radius: 15
-            color: "transparent"
+            color: "#111"
+            clip: true
+
             Image {
                 id: posterImage
                 anchors.fill: parent
                 source: imagePath
                 fillMode: Image.PreserveAspectCrop
                 smooth: true
+
+                MouseArea {
+                    id: posterMouse
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    
+                    property bool clickPending: false
+
+                    onClicked: {
+                        if (clickPending) {
+                            // 1. SUCCESS: Double Click Confirmed
+                            doubleClickTimer.stop()
+                            clickPending = false
+                            
+                            console.log("🎬 Playback Sequence Started for: " + getSearchTitle())
+
+                            // 2. Resolve full V2 paths using the image as the lookup key
+                            let resolved = xmlController.resolve_paths(imagePath)
+                            
+                            if (resolved && resolved.video) {
+                                // 3. Clean slashes for the Python Bridge
+                                let cleanPath = resolved.video.toString().replace(/\\/g, "/")
+                                
+                                console.log("!!! DETAIL VIEW PLAYBACK TRIGGERED !!!")
+                                console.log("Target: " + cleanPath)
+
+                                // 4. EXECUTE PLAYBACK via your Router
+                                // Passing 'false' for is_master to match your freestyle logic
+                                playbackRouter.playVideo(cleanPath, false)
+                                
+                                // 5. Signal UI (optional)
+                                detailViewRoot.v2PlayMovie(cleanPath)
+                            } else {
+                                console.log("❌ PLAYBACK ERROR: No video found for key: " + imagePath)
+                            }
+                        } else {
+                            // First Click
+                            clickPending = true
+                            doubleClickTimer.start()
+                        }
+                    }
+                }
+
+                Timer {
+                    id: doubleClickTimer
+                    interval: 350
+                    onTriggered: posterMouse.clickPending = false
+                }
+            }
+
+            // Hover Feedback Overlay
+            Rectangle {
+                anchors.fill: parent
+                color: "black"
+                opacity: posterMouse.containsMouse ? 0.3 : 0.0
+                radius: 15
+                Behavior on opacity { NumberAnimation { duration: 150 } }
+
+                Text {
+                    text: "▶"
+                    anchors.centerIn: parent
+                    font.pixelSize: 80
+                    color: "white"
+                    visible: posterMouse.containsMouse
+                }
             }
         }
 
@@ -177,7 +248,7 @@ Rectangle {
                 }
             }
 
-            // --- ⭐ STYLIZED WEB LINKS ROW ---
+            // --- WEB LINKS ROW ---
             Rectangle {
                 Layout.fillWidth: true
                 height: 50
@@ -187,7 +258,6 @@ Rectangle {
                     spacing: 8
                     function openWeb(url) { Qt.openUrlExternally(url + encodeURIComponent(getSearchTitle())) }
                     
-                    // Styled component with dynamic colors
                     component WebButton : Button {
                         property color brandColor: "#222"
                         property color textColor: "white"
@@ -210,29 +280,23 @@ Rectangle {
                     }
 
                     WebButton { 
-                        text: "IMDb"
-                        brandColor: "#f5c518" // IMDb Yellow
-                        textColor: "black"    // IMDb Text is black on yellow
+                        text: "IMDb"; brandColor: "#f5c518"; textColor: "black"
                         onClicked: parent.openWeb("https://www.imdb.com/find?q=") 
                     }
                     WebButton { 
-                        text: "Rotten"
-                        brandColor: "#fa320a" // RT Red
+                        text: "Rotten"; brandColor: "#fa320a"
                         onClicked: parent.openWeb("https://www.rottentomatoes.com/search?search=") 
                     }
                     WebButton { 
-                        text: "TMDB"
-                        brandColor: "#01b4e4" // TMDB Blue
+                        text: "TMDB"; brandColor: "#01b4e4"
                         onClicked: parent.openWeb("https://www.themoviedb.org/search?query=") 
                     }
                     WebButton { 
-                        text: "Wiki"
-                        brandColor: "#333333" // Wiki Dark Grey
+                        text: "Wiki"; brandColor: "#333333"
                         onClicked: parent.openWeb("https://en.wikipedia.org/wiki/Special:Search?search=") 
                     }
                     WebButton { 
-                        text: "Blu-ray"
-                        brandColor: "#0071bd" // Blu-ray Disc Blue
+                        text: "Blu-ray"; brandColor: "#0071bd"
                         onClicked: parent.openWeb("https://www.blu-ray.com/search/?action=search&keyword=") 
                     }
                 }
