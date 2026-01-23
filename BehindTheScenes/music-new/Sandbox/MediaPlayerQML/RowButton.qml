@@ -11,15 +11,15 @@ Column {
     // --- ROW 1: NAVIGATION BUTTONS ---
     Row {
         id: buttonRow
-        width: parent.width
+        // Instead of forcing width: parent.width, we let it hug the buttons
+        // and center the entire Row inside the Column.
         anchors.horizontalCenter: parent.horizontalCenter
         
         property int buttonWidth: 130
         property int buttonHeight: 40 
-        property int buttonCount: 6
-        property real spacingCalc: (width - (buttonCount * buttonWidth)) / (buttonCount - 1)
-
-        spacing: spacingCalc
+        
+        // Manual spacing between buttons
+        spacing: 20 
 
         // --- NEW FREESTYLE BUTTON ---
         StyledButton {
@@ -62,26 +62,6 @@ Column {
             }
         }
 
-        StyledButton {
-            text: "Video"
-            fixedWidth: buttonRow.buttonWidth
-            fixedHeight: buttonRow.buttonHeight
-            onClicked: {
-                splash.deactivate()
-                
-                // 1. Target 'videoPanel' (the ID you used in main.qml)
-                videoPanel.videoPath = "file:///W:/Collection/Western HD/She Wore A Yellow Ribbon (1949).mp4"
-                
-                // 2. We use 'window.isVideoPanelVisible' because your main.qml 
-                //    uses that variable to control the Y-position (sliding).
-                window.isVideoPanelVisible = true
-                
-                // 3. Start the internal video engine
-                videoPanel.isPlaying = true
-                
-                console.log("🎬 Video Panel Launched. Path: " + videoPanel.videoPath)
-            }
-        }
 
         StyledButton {
             text: "Collections"
@@ -114,6 +94,10 @@ Column {
         width: parent.width * 0.7 
         height: 45 
         anchors.horizontalCenter: parent.horizontalCenter
+        
+        // Added 15px margin to move it down further from the buttons
+        anchors.topMargin: 15 
+        
         radius: 22.5
         color: "#E6000000" 
         border.color: searchInput.activeFocus ? "yellow" : "#44FFFFFF"
@@ -169,7 +153,6 @@ Column {
         Popup {
             id: resultsPopup
             y: parent.height + 5
-            //y: isVisible ? (parent.height - height * 1.30) : parent.height
             width: parent.width
             height: Math.min(resultsModel.count * 40, 400)
             padding: 0
@@ -198,6 +181,12 @@ Column {
                         color: hovered ? "#33D4AF37" : "transparent"
                     }
                     onClicked: {
+                        // 1. THE STOP COMMAND
+                        // This kills the splash screen so it doesn't override the Detail View
+                        if (typeof splash !== "undefined") {
+                            splash.deactivate()
+                        }
+
                         console.log("🎥 Selecting:", model.filePath)
                         searchController.confirm_selection(model.filePath)
                         resultsPopup.close()
