@@ -24,25 +24,24 @@ Item {
             Row {
                 anchors.fill: parent; anchors.leftMargin: 8; spacing: 8
                 
-                // HOME BUTTON
+                // 1. HOME BUTTON (Existing)
                 Button { 
-                    id: homeBtn
                     text: "🏠"; width: 35; height: 30
                     anchors.verticalCenter: parent.verticalCenter
                     onClicked: { currentRelativePath = ""; architectController.get_sub_folders(""); }
                 }
 
-                // BACK BUTTON (The New Addition)
+                // 2. BACK BUTTON (New - Placed directly in the strip)
                 Button {
-                    id: backBtn
                     text: "⬅"; width: 35; height: 30
                     anchors.verticalCenter: parent.verticalCenter
-                    // Only show if we aren't at Root
-                    visible: currentRelativePath !== "" 
+                    // Only enabled if we aren't at the Root
+                    enabled: currentRelativePath !== "" 
+                    opacity: enabled ? 1.0 : 0.3 
                     
                     onClicked: {
                         var parts = currentRelativePath.split('/');
-                        parts.pop(); // Remove the last folder in the path
+                        parts.pop(); // Remove the last folder name
                         var newPath = parts.join('/');
                         currentRelativePath = newPath;
                         architectController.get_sub_folders(currentRelativePath);
@@ -52,8 +51,7 @@ Item {
                 Text {
                     text: currentRelativePath === "" ? "Root" : currentRelativePath
                     color: "gold"; font.pixelSize: 12; font.bold: true; elide: Text.ElideMiddle 
-                    // Dynamic width adjustment based on buttons
-                    width: parent.width - (backBtn.visible ? 100 : 60)
+                    width: parent.width - 100 // Room for both buttons
                     anchors.verticalCenter: parent.verticalCenter
                 }
             }
@@ -67,18 +65,17 @@ Item {
             clip: true
             model: folderListModel
             spacing: 4
-            
+
             // RESTORED SCROLLBAR
             ScrollBar.vertical: ScrollBar {
                 id: vbar
                 active: true
                 width: 8
                 policy: ScrollBar.AlwaysOn
-                anchors.right: parent.right
             }
-
+            
             delegate: ItemDelegate {
-                width: folderListView.width - 12 // Account for scrollbar space
+                width: folderListView.width - 12
                 height: 38
                 contentItem: Text {
                     text: "📁 " + model.modelData
