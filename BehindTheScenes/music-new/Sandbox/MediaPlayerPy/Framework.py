@@ -41,6 +41,7 @@ from Sandbox.Playback.playback_qml_bridge import PlaybackQmlBridge
 from DriveManager import DriveManager
 from search_controller import SearchController
 from SplashModel import SplashModel
+from architect_controller import ArchitectController
 
 from dotenv import load_dotenv
 
@@ -117,6 +118,9 @@ def main():
         #playbackManager
         router = PlaybackRouter()
 
+        #Architect
+        architect_engine = ArchitectController()
+
      
 
         # --- AI ---
@@ -144,6 +148,7 @@ def main():
         # --------------------------------------------------------
         # Expose Python Objects to QML
         # --------------------------------------------------------
+        ctx.setContextProperty("architectController", architect_engine)  # <--- ADD THIS LINE
         ctx.setContextProperty("splashModel", splash_model)
         ctx.setContextProperty("SettingsManager", settings_manager)
         ctx.setContextProperty("centralMenuData", settings_manager.menu_data) # Point to manager's data

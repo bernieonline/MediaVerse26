@@ -3,6 +3,7 @@
   "_comment": "This file provides persistence for user settings choices",
   "Preferred Player": 1,
   "JRiverPort": "52199",
+  "LibraryRoot": "W:\\Collection",
   "PlayerPaths": {
     "MiniPlayer": "",
     "JRiver": "C:\\Program Files\\J River\\Media Center 34\\MC34.exe",

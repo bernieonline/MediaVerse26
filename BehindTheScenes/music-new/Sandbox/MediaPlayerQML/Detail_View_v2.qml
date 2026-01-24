@@ -59,13 +59,12 @@ Rectangle {
         }
     }
 
-    // --- LAYOUT ---
     RowLayout {
         anchors.fill: parent
         anchors.margins: 50
         spacing: 50
 
-        // LEFT PANEL (Poster with Double-Click Play)
+        // --- LEFT PANEL (Poster with Double-Click Play) ---
         Rectangle {
             id: leftPanel
             Layout.fillHeight: true
@@ -85,38 +84,19 @@ Rectangle {
                     id: posterMouse
                     anchors.fill: parent
                     hoverEnabled: true
-                    
                     property bool clickPending: false
 
                     onClicked: {
                         if (clickPending) {
-                            // 1. SUCCESS: Double Click Confirmed
                             doubleClickTimer.stop()
                             clickPending = false
-                            
-                            console.log("🎬 Playback Sequence Started for: " + getSearchTitle())
-
-                            // 2. Resolve full V2 paths using the image as the lookup key
                             let resolved = xmlController.resolve_paths(imagePath)
-                            
                             if (resolved && resolved.video) {
-                                // 3. Clean slashes for the Python Bridge
                                 let cleanPath = resolved.video.toString().replace(/\\/g, "/")
-                                
-                                console.log("!!! DETAIL VIEW PLAYBACK TRIGGERED !!!")
-                                console.log("Target: " + cleanPath)
-
-                                // 4. EXECUTE PLAYBACK via your Router
-                                // Passing 'false' for is_master to match your freestyle logic
                                 playbackRouter.playVideo(cleanPath, false)
-                                
-                                // 5. Signal UI (optional)
                                 detailViewRoot.v2PlayMovie(cleanPath)
-                            } else {
-                                console.log("❌ PLAYBACK ERROR: No video found for key: " + imagePath)
                             }
                         } else {
-                            // First Click
                             clickPending = true
                             doubleClickTimer.start()
                         }
@@ -129,26 +109,9 @@ Rectangle {
                     onTriggered: posterMouse.clickPending = false
                 }
             }
-
-            // Hover Feedback Overlay
-            Rectangle {
-                anchors.fill: parent
-                color: "black"
-                opacity: posterMouse.containsMouse ? 0.3 : 0.0
-                radius: 15
-                Behavior on opacity { NumberAnimation { duration: 150 } }
-
-                Text {
-                    text: "▶"
-                    anchors.centerIn: parent
-                    font.pixelSize: 80
-                    color: "white"
-                    visible: posterMouse.containsMouse
-                }
-            }
         }
 
-        // RIGHT PANEL
+        // --- RIGHT PANEL ---
         ColumnLayout {
             Layout.fillWidth: true
             Layout.fillHeight: true
@@ -157,6 +120,7 @@ Rectangle {
             TabBar {
                 id: tabBar
                 Layout.fillWidth: true
+                background: Rectangle { color: "transparent" }
                 Repeater {
                     model: xmlController.getCategories()
                     TabButton {
@@ -166,43 +130,98 @@ Rectangle {
                 }
                 TabButton { 
                     text: "AiQ" 
-                    onClicked: {
-                        if (!xmlTextArea.text.includes("AI Analysis")) {
-                             xmlTextArea.text = "AI Analysis Mode for " + getSearchTitle()
-                        }
-                    }
+                    onClicked: xmlTextArea.text = "AI Analysis Mode for " + getSearchTitle()
                 }
             }
 
-            // AI SHORTCUT PANEL
+            // --- AI SHORTCUT PANEL (WITH CONTEXT & CLEAR) ---
             Rectangle {
                 id: aiqPanel
                 visible: tabBar.currentIndex === (tabBar.count - 1)
                 color: "#1a1a1a"
-                radius: 5
+                radius: 10
                 Layout.fillWidth: true
-                implicitHeight: aiFlow.implicitHeight + 20
+                implicitHeight: aiColumn.implicitHeight + 25
 
-                Flow {
-                    id: aiFlow
+                ColumnLayout {
+                    id: aiColumn
                     anchors.fill: parent
-                    anchors.margins: 10
-                    spacing: 10
-                    Button { text: "Trivia"; onClicked: aiController.ask(getSearchTitle(), "Give me 3 cool trivia facts.") }
-                    Button { text: "Locations"; onClicked: aiController.ask(getSearchTitle(), "Where was this filmed?") }
-                    Button { text: "Actor Thoughts"; onClicked: aiController.ask(getSearchTitle(), "What did the lead actors say about filming this?") }
-                    Button { text: "Director's Next"; onClicked: aiController.ask(getSearchTitle(), "What movie did the director make after this?") }
+                    anchors.margins: 15
+                    spacing: 12
+
+                    Text {
+                        text: "ASKING ABOUT: " + getSearchTitle().toUpperCase()
+                        color: "cyan"
+                        font.pixelSize: 11
+                        font.letterSpacing: 1
+                        font.bold: true
+                        opacity: 0.8
+                    }
+
+                    RowLayout {
+                        Layout.fillWidth: true
+                        spacing: 10
+
+                        TextField {
+                            id: customQuestionInput
+                            Layout.fillWidth: true
+                            placeholderText: "Ask a specific question..."
+                            color: "white"
+                            font.pixelSize: 18
+                            leftPadding: 12
+                            background: Rectangle { 
+                                color: "#000" 
+                                radius: 4 
+                                border.color: parent.activeFocus ? "cyan" : "#333" 
+                            }
+                            onAccepted: runAiButton.clicked()
+                        }
+
+                        Button {
+                            id: clearAiButton
+                            text: "X"
+                            implicitWidth: 40
+                            onClicked: customQuestionInput.clear()
+                            contentItem: Text { text: "X"; color: "#888"; font.bold: true; horizontalAlignment: Text.AlignHCenter }
+                            background: Rectangle { color: "#222"; radius: 4; border.color: parent.hovered ? "#444" : "transparent" }
+                        }
+
+                        Button {
+                            id: runAiButton
+                            text: "RUN"
+                            implicitWidth: 80
+                            contentItem: Text { text: "RUN"; color: "black"; font.bold: true; horizontalAlignment: Text.AlignHCenter }
+                            background: Rectangle { color: "white"; radius: 4 }
+                            onClicked: {
+                                if (customQuestionInput.text.trim() !== "") {
+                                    var q = "I have a question about " + getSearchTitle() + ": " + customQuestionInput.text
+                                    aiController.ask(getSearchTitle(), q)
+                                }
+                            }
+                        }
+                    }
+
+                    Flow {
+                        Layout.fillWidth: true
+                        spacing: 10
+                        component QuickButton : Button {
+                            contentItem: Text { text: parent.text; color: "#bbb"; font.pixelSize: 12 }
+                            background: Rectangle { color: "#2a2a2a"; radius: 4; border.color: parent.hovered ? "cyan" : "#444" }
+                        }
+                        QuickButton { text: "Trivia"; onClicked: aiController.ask(getSearchTitle(), "Give me 3 cool trivia facts.") }
+                        QuickButton { text: "Locations"; onClicked: aiController.ask(getSearchTitle(), "Where was this filmed?") }
+                        QuickButton { text: "Cast Info"; onClicked: aiController.ask(getSearchTitle(), "Tell me about the cast.") }
+                    }
                 }
             }
 
-            // TEXT AREA WITH SCROLLING, SPINNER & TIMER
+            // --- TEXT AREA ---
             Rectangle {
                 color: "#151515"
                 radius: 10
                 Layout.fillWidth: true
                 Layout.fillHeight: true
                 border.color: aiqPanel.visible ? "cyan" : "transparent"
-                border.width: 1
 
                 ScrollView {
                     id: scrollArea
@@ -214,41 +233,24 @@ Rectangle {
                         readOnly: true
                         wrapMode: Text.WordWrap
                         color: "white"
-                        opacity: aiSpinner.running ? 0.3 : 1.0
                         font.pixelSize: detailViewRoot.tenFootMode ? 32 : 16
                         padding: 20
                         background: Item {}
                     }
                 }
 
-                BusyIndicator {
-                    id: aiSpinner
-                    anchors.centerIn: parent
-                    visible: running
-                    running: false
-                }
-
-                Text {
-                    anchors.top: aiSpinner.bottom
-                    anchors.horizontalCenter: aiSpinner.horizontalCenter
-                    anchors.topMargin: 10
-                    text: "Thinking... " + aiTimer.seconds + "s"
-                    color: "cyan"
-                    visible: aiSpinner.running
-                }
-
+                BusyIndicator { id: aiSpinner; anchors.centerIn: parent; running: false }
+                
                 Timer {
                     id: aiTimer
-                    interval: 1000
-                    running: aiSpinner.running
-                    repeat: true
+                    interval: 1000; running: aiSpinner.running; repeat: true
                     property int seconds: 0
                     onTriggered: seconds++
                     onRunningChanged: if (!running) seconds = 0
                 }
             }
 
-            // --- WEB LINKS ROW ---
+            // --- NEUTRAL WEB LINKS ---
             Rectangle {
                 Layout.fillWidth: true
                 height: 50
@@ -258,46 +260,27 @@ Rectangle {
                     spacing: 8
                     function openWeb(url) { Qt.openUrlExternally(url + encodeURIComponent(getSearchTitle())) }
                     
-                    component WebButton : Button {
-                        property color brandColor: "#222"
-                        property color textColor: "white"
-                        Layout.fillWidth: true; Layout.fillHeight: true
-                        
-                        background: Rectangle { 
-                            color: parent.hovered ? Qt.lighter(parent.brandColor, 1.2) : parent.brandColor
-                            radius: 4
-                            border.color: parent.hovered ? "white" : "transparent"
-                            border.width: 1
+                    Repeater {
+                        model: [
+                            { n: "IMDb", u: "https://www.imdb.com/find?q=" },
+                            { n: "Rotten", u: "https://www.rottentomatoes.com/search?search=" },
+                            { n: "Wiki", u: "https://en.wikipedia.org/wiki/Special:Search?search=" }
+                        ]
+                        Button {
+                            text: modelData.n
+                            Layout.fillWidth: true; Layout.fillHeight: true
+                            contentItem: Text {
+                                text: parent.text
+                                color: parent.hovered ? "cyan" : "white"
+                                font.bold: true; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter
+                            }
+                            background: Rectangle { 
+                                color: "#222"
+                                radius: 4
+                                border.color: parent.hovered ? "cyan" : "#444"
+                            }
+                            onClicked: parent.openWeb(modelData.u)
                         }
-                        contentItem: Text {
-                            text: parent.text
-                            color: parent.textColor
-                            font.bold: true
-                            font.pixelSize: 13
-                            horizontalAlignment: Text.AlignHCenter
-                            verticalAlignment: Text.AlignVCenter
-                        }
-                    }
-
-                    WebButton { 
-                        text: "IMDb"; brandColor: "#f5c518"; textColor: "black"
-                        onClicked: parent.openWeb("https://www.imdb.com/find?q=") 
-                    }
-                    WebButton { 
-                        text: "Rotten"; brandColor: "#fa320a"
-                        onClicked: parent.openWeb("https://www.rottentomatoes.com/search?search=") 
-                    }
-                    WebButton { 
-                        text: "TMDB"; brandColor: "#01b4e4"
-                        onClicked: parent.openWeb("https://www.themoviedb.org/search?query=") 
-                    }
-                    WebButton { 
-                        text: "Wiki"; brandColor: "#333333"
-                        onClicked: parent.openWeb("https://en.wikipedia.org/wiki/Special:Search?search=") 
-                    }
-                    WebButton { 
-                        text: "Blu-ray"; brandColor: "#0071bd"
-                        onClicked: parent.openWeb("https://www.blu-ray.com/search/?action=search&keyword=") 
                     }
                 }
             }

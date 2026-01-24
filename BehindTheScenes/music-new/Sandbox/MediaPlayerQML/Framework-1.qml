@@ -250,4 +250,9 @@ ApplicationWindow {
         id: utilitySidebar
         anchors.fill: parent 
     }
+    ArchitectHUD {
+        id: architectHUD
+        anchors.fill: parent
+        visible: false // Hidden by default
+    }
 }

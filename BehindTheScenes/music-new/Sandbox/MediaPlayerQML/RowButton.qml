@@ -11,17 +11,14 @@ Column {
     // --- ROW 1: NAVIGATION BUTTONS ---
     Row {
         id: buttonRow
-        // Instead of forcing width: parent.width, we let it hug the buttons
-        // and center the entire Row inside the Column.
         anchors.horizontalCenter: parent.horizontalCenter
         
         property int buttonWidth: 130
         property int buttonHeight: 40 
         
-        // Manual spacing between buttons
         spacing: 20 
 
-        // --- NEW FREESTYLE BUTTON ---
+        // --- FREESTYLE BUTTON ---
         StyledButton {
             id: freestyleBtn
             text: "Freestyle"
@@ -47,40 +44,59 @@ Column {
             }
 
             onClicked: {
-                splash.deactivate()
+                if (typeof splash !== "undefined") splash.deactivate()
                 console.log("🚀 Soaring into Freestyle Mode...")
                 contentLoader.setSource("Freestyle.qml")
             }
         }
 
+        // --- ARCHITECT BUTTON (The Launch Point) ---
         StyledButton {
-            text: "Menu"
+            id: builderBtn
+            text: "Architect"
             fixedWidth: buttonRow.buttonWidth; fixedHeight: buttonRow.buttonHeight
+            
+            contentItem: Item {
+                anchors.fill: parent
+                Text {
+                    text: "Architect"
+                    anchors.centerIn: parent
+                    color: "#00F2FF" // High-tech Cyan
+                    font.bold: true
+                    font.letterSpacing: 1
+                }
+            }
+
             onClicked: {
-                splash.deactivate()
-                libraryPanel.x = (libraryPanel.x === 0) ? -libraryPanel.width : 0
+                if (typeof splash !== "undefined") splash.deactivate()
+                console.log("🏗️ Opening Collection Architect HUD...")
+                
+                // This targets the ID defined in Framework-1.qml
+                architectHUD.visible = true 
             }
         }
 
-
+        // --- COLLECTIONS BUTTON ---
         StyledButton {
             text: "Collections"
             fixedWidth: buttonRow.buttonWidth; fixedHeight: buttonRow.buttonHeight
             onClicked: {
-                splash.deactivate()
+                if (typeof splash !== "undefined") splash.deactivate()
                 contentLoader.setSource("CategoryMenu.qml")
             }
         }
 
+        // --- CREATE BUTTON ---
         StyledButton {
             text: "Create"
             fixedWidth: buttonRow.buttonWidth; fixedHeight: buttonRow.buttonHeight
             onClicked: {
-                splash.deactivate()
+                if (typeof splash !== "undefined") splash.deactivate()
                 utilitySidebar.showCollectionCreator()
             }
         }
 
+        // --- CLOSE BUTTON ---
         StyledButton {
             text: "Close"
             fixedWidth: buttonRow.buttonWidth; fixedHeight: buttonRow.buttonHeight
@@ -94,8 +110,6 @@ Column {
         width: parent.width * 0.7 
         height: 45 
         anchors.horizontalCenter: parent.horizontalCenter
-        
-        // Added 15px margin to move it down further from the buttons
         anchors.topMargin: 15 
         
         radius: 22.5
@@ -133,7 +147,7 @@ Column {
             }
         }
 
-        // Connect to Python SearchController signals
+        // --- SEARCH RESULTS POPUP ---
         Connections {
             target: searchController
             
@@ -181,12 +195,7 @@ Column {
                         color: hovered ? "#33D4AF37" : "transparent"
                     }
                     onClicked: {
-                        // 1. THE STOP COMMAND
-                        // This kills the splash screen so it doesn't override the Detail View
-                        if (typeof splash !== "undefined") {
-                            splash.deactivate()
-                        }
-
+                        if (typeof splash !== "undefined") splash.deactivate()
                         console.log("🎥 Selecting:", model.filePath)
                         searchController.confirm_selection(model.filePath)
                         resultsPopup.close()
