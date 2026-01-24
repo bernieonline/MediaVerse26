@@ -3,7 +3,6 @@ import QtQuick.Controls 2.15
 
 Item {
     id: folderNavRoot
-    // Instead of fill: parent, we bind to the card's width
     width: parent ? parent.width : 400
     height: parent ? parent.height : 550
     
@@ -14,23 +13,48 @@ Item {
         anchors.margins: 5
         spacing: 10
 
-        // --- BREADCRUMB ---
+        // --- BREADCRUMB STRIP ---
         Rectangle {
             id: breadcrumbBar
             width: parent.width
             height: 40
             color: "#22FFFFFF" 
             radius: 6
+            
             Row {
                 anchors.fill: parent; anchors.leftMargin: 8; spacing: 8
+                
+                // HOME BUTTON
                 Button { 
+                    id: homeBtn
                     text: "🏠"; width: 35; height: 30
+                    anchors.verticalCenter: parent.verticalCenter
                     onClicked: { currentRelativePath = ""; architectController.get_sub_folders(""); }
                 }
+
+                // BACK BUTTON (The New Addition)
+                Button {
+                    id: backBtn
+                    text: "⬅"; width: 35; height: 30
+                    anchors.verticalCenter: parent.verticalCenter
+                    // Only show if we aren't at Root
+                    visible: currentRelativePath !== "" 
+                    
+                    onClicked: {
+                        var parts = currentRelativePath.split('/');
+                        parts.pop(); // Remove the last folder in the path
+                        var newPath = parts.join('/');
+                        currentRelativePath = newPath;
+                        architectController.get_sub_folders(currentRelativePath);
+                    }
+                }
+
                 Text {
                     text: currentRelativePath === "" ? "Root" : currentRelativePath
                     color: "gold"; font.pixelSize: 12; font.bold: true; elide: Text.ElideMiddle 
-                    width: parent.width - 50; anchors.verticalCenter: parent.verticalCenter
+                    // Dynamic width adjustment based on buttons
+                    width: parent.width - (backBtn.visible ? 100 : 60)
+                    anchors.verticalCenter: parent.verticalCenter
                 }
             }
         }
@@ -39,14 +63,22 @@ Item {
         ListView {
             id: folderListView
             width: parent.width
-            // Calculate height to leave room for the Select button at the bottom
             height: parent.height - breadcrumbBar.height - selectBtn.height - 30
             clip: true
             model: folderListModel
             spacing: 4
             
+            // RESTORED SCROLLBAR
+            ScrollBar.vertical: ScrollBar {
+                id: vbar
+                active: true
+                width: 8
+                policy: ScrollBar.AlwaysOn
+                anchors.right: parent.right
+            }
+
             delegate: ItemDelegate {
-                width: folderListView.width - 10
+                width: folderListView.width - 12 // Account for scrollbar space
                 height: 38
                 contentItem: Text {
                     text: "📁 " + model.modelData
@@ -64,7 +96,7 @@ Item {
             }
         }
 
-        // --- THE MISSING ACCEPT BUTTON ---
+        // --- ACCEPT BUTTON ---
         Button {
             id: selectBtn
             width: parent.width
@@ -80,7 +112,6 @@ Item {
 
             onClicked: {
                 console.log("✅ Selecting Folder: " + currentRelativePath)
-                // Sending the index and the value back to the HUD
                 architectRoot.updateRule(panelRoot.panelIndex, "folder", currentRelativePath);
             }
         }
