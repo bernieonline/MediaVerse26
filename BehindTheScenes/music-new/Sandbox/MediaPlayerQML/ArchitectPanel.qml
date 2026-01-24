@@ -63,6 +63,7 @@ Item {
                 }
 
                 // TOOL LOADER
+                // TOOL LOADER
                 Loader {
                     id: toolLoader
                     anchors.fill: parent
@@ -70,6 +71,7 @@ Item {
                     source: {
                         if (currentMode === "folder") return "ArchitectFolderNav.qml";
                         if (currentMode === "search") return "ArchitectSearchNav.qml";
+                        if (currentMode === "category") return "ArchitectCategoryNav.qml"; // <-- ADD THIS LINE
                         return "";
                     }
                 }

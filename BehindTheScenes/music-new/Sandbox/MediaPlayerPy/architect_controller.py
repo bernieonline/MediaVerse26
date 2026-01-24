@@ -2,93 +2,116 @@ import os
 import json
 import logging
 from PySide6.QtCore import QObject, Signal, Slot
+from project_paths import paths
 
 class ArchitectController(QObject):
-    # Signals to communicate back to QML
-    foldersUpdated = Signal(list)
+    """
+    The Brain of the Collection Architect.
+    Processes JRiver XML sidecar data with support for '=' delimiters.
+    """
     resultsCounted = Signal(int)
+    foldersUpdated = Signal(list)
+    searchResultsUpdated = Signal(list)
     saveConfirmed = Signal(str)
 
     def __init__(self):
         super().__init__()
-        # Ensure this matches your matching rule root exactly
-        self.root_collection_path = "W:/Collection"
-        
-        # Placeholder for your library data for counting matches
-        self.library_data = [] 
+        self.library_data = []
+        self.last_filtered_results = []
+        self.load_library()
 
-    @Slot(str)
-    def get_sub_folders(self, relative_path):
-        """
-        Scans W:/Collection + relative_path and returns a list of subfolders.
-        """
+    @Slot()
+    def load_library(self):
+        """Initial load of the rich metadata records."""
         try:
-            # 1. Construct and normalize the target path
-            # We replace backslashes to avoid Windows/QML path string conflicts
-            clean_rel = relative_path.replace("\\", "/").strip("/")
-            
-            if not clean_rel:
-                full_target = self.root_collection_path
+            target_path = paths["xmldate"]
+            if os.path.exists(target_path):
+                with open(target_path, 'r', encoding='utf-8') as f:
+                    self.library_data = json.load(f)
+                logging.info(f"🎯 Architect Engine: Loaded {len(self.library_data)} records.")
             else:
-                full_target = os.path.join(self.root_collection_path, clean_rel).replace("\\", "/")
-
-            logging.debug(f"[Architect] Scanning for folders in: {full_target}")
-
-            # 2. Perform the scan
-            if os.path.exists(full_target) and os.path.isdir(full_target):
-                # Filter for directories only and ignore hidden folders
-                folders = [
-                    d for d in os.listdir(full_target) 
-                    if os.path.isdir(os.path.join(full_target, d)) and not d.startswith('.')
-                ]
-                folders.sort()
-                
-                logging.debug(f"[Architect] Found {len(folders)} folders.")
-                self.foldersUpdated.emit(folders)
-            else:
-                logging.warning(f"[Architect] Path not found: {full_target}")
-                self.foldersUpdated.emit([])
-
+                logging.error(f"❌ Architect Engine: File not found at {target_path}")
         except Exception as e:
-            logging.error(f"[Architect] Error scanning folders: {e}")
-            self.foldersUpdated.emit([])
+            logging.error(f"❌ Architect Engine: Load failed: {e}")
 
     @Slot(str)
     def update_live_preview(self, logic_json):
         """
-        Receives the full logic chain from the HUD and calculates the match count.
+        Parses rules like 'Director = Martin Scorsese' and filters the library.
         """
         try:
             rules = json.loads(logic_json)
-            logging.debug(f"[Architect] Recalculating matches for {len(rules)} rules...")
-            
-            # This is where your Folder/Category/Search filtering logic lives
-            # For now, we return a mock count to verify the connection
-            match_count = 42 
-            
-            self.resultsCounted.emit(match_count)
-        except Exception as e:
-            logging.error(f"[Architect] Preview error: {e}")
+            filtered = self.library_data 
 
-    @Slot(str, str, str, str)
-    def save_collection(self, name, description, category, logic_json):
-        """
-        Saves the final Architect configuration to a JSON file.
-        """
-        try:
-            save_data = {
-                "name": name,
-                "description": description,
-                "category": category,
-                "logic": json.loads(logic_json)
-            }
+            for rule in rules:
+                # Based on your log: [{"type":"category","value":"Director = Martin Scorsese"}]
+                rule_text = rule.get("value", "")
+                
+                # Support both '=' from your UI and ':' just in case
+                delimiter = "=" if "=" in rule_text else ":"
+                
+                if delimiter not in rule_text:
+                    continue
+                
+                # Split "Director = Martin Scorsese" -> ["Director", "Martin Scorsese"]
+                raw_cat, raw_val = rule_text.split(delimiter, 1)
+                
+                cat = raw_cat.strip().lower()
+                val = raw_val.strip().lower()
+
+                if not val:
+                    continue
+
+                # --- FILTERING ---
+                if cat == "director":
+                    # Exact string match against 'Director' key
+                    filtered = [m for m in filtered if str(m.get('Director', '')).lower() == val]
+                
+                elif cat == "actors":
+                    # Check list membership
+                    filtered = [m for m in filtered if any(val == str(a).lower() for a in m.get('Actors', []))]
+                
+                elif cat == "genre":
+                    # Split semicolon string "Drama;Crime"
+                    filtered = [m for m in filtered if val in str(m.get('Genre', '')).lower().split(';')]
+
+                elif cat == "year" or cat == "decade":
+                    # Handle ranges like "1960 - 1969" or single years
+                    clean_val = val.replace("year", "").replace("decade", "").replace("=", "").strip()
+                    if "-" in clean_val:
+                        try:
+                            s_str, e_str = clean_val.split("-")
+                            start, end = int(s_str.strip()), int(e_str.strip())
+                            filtered = [m for m in filtered if m.get('Year') and start <= int(str(m.get('Year'))) <= end]
+                        except: continue
+                    else:
+                        filtered = [m for m in filtered if str(m.get('Year')) == clean_val]
+
+                elif cat == "folder":
+                    filtered = [m for m in filtered if val in str(m.get('Filename', '')).lower()]
+
+            # Update results
+            self.last_filtered_results = filtered
+            self.resultsCounted.emit(len(filtered))
             
-            # Define your save path (e.g., in Assets/Collections)
-            file_name = f"{name.replace(' ', '_')}.json"
-            logging.info(f"[Architect] Saving collection: {file_name}")
-            
-            # Emit success to QML to close the HUD
-            self.saveConfirmed.emit(name)
-            
+            print(f"✅ Filter Success: '{val}' found {len(filtered)} matches.")
+
         except Exception as e:
-            logging.error(f"[Architect] Save error: {e}")
+            print(f"❌ Filter Error: {e}")
+            self.resultsCounted.emit(0)
+
+    @Slot(str)
+    def search_library(self, query):
+        """Live search for the search card mode."""
+        if not query or len(query) < 2:
+            self.searchResultsUpdated.emit([])
+            return
+        results = [m.get('Name', 'Unknown') for m in self.library_data 
+                   if query.lower() in str(m.get('Name', '')).lower()]
+        self.searchResultsUpdated.emit(results[:15])
+
+    @Slot(str, str)
+    def save_collection(self, name, logic_json):
+        """Finalize the filtered list for storage."""
+        logging.info(f"💾 Saving {len(self.last_filtered_results)} items to {name}")
+        self.saveConfirmed.emit(name)
