@@ -7,7 +7,7 @@ from project_paths import paths
 class ArchitectController(QObject):
     resultsCounted = Signal(int)
     foldersUpdated = Signal(list)
-    searchResultsUpdated = Signal(list) # Your QML likely connects to this
+    searchResultsUpdated = Signal(list) 
     saveConfirmed = Signal(str)
     searchResultsChanged = Signal()
 
@@ -18,7 +18,6 @@ class ArchitectController(QObject):
         self.collectionLogic = xml_logic 
         self.load_library()
 
-    # We keep the property just in case your QML uses it for the delegate
     @Property('QVariantList', notify=searchResultsChanged)
     def searchResultsModel(self):
         return self._search_results
@@ -34,7 +33,6 @@ class ArchitectController(QObject):
         except Exception as e:
             logging.error(f"❌ Architect Engine: Load failed: {e}")
 
-    # --- SEARCH LOGIC (Optimized for your Manifest) ---
     @Slot(str)
     def search_library(self, query):
         if not query or len(query) < 2:
@@ -42,26 +40,20 @@ class ArchitectController(QObject):
             self.searchResultsUpdated.emit([])
             return
             
-        matches_for_qml_list = [] # Simple strings for the UI list
-        matches_with_paths = []    # Dicts for the 'Add to Stack' logic
-        
+        matches_for_qml_list = []
+        matches_with_paths = []
         q = query.lower()
         for m in self.library_data:
             name = str(m.get('Name', ''))
             fname = str(m.get('Filename', ''))
-            
             if q in name.lower():
                 matches_for_qml_list.append(name)
                 matches_with_paths.append({"title": name, "filename": fname})
         
         self._search_results = matches_with_paths[:15]
         self.searchResultsChanged.emit()
-        
-        # This is the "old reliable" signal your QML is likely using
         self.searchResultsUpdated.emit(matches_for_qml_list[:15])
-        print(f"DEBUG: Search for '{query}' found {len(matches_for_qml_list)} movies.")
 
-    # --- FOLDER NAVIGATION (YOUR WORKING VERSION) ---
     @Slot(str)
     def get_sub_folders(self, current_path):
         base_root = "W:\\Collection"
@@ -82,36 +74,45 @@ class ArchitectController(QObject):
                     folders.add(parts[0])
         self.foldersUpdated.emit(sorted(list(folders)))
 
-    # --- LIVE PREVIEW / STACK FILTERING ---
     @Slot(str)
     def update_live_preview(self, criteria_json):
+        """Processes criteria and ensures Cloud selections map to correct JSON keys."""
         criteria_list = json.loads(criteria_json)
         search_dict = {}
         manual_files = []
 
+        # Map UI categories to actual Manifest keys
+        mapping = {"Actors": "Actors", "Director": "Director", "Genre": "Genre", "Keywords": "Keywords", "Series": "Series"}
+
         for item in criteria_list:
-            if item["category"] == "search_files":
-                if item["value"]:
-                    manual_files = item["value"].split("|")
-            elif item["category"] == "folder":
-                search_dict["Filename"] = item["value"].replace("/", "\\")
+            category = item["category"]
+            value = item["value"]
+
+            if category == "search_files":
+                if value:
+                    manual_files = value.split("|")
+            elif category == "folder":
+                search_dict["Filename"] = value.replace("/", "\\")
             else:
-                raw_value = item["value"]
-                if " = " in raw_value:
-                    key, val = raw_value.split(" = ", 1)
-                    search_dict[key.strip()] = val.strip()
+                # Handle Cloud selections (e.g., "Actors = Sean Connery")
+                if " = " in value:
+                    key, val = value.split(" = ", 1)
+                    clean_key = mapping.get(key.strip(), key.strip())
+                    search_dict[clean_key] = val.strip()
                 else:
-                    search_dict[item["category"]] = raw_value
+                    # Direct category mapping
+                    clean_key = mapping.get(category, category)
+                    search_dict[clean_key] = value
 
         matches = self.collectionLogic.get_collection_results(search_dict)
         
-        # If the 'Search Mode' stack has files, filter the engine results
         if manual_files:
             if not search_dict:
                 matches = [m for m in self.library_data if m.get("Filename") in manual_files]
             else:
                 matches = [m for m in matches if m.get("Filename") in manual_files]
 
+        print(f"🔍 Architect Preview: {search_dict} | Found: {len(matches)}")
         self.resultsCounted.emit(len(matches))
 
     @Slot(str, str, result=list)
