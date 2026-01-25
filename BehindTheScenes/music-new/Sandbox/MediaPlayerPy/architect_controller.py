@@ -110,29 +110,31 @@ class ArchitectController(QObject):
 
     @Slot(str)
     def update_live_preview(self, criteria_json):
-        # 1. Parse the incoming JSON from the HUD
-        # Let's say it looks like: [{"category": "folder", "value": "W:/Collection/Westerns"}]
         import json
         criteria_list = json.loads(criteria_json)
         
-        # 2. Convert Architect format to XMLCollections format
-        # XMLCollections expects: {"Filename": "W:\\Collection\\Westerns"}
         search_dict = {}
         for item in criteria_list:
+            # --- FOLDER LOGIC (UNTOUCHED) ---
             if item["category"] == "folder":
-                # We use 'Filename' because that's what your V2 logic matches against
                 search_dict["Filename"] = item["value"].replace("/", "\\")
+            
+            # --- CATEGORY LOGIC (UPDATED) ---
             else:
-                search_dict[item["category"]] = item["value"]
+                raw_value = item["value"]
+                # If UI sends "Actors = Sean Connery", we split it 
+                # to create {"Actors": "Sean Connery"} for the search_dict
+                if " = " in raw_value:
+                    key, val = raw_value.split(" = ", 1)
+                    search_dict[key.strip()] = val.strip()
+                else:
+                    # Fallback for simple values
+                    search_dict[item["category"]] = raw_value
 
-        # 3. Call your SOLID logic (Assuming 'collectionLogic' is your XMLCollections instance)
-        # This uses the exact same matching code you just shared!
+        # --- CALL ENGINE & EMIT (UNTOUCHED) ---
         matches = self.collectionLogic.get_collection_results(search_dict)
-        
-        # 4. Emit the count
-        # This will now be 100% accurate to your movie library
+        print(f"🔍 Architect Search: {search_dict} | Found: {len(matches)}")
         self.resultsCounted.emit(len(matches))
-
 
     @Slot(str)
     def search_library(self, query):
