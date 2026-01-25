@@ -20,10 +20,27 @@ Item {
             width: parent.width; height: 40; color: "#22FFFFFF"; radius: 6
             Row {
                 anchors.fill: parent; anchors.leftMargin: 8; spacing: 8
+                
+                // HOME BUTTON (Stays)
                 Button { 
                     text: "🏠"; width: 35; height: 30; anchors.verticalCenter: parent.verticalCenter
                     onClicked: { currentSubMode = "main"; activeCategory = ""; filterField.text = ""; }
                 }
+
+                // --- NEW BACK BUTTON ---
+                // Only visible when we have left the main 6-button grid
+                Button {
+                    visible: currentSubMode !== "main"
+                    text: "BACK"
+                    width: 60; height: 30
+                    anchors.verticalCenter: parent.verticalCenter
+                    onClicked: {
+                        currentSubMode = "main";
+                        activeCategory = "";
+                        filterField.text = "";
+                    }
+                }
+
                 Text {
                     text: activeCategory === "" ? "SELECT CATEGORY" : activeCategory.toUpperCase()
                     color: "gold"; font.bold: true; font.pixelSize: 12; anchors.verticalCenter: parent.verticalCenter
@@ -79,7 +96,6 @@ Item {
                         id: cloudFlow; width: parent.width - 10; spacing: 8
                         
                         Repeater {
-                            // This block triggers every time filterField.text or activeCategory changes
                             model: {
                                 if (currentSubMode !== "search") return [];
                                 if (typeof collectionLogic !== 'undefined' && collectionLogic !== null) {
@@ -91,7 +107,6 @@ Item {
                             delegate: Button {
                                 padding: 10
                                 background: Rectangle {
-                                    // Highlight if it matches the current rule (optional visual flair)
                                     color: "transparent"
                                     border.color: "gold"; border.width: 1; radius: 17
                                 }
@@ -99,7 +114,6 @@ Item {
                                     text: modelData; color: "gold"; font.bold: true; font.pixelSize: 12
                                 }
                                 onClicked: {
-                                    // This is the moment "Actor = John Wayne" is locked in
                                     console.log("✅ Category Selected: " + activeCategory + " -> " + modelData)
                                     architectRoot.updateRule(panelRoot.panelIndex, "category", activeCategory + " = " + modelData);
                                 }
@@ -111,7 +125,7 @@ Item {
             }
         }
 
-        // --- VIEW 3: YEAR RANGE (Decade replacement) ---
+        // --- VIEW 3: YEAR RANGE ---
         Column {
             visible: currentSubMode === "year"
             width: parent.width; spacing: 20
@@ -126,7 +140,7 @@ Item {
             Button {
                 width: parent.width; height: 45; text: "SET YEAR RANGE"
                 onClicked: {
-                    var range = "Year: " + yearFrom.value + " - " + yearTo.value;
+                    var range = "Year = " + yearFrom.value + " - " + yearTo.value;
                     architectRoot.updateRule(panelRoot.panelIndex, "category", range);
                 }
             }

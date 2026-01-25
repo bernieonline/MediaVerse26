@@ -119,7 +119,7 @@ def main():
         router = PlaybackRouter()
 
         #Architect
-        architect_engine = ArchitectController()
+        architect_engine = ArchitectController(xml_logic=xml_logic)
 
      
 

@@ -6,7 +6,7 @@ Rectangle {
     id: architectRoot 
     anchors.fill: parent
     color: "#F2050505"
-    visible: false 
+    visible: false
     z: 5000
 
     // --- REFINED DIMENSIONS ---
@@ -34,14 +34,30 @@ Rectangle {
 
     function refreshLiveCount() {
         var fullLogic = [];
+        console.log("🛠️ Debug: Building Logic for " + criteriaModel.count + " panels");
+
         for (var i = 0; i < criteriaModel.count; i++) {
             var item = criteriaModel.get(i);
+            
+            // Log every item even if empty so we see the state
+            console.log("   Panel " + i + ": Type=" + item.panelType + " | Value=" + item.panelValue);
+
             if (item.panelValue !== "") {
-                fullLogic.push({ "type": item.panelType, "value": item.panelValue });
+                // CRITICAL FIX: Changed "type" to "category" to stop the Python KeyError
+                fullLogic.push({ 
+                    "category": item.panelType, 
+                    "value": item.panelValue 
+                });
             }
         }
+
+        var jsonString = JSON.stringify(fullLogic);
+        console.log("📦 Sending to Python: " + jsonString);
+
         if (typeof architectController !== "undefined") {
-            architectController.update_live_preview(JSON.stringify(fullLogic));
+            architectController.update_live_preview(jsonString);
+        } else {
+            console.error("❌ Error: architectController is NOT defined!");
         }
     }
 
