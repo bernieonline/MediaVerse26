@@ -6,18 +6,18 @@ Rectangle {
     anchors.fill: parent
     color: "transparent"
     
-    property var titleStack: []
+    // REMOVED local titleStack - we will use the one from the master logic
     property int panelIndex: 0 
 
-    function addToStack(filename) {
-        var temp = titleStack;
-        if (temp.indexOf(filename) === -1) {
-            temp.push(filename);
-            titleStack = temp;
-            if (typeof architectRoot !== "undefined") {
-                architectRoot.updateRule(panelIndex, "search_files", titleStack.join("|"));
-            }
+    // Helper to get the current list from the master controller
+    // This ensures Section B always sees what Section A added
+    function getCurrentStack() {
+        if (typeof architectRoot !== "undefined") {
+            // We pull the current rule value for this panel
+            var rule = architectRoot.getRuleValue(panelIndex, "search_files");
+            return rule ? rule.split("|") : [];
         }
+        return [];
     }
 
     Column {
@@ -25,7 +25,6 @@ Rectangle {
         anchors.margins: 12
         spacing: 10
 
-        // 1. HEADER (Fixed the font.letterSpacing syntax)
         Text { 
             text: "FILE SEARCH MODE"
             color: "#00F2FF"
@@ -34,59 +33,56 @@ Rectangle {
             font.letterSpacing: 1 
         }
 
-        // 2. SEARCH INPUT
         TextField {
             id: searchInput
             width: parent.width; height: 38
             placeholderText: "Type to find movies..."
             color: "white"
             font.pixelSize: 13
-            
-            background: Rectangle { 
-                color: "#1AFFFFFF"; radius: 4
-                border.color: searchInput.activeFocus ? "#00F2FF" : "#33FFFFFF" 
-            }
-            
+            background: Rectangle { color: "#1AFFFFFF"; radius: 4; border.color: "#33FFFFFF" }
             onTextChanged: architectController.search_library(text)
         }
 
-        // 3. RESULTS LIST (Conditional height)
+        // Section A: Results
         ListView {
             id: resultsView
             width: parent.width
             height: searchInput.text.length > 0 ? 120 : 0
             clip: true
-            visible: height > 0
             model: architectController.searchResultsModel
             
             delegate: ItemDelegate {
                 width: resultsView.width; height: 32
-                background: Rectangle { color: hovered ? "#33FFFFFF" : "#11FFFFFF"; radius: 2 }
                 contentItem: Text {
                     text: "➕ " + (modelData.title || "Unknown")
                     color: "white"; font.pixelSize: 12; verticalAlignment: Text.AlignVCenter
                 }
                 onClicked: {
-                    searchNavRoot.addToStack(modelData.filename);
-                    searchInput.text = ""; 
+                    var current = getCurrentStack();
+                    if (current.indexOf(modelData.filename) === -1) {
+                        current.push(modelData.filename);
+                        // Update master logic
+                        architectRoot.updateRule(panelIndex, "search_files", current.join("|"));
+                        searchInput.text = ""; // Force refresh
+                    }
                 }
             }
         }
 
         Rectangle { width: parent.width; height: 1; color: "#33FFFFFF" }
 
-        // 4. STACK SECTION
+        // Section B: The Stack
         Text { 
-            text: "SELECTED STACK (" + titleStack.length + ")"
+            text: "SELECTED STACK"
             color: "gold"; font.pixelSize: 10; font.bold: true 
         }
 
-        // We use anchors here to make sure it fills the rest of the column's space
         ListView {
             id: stackView
             width: parent.width
-            height: parent.height - (resultsView.visible ? 250 : 130)
-            model: titleStack
+            height: parent.height - 200 // Fixed height for testing
+            // We bind directly to the master rule to ensure it updates
+            model: getCurrentStack()
             spacing: 5
             clip: true
 
@@ -104,13 +100,11 @@ Rectangle {
                     }
                     Button {
                         width: 20; height: 20; flat: true
-                        anchors.verticalCenter: parent.verticalCenter
-                        contentItem: Text { text: "✕"; color: "#FF4444"; font.bold: true; horizontalAlignment: Text.AlignHCenter }
+                        contentItem: Text { text: "✕"; color: "#FF4444"; font.bold: true }
                         onClicked: {
-                            var temp = titleStack;
-                            temp.splice(index, 1);
-                            titleStack = temp;
-                            architectRoot.updateRule(panelIndex, "search_files", titleStack.join("|"));
+                            var current = getCurrentStack();
+                            current.splice(index, 1);
+                            architectRoot.updateRule(panelIndex, "search_files", current.join("|"));
                         }
                     }
                 }

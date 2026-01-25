@@ -17,13 +17,50 @@ Rectangle {
     readonly property int stageWidth: (cardWidth * 4) + (cardGap * 3) + addButtonWidth
     
     property int totalMatches: 0
+    // Add this near your other properties at the top
+    property var filterRules: []
 
     ListModel {
         id: criteriaModel
         ListElement { panelType: "selection"; panelValue: "" }
     }
+    // Add this inside your architectRoot / ArchitectHUD component
+    function getRuleValue(pIndex, cat) {
+        // Look at the rules we are already sending to Python
+        for (var i = 0; i < filterRules.length; i++) {
+            if (filterRules[i].panelIndex === pIndex && filterRules[i].category === cat) {
+                return filterRules[i].value;
+            }
+        }
+        return "";
+    }
 
     function updateRule(index, type, value) {
+        if (index >= 0 && index < criteriaModel.count) {
+            criteriaModel.setProperty(index, "panelType", type);
+            criteriaModel.setProperty(index, "panelValue", value);
+
+            // --- THE CRITICAL SYNC STEP ---
+            // We rebuild filterRules so getRuleValue can see the changes
+            var tempRules = [];
+            for (var i = 0; i < criteriaModel.count; i++) {
+                var item = criteriaModel.get(i);
+                if (item.panelType !== "selection") {
+                    tempRules.push({
+                        "panelIndex": i,
+                        "category": item.panelType,
+                        "value": item.panelValue
+                    });
+                }
+            }
+            filterRules = tempRules; // Now getRuleValue will find the data!
+
+            // Send to Python
+            architectController.update_live_preview(JSON.stringify(filterRules));
+        }
+    }
+
+    function updateRuleOld(index, type, value) {
         if (index >= 0 && index < criteriaModel.count) {
             criteriaModel.setProperty(index, "panelType", type);
             criteriaModel.setProperty(index, "panelValue", value);
