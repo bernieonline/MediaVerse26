@@ -9,14 +9,13 @@ Rectangle {
     visible: false
     z: 5000
 
-    // --- REFINED DIMENSIONS ---
+    // --- DIMENSIONS ---
     readonly property int cardWidth: 360    
     readonly property int cardHeight: 600   
     readonly property int cardGap: 25       
     readonly property int addButtonWidth: 60
-
-    // Fixed Stage Width for 4 Slots
     readonly property int stageWidth: (cardWidth * 4) + (cardGap * 3) + addButtonWidth
+    
     property int totalMatches: 0
 
     ListModel {
@@ -34,30 +33,18 @@ Rectangle {
 
     function refreshLiveCount() {
         var fullLogic = [];
-        console.log("🛠️ Debug: Building Logic for " + criteriaModel.count + " panels");
-
         for (var i = 0; i < criteriaModel.count; i++) {
             var item = criteriaModel.get(i);
-            
-            // Log every item even if empty so we see the state
-            console.log("   Panel " + i + ": Type=" + item.panelType + " | Value=" + item.panelValue);
-
             if (item.panelValue !== "") {
-                // CRITICAL FIX: Changed "type" to "category" to stop the Python KeyError
                 fullLogic.push({ 
                     "category": item.panelType, 
                     "value": item.panelValue 
                 });
             }
         }
-
         var jsonString = JSON.stringify(fullLogic);
-        console.log("📦 Sending to Python: " + jsonString);
-
         if (typeof architectController !== "undefined") {
             architectController.update_live_preview(jsonString);
-        } else {
-            console.error("❌ Error: architectController is NOT defined!");
         }
     }
 
@@ -83,13 +70,11 @@ Rectangle {
                 }
             }
 
-            // CIRCULAR ADD BUTTON
             Button {
                 id: addRuleBtn
                 width: architectRoot.addButtonWidth; height: 60
                 visible: criteriaModel.count < 4
                 anchors.verticalCenter: parent.verticalCenter
-                
                 background: Rectangle {
                     color: addRuleBtn.hovered ? "#33FFFFFF" : "#08FFFFFF"
                     radius: 30; border.color: "#00F2FF"; border.width: 1
@@ -103,40 +88,62 @@ Rectangle {
         }
     }
 
-    // FOOTER
+    // --- NEW MASTER FOOTER ---
     Rectangle {
-        width: parent.width; height: 100; anchors.bottom: parent.bottom; color: "#1A000000"
+        id: architectFooter
+        width: parent.width
+        height: 100
+        color: "#1A000000"
+        anchors.bottom: parent.bottom
+        z: 100
+
         Rectangle { width: parent.width; height: 1; color: "#22FFFFFF"; anchors.top: parent.top }
+
         Row {
-            anchors.centerIn: parent; spacing: 60
+            anchors.centerIn: parent
+            spacing: 60
+
+            // MATCH COUNTER
             Column {
                 anchors.verticalCenter: parent.verticalCenter
                 Text { text: "MATCHING FILES"; color: "#88FFFFFF"; font.pixelSize: 11 }
                 Text { text: architectRoot.totalMatches; color: "gold"; font.pixelSize: 32; font.bold: true }
             }
+
+            // RESET BUTTON
             Button {
-                id: constructBtn
-                width: 260; height: 45
+                id: resetBtn
+                width: 150; height: 45
                 contentItem: Text { 
-                    text: "CONSTRUCT COLLECTION"; color: "black"; font.bold: true;
+                    text: "RESET SCHEME"; color: "white"; font.bold: true;
                     horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter 
                 }
-                background: Rectangle { color: "#00F2FF"; radius: 4; opacity: constructBtn.hovered ? 0.8 : 1.0 }
+                background: Rectangle { color: "transparent"; border.color: "white"; radius: 4; opacity: resetBtn.hovered ? 1.0 : 0.6 }
+                onClicked: {
+                    criteriaModel.clear();
+                    criteriaModel.append({ "panelType": "selection", "panelValue": "" });
+                    architectRoot.totalMatches = 0;
+                    refreshLiveCount(); // Update Python that we cleared everything
+                }
+            }
+
+            // EXIT BUTTON (Replaces Construct for now or sits next to it)
+            Button {
+                id: exitBtn
+                width: 150; height: 45
+                contentItem: Text { 
+                    text: "EXIT ARCHITECT"; color: "white"; font.bold: true;
+                    horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter 
+                }
+                background: Rectangle { color: "#44FF0000"; border.color: "red"; radius: 4; opacity: exitBtn.hovered ? 1.0 : 0.7 }
+                onClicked: {
+                    criteriaModel.clear();
+                    criteriaModel.append({ "panelType": "selection", "panelValue": "" });
+                    architectRoot.totalMatches = 0;
+                    architectRoot.visible = false;
+                }
             }
         }
-    }
-
-    // MASTER CLOSE
-    Button {
-        id: masterClose
-        anchors.top: parent.top; anchors.right: parent.right; anchors.margins: 30
-        width: 44; height: 44
-        onClicked: architectRoot.visible = false
-        contentItem: Text {
-            text: "✕"; color: "white"; font.pixelSize: 20;
-            horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter
-        }
-        background: Rectangle { color: masterClose.hovered ? "#CCFF4444" : "#22FFFFFF"; radius: 22 }
     }
 
     Connections {

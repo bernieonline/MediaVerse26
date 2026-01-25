@@ -19,6 +19,7 @@ Item {
         anchors.fill: parent
         color: "#1A1A1A"; radius: 12; border.color: "#FFFFFF"; border.width: 1; clip: true 
 
+    
         Column {
             anchors.fill: parent
             anchors.margins: 12 // Reduced from 20 for better internal spacing
@@ -32,6 +33,7 @@ Item {
                     color: "white"; font.bold: true; font.pixelSize: 11; opacity: 0.5
                     width: parent.width - 25
                 }
+                
                 Button {
                     width: 20; height: 20; visible: currentMode !== "selection"
                     contentItem: Text { text: "↺"; color: "white"; horizontalAlignment: Text.AlignHCenter }
@@ -47,6 +49,22 @@ Item {
             Item {
                 width: parent.width
                 height: parent.height - 50 
+
+
+                // LEFT SIDE: Back Button (Only shows when in a sub-list)
+                Button {
+                    id: backButton
+                    text: "⬅"
+                    width: 40; height: 25
+                    anchors.left: parent.left
+                    visible: typeof currentSubList !== "undefined" && currentSubList !== ""
+                    onClicked: {
+                        currentSubList = "";      
+                        viewStack.pop();          
+                    }
+                }
+
+                
                 
                 // SELECTION MENU
                 Column {
