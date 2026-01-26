@@ -13,7 +13,7 @@ Rectangle {
     // --- DIMENSIONS ---
     readonly property int cardWidth: 360    
     readonly property int cardHeight: 600   
-    readonly property int joinGap: 40 // Space between panels for the gate to sit
+    readonly property int joinGap: 40 
     
     property int totalMatches: 0
     property var filterRules: []
@@ -23,11 +23,39 @@ Rectangle {
         ListElement { panelType: "selection"; panelValue: ""; gateValue: "NONE" }
     }
 
-    // --- LOGIC FUNCTIONS ---
+    // --- HELPER FUNCTIONS ---
+    function getRuleValue(pIndex, cat) {
+        for (var i = 0; i < filterRules.length; i++) {
+            if (filterRules[i].panelIndex === pIndex && filterRules[i].category === cat) {
+                return filterRules[i].value;
+            }
+        }
+        return "";
+    }
+
+    // Updated to package JSON and send to Python
     function updateRule(index, type, value) {
         if (index >= 0 && index < criteriaModel.count) {
             criteriaModel.setProperty(index, "panelType", type);
             criteriaModel.setProperty(index, "panelValue", value);
+
+            var tempRules = [];
+            for (var i = 0; i < criteriaModel.count; i++) {
+                var item = criteriaModel.get(i);
+                if (item.panelType !== "selection") {
+                    tempRules.push({
+                        "panelIndex": i,
+                        "category": item.panelType,
+                        "value": item.panelValue,
+                        "logic": item.gateValue
+                    });
+                }
+            }
+            filterRules = tempRules;
+            
+            if (typeof architectController !== "undefined") {
+                architectController.update_live_preview(JSON.stringify(filterRules));
+            }
         }
     }
 
@@ -41,7 +69,7 @@ Rectangle {
         Row {
             id: cardRow
             anchors.centerIn: parent
-            spacing: 0 // We use the Gate's width to create the gap
+            spacing: 0 
 
             Repeater {
                 model: criteriaModel
@@ -53,12 +81,18 @@ Rectangle {
                         height: architectRoot.cardHeight
                         panelIndex: index
                         
-                        // Syncing with model
                         nextGate: model.gateValue
-                        onNextGateChanged: model.gateValue = nextGate
+                        
+                        // Error Fix: Only update model if the value actually changed
+                        onNextGateChanged: {
+                            if (model.gateValue !== nextGate) {
+                                model.gateValue = nextGate
+                                architectRoot.updateRule(index, mainPanel.currentMode, mainPanel.panelValue || "")
+                            }
+                        }
                     }
 
-                    // 2. THE GATE (Sitting outside the bottom join)
+                    // 2. THE GATE
                     Item {
                         width: architectRoot.joinGap
                         height: architectRoot.cardHeight
@@ -68,10 +102,9 @@ Rectangle {
                             width: 50
                             anchors.horizontalCenter: parent.horizontalCenter
                             anchors.top: parent.bottom 
-                            anchors.topMargin: -40 // Pulls it up so it straddles the bottom edge
+                            anchors.topMargin: -40 
                             spacing: 8
 
-                            // AND BUTTON
                             Rectangle {
                                 width: 44; height: 44; radius: 22
                                 color: model.gateValue === "AND" ? "#00F2FF" : "#1A1A1A"
@@ -88,7 +121,6 @@ Rectangle {
                                 }
                             }
 
-                            // NOT BUTTON
                             Rectangle {
                                 width: 44; height: 44; radius: 22
                                 color: model.gateValue === "NOT" ? "#FF0055" : "#1A1A1A"
@@ -138,6 +170,7 @@ Rectangle {
                 onClicked: {
                     criteriaModel.clear();
                     criteriaModel.append({ "panelType": "selection", "panelValue": "", "gateValue": "NONE" });
+                    architectRoot.totalMatches = 0;
                 }
             }
 
@@ -148,9 +181,18 @@ Rectangle {
                 onClicked: {
                     criteriaModel.clear();
                     criteriaModel.append({ "panelType": "selection", "panelValue": "", "gateValue": "NONE" });
+                    architectRoot.totalMatches = 0;
                     architectRoot.visible = false;
                 }
             }
+        }
+    }
+
+    // Python Sync
+    Connections {
+        target: (typeof architectController !== "undefined") ? architectController : null
+        function onResultsCounted(count) { 
+            architectRoot.totalMatches = count 
         }
     }
 }
