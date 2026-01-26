@@ -6,8 +6,8 @@ Item {
     id: panelRoot
     property int panelIndex: 0
     property string currentMode: "selection" 
+    property string nextGate: "NONE" // HUD reads this but we don't draw it here
 
-    // WHITE GLOW AURA
     RectangularGlow {
         id: effect
         anchors.fill: cardFrame
@@ -19,10 +19,9 @@ Item {
         anchors.fill: parent
         color: "#1A1A1A"; radius: 12; border.color: "#FFFFFF"; border.width: 1; clip: true 
 
-    
         Column {
             anchors.fill: parent
-            anchors.margins: 12 // Reduced from 20 for better internal spacing
+            anchors.margins: 12 
             spacing: 12
 
             // HEADER
@@ -40,33 +39,17 @@ Item {
                     background: Item {}
                     onClicked: { 
                         currentMode = "selection"; 
+                        nextGate = "NONE";
                         architectRoot.updateRule(panelIndex, "selection", ""); 
                     }
                 }
             }
 
-            // VIEWPORT
+            // VIEWPORT (The Main Content Area)
             Item {
                 width: parent.width
-                height: parent.height - 50 
+                height: parent.height - 40 
 
-
-                // LEFT SIDE: Back Button (Only shows when in a sub-list)
-                Button {
-                    id: backButton
-                    text: "⬅"
-                    width: 40; height: 25
-                    anchors.left: parent.left
-                    visible: typeof currentSubList !== "undefined" && currentSubList !== ""
-                    onClicked: {
-                        currentSubList = "";      
-                        viewStack.pop();          
-                    }
-                }
-
-                
-                
-                // SELECTION MENU
                 Column {
                     visible: currentMode === "selection"
                     anchors.centerIn: parent; width: parent.width; spacing: 10
@@ -80,8 +63,6 @@ Item {
                     Button { text: "🏷️ Category Mode"; width: parent.width * 0.9; height: 45; anchors.horizontalCenter: parent.horizontalCenter; onClicked: currentMode = "category" }
                 }
 
-                // TOOL LOADER
-                // TOOL LOADER
                 Loader {
                     id: toolLoader
                     anchors.fill: parent
@@ -89,7 +70,7 @@ Item {
                     source: {
                         if (currentMode === "folder") return "ArchitectFolderNav.qml";
                         if (currentMode === "search") return "ArchitectSearchNav.qml";
-                        if (currentMode === "category") return "ArchitectCategoryNav.qml"; // <-- ADD THIS LINE
+                        if (currentMode === "category") return "ArchitectCategoryNav.qml";
                         return "";
                     }
                 }
