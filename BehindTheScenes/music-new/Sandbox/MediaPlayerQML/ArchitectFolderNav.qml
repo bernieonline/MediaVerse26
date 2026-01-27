@@ -8,6 +8,9 @@ Item {
     
     property string currentRelativePath: "" 
 
+    // --- ICON LOADER ---
+    FontLoader { id: folderIconFont; source: paths.font_path || "" }
+
     Column {
         anchors.fill: parent
         anchors.margins: 5
@@ -24,24 +27,44 @@ Item {
             Row {
                 anchors.fill: parent; anchors.leftMargin: 8; spacing: 8
                 
-                // 1. HOME BUTTON (Existing)
+                // 1. HOME BUTTON
                 Button { 
-                    text: "🏠"; width: 35; height: 30
+                    id: homeBtn
+                    width: 35; height: 30
                     anchors.verticalCenter: parent.verticalCenter
+                    
+                    contentItem: Text {
+                        text: folderIconFont.status === FontLoader.Ready ? "\uf015" : "H"
+                        font.family: folderIconFont.name
+                        font.pixelSize: 16
+                        color: homeBtn.hovered ? "gold" : "white"
+                        horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter
+                    }
+                    background: Rectangle { color: homeBtn.pressed ? "#44FFFFFF" : "transparent" }
                     onClicked: { currentRelativePath = ""; architectController.get_sub_folders(""); }
                 }
 
-                // 2. BACK BUTTON (New - Placed directly in the strip)
+                // 2. BACK BUTTON (Iconized)
                 Button {
-                    text: "⬅"; width: 35; height: 30
+                    id: internalBackBtn
+                    width: 35; height: 30
                     anchors.verticalCenter: parent.verticalCenter
-                    // Only enabled if we aren't at the Root
                     enabled: currentRelativePath !== "" 
                     opacity: enabled ? 1.0 : 0.3 
                     
+                    contentItem: Text {
+                        // FontAwesome "Arrow Left" unicode: \uf060
+                        text: folderIconFont.status === FontLoader.Ready ? "\uf060" : "←"
+                        font.family: folderIconFont.name
+                        font.pixelSize: 16
+                        color: internalBackBtn.hovered ? "gold" : "white"
+                        horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter
+                    }
+                    background: Rectangle { color: internalBackBtn.pressed ? "#44FFFFFF" : "transparent" }
+                    
                     onClicked: {
                         var parts = currentRelativePath.split('/');
-                        parts.pop(); // Remove the last folder name
+                        parts.pop(); 
                         var newPath = parts.join('/');
                         currentRelativePath = newPath;
                         architectController.get_sub_folders(currentRelativePath);
@@ -51,7 +74,7 @@ Item {
                 Text {
                     text: currentRelativePath === "" ? "Root" : currentRelativePath
                     color: "gold"; font.pixelSize: 12; font.bold: true; elide: Text.ElideMiddle 
-                    width: parent.width - 100 // Room for both buttons
+                    width: parent.width - 110 
                     anchors.verticalCenter: parent.verticalCenter
                 }
             }
@@ -66,12 +89,8 @@ Item {
             model: folderListModel
             spacing: 4
 
-            // RESTORED SCROLLBAR
             ScrollBar.vertical: ScrollBar {
-                id: vbar
-                active: true
-                width: 8
-                policy: ScrollBar.AlwaysOn
+                id: vbar; active: true; width: 8; policy: ScrollBar.AlwaysOn
             }
             
             delegate: ItemDelegate {

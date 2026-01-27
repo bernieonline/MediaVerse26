@@ -80,6 +80,9 @@ Rectangle {
                         width: architectRoot.cardWidth
                         height: architectRoot.cardHeight
                         panelIndex: index
+
+                        // NEW: Pass the hit count from the model to the panel
+                        hitCount: model.panelHits || 0
                         
                         nextGate: model.gateValue
                         

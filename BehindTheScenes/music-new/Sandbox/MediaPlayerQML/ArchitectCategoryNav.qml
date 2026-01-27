@@ -9,31 +9,49 @@ Item {
     property string currentSubMode: "main"
     property string activeCategory: "" 
 
+    // FIXED: Use the global paths dictionary for the font
+    FontLoader { id: catIconFont; source: paths.font_path }
+
     Column {
         anchors.fill: parent
         anchors.margins: 10
         spacing: 12
 
-        // --- NAVIGATION HEADER ---
+        // --- NAVIGATION HEADER (Synced Style) ---
         Rectangle {
             id: breadcrumbBar
             width: parent.width; height: 40; color: "#22FFFFFF"; radius: 6
+            
             Row {
                 anchors.fill: parent; anchors.leftMargin: 8; spacing: 8
                 
-                // HOME BUTTON (Stays)
+                // HOME BUTTON
                 Button { 
-                    text: "🏠"; width: 35; height: 30; anchors.verticalCenter: parent.verticalCenter
+                    id: homeBtn
+                    width: 35; height: 30; anchors.verticalCenter: parent.verticalCenter
+                    contentItem: Text {
+                        text: catIconFont.status === FontLoader.Ready ? "\uf015" : "🏠"
+                        font.family: catIconFont.name; font.pixelSize: 16
+                        color: homeBtn.hovered ? "gold" : "white"
+                        horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter
+                    }
+                    background: Rectangle { color: "transparent" }
                     onClicked: { currentSubMode = "main"; activeCategory = ""; filterField.text = ""; }
                 }
 
-                // --- NEW BACK BUTTON ---
-                // Only visible when we have left the main 6-button grid
+                // BACK BUTTON (Iconized)
                 Button {
+                    id: internalBackBtn
                     visible: currentSubMode !== "main"
-                    text: "BACK"
-                    width: 60; height: 30
-                    anchors.verticalCenter: parent.verticalCenter
+                    width: 35; height: 30; anchors.verticalCenter: parent.verticalCenter
+                    
+                    contentItem: Text {
+                        text: catIconFont.status === FontLoader.Ready ? "\uf060" : "←"
+                        font.family: catIconFont.name; font.pixelSize: 16
+                        color: internalBackBtn.hovered ? "gold" : "white"
+                        horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter
+                    }
+                    background: Rectangle { color: "transparent" }
                     onClicked: {
                         currentSubMode = "main";
                         activeCategory = "";
@@ -48,7 +66,7 @@ Item {
             }
         }
 
-        // --- VIEW 1: CATEGORY BUTTONS (Initial State) ---
+        // --- VIEW 1: CATEGORY TILES (Synchronized Styling) ---
         Grid {
             visible: currentSubMode === "main"
             columns: 2; spacing: 12
@@ -57,11 +75,22 @@ Item {
             Repeater {
                 model: ["Actors", "Decade", "Director", "Genre", "Keywords", "Series"]
                 delegate: Button {
-                    width: 165; height: 80
-                    text: modelData
+                    id: tileBtn
+                    width: 160; height: 80
+                    
+                    contentItem: Text {
+                        text: modelData
+                        color: tileBtn.hovered ? "#00F2FF" : "white"
+                        font.pixelSize: 14; font.bold: true
+                        horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter
+                    }
+                    background: Rectangle {
+                        color: tileBtn.hovered ? "#3300F2FF" : "#11FFFFFF"
+                        radius: 8; border.color: tileBtn.hovered ? "#00F2FF" : "#33FFFFFF"
+                    }
+                    
                     onClicked: {
                         activeCategory = modelData;
-                        // Decade follows a different logic (Year Range), others use the Cloud
                         currentSubMode = (modelData === "Decade") ? "year" : "search";
                     }
                 }
@@ -73,54 +102,54 @@ Item {
             visible: currentSubMode === "search"
             width: parent.width; spacing: 15
 
-            // Search Input
             TextField {
                 id: filterField
-                width: parent.width
-                placeholderText: "Type to filter " + activeCategory + "..."
+                width: parent.width; height: 40
+                placeholderText: "Filter " + activeCategory + "..."
                 color: "white"; leftPadding: 40
                 background: Rectangle {
                     color: "#15FFFFFF"; radius: 20
                     border.color: filterField.activeFocus ? "gold" : "#444"
-                    Text { text: "🔍"; anchors.left: parent.left; anchors.leftMargin: 12; anchors.verticalCenter: parent.verticalCenter }
+                    Text { 
+                        text: "🔍"; color: "gold"; font.pixelSize: 14
+                        anchors.left: parent.left; anchors.leftMargin: 12; anchors.verticalCenter: parent.verticalCenter 
+                    }
                 }
             }
 
-            // The Cloud (Flickable for scrolling)
             Rectangle {
-                width: parent.width; height: 320; color: "transparent"; clip: true
+                width: parent.width; height: 350; color: "transparent"; clip: true
                 Flickable {
                     anchors.fill: parent; contentHeight: cloudFlow.height; clip: true
                     
                     Flow {
                         id: cloudFlow; width: parent.width - 10; spacing: 8
-                        
                         Repeater {
                             model: {
                                 if (currentSubMode !== "search") return [];
-                                if (typeof collectionLogic !== 'undefined' && collectionLogic !== null) {
-                                    return collectionLogic.get_filtered_keywords(activeCategory, filterField.text)
-                                }
-                                return []
+                                // Use collectionLogic as per your original file
+                                return (typeof collectionLogic !== 'undefined' && collectionLogic !== null) 
+                                    ? collectionLogic.get_filtered_keywords(activeCategory, filterField.text) : []
                             }
                             
                             delegate: Button {
+                                id: cloudItem
                                 padding: 10
+                                contentItem: Text {
+                                    text: modelData; color: cloudItem.hovered ? "black" : "gold"
+                                    font.bold: true; font.pixelSize: 12
+                                }
                                 background: Rectangle {
-                                    color: "transparent"
+                                    color: cloudItem.hovered ? "gold" : "transparent"
                                     border.color: "gold"; border.width: 1; radius: 17
                                 }
-                                contentItem: Text {
-                                    text: modelData; color: "gold"; font.bold: true; font.pixelSize: 12
-                                }
                                 onClicked: {
-                                    console.log("✅ Category Selected: " + activeCategory + " -> " + modelData)
                                     architectRoot.updateRule(panelRoot.panelIndex, "category", activeCategory + " = " + modelData);
                                 }
                             }
                         }
                     }
-                    ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
+                    ScrollBar.vertical: ScrollBar { active: true }
                 }
             }
         }
@@ -138,7 +167,10 @@ Item {
             }
 
             Button {
-                width: parent.width; height: 45; text: "SET YEAR RANGE"
+                id: yearBtn
+                width: parent.width; height: 45
+                contentItem: Text { text: "SET YEAR RANGE"; color: "black"; font.bold: true; horizontalAlignment: Text.AlignHCenter }
+                background: Rectangle { color: "#00F2FF"; radius: 6 }
                 onClicked: {
                     var range = "Year = " + yearFrom.value + " - " + yearTo.value;
                     architectRoot.updateRule(panelRoot.panelIndex, "category", range);
