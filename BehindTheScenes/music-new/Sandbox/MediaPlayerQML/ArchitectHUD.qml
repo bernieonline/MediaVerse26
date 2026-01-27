@@ -10,7 +10,7 @@ Rectangle {
     z: 5000
     clip: true
 
-    // --- DIMENSIONS (Restored to your good version) ---
+    // --- DIMENSIONS ---
     readonly property int cardWidth: 360    
     readonly property int cardHeight: 600   
     readonly property int joinGap: 40 
@@ -23,9 +23,8 @@ Rectangle {
         ListElement { panelType: "selection"; panelValue: ""; gateValue: "NONE"; panelHits: 0 }
     }
 
-    // --- NEW: THE REMOVAL FUNCTION ---
+    // --- THE REMOVAL FUNCTION ---
     function removePanel(index) {
-        // If it's the only panel, just reset it to the start
         if (criteriaModel.count <= 1) {
             updateRule(0, "selection", "");
             return;
@@ -33,26 +32,15 @@ Rectangle {
 
         criteriaModel.remove(index);
 
-        // Cleanup: If the new last panel has a gate, kill the gate
         if (criteriaModel.count > 0) {
             var lastIdx = criteriaModel.count - 1;
             criteriaModel.setProperty(lastIdx, "gateValue", "NONE");
         }
 
-        // Trigger a refresh so the movie count updates
         updateRule(-1, "refresh", ""); 
     }
 
     // --- HELPER FUNCTIONS ---
-    function getRuleValue(pIndex, cat) {
-        for (var i = 0; i < filterRules.length; i++) {
-            if (filterRules[i].panelIndex === pIndex && filterRules[i].category === cat) {
-                return filterRules[i].value;
-            }
-        }
-        return "";
-    }
-
     function updateRule(index, type, value) {
         if (index >= 0 && index < criteriaModel.count) {
             criteriaModel.setProperty(index, "panelType", type);
@@ -99,7 +87,6 @@ Rectangle {
                         width: architectRoot.cardWidth
                         height: architectRoot.cardHeight
                         panelIndex: index
-
                         hitCount: model.panelHits || 0
                         nextGate: model.gateValue
                         
@@ -115,7 +102,6 @@ Rectangle {
                     Item {
                         width: architectRoot.joinGap
                         height: architectRoot.cardHeight
-                        // Keep your original visibility logic
                         visible: index < 3 && mainPanel.currentMode !== "selection"
 
                         Column {
@@ -191,7 +177,6 @@ Rectangle {
                     criteriaModel.clear();
                     criteriaModel.append({ "panelType": "selection", "panelValue": "", "gateValue": "NONE", "panelHits": 0 });
                     architectRoot.totalMatches = 0;
-                    architectRoot.updateRule(-1, "reset", "");
                 }
             }
 
@@ -199,12 +184,7 @@ Rectangle {
                 id: exitBtn
                 width: 150; height: 45
                 text: "EXIT ARCHITECT"
-                onClicked: {
-                    criteriaModel.clear();
-                    criteriaModel.append({ "panelType": "selection", "panelValue": "", "gateValue": "NONE", "panelHits": 0 });
-                    architectRoot.totalMatches = 0;
-                    architectRoot.visible = false;
-                }
+                onClicked: architectRoot.visible = false
             }
         }
     }

@@ -58,28 +58,9 @@ Item {
 
                 Item { Layout.fillWidth: true } 
 
-                // BACK
-                Text {
-                    text: iconFont.status === FontLoader.Ready ? "\uf060" : "←"
-                    font.family: iconFont.name; font.pixelSize: 20; color: "white"
-                    opacity: currentMode !== "selection" ? 1.0 : 0.2
-                    MouseArea {
-                        id: backMA; anchors.fill: parent; hoverEnabled: true
-                        onClicked: { currentMode = "selection"; panelValue = ""; nextGate = "NONE" }
-                    }
-                    ToolTip { visible: backMA.containsMouse; text: "Back"; font.pixelSize: 16 }
-                }
+                
 
-                // HOME
-                Text {
-                    text: iconFont.status === FontLoader.Ready ? "\uf015" : "H"
-                    font.family: iconFont.name; font.pixelSize: 20; color: "white"
-                    MouseArea {
-                        id: homeMA; anchors.fill: parent; hoverEnabled: true
-                        onClicked: architectRoot.updateRule(panelIndex, currentMode, "")
-                    }
-                    ToolTip { visible: homeMA.containsMouse; text: "Reset Mode"; font.pixelSize: 16 }
-                }
+                
 
                 // MODE (Gold M)
                 Text {
