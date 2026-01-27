@@ -10,7 +10,7 @@ Rectangle {
     z: 5000
     clip: true
 
-    // --- DIMENSIONS ---
+    // --- DIMENSIONS (Restored to your good version) ---
     readonly property int cardWidth: 360    
     readonly property int cardHeight: 600   
     readonly property int joinGap: 40 
@@ -20,7 +20,27 @@ Rectangle {
 
     ListModel {
         id: criteriaModel
-        ListElement { panelType: "selection"; panelValue: ""; gateValue: "NONE" }
+        ListElement { panelType: "selection"; panelValue: ""; gateValue: "NONE"; panelHits: 0 }
+    }
+
+    // --- NEW: THE REMOVAL FUNCTION ---
+    function removePanel(index) {
+        // If it's the only panel, just reset it to the start
+        if (criteriaModel.count <= 1) {
+            updateRule(0, "selection", "");
+            return;
+        }
+
+        criteriaModel.remove(index);
+
+        // Cleanup: If the new last panel has a gate, kill the gate
+        if (criteriaModel.count > 0) {
+            var lastIdx = criteriaModel.count - 1;
+            criteriaModel.setProperty(lastIdx, "gateValue", "NONE");
+        }
+
+        // Trigger a refresh so the movie count updates
+        updateRule(-1, "refresh", ""); 
     }
 
     // --- HELPER FUNCTIONS ---
@@ -33,29 +53,28 @@ Rectangle {
         return "";
     }
 
-    // Updated to package JSON and send to Python
     function updateRule(index, type, value) {
         if (index >= 0 && index < criteriaModel.count) {
             criteriaModel.setProperty(index, "panelType", type);
             criteriaModel.setProperty(index, "panelValue", value);
+        }
 
-            var tempRules = [];
-            for (var i = 0; i < criteriaModel.count; i++) {
-                var item = criteriaModel.get(i);
-                if (item.panelType !== "selection") {
-                    tempRules.push({
-                        "panelIndex": i,
-                        "category": item.panelType,
-                        "value": item.panelValue,
-                        "logic": item.gateValue
-                    });
-                }
+        var tempRules = [];
+        for (var i = 0; i < criteriaModel.count; i++) {
+            var item = criteriaModel.get(i);
+            if (item.panelType !== "selection" && item.panelType !== "refresh") {
+                tempRules.push({
+                    "panelIndex": i,
+                    "category": item.panelType,
+                    "value": item.panelValue,
+                    "logic": item.gateValue
+                });
             }
-            filterRules = tempRules;
-            
-            if (typeof architectController !== "undefined") {
-                architectController.update_live_preview(JSON.stringify(filterRules));
-            }
+        }
+        filterRules = tempRules;
+        
+        if (typeof architectController !== "undefined") {
+            architectController.update_live_preview(JSON.stringify(filterRules));
         }
     }
 
@@ -81,12 +100,9 @@ Rectangle {
                         height: architectRoot.cardHeight
                         panelIndex: index
 
-                        // NEW: Pass the hit count from the model to the panel
                         hitCount: model.panelHits || 0
-                        
                         nextGate: model.gateValue
                         
-                        // Error Fix: Only update model if the value actually changed
                         onNextGateChanged: {
                             if (model.gateValue !== nextGate) {
                                 model.gateValue = nextGate
@@ -99,6 +115,7 @@ Rectangle {
                     Item {
                         width: architectRoot.joinGap
                         height: architectRoot.cardHeight
+                        // Keep your original visibility logic
                         visible: index < 3 && mainPanel.currentMode !== "selection"
 
                         Column {
@@ -117,7 +134,7 @@ Rectangle {
                                     anchors.fill: parent
                                     onClicked: {
                                         if (model.gateValue === "NONE") {
-                                            criteriaModel.append({ "panelType": "selection", "panelValue": "", "gateValue": "NONE" })
+                                            criteriaModel.append({ "panelType": "selection", "panelValue": "", "gateValue": "NONE", "panelHits": 0 })
                                         }
                                         model.gateValue = "AND"
                                     }
@@ -133,7 +150,7 @@ Rectangle {
                                     anchors.fill: parent
                                     onClicked: {
                                         if (model.gateValue === "NONE") {
-                                            criteriaModel.append({ "panelType": "selection", "panelValue": "", "gateValue": "NONE" })
+                                            criteriaModel.append({ "panelType": "selection", "panelValue": "", "gateValue": "NONE", "panelHits": 0 })
                                         }
                                         model.gateValue = "NOT"
                                     }
@@ -172,8 +189,9 @@ Rectangle {
                 text: "RESET SCHEME"
                 onClicked: {
                     criteriaModel.clear();
-                    criteriaModel.append({ "panelType": "selection", "panelValue": "", "gateValue": "NONE" });
+                    criteriaModel.append({ "panelType": "selection", "panelValue": "", "gateValue": "NONE", "panelHits": 0 });
                     architectRoot.totalMatches = 0;
+                    architectRoot.updateRule(-1, "reset", "");
                 }
             }
 
@@ -183,7 +201,7 @@ Rectangle {
                 text: "EXIT ARCHITECT"
                 onClicked: {
                     criteriaModel.clear();
-                    criteriaModel.append({ "panelType": "selection", "panelValue": "", "gateValue": "NONE" });
+                    criteriaModel.append({ "panelType": "selection", "panelValue": "", "gateValue": "NONE", "panelHits": 0 });
                     architectRoot.totalMatches = 0;
                     architectRoot.visible = false;
                 }
@@ -191,9 +209,9 @@ Rectangle {
         }
     }
 
-    // Python Sync
     Connections {
         target: (typeof architectController !== "undefined") ? architectController : null
+        ignoreUnknownSignals: true
         function onResultsCounted(count) { 
             architectRoot.totalMatches = count 
         }
