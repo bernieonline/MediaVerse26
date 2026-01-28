@@ -53,7 +53,6 @@ Item {
                     opacity: enabled ? 1.0 : 0.3 
                     
                     contentItem: Text {
-                        // FontAwesome "Arrow Left" unicode: \uf060
                         text: folderIconFont.status === FontLoader.Ready ? "\uf060" : "←"
                         font.family: folderIconFont.name
                         font.pixelSize: 16
@@ -84,7 +83,8 @@ Item {
         ListView {
             id: folderListView
             width: parent.width
-            height: parent.height - breadcrumbBar.height - selectBtn.height - 30
+            // Adjusted height to account for the new footerBar Row
+            height: parent.height - breadcrumbBar.height - footerBar.height - 30
             clip: true
             model: folderListModel
             spacing: 4
@@ -112,23 +112,75 @@ Item {
             }
         }
 
-        // --- ACCEPT BUTTON ---
-        Button {
-            id: selectBtn
+        // --- SELECTION & LOGIC TOOLBAR ---
+        Row {
+            id: footerBar
             width: parent.width
             height: 45
-            contentItem: Text {
-                text: "USE: " + (currentRelativePath === "" ? "Root" : currentRelativePath.split('/').pop())
-                color: "black"; font.bold: true; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter
-            }
-            background: Rectangle { 
-                color: "#00F2FF"; radius: 6 
-                border.color: selectBtn.hovered ? "white" : "transparent"
+            spacing: 8
+
+            // 1. FILTER TOGGLE
+            CheckBox {
+                id: filterToggle
+                width: 85
+                height: parent.height
+                
+                // Logic: Disable if it's the first panel
+                enabled: panelRoot.panelIndex > 0 
+                opacity: enabled ? 1.0 : 0.4
+                
+                indicator: Rectangle {
+                    implicitWidth: 18
+                    implicitHeight: 18
+                    x: filterToggle.leftPadding
+                    y: parent.height / 2 - height / 2
+                    radius: 3
+                    border.color: filterToggle.enabled ? "#00F2FF" : "gray"
+                    color: "transparent"
+                    Rectangle {
+                        width: 10; height: 10
+                        x: 4; y: 4
+                        radius: 2
+                        color: "#00F2FF"
+                        visible: filterToggle.checked
+                    }
+                }
+
+                contentItem: Text {
+                    text: "Filter"
+                    font.pixelSize: 12
+                    color: filterToggle.enabled ? "white" : "gray"
+                    leftPadding: filterToggle.indicator.width + 6
+                    verticalAlignment: Text.AlignVCenter
+                }
+
+                checked: false // Defaults to unchecked (OR logic)
+
+                ToolTip.visible: hovered
+                ToolTip.delay: 400
+                ToolTip.text: enabled ? "Narrow down results from previous panels" : "First panel sets the source"
             }
 
-            onClicked: {
-                console.log("✅ Selecting Folder: " + currentRelativePath)
-                architectRoot.updateRule(panelRoot.panelIndex, "folder", currentRelativePath);
+            // 2. ACCEPT BUTTON
+            Button {
+                id: selectBtn
+                width: parent.width - filterToggle.width - parent.spacing
+                height: parent.height
+                
+                contentItem: Text {
+                    text: "USE: " + (currentRelativePath === "" ? "Root" : currentRelativePath.split('/').pop())
+                    color: "black"; font.bold: true; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter
+                }
+                background: Rectangle { 
+                    color: "#00F2FF"; radius: 6 
+                    border.color: selectBtn.hovered ? "white" : "transparent"
+                }
+
+                onClicked: {
+                    console.log("✅ Selecting Folder: " + currentRelativePath + " | Filter: " + filterToggle.checked)
+                    // Passing the folder path and the filter state
+                    architectRoot.updateRule(panelRoot.panelIndex, "folder", currentRelativePath, filterToggle.checked);
+                }
             }
         }
     }

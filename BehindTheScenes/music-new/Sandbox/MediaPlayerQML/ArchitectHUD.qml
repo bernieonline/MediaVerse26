@@ -192,8 +192,17 @@ Rectangle {
     Connections {
         target: (typeof architectController !== "undefined") ? architectController : null
         ignoreUnknownSignals: true
-        function onResultsCounted(count) { 
-            architectRoot.totalMatches = count 
+        function onResultsCounted(panelIndex, panelCount) { 
+            console.log("!!! QML DATA PIPE TEST !!! Panel:", panelIndex, "Count:", panelCount);
+            
+            // 1. Update the local data for the specific card
+            if (panelIndex >= 0 && panelIndex < criteriaModel.count) {
+                criteriaModel.setProperty(panelIndex, "panelHits", panelCount);
+            }
+
+            // 2. Temporarily set the total matches to this panel's count 
+            // (We will add the cumulative math here in Step 2)
+            architectRoot.totalMatches = panelCount;
         }
     }
 }

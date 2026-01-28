@@ -5,11 +5,12 @@ from PySide6.QtCore import QObject, Signal, Slot, Property
 from project_paths import paths
 
 class ArchitectController(QObject):
-    resultsCounted = Signal(int)
+    resultsCounted = Signal(int, int)   # (panelIndex, panelCount)
     foldersUpdated = Signal(list)
     searchResultsUpdated = Signal(list) 
     saveConfirmed = Signal(str)
     searchResultsChanged = Signal()
+    
 
     def __init__(self, xml_logic=None):
         super().__init__()
@@ -76,22 +77,34 @@ class ArchitectController(QObject):
 
     @Slot(str)
     def update_live_preview(self, criteria_json):
-        """Processes criteria and ensures Cloud selections map to correct JSON keys."""
-        criteria_list = json.loads(criteria_json)
-        search_dict = {}
-        manual_files = []
+        """Processes criteria and returns panel-specific counts for the Architect HUD."""
+        try:
+            criteria_list = json.loads(criteria_json)
+            if not criteria_list:
+                return
 
-        # Map UI categories to actual Manifest keys
-        mapping = {"Actors": "Actors", "Director": "Director", "Genre": "Genre", "Keywords": "Keywords", "Series": "Series"}
+            # --- STEP 1: Identify the Panel that just changed ---
+            # We assume the last item in the list is the one the user just interacted with
+            active_item = criteria_list[-1]
+            active_index = active_item.get("panelIndex", 0)
+            
+            # Temporary variables for this specific panel's calculation
+            search_dict = {}
+            manual_files = []
+            
+            # Map UI categories to actual Manifest keys
+            mapping = {"Actors": "Actors", "Director": "Director", "Genre": "Genre", 
+                       "Keywords": "Keywords", "Series": "Series"}
 
-        for item in criteria_list:
-            category = item["category"]
-            value = item["value"]
+            category = active_item["category"]
+            value = active_item["value"]
 
+            # --- STEP 2: Logic Branching (Folder vs Search vs Category) ---
             if category == "search_files":
                 if value:
                     manual_files = value.split("|")
             elif category == "folder":
+                # Ensure the folder path is correctly formatted for manifest lookup
                 search_dict["Filename"] = value.replace("/", "\\")
             else:
                 # Handle Cloud selections (e.g., "Actors = Sean Connery")
@@ -104,17 +117,28 @@ class ArchitectController(QObject):
                     clean_key = mapping.get(category, category)
                     search_dict[clean_key] = value
 
-        matches = self.collectionLogic.get_collection_results(search_dict)
-        
-        if manual_files:
-            if not search_dict:
+            # --- STEP 3: Run the existing Quick Collection logic ---
+            # If we are in 'search_files' mode, we count the manual stack
+            if category == "search_files":
                 matches = [m for m in self.library_data if m.get("Filename") in manual_files]
             else:
-                matches = [m for m in matches if m.get("Filename") in manual_files]
+                # Use your proven collectionLogic for folders and categories
+                matches = self.collectionLogic.get_collection_results(search_dict)
 
-        print(f"🔍 Architect Preview: {search_dict} | Found: {len(matches)}")
-        self.resultsCounted.emit(len(matches))
+            # --- STEP 4: Audit and Emit ---
+            match_count = len(matches)
+            
+            print(f"--- ARCHITECT DATA PIPE AUDIT ---")
+            print(f"Panel Index: {active_index}")
+            print(f"Criteria:    {category} -> {value}")
+            print(f"Matches:     {match_count}")
+            print(f"---------------------------------")
 
+            # Repurposed Signal: emit(panelIndex, panelCount)
+            self.resultsCounted.emit(active_index, match_count)
+
+        except Exception as e:
+            print(f"❌ Architect Preview Error: {e}")
     @Slot(str, str, result=list)
     def get_filtered_keywords(self, category, filter_text):
         try:
