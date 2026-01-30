@@ -9,7 +9,7 @@ Rectangle {
     color: "transparent"
 
     // ----------------------------------------------------------------
-    // INLINE TITLE EXTRACTOR (URL-safe)
+    // INLINE TITLE EXTRACTOR (URL-safe, strips year)
     // ----------------------------------------------------------------
     function cleanTitle(path) {
         if (!path) return "";
@@ -24,7 +24,12 @@ Rectangle {
         let name = clean.split("/").pop().split("\\").pop();
 
         // Remove extension
-        return name.replace(/\.[^/.]+$/, "");
+        name = name.replace(/\.[^/.]+$/, "");
+
+        // Remove trailing " (YYYY)"
+        name = name.replace(/\s*\(\d{4}\)$/, "");
+
+        return name;
     }
 
     signal v2OpenDetail(var movie)
@@ -121,7 +126,7 @@ Rectangle {
                                         asynchronous: true
                                     }
 
-                                    // ⭐ YEAR BADGE (restored)
+                                    // ⭐ YEAR BADGE
                                     Rectangle {
                                         id: yearBadge
                                         visible: modelData.year && modelData.year !== 0
@@ -130,7 +135,7 @@ Rectangle {
                                         anchors.topMargin: 6
                                         anchors.rightMargin: 6
                                         radius: 4
-                                        color: "#CC000000"   // translucent black
+                                        color: "#CC000000"
                                         border.color: "white"
                                         border.width: 1
                                         width: 38
@@ -169,7 +174,7 @@ Rectangle {
                                 }
                             }
 
-                            // TITLE
+                            // ⭐ TITLE (year stripped)
                             Text {
                                 width: parent.width
                                 text: cleanTitle(modelData.filePath)
