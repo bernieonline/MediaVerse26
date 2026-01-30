@@ -250,36 +250,39 @@ Rectangle {
                 }
             }
 
-            // --- NEUTRAL WEB LINKS ---
+            // --- BRANDED WEB LINKS ---
             Rectangle {
                 Layout.fillWidth: true
                 height: 50
                 color: "transparent"
                 RowLayout {
+                    id: brandedLinks
                     anchors.fill: parent
                     spacing: 8
                     function openWeb(url) { Qt.openUrlExternally(url + encodeURIComponent(getSearchTitle())) }
                     
                     Repeater {
                         model: [
-                            { n: "IMDb", u: "https://www.imdb.com/find?q=" },
-                            { n: "Rotten", u: "https://www.rottentomatoes.com/search?search=" },
-                            { n: "Wiki", u: "https://en.wikipedia.org/wiki/Special:Search?search=" }
+                            { n: "IMDb", u: "https://www.imdb.com/find?q=", b: "#F5C518", t: "black" },
+                            { n: "TMDB", u: "https://www.themoviedb.org/search?query=", b: "#01b4e4", t: "white" },
+                            { n: "Blu-Ray", u: "https://www.blu-ray.com/search/?action=search&keyword=", b: "#0046be", t: "white" },
+                            { n: "Rotten", u: "https://www.rottentomatoes.com/search?search=", b: "#FA320A", t: "white" },
+                            { n: "Wiki", u: "https://en.wikipedia.org/wiki/Special:Search?search=", b: "#e6e6e6", t: "black" }
                         ]
                         Button {
-                            text: modelData.n
                             Layout.fillWidth: true; Layout.fillHeight: true
                             contentItem: Text {
-                                text: parent.text
-                                color: parent.hovered ? "cyan" : "white"
+                                text: modelData.n
+                                color: parent.hovered ? "white" : modelData.t
                                 font.bold: true; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter
                             }
                             background: Rectangle { 
-                                color: "#222"
+                                color: parent.hovered ? Qt.lighter(modelData.b, 1.1) : modelData.b
                                 radius: 4
-                                border.color: parent.hovered ? "cyan" : "#444"
+                                border.color: parent.hovered ? "white" : "transparent"
+                                border.width: 1
                             }
-                            onClicked: parent.openWeb(modelData.u)
+                            onClicked: brandedLinks.openWeb(modelData.u)
                         }
                     }
                 }
