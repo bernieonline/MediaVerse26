@@ -100,6 +100,7 @@ Rectangle {
                             anchors.fill: parent
                             spacing: 5
 
+                            // POSTER
                             Item {
                                 width: parent.width
                                 height: gridRoot.posterHeight
@@ -118,6 +119,31 @@ Rectangle {
                                         source: modelData.filePath || ""
                                         fillMode: Image.PreserveAspectCrop
                                         asynchronous: true
+                                    }
+
+                                    // ⭐ YEAR BADGE (restored)
+                                    Rectangle {
+                                        id: yearBadge
+                                        visible: modelData.year && modelData.year !== 0
+                                        anchors.top: parent.top
+                                        anchors.right: parent.right
+                                        anchors.topMargin: 6
+                                        anchors.rightMargin: 6
+                                        radius: 4
+                                        color: "#CC000000"   // translucent black
+                                        border.color: "white"
+                                        border.width: 1
+                                        width: 38
+                                        height: 20
+                                        z: 10
+
+                                        Text {
+                                            anchors.centerIn: parent
+                                            text: modelData.year
+                                            color: "white"
+                                            font.pixelSize: 10
+                                            font.bold: true
+                                        }
                                     }
                                 }
 
@@ -143,7 +169,7 @@ Rectangle {
                                 }
                             }
 
-                            // ⭐ TITLE (now decoded and clean)
+                            // TITLE
                             Text {
                                 width: parent.width
                                 text: cleanTitle(modelData.filePath)
