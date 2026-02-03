@@ -10,42 +10,67 @@ from PySide6.QtCore import QObject, Signal, Slot
 import random  # <--- Crucial for the random posters
 from project_paths import paths  # <--- Loads your relative path dictionary
 # Import your centralized path definitions
-
+import XMLCollectionBuilder
 
 class XMLCollections(QObject):
     cacheRebuilt = Signal()
 
     def __init__(self):
         super().__init__()
-
-        # This stores the dictionary so get_collections_by_category can find it
         self.paths = paths
-
-
         self.master_cache = []
-        self.image_lookup = {} # Map for Filename -> Thumb Path
-        
-        # SOURCE OF TRUTH: xml_collection_data.json
-        self.manifest_path = paths["xmldate"]
+        self.image_lookup = {} 
 
-        self.load_data()
-        
+        # 1. SETUP PATHS
+        # DEBUG: Verify path from project_paths.py
+        self.manifest_path = paths.get("xmldate")
+        print(f"\n🔍 [INIT DEBUG] Checking Manifest Path in project_paths: {self.manifest_path}")
         # INTERNAL CACHING
         self.cache_dir = Path("W:/MediaVerse/cache")
         self.cache_file = self.cache_dir / "collections_cache.json"
-        
-        # Initialize internal maps
+
+        # 2. THE "SAFETY NET" CHECK
+        if not self.manifest_path:
+            print("❌ [INIT DEBUG] ERROR: 'xmldate' key is missing from project_paths.py!")
+        elif not Path(self.manifest_path).exists():
+            print(f"⚠️ [INIT DEBUG] FILE MISSING: {self.manifest_path} does not exist on disk yet.")
+        else:
+            print(f"✅ [INIT DEBUG] FILE FOUND: Preparing to load {self.manifest_path}")
+
+
+        # 3. TRIGGER THE BUILDER IF MISSING
+        if not Path(self.manifest_path).exists():
+            print(f"⚠️ [INIT] FILE MISSING: Triggering XMLCollectionBuilder...")
+            # This creates the file before we attempt to load it
+            XMLCollectionBuilder.build_dna_bank() 
+        else:
+            print(f"✅ [INIT] FILE FOUND: {self.manifest_path}")
+
+        # 4. LOAD DATA (Now guaranteed to have a file to read)
+        self.load_data()
         self._load_image_map()
         print(f"🛠️ XMLCollections initialized. Target: {self.manifest_path}")
-    
+
     def load_data(self):
         """Loads the master movie data."""
         data_path = paths.get("xmldate")
         if data_path and Path(data_path).exists():
-            with open(data_path, 'r', encoding='utf-8') as f:
-                self.master_cache = json.load(f)
-            print(f"🛠️ XMLCollections: Loaded {len(self.master_cache)} movies.")
-
+            try:
+                with open(data_path, 'r', encoding='utf-8') as f:
+                    self.master_cache = json.load(f)
+                
+                # Check for empty data
+                if not self.master_cache:
+                    print(f"⚠️ [DATA DEBUG] {data_path} loaded, but it is an EMPTY LIST [].")
+                else:
+                    print(f"🛠️ [DATA DEBUG] Successfully loaded {len(self.master_cache)} movies.")
+            
+            except json.JSONDecodeError:
+                print(f"❌ [DATA DEBUG] CORRUPTION ERROR: {data_path} contains invalid JSON.")
+            except Exception as e:
+                print(f"❌ [DATA DEBUG] UNKNOWN ERROR loading {data_path}: {e}")
+        else:
+            print(f"❌ [DATA DEBUG] Load aborted: {data_path} not found.")
     # start
     def _load_image_map(self):
         """Links Video Filenames to Thumbnails using relative project paths."""
