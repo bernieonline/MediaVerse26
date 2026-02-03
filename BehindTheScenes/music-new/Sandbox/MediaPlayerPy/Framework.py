@@ -88,6 +88,10 @@ def main():
 
         # XML & Data Managers
         manifest_updater = ManifestUpdater()
+        #build local cache on signal conf server cache completed
+        manifest_updater.cacheRebuildFinished.connect(manifest_updater.start_local_cache_sync)
+
+        
         todo_manager = ToDoManager()
         xml_logic = XMLCollections()
         xml_controller = XmlController()

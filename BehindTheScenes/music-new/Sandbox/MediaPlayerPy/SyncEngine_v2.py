@@ -198,8 +198,13 @@ class SyncEngine_v2(QObject):
             print("⚠️ Hash mismatch — content changed.")
             self.report["library_check"] = "Hash mismatch — content changed"
             self.report["manifest_check"] = "Server manifest should be updated"
-            manifest_a["content_changed"] = True
-            return manifest_a
+            #manifest_a["content_changed"] = True
+            #return manifest_a
+        
+            manifest_b["content_changed"] = True  # Inject flag into NEW data
+            return manifest_b                     # Return the NEW data
+
+
 
         msg = "Manifest hashes and item counts are identical — no rebuild required"
         notifier.post_notification("Manifest contents unchanged no action needed.", False)
@@ -411,9 +416,48 @@ class SyncEngine_v2(QObject):
             return
 
         # Check B — Local cache freshness
-        self._sync_server_to_local_if_needed(server_cache_info)
+        #self._sync_server_to_local_if_needed(server_cache_info)
 
         # Final report to terminal
         self._print_report()
 
         print("=== MediaVerse V2 Sync Finished ===\n")
+
+# ------------------------------------------------------------
+    # Helper: run server cache builder in background
+    # -----ADDED JAN COS IT WAS MISSING THIS IS FROM DEC-------------------------------------------------------
+    def run_server_cache_builder(self, manifest: dict):
+        """
+        Run CacheBuilder_v2 on the server using the given manifest.
+        This runs in a worker thread to avoid blocking the UI.
+        """
+        try:
+            print("Framework,py")
+
+            print("[CacheBuilder_v2] Initializing server cache builder...")
+            builder = CacheBuilder_v2(manifest, self.server_cache_root)
+            # Optional: simple console logging for progress
+            builder.cacheStarted.connect(
+                lambda: print("[CacheBuilder_v2] Cache build started")
+            )
+            #builder.cacheProgress.connect(
+                #lambda done, total: print(f"[CacheBuilder_v2] Progress: {done}/{total}")   
+                #)
+            builder.cacheProgress.connect(
+                lambda done, total: None
+            )
+            builder.cacheFinished.connect(
+                lambda: print("[CacheBuilder_v2] Cache build finished")
+            )
+
+            builder.run()
+
+                # After a successful run, record the manifest timestamp
+                #update_cache_info(manifest)
+
+        except Exception as e:
+            print(f"[CacheBuilder_v2] ERROR during cache build: {e}")
+             
+
+
+        

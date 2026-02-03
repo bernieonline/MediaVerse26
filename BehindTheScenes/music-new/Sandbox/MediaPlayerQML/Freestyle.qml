@@ -17,6 +17,19 @@ Rectangle {
         visible: freestyleRoot.activeMode === "PANELS"
         Behavior on contentX { NumberAnimation { duration: 400; easing.type: Easing.OutCubic } }
 
+        // --- HORIZONTAL SCROLLBAR FOR PANELS ---
+        ScrollBar.horizontal: ScrollBar {
+            id: hBar
+            policy: ScrollBar.AsNeeded
+            anchors.bottom: parent.bottom
+            contentItem: Rectangle {
+                implicitHeight: 4
+                color: "gold"
+                opacity: 0.5
+                radius: 2
+            }
+        }
+
         Row {
             id: unfoldingRow
             height: parent.height
@@ -115,6 +128,18 @@ Rectangle {
                             anchors.bottom: displayBtn.visible ? displayBtn.top : parent.bottom
                             anchors.left: parent.left; anchors.right: parent.right; anchors.margins: 15; clip: true
                             contentHeight: contentCol.height
+
+                            // --- VERTICAL SCROLLBAR FOR PANE CONTENT ---
+                            ScrollBar.vertical: ScrollBar {
+                                id: vBar
+                                policy: ScrollBar.AsNeeded
+                                contentItem: Rectangle {
+                                    implicitWidth: 4
+                                    color: "gold"
+                                    opacity: 0.5
+                                    radius: 2
+                                }
+                            }
                             
                             Column {
                                 id: contentCol; width: parent.width - 10; spacing: 4
@@ -151,12 +176,12 @@ Rectangle {
                             }
                         }
 
-                        // The Display Media Button - Logic fixed for Non-Library folders
+                        // The Display Media Button
                         Button {
                             id: displayBtn
                             width: parent.width - 30; height: 40; 
                             anchors.bottom: parent.bottom; anchors.bottomMargin: 15; anchors.horizontalCenter: parent.horizontalCenter
-                            visible: pane.hasVideos // Shows if ANY video extensions are found
+                            visible: pane.hasVideos 
                             
                             background: Rectangle { 
                                 color: displayBtn.hovered ? "#33D4AF37" : "transparent"; 

@@ -9,6 +9,12 @@ Rectangle {
     color: "transparent"
 
     // ----------------------------------------------------------------
+    // 0. V2 CLICK SIGNALS (NEW)
+    // ----------------------------------------------------------------
+    signal v2OpenDetail(var movie)
+    signal v2PlayMovie(var movie)
+
+    // ----------------------------------------------------------------
     // 1. PROPERTIES & LOGIC
     // ----------------------------------------------------------------
     property var externalImageList: []
@@ -72,6 +78,7 @@ Rectangle {
 
                 Repeater {
                     model: gridRoot.pageItems
+
                     delegate: Item {
                         width: gridRoot.posterWidth
                         height: gridRoot.posterHeight + gridRoot.labelHeight
@@ -79,8 +86,9 @@ Rectangle {
                         Column {
                             anchors.fill: parent
                             spacing: 5
+                            //Component.onCompleted: console.log("DEBUG PATH BBGG: " + modelData.filePath)
 
-                            // POSTER WRAPPER (Allows Badge to float over clipped Image)
+                            // POSTER WRAPPER
                             Item {
                                 width: parent.width
                                 height: gridRoot.posterHeight
@@ -102,20 +110,92 @@ Rectangle {
                                     }
                                 }
 
+                                // ----------------------------------------------------
+                                // CLICK HANDLER (NEW — V2)
+                                // ----------------------------------------------------
+                                MouseArea {
+                                    anchors.fill: parent
+                                    acceptedButtons: Qt.LeftButton
+                                    property bool doubleClickActive: false
+                                    property var singleClickTimer: null
+
+                                    onClicked: {
+                                        if (singleClickTimer) singleClickTimer.stop()
+                                        singleClickTimer = Qt.createQmlObject(
+                                            'import QtQuick 2.15; Timer { interval: 250; repeat: false }',
+                                            gridRoot
+                                        )
+                                        singleClickTimer.triggered.connect(function() {
+                                            if (!doubleClickActive) {
+                                                gridRoot.v2OpenDetail({
+                                                    display: modelData.display,                     // manifest key
+                                                    filePath: modelData.filePath,                   // local thumbnail (grid only)
+                                                    title: metadata.extractCleanTitle(modelData.filePath),
+                                                    year: metadata.extractYear(modelData.filePath)
+                                                })
+                                            }
+                                            doubleClickActive = false
+                                        })
+                                        singleClickTimer.start()
+                                    }
+
+                                    onDoubleClicked: {
+                                        doubleClickActive = true
+                                        if (singleClickTimer) singleClickTimer.stop()
+
+                                        // ⭐ Resolve full V2 paths (image, xml, video)
+                                        let resolved = _xmlController.resolve_paths(modelData.display)
+                                        
+                                        
+                                        
+                                        console.log("Resolved Path: " + resolved.video)
+                                        console.log("-----------------------------------------")
+                                        
+                                        if (resolved && resolved.video) {
+                                            // 2. Standardize slashes to forward slashes (matching your successful test button)
+                                            let cleanPath = resolved.video.toString().replace(/\\/g, "/")
+                                            
+                                            //console.log("-----------------------------------------")
+                                            //console.log("EXECUTION: Double-Click Playback")
+                                            //console.log("Original: " + resolved.video)
+                                            //console.log("Cleaned:  " + cleanPath)
+                                            //console.log("-----------------------------------------")
+
+                                            // 3. Call the Bridge directly (same as your test button)
+                                            playbackBridge.playVideo(cleanPath)
+                                            
+                                            // 4. Also emit the signal if other parts of the UI need to know
+                                            gridRoot.v2PlayMovie(cleanPath)
+                                        } else {
+                                            console.log("QML ERROR: No video path resolved for " + modelData.display)
+                                        }
+
+
+
+
+
+
+
+                                        
+                                        // ⭐ Play the movie using the manifest video path
+                                         //gridRoot.v2PlayMovie(resolved.video)
+                                        
+                                    }//click
+                                }
+
                                 // YEAR BADGE
                                 Rectangle {
                                     id: yearBadge
                                     width: 38
                                     height: 20
                                     radius: 4
-                                    color: "#CC000000" // 80% opacity black
+                                    color: "#CC000000"
                                     anchors.top: parent.top
                                     anchors.right: parent.right
                                     anchors.topMargin: 6
                                     anchors.rightMargin: 6
-                                    z: 10 // Force visibility over the image
+                                    z: 10
 
-                                    // Safely extract year
                                     property int yearVal: metadata.extractYear(modelData.filePath)
                                     visible: yearVal !== 0
 
@@ -188,7 +268,7 @@ Rectangle {
         MouseArea {
             anchors.fill: parent
             onClicked: sortDrawer.drawerOpen = !sortDrawer.drawerOpen
-            
+
             Column {
                 anchors.right: parent.right
                 anchors.top: parent.top

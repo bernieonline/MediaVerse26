@@ -101,8 +101,17 @@ class XMLCollections(QObject):
     #START
     @Slot('QVariant', result=list)
     def get_collection_images_by_rules(self, rules):
+
+        print(f"!!! HANDSHAKE SUCCESS !!! Called with rules: {rules}")
+
+        # DEBUG 1: What did QML actually send?
+        print(f"\n[FAN DEBUG] Incoming Rules: {rules}")
+
         matches = self.get_collection_results(rules)
         raw_paths = [m["filePath"] for m in matches if m.get("filePath")]
+
+        # DEBUG 2: How many movies did the logic find?
+        print(f"[FAN DEBUG] Logic found {len(matches)} matches for these rules.")
         
         if not raw_paths:
             return []
@@ -128,48 +137,55 @@ class XMLCollections(QObject):
     #start
     @Slot('QVariant', result=list)
     def get_collection_results(self, criteria):
-        """Filters master cache and returns data compatible with ImageGridView."""
-        # --- NEW SAFETY CONVERSION ---
-        # If criteria is a QJSValue (from QML), convert it to a dict
         if hasattr(criteria, 'toVariant'):
             criteria = criteria.toVariant()
         
-        # Double check it's actually a dictionary now
-        if not isinstance(criteria, dict) or not self.master_cache:
-            print(f"⚠️ XMLCollections: Invalid criteria type: {type(criteria)}")
-            return []
-
         results = []
+        print(f"\n📂 --- DEEP DATA TRACE ---")
+        
         for item in self.master_cache:
             match = True
             for key, value in criteria.items():
-                # --- DECADE LOGIC ---
+                # --- LEAST DISRUPTIVE BRANCHING START ---
                 if key == "Decade":
-                    target_decade_prefix = str(value).strip()[:3]
-                    item_year = str(item.get("Year") or item.get("year") or "").strip()
-                    if not item_year.startswith(target_decade_prefix):
+                    # 1. The Slice: Turn "1980s" into "198"
+                    target_prefix = str(value)[:3]
+                    # 2. The Redirect: Look at "Year" field instead of "Decade"
+                    item_year = str(item.get("Year") or item.get("year", ""))
+
+                    # DEBUG: See the logic in action
+                    # print(f"[DECADE TRACE] Testing: {item.get('Title')} ({item_year}) against Prefix: {target_prefix}")
+                    
+                    if not item_year.startswith(target_prefix):
                         match = False
                         break
-                
-                # --- STANDARD LOGIC ---
-                else:
-                    item_val = str(item.get(key, "")).lower()
-                    if str(value).lower() not in item_val:
-                        match = False
-                        break
+                    continue  # Successfully handled, skip the standard logic below
+                # --- LEAST DISRUPTIVE BRANCHING END -
+
+                # Flexible key check (handles Filename or filename)
+                item_val = str(item.get(key) or item.get(key.lower(), "")).lower()
+                if str(value).lower() not in item_val:
+                    match = False
+                    break
             
             if match:
-                video_path = item.get("Filename")
-                thumb_uri = self.image_lookup.get(video_path, "")
-                results.append({
-                    "filePath": thumb_uri, 
-                    "originalPath": video_path,
-                    "fileName": item.get("Title", "Unknown")
-                })
-        
-        print(f"🔍 Builder Update: '{criteria}' found {len(results)} movies.")
+                v_path = item.get("Filename") or item.get("shared", {}).get("video")
+                thumb_uri = self.image_lookup.get(v_path, "")
+                
+                # FALLBACK LOGIC: If Title is missing, use the filename from the path
+                raw_title = item.get("Title") or item.get("title")
+                display_name = raw_title if raw_title else os.path.basename(v_path) if v_path else "Total Unknown"
+
+                if thumb_uri:
+                    results.append({
+                        "filePath": thumb_uri, 
+                        "originalPath": v_path,
+                        "fileName": display_name
+                    })
+                    # PRINT THE TRUTH:
+                    #print(f"MATCH {len(results)}: {display_name} | Path: {v_path}")
+
         return results
-    #start
     @Slot(str, result=list)
     def get_filter_options(self, category):
         """Calculates Top 10 for the Sidebar buttons."""
@@ -178,6 +194,8 @@ class XMLCollections(QObject):
             return []
 
         counts = Counter()
+        print("============  inside row 179   ============")
+
         for item in self.master_cache:
             if category == "Actors":
                 val = item.get("Actors")
@@ -329,6 +347,7 @@ class XMLCollections(QObject):
 
         all_options = set()
         query = filter_text.lower().strip()
+        print("============  inside row 330   ============")
 
         for item in self.master_cache:
             # 1. Get the value safely
@@ -565,104 +584,9 @@ class XMLCollections(QObject):
             return False
         
 
-    # -------------------------------------------------------------------------
-# get_collection_results_v2(criteria, resolution)  →  list of dicts
-#
-# PURPOSE:
-#     This is the V2, resolution‑aware version of get_collection_results().
-#     It filters the master manifest (self.master_cache) using the same
-#     matching logic as V1, but returns image paths from the new cacheV2
-#     system instead of the old thumbnail lookup.
-#
-# WHY THIS EXISTS:
-#     • V1 always returned THUMBNAIL images (~8 KB) via image_lookup.
-#     • V2 needs higher‑quality images for GridView_v2 and CarouselView_v2.
-#     • The manifest already contains all three cache levels:
-#           cache.thumb      (~8 KB)
-#           cache.display    (~42 KB)
-#           cache.carousel   (~59 KB)
-#     • This method selects the correct resolution and maps it to the
-#       LOCAL cacheV2 path using project_paths (never hard‑coded).
-#
-# PARAMETERS:
-#     criteria   – dict of filter rules from QML (possibly a QJSValue)
-#     resolution – string: "thumb", "display", or "carousel"
-#                  Determines which cache level to use.
-#
-# HOW IT WORKS:
-#     1. Converts QJSValue → Python dict if needed.
-#     2. Filters master_cache using your existing matching logic
-#        (Decade logic + standard substring matching).
-#     3. For each matched item:
-#           • Reads manifest fields:
-#                 title, shared.video, shared.xml
-#                 cache.thumb / cache.display / cache.carousel
-#           • Selects the correct cache entry based on `resolution`.
-#           • Converts the manifest's relative cache path into a LOCAL
-#             cacheV2 path using project_paths (never hard‑coded).
-#           • Converts the local path into a QML‑friendly file:/// URI.
-#     4. Returns a list of dicts in the SAME SHAPE as V1:
-#           {
-#               "filePath": <local cacheV2 image URI>,
-#               "originalPath": <video file>,
-#               "xmlPath": <sidecar XML>,
-#               "fileName": <title>
-#           }
-#
-# RETURN VALUE:
-#     A list of dictionaries ready for QML GridView/Carousel delegates.
-#     This structure is intentionally identical to V1 so QML does not
-#     need to change when switching between V1 and V2.
-#
-# USED BY:
-#     • ImageGridView_v2 (resolution="display")
-#     • CarouselView_v2   (resolution="carousel")
-#     • Collection fan stacks (resolution="thumb")
-#
-# BENEFITS:
-#     • No hard‑coded paths
-#     • Fully resolution‑aware
-#     • Uses manifest as the single source of truth
-#     • Safe: does not modify or break V1 behaviour
-#     • Fast: uses local cacheV2 only
-# -------------------------------------------------------------------------
-    # -------------------------------------------------------------------------
-# get_collection_results_v2(criteria, resolution)  →  list of dicts
-#
-# PURPOSE:
-#     Resolution‑aware version of get_collection_results().
-#     Uses manifest.json as the single source of truth and returns
-#     LOCAL cacheV2 image paths at the requested resolution.
-#
-# WHY:
-#     • V1 always returned thumbnails (~8 KB).
-#     • V2 needs higher‑quality images for GridView_v2 and CarouselView_v2.
-#     • Manifest already contains cache.thumb / cache.display / cache.carousel.
-#     • This method selects the correct cache level and maps it to the
-#       LOCAL cacheV2 directory using project_paths.
-#
-# PARAMETERS:
-#     criteria   – dict of filter rules from QML (possibly a QJSValue)
-#     resolution – "thumb", "display", or "carousel"
-#
-# RETURNS:
-#     A list of dicts in the SAME SHAPE as V1:
-#         {
-#             "filePath": <local cacheV2 image URI>,
-#             "originalPath": <video file>,
-#             "xmlPath": <sidecar XML>,
-#             "fileName": <title>,
-#             "year": <int>
-#         }
-#
-# NOTES:
-#     • Sorting is applied by YEAR (ascending: oldest → newest).
-#     • No randomness is used here — fan‑stack randomness stays isolated.
-#     • Safe: does not modify or break V1 behaviour.
-# -------------------------------------------------------------------------
-
     @Slot('QVariant', str, result=list)
     def get_collection_results_v2(self, criteria, resolution):
+        print(f"\n[PYTHON DEBUG get_collection_results_v2] Criteria received from QML: {criteria}")
         """
         Tier-aware version of get_collection_results().
         Reuses the same filtering logic but swaps the image path
@@ -671,6 +595,10 @@ class XMLCollections(QObject):
         NOW ALSO:
         - Ensures results are always ordered OLDEST FIRST by Year.
         """
+        cache_size = len(self.master_cache) if self.master_cache else 0
+        print(f"🔍 [TRACE] Scanning through {cache_size} movies in master_cache")
+        print(f"🔍 [TRACE] Criteria: {criteria}")
+
 
         # ------------------------------------------------------------
         # 1. Convert QJSValue → dict if needed
@@ -703,11 +631,13 @@ class XMLCollections(QObject):
         # 3. FILTERING LOGIC (copied from V1)
         # ------------------------------------------------------------
         filtered_items = []
+        print("============  inside row 613   ============")
         for item in self.master_cache:
             match = True
             for key, value in criteria.items():
 
                 # --- DECADE LOGIC ---
+                #print(f"DEBUG: Processing Key: '{key}' with Value: '{value}'") # Check the casing!
                 if key == "Decade":
                     target_decade_prefix = str(value).strip()[:3]
                     item_year = str(item.get("Year") or item.get("year") or "").strip()

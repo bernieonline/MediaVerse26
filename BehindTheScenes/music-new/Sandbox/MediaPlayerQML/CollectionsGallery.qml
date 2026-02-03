@@ -46,6 +46,8 @@ Item {
             anchors.fill: parent
             hoverEnabled: true
             onClicked: {
+                console.log(">>>> CAROUSEL CLICK TRIGGERED 1 <<<<")
+
                 carousel.currentIndex = Math.max(0, carousel.currentIndex - 1)
                 collectionsCarousel.updatePosition()
             }
@@ -73,6 +75,8 @@ Item {
             anchors.fill: parent
             hoverEnabled: true
             onClicked: {
+                console.log(">>>> CAROUSEL CLICK TRIGGERED 2 <<<<")
+
                 carousel.currentIndex = Math.min(collectionsCarousel.maxIndex, carousel.currentIndex + 1)
                 collectionsCarousel.updatePosition()
             }
@@ -138,6 +142,10 @@ Item {
                     hoverEnabled: true
 
                     onClicked: {
+                        console.log(">>>> CAROUSEL CLICK TRIGGERED 3 <<<<")
+                        console.log("Target Collection:", modelData.name)
+                        console.log("Rules Object:", JSON.stringify(modelData.rules))
+
                         if (!collectionsCarousel.logic)
                             return
 
@@ -307,6 +315,8 @@ Item {
                         MouseArea {
                             id: favM; anchors.fill: parent; hoverEnabled: true
                             onClicked: {
+                                console.log(">>>> CAROUSEL CLICK TRIGGERED 4 <<<<")
+
                                 if (collectionsCarousel.logic) {
                                     modelData.favorite = !modelData.favorite
                                     collectionsCarousel.logic.toggle_favorite(modelData.name)
@@ -332,6 +342,8 @@ Item {
                         MouseArea {
                             id: renM; anchors.fill: parent; hoverEnabled: true
                             onClicked: {
+                                console.log(">>>> CAROUSEL CLICK TRIGGERED 5 <<<<")
+
                                 renameBlock.editing = true
                                 nameEditor.forceActiveFocus()
                                 nameEditor.selectAll()
@@ -356,6 +368,8 @@ Item {
                         MouseArea {
                             id: delM; anchors.fill: parent; hoverEnabled: true
                             onClicked: {
+                                console.log(">>>> CAROUSEL CLICK TRIGGERED 6 <<<<")
+
                                 if (collectionsCarousel.logic) {
                                     collectionsCarousel.logic.delete_collection(modelData.name)
                                 }

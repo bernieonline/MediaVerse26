@@ -78,7 +78,7 @@ class CacheBuilder_v2(QObject):
                     targets.append(("carousel", self.cache_root / "carousel" / carousel_name))
 
                 for label, target in targets:
-                    print(f"    [{label}] Target path: {target}")
+                    #print(f"    [{label}] Target path: {target}")
                     os.makedirs(target.parent, exist_ok=True)
                     img.save(target)
 

@@ -4,10 +4,20 @@ import json
 import threading
 import copy
 
+from CacheSyncWorker import CacheSyncWorker
+from PySide6.QtCore import QThread
+
 from manifest_v3 import write_manifest_to_disk
 from SyncEngine_v2 import SyncEngine_v2
 from project_paths import paths
+from PySide6.QtCore import QThread
 from NotificationManager import notifier
+
+import shutil
+from project_paths import (
+    server_cache_thumb_v2, server_cache_display_v2, server_cache_carousel_v2,
+    local_thumb_v2, local_display_v2, local_carousel_v2
+)
 
 
 class ManifestUpdater_v2(QObject):
@@ -16,6 +26,8 @@ class ManifestUpdater_v2(QObject):
     manifestLoaded = Signal(dict)
     manifestError = Signal(str)
     manifestUpdated = Signal()
+    cacheRebuildFinished = Signal()
+
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -52,21 +64,38 @@ class ManifestUpdater_v2(QObject):
     def _update_and_check_manifest(self):
         """Full Check 0 flow: build A, build B, compare, trigger cache if needed."""
         try:
+            # do not uncomment this else you create 2 identical manifest
             # Step 1: Build canonical manifest.json
             #print("running _update_and_check_manifest inside manifest_v2_wrapper")
             #print(f"[ManifestUpdater_v2] Building canonical manifest at {self.manifest_path}...")
             #write_manifest_to_disk(self.manifest_path)
             #notifier.post_notification("Wrapper - Manifest Written to server.", False)
 
-            # Step 2: Build comparison manifest_b.json
+            # Step 2: Build comparison manifest_b.json445tgb
             print(f"[ManifestUpdater_v2] Building comparison manifest at {self.comparison_path}...")
+            #comparison_path=w:/mediaverse/manifest.json
+            #create manifest_b using comparison_path
             write_manifest_to_disk(self.comparison_path)
 
             # Step 3: Run Check 0
             print("[ManifestUpdater_v2] Running Check 0...")
+
+
+            #result is manifest.json returned
             result = self.sync_engine._check_library_vs_manifest(
                 self.manifest_path, self.comparison_path
             )
+
+            # If Check 0 found a hash mismatch, it returned manifest_b with content_changed = True
+            if result and result.get("content_changed"):
+                
+                print("[ManifestUpdater_v2] Swapping files: Candidate is now the Master.")
+                
+                
+                # This physically moves manifest_candidate.json to manifest.json
+                # .replace() is atomic and safe.
+                self.comparison_path.replace(self.manifest_path)
+            # ----------------------------
 
             # Step 4: Load canonical manifest and inject content_changed
             if not self.manifest_path.exists():
@@ -87,10 +116,20 @@ class ManifestUpdater_v2(QObject):
             # Step 5: Emit manifest to Framework
             self.manifestLoaded.emit(copy.deepcopy(manifest))
 
+
+
             # Step 6: Trigger cache if needed
             if manifest["content_changed"]:
                 print("[ManifestUpdater_v2] Content changed — triggering cache rebuild.")
                 self.sync_engine.run_server_cache_builder(manifest)
+                #AFTER CACHE REBUILD COPY TO LOCAL DRIVE
+                #self.clone_server_to_local()
+                #NOW THE LOCAL CACHE
+                self.cacheRebuildFinished.emit()
+
+                #self.start_local_cache_sync()
+
+
             else:
                 print("[ManifestUpdater_v2] No content change detected.")
 
@@ -164,3 +203,56 @@ class ManifestUpdater_v2(QObject):
         print(f"[ManifestUpdater_v2] Building comparison manifest at {comparison_path}...")
         thread = threading.Thread(target=self._update_manifest, args=(comparison_path,), daemon=True)
         thread.start()
+
+
+    def clone_server_to_local(self):
+        """Independent clone: Forces D: to match W:"""
+        print("\n" + "="*40)
+        print("[Sync] Initiating Master Clone: Server -> Local")
+        print("="*40)
+
+        # Pairs: (Source on W, Destination on D)
+        sync_map = [
+            (server_cache_thumb_v2, local_thumb_v2),
+            (server_cache_display_v2, local_display_v2),
+            (server_cache_carousel_v2, local_carousel_v2)
+        ]
+
+        for src, dst in sync_map:
+            try:
+                if Path(src).exists():
+                    print(f"  > Copying {Path(src).name}...")
+                    # dirs_exist_ok=True performs a 'merge/overwrite' clone
+                    shutil.copytree(src, dst, dirs_exist_ok=True)
+                    print(f"  ✅ {Path(src).name} synced.")
+                else:
+                    print(f"  ⚠️ Source missing on server: {src}")
+            except Exception as e:
+                print(f"  ❌ Error cloning {src}: {e}")
+
+        print("="*40)
+        print("[Sync] Clone operation finished.")
+        print("="*40)
+
+    def start_local_cache_sync(self):
+        print("Starting async local cache sync…")
+
+        # Create thread + worker
+        self.sync_thread = QThread()
+        #self.sync_worker = CacheSyncWorker(self.paths)
+        self.sync_worker = CacheSyncWorker(paths)
+
+        # Move worker into thread
+        self.sync_worker.moveToThread(self.sync_thread)
+
+        # Connect lifecycle
+        self.sync_thread.started.connect(self.sync_worker.run)
+        self.sync_worker.finished.connect(self.sync_thread.quit)
+        self.sync_worker.finished.connect(self.sync_worker.deleteLater)
+        self.sync_thread.finished.connect(self.sync_thread.deleteLater)
+
+        # Optional: progress to QML
+        # self.sync_worker.progress.connect(self.qml_root.onSyncProgress)
+
+        # Start thread
+        self.sync_thread.start()        

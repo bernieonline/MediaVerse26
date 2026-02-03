@@ -73,7 +73,19 @@ Item {
                     id: ma
                     anchors.fill: parent
                     hoverEnabled: true
-                    onClicked: menuRoot.categorySelected(modelData.key)
+                    onClicked: {
+                        // 1. Identify which card was clicked
+                        console.log("-----------------------------------------")
+                        console.log("MENU TRIGGER: User selected " + modelData.label)
+                        
+                        // 2. See the EXACT string being sent to the backend
+                        // This is the "Key" that Python must match (e.g., "Decade")
+                        console.log("SENT KEY: '" + modelData.key + "'")
+                        console.log("-----------------------------------------")
+
+                        // 3. Emit the original signal
+                        menuRoot.categorySelected(modelData.key)
+                    }
                 }
 
                 // Animation on hover

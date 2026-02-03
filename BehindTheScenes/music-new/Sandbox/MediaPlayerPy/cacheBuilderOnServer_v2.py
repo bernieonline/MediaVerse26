@@ -12,6 +12,11 @@ from pathlib import Path
 import os
 from NotificationManager import notifier
 import shutil
+import traceback
+from CacheSyncWorker import CacheSyncWorker
+from PySide6.QtCore import QThread
+
+
 
 from PySide6.QtCore import QObject, Signal
 from project_paths import (
@@ -95,9 +100,12 @@ class CacheBuilder_v2(QObject):
             total = len(items)
             done = 0
 
+            # ADD THESE TWO LINES HERE
+            print(f"DEBUG: Manifest keys found: {list(self.manifest.keys())}")
+            print(f"DEBUG: Type of 'items' found: {type(items)}")
+
             print(f">>> Manifest contains {total} items")
 
-            from PIL import Image, ImageOps
 
             for index, item in enumerate(items):
                 #print(f"\n>>> Processing item {index + 1} of {total}")
@@ -167,26 +175,44 @@ class CacheBuilder_v2(QObject):
                         carousel_img.save(carousel_target, quality=85, optimize=True)
 
                     done += 1
-                    #print(f"    ✅ Cached {done} of {total}")
+                    print(f"    ✅ Cached {done} of {total}")
                     self.cacheProgress.emit(done, total)
+                    print("############   after cachProgress emit   ###################")
 
                 except Exception as e:
                     print(f"    ⚠️ Error processing {source}: {e}")
+
+           
+
+            #update local copies from server copies
+            #self.sync_to_local()
+            
+            print("############   next is sync to local ###################")
+            # DIAGNOSTIC CALL
+            #try:
+                #print(f"!!!  SYNC CALL : ")
+                ##self.sync_to_local()
+            #except Exception as sync_err:
+                #print(f"!!! CRITICAL SYNC CALL FAILURE: {sync_err}")
+                #traceback.print_exc()
 
             print("\n>>> Cache building complete")
             self.cacheFinished.emit()
             print(">>> CacheBuilder_v2.run() finished")
 
-            #update local copies from server copies
-            self.sync_to_local()
+            #
+            #HAND BACK TO WRAPPER TO CLONE SERVER CACH TO LOCAL DRIVE
+
 
         except Exception as e:
             print(f"[CacheBuilder_v2] ERROR in run(): {e}")
             traceback.print_exc()
 
+            
 
 
-    def sync_to_local(self):
+
+    def sync_to_local_old(self):
         #this ensures that the local cache and manifest are updated
         #each time that the cache on the server is built
         
@@ -218,3 +244,68 @@ class CacheBuilder_v2(QObject):
 
         print("[CacheBuilder_v2] Sync complete.")   
         notifier.post_notification("Local cache updated.", False) 
+
+    def sync_to_local(self):
+        print("\n" + "="*50)
+        print("[DEBUG] STARTING SYNC_TO_LOCAL")
+        print("="*50)
+
+        sync_map = [
+            ("Thumb", server_cache_thumb_v2, local_thumb_v2),
+            ("Display", server_cache_display_v2, local_display_v2),
+            ("Carousel", server_cache_carousel_v2, local_carousel_v2),
+        ]
+
+        for label, src, dst in sync_map:
+            print(f"\n>>> Checking {label}:")
+            
+            # Convert to Path objects to be 100% sure
+            src_p = Path(src)
+            dst_p = Path(dst)
+
+            print(f"    Source Path: {src_p} (Exists: {src_p.exists()})")
+            print(f"    Dest Path:   {dst_p} (Exists: {dst_p.exists()})")
+
+            if not src_p.exists():
+                print(f"    ⚠️ SKIPPING: {label} source folder not found on server.")
+                continue
+
+            # Check file counts on server
+            src_files = list(src_p.glob("*"))
+            print(f"    Server files found: {len(src_files)}")
+
+            try:
+                # Step 1: Handle Destination
+                if dst_p.exists():
+                    print(f"    Attempting to remove old local folder: {dst_p}")
+                    # We use ignore_errors=False here for debugging so we see the lock!
+                    shutil.rmtree(dst_p) 
+                    print("    Successfully removed old folder.")
+                
+                # Step 2: Ensure Parent exists
+                dst_p.parent.mkdir(parents=True, exist_ok=True)
+
+                # Step 3: Copy
+                print(f"    Copying {len(src_files)} files to {dst_p}...")
+                
+                # If your Python is 3.8+, use dirs_exist_ok=True for extra reliability
+                shutil.copytree(src_p, dst_p, dirs_exist_ok=True)
+                
+                # Verify result
+                new_count = len(list(dst_p.glob("*")))
+                print(f"    ✅ {label} Sync Success! Local count: {new_count}")
+
+            except Exception as e:
+                print(f"    ❌ ERROR syncing {label}:")
+                print(f"    Type: {type(e).__name__}")
+                print(f"    Message: {str(e)}")
+                # This is the "God mode" debug info for Windows locks
+                if "PermissionError" in str(type(e)):
+                    print("    💡 ANALYSIS: A file is likely LOCKED by the QML UI or Windows Explorer.")
+
+        print("\n" + "="*50)
+        print("[DEBUG] SYNC_TO_LOCAL FINISHED")
+        print("="*50)
+        notifier.post_notification("Local cache sync attempted (see logs).", False)
+
+
