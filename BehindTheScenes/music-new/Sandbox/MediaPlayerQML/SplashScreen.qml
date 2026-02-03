@@ -22,6 +22,15 @@ Item {
     // --- Component Lifecycle ---
     Component.onCompleted: {
         splashData = splashModel.get_splash_data()
+
+        // --- Shuffle the splashData array (Fisher–Yates) ---
+        for (var i = splashData.length - 1; i > 0; i--) {
+            var j = Math.floor(Math.random() * (i + 1))
+            var temp = splashData[i]
+            splashData[i] = splashData[j]
+            splashData[j] = temp
+        }
+
         if (splashData.length > 0) {
             updateData()
             // Start the initial entry sequence
