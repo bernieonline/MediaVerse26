@@ -57,27 +57,5 @@
       "And that this... this is our land!"
     ],
     "delay": 15
-  },
-	{
-    "image": "The Northwest Frontier.jpg",
-    "title": "The Northwest Frontier",
-    "quote": [
-      "[Gupta] Victoria [the train] is old, I confess that.",
-      "But she has experience and when she has experience,",
-      "nothing can go wrong!"
-    ],
-    "delay": 15
-  },
-	{
-    "image": "The Alamo.jpg",
-    "title": "The Alamo",
-    "quote": [
-      "You will remember this battle! Each minute! Each second! ",
-      "Until the day that you die! But that is for tomorrow, gentlemen.",
-      "For today, Remember The Alamo!!"
-    ],
-    "delay": 15
   }
-
-
 ]

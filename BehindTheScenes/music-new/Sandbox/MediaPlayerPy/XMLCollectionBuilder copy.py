@@ -2,6 +2,7 @@ import json
 import re
 import xml.etree.ElementTree as ET
 from pathlib import Path
+from urllib.parse import quote
 from project_paths import paths
 
 def build_dna_bank():
@@ -11,7 +12,7 @@ def build_dna_bank():
     if not source_manifest or not source_manifest.exists():
         return False
 
-    print("🚀 Rebuilding xml_collection_dat DNA Bank - Matching Original Record Spec...")
+    print("🚀 Rebuilding DNA Bank using legacy metadata logic...")
     
     try:
         with open(source_manifest, 'r', encoding='utf-8') as f:
@@ -22,19 +23,26 @@ def build_dna_bank():
 
         for item in raw_items:
             shared = item.get("shared", {})
+            cache_info = item.get("cache", {})
             v_str, x_str = shared.get("video"), shared.get("xml")
             
             if v_str and x_str:
                 video_path = Path(v_str)
                 xml_path = Path(x_str)
 
-                # 1. Year Extraction (Original logic)
+                # 1. Year Extraction (Matches your old regex)
                 year_match = re.search(r"\((\d{4})\)", video_path.name)
                 extracted_year = year_match.group(1) if year_match else ""
 
-                # 2. Replicate the Exact Key Structure (No URLs)
+                # 2. Image Path Logic (Restoring URL prefixes and encoding)
+                rel_thumb = cache_info.get("relative_thumb", "")
+                local_img = paths["local_thumb_v2"] / rel_thumb
+                server_img = f"file:///W:/MediaVerse/cache/images/thumb/{quote(rel_thumb)}"
+                final_thumb = f"file:///{local_img}" if local_img.exists() else server_img
+
+                # 3. Base Structure
                 entry = {
-                    "Filename": v_str,
+                    "Filename": str(video_path),
                     "Year": extracted_year,
                     "Genre": "",
                     "Keywords": "",
@@ -42,6 +50,8 @@ def build_dna_bank():
                     "Director": "Unknown",
                     "Name": video_path.stem.split(' (')[0],
                     "Series": "",
+                    "Thumb_URL": str(final_thumb).replace("\\", "/"),
+                    "Display_URL": str(final_thumb).replace("thumb", "display").replace("\\", "/"),
                     "IMDb ID": "",
                     "Media Sub Type": "Movie",
                     "Season": "",
@@ -50,7 +60,7 @@ def build_dna_bank():
                     "TheMovieDB Series ID": ""
                 }
 
-                # 3. Deep XML Parse to fill the empty keys
+                # 4. Deep XML Parse
                 if xml_path.exists():
                     try:
                         tree = ET.parse(xml_path)
@@ -75,23 +85,23 @@ def build_dna_bank():
 
                         actors_raw = get_field("Actors")
                         if actors_raw:
-                            # Replicate the 5-actor limit from your old code
+                            # Restoring your specific limit of 5 actors
                             actor_list = [a.strip() for a in actors_raw.split(";") if a.strip()]
                             entry["Actors"] = actor_list[:5]
 
                     except Exception as e:
-                        print(f"⚠️ XML Parse Error for {video_path.name}: {e}")
+                        print(f"⚠️ XML Error for {video_path.name}: {e}")
 
                 enriched_data.append(entry)
 
-        # 4. Save with Indent 4 to exactly match the original file's look
+        # 5. Save with Indent 4 to match original readability
         output_json.parent.mkdir(parents=True, exist_ok=True)
         with open(output_json, 'w', encoding='utf-8') as f:
             json.dump(enriched_data, f, indent=4)
         
-        print(f"✅ DNA Bank Replicated: {len(enriched_data)} items saved.")
+        print(f"✅ DNA Bank Created: {len(enriched_data)} items saved.")
         return True
 
     except Exception as e:
-        print(f"❌ Replication Error: {e}")
+        print(f"❌ Critical Build Error: {e}")
         return False

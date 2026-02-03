@@ -1,0 +1,47 @@
+{
+  "menu": [
+    {
+      "label": "File",
+      "items": [
+        { "label": "Search" },
+        { "label": "Edit" },
+        { "label": "Open" }
+      ]
+    },
+    {
+      "label": "Collections",
+      "items": [
+        { "label": "Create" },
+        { "label": "Show" },
+        { "label": "Delete" },
+        { "label": "Compare" }
+      ]
+    },
+    {
+      "label": "Utilities",
+      "items": [
+        { "label": "IMDB" },
+        { "label": "Rotten Tomatoes" },
+        { "label": "FFMPEG" }
+      ]
+    },
+    {
+      "label": "Settings",
+      "items": [
+        {
+          "label": "Media Apps",
+          "items": [
+            { "label": "Manage Players ..." }
+          ]
+        },
+        { "label": "MySql" },
+        {
+          "label": "Media Player",
+          "items": [
+           
+          ]
+        }
+      ]
+    }
+  ]
+}

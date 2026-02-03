@@ -135,6 +135,27 @@ class ArchitectController(QObject):
             print(f"---------------------------------")
 
             # Repurposed Signal: emit(panelIndex, panelCount)
+            # --- STEP 4: Audit and Emit ---
+            match_count = len(matches)
+            
+            print(f"--- ARCHITECT DATA PIPE AUDIT ---")
+            print(f"Panel Index: {active_index}")
+            print(f"Criteria:    {category} -> {value}")
+            print(f"Matches:     {match_count}")
+            
+            if match_count > 0:
+                print("--- FILE LIST ---")
+                for i, m in enumerate(matches, 1):
+                    # Check 'fileName' (from V2 logic) or 'Name' (from library_data)
+                    title = m.get('fileName') or m.get('Name') or m.get('Title') or "Unknown"
+                    print(f"{i}. {title}")
+            print(f"---------------------------------")
+            
+            
+            
+            
+            
+            
             self.resultsCounted.emit(active_index, match_count)
 
         except Exception as e:

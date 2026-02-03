@@ -22,35 +22,36 @@ class XMLCollections(QObject):
         self.image_lookup = {} 
 
         # 1. SETUP PATHS
-        # DEBUG: Verify path from project_paths.py
-        self.manifest_path = paths.get("xmldate")
-        print(f"\n🔍 [INIT DEBUG] Checking Manifest Path in project_paths: {self.manifest_path}")
-        # INTERNAL CACHING
+        self.manifest_path = Path(paths.get("xmldate")) if paths.get("xmldate") else None
+        self.source_manifest = Path(paths.get("server_manifest_v2")) if paths.get("server_manifest_v2") else None
         self.cache_dir = Path("W:/MediaVerse/cache")
         self.cache_file = self.cache_dir / "collections_cache.json"
 
-        # 2. THE "SAFETY NET" CHECK
+        # 2. SURGICAL SYNC LOGIC
         if not self.manifest_path:
-            print("❌ [INIT DEBUG] ERROR: 'xmldate' key is missing from project_paths.py!")
-        elif not Path(self.manifest_path).exists():
-            print(f"⚠️ [INIT DEBUG] FILE MISSING: {self.manifest_path} does not exist on disk yet.")
+            print("❌ [INIT] ERROR: 'xmldate' missing from project_paths.py!")
+            return
+
+        rebuild_reason = None
+        if not self.manifest_path.exists():
+            rebuild_reason = "File missing"
+        elif self.source_manifest and self.source_manifest.exists():
+            # Only compare if both exist; rebuild if source is newer
+            if self.source_manifest.stat().st_mtime > self.manifest_path.stat().st_mtime:
+                rebuild_reason = "Source manifest updated"
+
+        # 3. EXECUTE BUILDER IF NECESSARY
+        if rebuild_reason:
+            print(f"🔄 [INIT xml_collection_data] {rebuild_reason}. Triggering XMLCollectionBuilder...")
+            import XMLCollectionBuilder
+            XMLCollectionBuilder.build_dna_bank()
         else:
-            print(f"✅ [INIT DEBUG] FILE FOUND: Preparing to load {self.manifest_path}")
+            print(f"✅ [INIT] DNA Bank is up to date: {self.manifest_path}")
 
-
-        # 3. TRIGGER THE BUILDER IF MISSING
-        if not Path(self.manifest_path).exists():
-            print(f"⚠️ [INIT] FILE MISSING: Triggering XMLCollectionBuilder...")
-            # This creates the file before we attempt to load it
-            XMLCollectionBuilder.build_dna_bank() 
-        else:
-            print(f"✅ [INIT] FILE FOUND: {self.manifest_path}")
-
-        # 4. LOAD DATA (Now guaranteed to have a file to read)
+        # 4. LOAD DATA
         self.load_data()
         self._load_image_map()
-        print(f"🛠️ XMLCollections initialized. Target: {self.manifest_path}")
-
+        print(f"🛠️ XMLCollections initialized.")
     def load_data(self):
         """Loads the master movie data."""
         data_path = paths.get("xmldate")
