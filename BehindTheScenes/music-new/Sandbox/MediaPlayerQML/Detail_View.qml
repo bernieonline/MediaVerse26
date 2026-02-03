@@ -81,7 +81,11 @@ Rectangle {
                     console.log("🎯 Double‑clicked in Detail_View:", detailViewRoot.imagePath)
                     doubleClickActive = true
                     if (singleClickTimer) singleClickTimer.stop()
+
+                    
+                    
                     detailViewRoot.launchVideoRequested(detailViewRoot.imagePath)
+                    //playbackRouter.playVideo(rawPath, isMaster)
                 }
             }
         }

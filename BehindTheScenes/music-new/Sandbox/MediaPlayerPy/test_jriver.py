@@ -1,78 +1,52 @@
-import requests
-import time
-import xml.etree.ElementTree as ET
-import ctypes
+import subprocess
+import os
 
-URL = "http://localhost:52199/MCWS/v1"
-# The filename from your selection
-TARGET_FILE = "For a Fistful of Dollars (1964).m2ts"
+# 1. THE EXACT PATH FROM YOUR SIDECAR
+# Note the 'r' prefix - this makes it a 'raw' string so backslashes aren't treated as escape characters.
+movie_path = r"W:\Collection\1960s 70s 80s\Bear Island (1979).mp4"
 
-def test_jriver_robust():
-    print(f"Targeting JRiver: {URL}")
+# 2. YOUR JRIVER EXECUTABLE PATH
+# Update this if you are using a different version (MC31, MC30, etc.)
+jriver_exe = r"C:\Program Files\J River\Media Center 32\MC32.exe"
+
+def test_playback():
+    print(f"Checking if file exists: {os.path.exists(movie_path)}")
+    print(f"Checking if JRiver exists: {os.path.exists(jriver_exe)}")
     
-    # Use a simpler query: just the filename without the path
-    # This avoids the W:/ vs W:\ slash conflict
-    search_url = f"{URL}/Files/Search?Query=[Filename]=[{TARGET_FILE}]"
-    
+    if not os.path.exists(jriver_exe):
+        print("❌ ERROR: JRiver EXE not found at that location.")
+        return
+
+    # TEST A: THE SIMPLEST METHOD (Passing path as an argument)
+    # This is what we are currently trying to do in DriveManager.
+    print("\n--- TEST A: Direct Path Argument ---")
     try:
-        print(f"Searching for: {TARGET_FILE}...")
-        r = requests.get(search_url)
-        root = ET.fromstring(r.text)
-        
-        file_key = None
-        # Look for the Key in the results
-        for item in root.findall(".//Item"):
-            for field in item.findall("Field"):
-                if field.get("Name") == "Key":
-                    file_key = field.text
-                    break
-        
-        if not file_key:
-            print("File not found. Attempting a 'Like' search...")
-            # Fallback: Search for the title alone
-            fallback_url = f"{URL}/Files/Search?Query=Fistful of Dollars"
-            r = requests.get(fallback_url)
-            root = ET.fromstring(r.text)
-            # Take the first result
-            item = root.find(".//Item")
-            if item is not None:
-                for field in item.findall("Field"):
-                    if field.get("Name") == "Key":
-                        file_key = field.text
-                        break
-
-        if not file_key:
-            print("CRITICAL: File not found in JRiver Library. Please check JRiver import.")
-            return
-
-        print(f"SUCCESS: Found File Key {file_key}")
-
-        # 1. Trigger Playback
-        requests.get(f"{URL}/Playback/PlayById?Key={file_key}")
-        print("Playback triggered in JRiver.")
-
-        # 2. The Watchdog (The Transition Bridge)
-        time.sleep(3) # Let the engine warm up
-        while True:
-            status_resp = requests.get(f"{URL}/Playback/Info")
-            status_xml = ET.fromstring(status_resp.text)
-            
-            state = "0"
-            for item in status_xml.findall(".//Item"):
-                if item.get("Name") == "State":
-                    state = item.text
-                    break
-            
-            if state == "0":
-                print("\nPlayback Stopped. Returning to Mediaverse...")
-                ctypes.windll.user32.MessageBoxW(0, "Handing back to Mediaverse", "Done", 0)
-                break
-            
-            print(f"Movie is playing (State {state})...", end="\r")
-            time.sleep(2)
-
+        subprocess.Popen([jriver_exe, movie_path])
+        print("Command sent: [jriver_exe, movie_path]")
     except Exception as e:
-        print(f"Error: {e}")
+        print(f"Test A failed: {e}")
+
+    input("\nPress Enter to try TEST B (Alternative Slash Direction)...")
+
+    # TEST B: FORWARD SLASHES (Some players prefer this even on Windows)
+    print("\n--- TEST B: Forward Slashes ---")
+    forward_path = movie_path.replace('\\', '/')
+    try:
+        subprocess.Popen([jriver_exe, forward_path])
+        print(f"Command sent: [jriver_exe, {forward_path}]")
+    except Exception as e:
+        print(f"Test B failed: {e}")
+
+    input("\nPress Enter to try TEST C (The /Play Command Switch)...")
+
+    # TEST C: EXPLICIT PLAY SWITCH
+    # Some versions of JRiver prefer the /Play switch to ensure it starts immediately.
+    print("\n--- TEST C: Explicit /Play Switch ---")
+    try:
+        subprocess.Popen([jriver_exe, "/Play", movie_path])
+        print(f"Command sent: [jriver_exe, '/Play', movie_path]")
+    except Exception as e:
+        print(f"Test C failed: {e}")
 
 if __name__ == "__main__":
-    test_jriver_robust()
+    test_playback()

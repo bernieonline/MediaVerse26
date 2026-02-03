@@ -1,168 +1,152 @@
-// PlayerPanel.qml
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
-import QtMultimedia 5.15   // or just QtMultimedia if using Qt 6
+import QtMultimedia 5.15
+import Qt5Compat.GraphicalEffects
 
-Rectangle {
-    id: playerPanel
-    property bool isVisible: true
+Item {
+    id: playerRoot
+    anchors.fill: parent 
+
+    property bool isVideoPanelVisible: false
+    property bool startupComplete: false
     property bool isPlaying: false
-    property string videoPath: ""   // ✅ dynamic, set by detail_view
+    property string videoPath: ""
 
-    // ✅ Width reduced by 20%, height unchanged
-    width: parent ? parent.width * 0.5 * 0.8 : 512
-    height: parent ? parent.height * 0.5 : 360
-
-    anchors.horizontalCenter: parent ? parent.horizontalCenter : undefined
-    y: isVisible ? (parent ? parent.height - height : 0) : (parent ? parent.height : 0)
-    z: 2
-
-    color: "#1e1e1e80"
-    radius: 25
-    border.color: "gold"
-    border.width: 2
-
-    Behavior on y {
-        NumberAnimation { duration: 400; easing.type: Easing.InOutQuad }
-    }
-
-    function filenameFromVideoPath(path) {
-        if (!path || path === "") return ""
-        var decoded = decodeURIComponent(path)
-        if (decoded.startsWith("file:///")) decoded = decoded.substring(8)
-        var parts = decoded.split("/")
-        return parts[parts.length - 1]   // just the filename
-    }
-
-    // 🔑 Auto‑play when isPlaying is set true
-    onIsPlayingChanged: {
-        if (isPlaying && videoPath !== "") {
-            console.log("🎥 Auto‑playing video:", videoPath)
-            videoPlayer.play()
-        } else {
-            videoPlayer.pause()
-        }
-    }
-
-    // 🔑 Debug when videoPath changes
-    onVideoPathChanged: {
-        console.log("🎥 PlayerPanel received videoPath:", videoPath)
-    }
-
+    // --- THE THEATER DIMMER ---
     Rectangle {
-        id: videoScreen
-        anchors {
-            top: parent.top; topMargin: 15
-            left: parent.left; leftMargin: 15
-            right: parent.right; rightMargin: 15
-            bottom: timelineSlider.top; bottomMargin: 15
+        id: theaterDimmer
+        anchors.fill: parent
+        color: "black"
+        opacity: playerRoot.isVideoPanelVisible ? 0.92 : 0.0 // Slightly darker for SD content
+        z: 1 
+        visible: opacity > 0
+
+        Behavior on opacity {
+            NumberAnimation { duration: 1000; easing.type: Easing.InOutQuad }
         }
-        radius: 16
-        color: "#000000"
+
+        MouseArea {
+            anchors.fill: parent
+            enabled: playerRoot.isVideoPanelVisible
+            onClicked: playerRoot.isVideoPanelVisible = false
+        }
+    }
+
+    // --- THE PLAYER BOX ---
+    Rectangle {
+        id: playerPanel
+        
+        // SD Capping: 1280px is the "Sweet Spot" for 480p on a 4K monitor
+        width: Math.min(parent.width * 0.66, 1280)
+    
+        height: width * 0.75 
+        
+        anchors.horizontalCenter: parent.horizontalCenter
+        z: 2 
+
+        y: {
+            if (!startupComplete) return parent.height + 150;
+            return isVideoPanelVisible ? (parent.height - height) / 2 : parent.height + 150
+        }
+
+        Behavior on y {
+            enabled: startupComplete
+            NumberAnimation { duration: 600; easing.type: Easing.OutQuart }
+        }
+
+        color: "#1A1A1A" 
+        radius: 20
+        border.color: "gold"
+        border.width: 2
         clip: true
 
-        Video {
-            id: videoPlayer
-            anchors.fill: parent
-            source: playerPanel.videoPath
-            autoPlay: false
-            muted: false
-            volume: 1.0
+        Component.onCompleted: playerRoot.startupComplete = true
+
+        // --- Video Screen with Effects ---
+        Rectangle {
+            id: videoContainer
+            anchors {
+                top: parent.top; topMargin: 10
+                left: parent.left; leftMargin: 10
+                right: parent.right; rightMargin: 10
+                bottom: timelineSlider.top; bottomMargin: 10
+            }
+            color: "black"; radius: 10; clip: true
+
+            Video {
+                id: videoPlayer
+                anchors.fill: parent
+                source: playerRoot.formatPath(playerRoot.videoPath)
+                autoPlay: false
+                fillMode: 1 // Fixed: Uses integer for PreserveAspectFit
+                
+                smooth: true
+                antialiasing: true
+            }
+
+            // ⭐ Qt5Compat Effect: Softens 4K magnification noise
+            FastBlur {
+                anchors.fill: videoPlayer
+                source: videoPlayer
+                radius: 8 // Very subtle blur to blend pixelated edges
+                transparentBorder: true
+                visible: playerRoot.isVideoPanelVisible // Only process when visible
+            }
+        }
+
+        // --- Controls ---
+        Slider {
+            id: timelineSlider
+            anchors {
+                left: parent.left; right: parent.right
+                bottom: buttonArea.top; bottomMargin: 10
+                leftMargin: 20; rightMargin: 20
+            }
+            from: 0; to: Math.max(1, videoPlayer.duration)
+            value: videoPlayer.position
+            onMoved: videoPlayer.seek(value)
         }
 
         Rectangle {
-            anchors.fill: parent
-            radius: parent.radius
-            visible: !playerPanel.isPlaying
-            color: "#00000040"
-        }
+            id: buttonArea
+            anchors { left: parent.left; right: parent.right; bottom: parent.bottom; margins: 10 }
+            height: 60; radius: 10; color: "#22FFFFFF"
 
-        Text {
-            anchors.centerIn: parent
-            text: playerPanel.videoPath === "" ? "No movie selected"
-                                               : (videoPlayer.hasAudio ? "Ready: " + filenameFromVideoPath(playerPanel.videoPath)
-                                                                       : "No audio track detected")
-            color: "white"
-            font.pixelSize: 20
-            visible: !playerPanel.isPlaying
-        }
-    }
-
-    // --- Timeline slider ---
-    Slider {
-        id: timelineSlider
-        anchors {
-            left: parent.left; right: parent.right
-            bottom: buttonArea.top; bottomMargin: 10
-            leftMargin: 15; rightMargin: 15
-        }
-        from: 0
-        to: videoPlayer.duration
-        value: videoPlayer.position
-
-        onMoved: videoPlayer.seek(value)
-
-        Connections {
-            target: videoPlayer
-            function onPositionChanged() {
-                timelineSlider.value = videoPlayer.position
+            RowLayout {
+                anchors.fill: parent; anchors.margins: 10
+                Button { 
+                    text: playerRoot.isPlaying ? "PAUSE" : "PLAY"
+                    Layout.fillWidth: true
+                    onClicked: {
+                        if (playerRoot.isPlaying) videoPlayer.pause()
+                        else videoPlayer.play()
+                        playerRoot.isPlaying = !playerRoot.isPlaying
+                    }
+                }
+                Button { 
+                    text: "EXIT THEATER"
+                    Layout.fillWidth: true
+                    onClicked: {
+                        videoPlayer.stop()
+                        playerRoot.isPlaying = false
+                        playerRoot.isVideoPanelVisible = false 
+                    }
+                }
             }
         }
     }
 
-    // --- Button bar ---
-    Rectangle {
-        id: buttonArea
-        anchors {
-            left: parent.left; right: parent.right; bottom: parent.bottom
-            leftMargin: 15; rightMargin: 15; bottomMargin: 15
-        }
-        height: 100
-        radius: 10
-        color: "#1e1e1e80"
-        border.color: "gold"
-        border.width: 1
+    function formatPath(path) {
+        if (!path) return ""
+        var p = path.replace(/\\/g, "/")
+        if (!p.startsWith("file:///")) p = "file:///" + p
+        return p
+    }
 
-        RowLayout {
-            anchors.fill: parent
-            anchors.margins: 15
-            spacing: 15
-
-            Button {
-                text: "Play"
-                Layout.fillWidth: true
-                onClicked: {
-                    if (playerPanel.videoPath !== "") {
-                        videoPlayer.play()
-                        playerPanel.isPlaying = true
-                    }
-                }
-            }
-            Button { text: "Pause"; Layout.fillWidth: true; onClicked: videoPlayer.pause() }
-            Button { text: "Stop"; Layout.fillWidth: true; onClicked: { videoPlayer.stop(); playerPanel.isPlaying = false } }
-            Button { text: "Full Screen"; Layout.fillWidth: true; onClicked: console.log("Full screen requested") }
-
-            Button {
-                text: "Volume +"
-                Layout.fillWidth: true
-                onClicked: {
-                    if (videoPlayer.volume < 1.0) {
-                        videoPlayer.volume += 0.1
-                        console.log("Volume:", videoPlayer.volume)
-                    }
-                }
-            }
-            Button {
-                text: "Volume -"
-                Layout.fillWidth: true
-                onClicked: {
-                    if (videoPlayer.volume > 0.0) {
-                        videoPlayer.volume -= 0.1
-                        console.log("Volume:", videoPlayer.volume)
-                    }
-                }
-            }
-        }
+    function filenameFromVideoPath(path) {
+        if (!path) return ""
+        var parts = path.split(/[\\/]/)
+        return parts[parts.length - 1]
     }
 }

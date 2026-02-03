@@ -667,6 +667,9 @@ class XMLCollections(QObject):
         Tier-aware version of get_collection_results().
         Reuses the same filtering logic but swaps the image path
         to the correct cache tier (thumb, display, carousel).
+
+        NOW ALSO:
+        - Ensures results are always ordered OLDEST FIRST by Year.
         """
 
         # ------------------------------------------------------------
@@ -725,6 +728,24 @@ class XMLCollections(QObject):
         print(f"[V2] Items matched by criteria = {len(filtered_items)}")
 
         # ------------------------------------------------------------
+        # 3b. GLOBAL ORDERING: OLDEST FIRST BY YEAR
+        # ------------------------------------------------------------
+        def safe_year(it):
+            raw = it.get("Year") or it.get("year") or ""
+            try:
+                return int(raw)
+            except (TypeError, ValueError):
+                return 0
+
+        # Oldest first
+        filtered_items.sort(key=safe_year)
+
+        # Optional: debug-check ordering
+        if filtered_items:
+            print("[V2] First few years after sort:",
+                [safe_year(it) for it in filtered_items[:10]])
+
+        # ------------------------------------------------------------
         # 4. Build final model with tier-aware paths
         # ------------------------------------------------------------
         for item in filtered_items:
@@ -736,12 +757,17 @@ class XMLCollections(QObject):
 
             file_uri = "file:///" + str(local_path).replace("\\", "/")
 
-            print(f"[V2] Final path → {file_uri}")
+            year_value = safe_year(item)
+
+            #print(f"[V2] Final path → {file_uri} (Year={year_value})")
 
             results.append({
                 "filePath": file_uri,
                 "originalPath": video_path,
-                "fileName": item.get("Title", "Unknown")
+                "fileName": item.get("Title", "Unknown"),
+                # Expose year if QML ever wants it directly
+                "year": year_value,
+                "display": rel_cache_path
             })
 
         print(f"[V2] Total results returned = {len(results)}\n")

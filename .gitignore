@@ -83,3 +83,30 @@ BehindTheScenes/music-new/Sandbox/MediaPlayerPy/DriveManager copy.py
 BehindTheScenes/music-new/Sandbox/MediaPlayerQML/ImageGridView.qml
 *.env
 *.env
+BehindTheScenes/music-new/Sandbox/MediaPlayerQML/ArchitectHUD copy.qml
+BehindTheScenes/music-new/application.log
+BehindTheScenes/music-new/Assets/Splash/03 - N76QLYl.avif
+BehindTheScenes/music-new/Sandbox/MediaPlayerPy/Settings_Manager copy.py
+BehindTheScenes/music-new/Sandbox/MediaPlayerPy/test_jriver.py
+BehindTheScenes/music-new/Sandbox/MediaPlayerQML/ArchitectPanel copy.qml
+BehindTheScenes/music-new/Sandbox/MediaPlayerQML/CarouselView_v2 copy.qml
+BehindTheScenes/music-new/Sandbox/MediaPlayerQML/Detail_View.qml
+BehindTheScenes/music-new/Sandbox/MediaPlayerQML/Detail_View_v2 Original.qml
+BehindTheScenes/music-new/Sandbox/MediaPlayerQML/Detail_ViewOriginal.qml
+BehindTheScenes/music-new/Sandbox/MediaPlayerQML/Freestyle copy.qml
+BehindTheScenes/music-new/Sandbox/MediaPlayerQML/FreestyleView copy.qml
+BehindTheScenes/music-new/Sandbox/MediaPlayerQML/FreestyleViewOriginal.qml
+BehindTheScenes/music-new/Sandbox/MediaPlayerQML/ImageGridView.qml
+BehindTheScenes/music-new/Sandbox/MediaPlayerQML/PlayerPanelBack.qml
+BehindTheScenes/music-new/Sandbox/MediaPlayerQML/SplashScreen copy.qml
+BehindTheScenes/music-new/Sandbox/MediaPlayerQML/StyledMenu copy.qml
+BehindTheScenes/music-new/Sandbox/Playback/PlaybackRouter copy.py
+*.qml
+BehindTheScenes/music-new/Sandbox/MediaPlayerQML/PlayerPanelBack.qml
+BehindTheScenes/music-new/Testing/test_manifest_v2_wrapper.py
+BehindTheScenes/music-new/Sandbox/MediaPlayerPy/architect_controller copy.py
+BehindTheScenes/music-new/Sandbox/MediaPlayerPy/manifestTest.py
+BehindTheScenes/music-new/Sandbox/MediaPlayerPy/mock_architect.py
+BehindTheScenes/music-new/Sandbox/MediaPlayerPy/test_jriver.py
+BehindTheScenes/music-new/Sandbox/MediaPlayerPy/xml_collections copy.py
+BehindTheScenes/music-new/Sandbox/MediaPlayerQML/ArchitectCategoryNav copy.qml
