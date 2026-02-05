@@ -7,7 +7,10 @@
       "He was not of my tribe. He was of the Howeitat.",
       "It is written."
     ],
-    "delay": 10
+    "delay": 10,
+    "offsetX": -0.15,
+    "offsetY": 0.10
+
   },
   {
     "image": "ben hur.jpg",
@@ -16,7 +19,10 @@
       "May God grant me vengeance!",
       "I will pray that you live until I return!"
     ],
-    "delay": 10
+    "delay": 10,
+    "offsetX": -0.15,
+    "offsetY": 0.10
+
   },
   {
     "image": "Rocky.jpg",
@@ -26,7 +32,10 @@
       "It's about how many you can take!",
       "and still keep moving forward."
     ],
-    "delay": 10
+    "delay": 10,
+    "offsetX": -0.15,
+    "offsetY": 0.10
+
   },
   {
     "image": "Jaws.jpg",
@@ -35,7 +44,10 @@
       "You're gonna need a bigger boat",
       "Just when you thought it was safe to go back in the water!"
     ],
-    "delay": 10
+    "delay": 10,
+    "offsetX": -0.15,
+    "offsetY": 0.10
+
   },
   {
     "image": "Dances.jpg",
@@ -45,7 +57,10 @@
       "They are not thieves or beggars",
       "They are not the bogeymen they are made out to be"
     ],
-    "delay": 10
+    "delay": 10,
+    "offsetX": -0.15,
+    "offsetY": 0.10
+
   },
   {
     "image": "Avatar.jpg",
@@ -56,7 +71,10 @@
       "and we will show the Sky People that they cannot take whatever they want!",
       "And that this... this is our land!"
     ],
-    "delay": 15
+    "delay": 15,
+    "offsetX": -0.15,
+    "offsetY": 0.10
+
   },
 	{
     "image": "The Northwest Frontier.jpg",
@@ -66,7 +84,10 @@
       "But she has experience and when she has experience,",
       "nothing can go wrong!"
     ],
-    "delay": 15
+    "delay": 15,
+    "offsetX": -0.15,
+    "offsetY": 0.10
+
   },
 	{
     "image": "The Alamo.jpg",
@@ -76,7 +97,10 @@
       "Until the day that you die! But that is for tomorrow, gentlemen.",
       "For today, Remember The Alamo!!"
     ],
-    "delay": 15
+    "delay": 15,
+    "offsetX": -0.15,
+    "offsetY": 0.50
+
   }
 
 
