@@ -20,7 +20,13 @@ Rectangle {
 
     ListModel {
         id: criteriaModel
-        ListElement { panelType: "selection"; panelValue: ""; gateValue: "NONE"; panelHits: 0 }
+        ListElement { 
+            panelType: "selection"; 
+            panelValue: ""; 
+            gateValue: "NONE"; 
+            panelHits: 0; 
+            isFilterMode: false 
+        }
     }
 
     // --- THE REMOVAL FUNCTION ---
@@ -40,13 +46,19 @@ Rectangle {
         updateRule(-1, "refresh", ""); 
     }
 
-    // --- HELPER FUNCTIONS ---
+    // --- FIXED HELPER FUNCTION ---
     function updateRule(index, type, value) {
+        // SURGICAL FIX: QML ListModels are strictly typed. 
+        // If 'value' is an Array (from currentResults), flatten it to a String.
+        var safeValue = Array.isArray(value) ? value.join("|") : value.toString();
+
+        // Update the model first
         if (index >= 0 && index < criteriaModel.count) {
             criteriaModel.setProperty(index, "panelType", type);
-            criteriaModel.setProperty(index, "panelValue", value);
+            criteriaModel.setProperty(index, "panelValue", safeValue);
         }
 
+        // Rebuild the logic rules for Python
         var tempRules = [];
         for (var i = 0; i < criteriaModel.count; i++) {
             var item = criteriaModel.get(i);
@@ -54,14 +66,17 @@ Rectangle {
                 tempRules.push({
                     "panelIndex": i,
                     "category": item.panelType,
-                    "value": item.panelValue,
-                    "logic": item.gateValue
+                    "value": item.panelValue, // This is now a safe String
+                    "gateValue": item.gateValue,
+                    "checked": item.isFilterMode,
+                    "isNot": (item.gateValue === "NOT")
                 });
             }
         }
         filterRules = tempRules;
         
         if (typeof architectController !== "undefined") {
+            // Send the finalized ruleset to the Python Engine
             architectController.update_live_preview(JSON.stringify(filterRules));
         }
     }
@@ -90,15 +105,28 @@ Rectangle {
                         hitCount: model.panelHits || 0
                         nextGate: model.gateValue
                         
+                        // Rule: Only panels 2 and up (index 1+) can use the Filter Checkbox
+                        filterEnabled: index >= 1
+                        
+                        onFilterChanged: {
+                            model.isFilterMode = mainPanel.isFilterActive;
+                            architectRoot.updateRule(index, mainPanel.currentMode, mainPanel.currentResults);
+                        }
+                        
+                        // When the panel mode changes (e.g. Selection -> Folder)
+                        onCurrentModeChanged: {
+                             architectRoot.updateRule(index, mainPanel.currentMode, mainPanel.currentResults);
+                        }
+
                         onNextGateChanged: {
                             if (model.gateValue !== nextGate) {
-                                model.gateValue = nextGate
-                                architectRoot.updateRule(index, mainPanel.currentMode, mainPanel.panelValue || "")
+                                model.gateValue = nextGate;
+                                architectRoot.updateRule(index, mainPanel.currentMode, mainPanel.currentResults);
                             }
                         }
                     }
 
-                    // 2. THE GATE
+                    // 2. THE GATE (The Joiner)
                     Item {
                         width: architectRoot.joinGap
                         height: architectRoot.cardHeight
@@ -108,37 +136,39 @@ Rectangle {
                             width: 50
                             anchors.horizontalCenter: parent.horizontalCenter
                             anchors.top: parent.bottom 
-                            anchors.topMargin: -40 
+                            anchors.topMargin: -120 // Adjusted for better visibility
                             spacing: 8
 
+                            // AND/ADD Gate
                             Rectangle {
                                 width: 44; height: 44; radius: 22
                                 color: model.gateValue === "AND" ? "#00F2FF" : "#1A1A1A"
                                 border.color: "white"; border.width: 1
-                                Text { anchors.centerIn: parent; text: "AND"; color: "white"; font.pixelSize: 10; font.bold: true }
+                                Text { anchors.centerIn: parent; text: "+"; color: "white"; font.pixelSize: 18; font.bold: true }
                                 MouseArea {
                                     anchors.fill: parent
                                     onClicked: {
                                         if (model.gateValue === "NONE") {
-                                            criteriaModel.append({ "panelType": "selection", "panelValue": "", "gateValue": "NONE", "panelHits": 0 })
+                                            criteriaModel.append({ "panelType": "selection", "panelValue": "", "gateValue": "NONE", "panelHits": 0, "isFilterMode": false });
                                         }
-                                        model.gateValue = "AND"
+                                        model.gateValue = "AND";
                                     }
                                 }
                             }
 
+                            // NOT/SUBTRACT Gate
                             Rectangle {
                                 width: 44; height: 44; radius: 22
                                 color: model.gateValue === "NOT" ? "#FF0055" : "#1A1A1A"
                                 border.color: "white"; border.width: 1
-                                Text { anchors.centerIn: parent; text: "NOT"; color: "white"; font.pixelSize: 10; font.bold: true }
+                                Text { anchors.centerIn: parent; text: "-"; color: "white"; font.pixelSize: 18; font.bold: true }
                                 MouseArea {
                                     anchors.fill: parent
                                     onClicked: {
                                         if (model.gateValue === "NONE") {
-                                            criteriaModel.append({ "panelType": "selection", "panelValue": "", "gateValue": "NONE", "panelHits": 0 })
+                                            criteriaModel.append({ "panelType": "selection", "panelValue": "", "gateValue": "NONE", "panelHits": 0, "isFilterMode": false });
                                         }
-                                        model.gateValue = "NOT"
+                                        model.gateValue = "NOT";
                                     }
                                 }
                             }
@@ -165,8 +195,8 @@ Rectangle {
 
             Column {
                 anchors.verticalCenter: parent.verticalCenter
-                Text { text: "MATCHING FILES"; color: "#88FFFFFF"; font.pixelSize: 11 }
-                Text { text: architectRoot.totalMatches; color: "gold"; font.pixelSize: 32; font.bold: true }
+                Text { text: "CUMULATIVE MATCHES"; color: "#88FFFFFF"; font.pixelSize: 11 }
+                Text { text: architectRoot.totalMatches; color: "#00F2FF"; font.pixelSize: 32; font.bold: true }
             }
 
             Button {
@@ -175,7 +205,7 @@ Rectangle {
                 text: "RESET SCHEME"
                 onClicked: {
                     criteriaModel.clear();
-                    criteriaModel.append({ "panelType": "selection", "panelValue": "", "gateValue": "NONE", "panelHits": 0 });
+                    criteriaModel.append({ "panelType": "selection", "panelValue": "", "gateValue": "NONE", "panelHits": 0, "isFilterMode": false });
                     architectRoot.totalMatches = 0;
                 }
             }
@@ -192,17 +222,15 @@ Rectangle {
     Connections {
         target: (typeof architectController !== "undefined") ? architectController : null
         ignoreUnknownSignals: true
+        
         function onResultsCounted(panelIndex, panelCount) { 
-            console.log("!!! QML DATA PIPE TEST !!! Panel:", panelIndex, "Count:", panelCount);
-            
-            // 1. Update the local data for the specific card
             if (panelIndex >= 0 && panelIndex < criteriaModel.count) {
                 criteriaModel.setProperty(panelIndex, "panelHits", panelCount);
             }
+        }
 
-            // 2. Temporarily set the total matches to this panel's count 
-            // (We will add the cumulative math here in Step 2)
-            architectRoot.totalMatches = panelCount;
+        function onTotalCountUpdated(total) {
+            architectRoot.totalMatches = total;
         }
     }
 }
