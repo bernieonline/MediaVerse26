@@ -167,18 +167,5 @@ Rectangle {
                 }
             }
         }
-
-        // 4. ACTION BUTTON
-        Button {
-            id: syncBtn
-            width: parent.width; height: 44
-            visible: selectedModel.count > 0
-            contentItem: Text {
-                text: "SYNC TO COLLECTION"; color: "black"; font.bold: true
-                horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter
-            }
-            background: Rectangle { color: syncBtn.pressed ? "#00C2CC" : "#00F2FF"; radius: 6 }
-            onClicked: syncToPython()
-        }
     }
 }
