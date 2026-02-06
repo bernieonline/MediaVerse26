@@ -7,37 +7,61 @@ Rectangle {
     anchors.fill: parent
     color: "transparent"
 
-    // NEW: Reference to the ArchitectPanel frame
+    // --- BRIDGING TO NEW HUD ---
     property Item parentPanel: null
-    property int panelIndex: (parentPanel) ? parentPanel.panelIndex : 0
+    property int panelIndex: (parentPanel !== null) ? parentPanel.panelIndex : 0
 
-    // This model holds the "Bucket" of manually selected movies
+    // Safe Font Loader for the Search Icon
+    FontLoader { 
+        id: searchIconFont
+        source: {
+            var p = (typeof _paths !== 'undefined' && _paths.fonts) ? _paths.fonts.toString() : "";
+            if (p === "") return "";
+            return (p.indexOf("file:///") === -1) ? "file:///" + p.replace(/\\/g, "/") : p;
+        }
+    }
+
     ListModel { id: selectedModel }
 
-    // --- INTERNAL LOGIC ---
-    // Updated to fill the 'Holding Tank' instead of pushing directly to global rules
-    function syncToParent() {
+    // --- INTERNAL LOGIC (PRESERVED) ---
+    function syncToPython() {
         var paths = [];
-        for(var i=0; i<selectedModel.count; i++) {
+        for(var i=0; i < selectedModel.count; i++) {
             paths.push(selectedModel.get(i).filePath);
         }
         
+        var finalValue = paths.join("|");
+        var count = selectedModel.count;
+
+        // 1. Local Frame Update
         if (parentPanel) {
-            // Update the holding tank for the SAVE button
-            parentPanel.currentResults = paths;
-            // Update the cyan count in the toolbar
-            parentPanel.hitCount = paths.length;
+            parentPanel.hitCount = count;
+            parentPanel.currentResults = count > 0 ? ["search_files = " + finalValue] : [];
+        }
+
+        // 2. Engine Update
+        if (typeof architectController !== "undefined") {
+            // IF count is 0, we explicitly tell Python there are 0 matches
+            if (count === 0) {
+                architectController.resultsCounted.emit(panelIndex, 0);
+            } else {
+                var ruleObj = [{
+                    "panelIndex": panelIndex,
+                    "category": "search_files",
+                    "value": finalValue
+                }];
+                architectController.update_live_preview(JSON.stringify(ruleObj));
+            }
         }
     }
 
     function addMovieToBucket(title, path) {
         if (!path) return;
-        // Prevent duplicates
         for(var i=0; i<selectedModel.count; i++) {
             if(selectedModel.get(i).filePath === path) return;
         }
         selectedModel.append({"title": title, "filePath": path});
-        syncToParent(); // Real-time update of the hit counter
+        syncToPython();
     }
 
     Column {
@@ -45,9 +69,17 @@ Rectangle {
         anchors.margins: 12
         spacing: 10
 
-        Text { 
-            text: "FILE SEARCH MODE"
-            color: "#00F2FF"; font.pixelSize: 11; font.bold: true; font.letterSpacing: 1 
+        Row {
+            spacing: 8
+            Text { 
+                text: searchIconFont.status === FontLoader.Ready ? "\uf002" : "🔍"
+                font.family: searchIconFont.name; color: "#00F2FF"; font.pixelSize: 14
+            }
+            Text { 
+                text: "FILE SEARCH MODE"
+                color: "#00F2FF"; font.pixelSize: 11; font.bold: true; font.letterSpacing: 1 
+                anchors.verticalCenter: parent.verticalCenter
+            }
         }
 
         // 1. SEARCH INPUT
@@ -57,8 +89,10 @@ Rectangle {
             placeholderText: "Type to find movies..."
             color: "white"; font.pixelSize: 13
             background: Rectangle { color: "#1AFFFFFF"; radius: 4; border.color: "#33FFFFFF" }
+            
             onTextChanged: {
-                if (text.length > 1 && typeof architectController !== "undefined") {
+                // Ensure architectController is globally accessible
+                if (typeof architectController !== "undefined") {
                     architectController.search_library(text);
                 }
             }
@@ -68,11 +102,10 @@ Rectangle {
         ListView {
             id: resultsView
             width: parent.width
-            // Show dropdown only when typing and results exist
             height: (searchInput.text.length > 0 && count > 0) ? Math.min(contentHeight, 150) : 0
             clip: true
+            // Binds to your existing Python Property
             model: (typeof architectController !== "undefined") ? architectController.searchResultsModel : []
-            z: 10 // Float above the bucket list
             
             delegate: ItemDelegate {
                 width: resultsView.width; height: 32
@@ -80,11 +113,7 @@ Rectangle {
                     text: "➕ " + (modelData.title || modelData.filename || "Unknown")
                     color: "white"; font.pixelSize: 12; verticalAlignment: Text.AlignVCenter
                 }
-                background: Rectangle { 
-                    color: hovered ? "#2200F2FF" : "#1A1A1A"
-                    radius: 4 
-                    border.color: "#33FFFFFF"; border.width: hovered ? 1 : 0
-                }
+                background: Rectangle { color: hovered ? "#2200F2FF" : "#05FFFFFF"; radius: 4 }
                 
                 onClicked: {
                     var finalPath = modelData.filename || modelData.path || modelData.filePath;
@@ -98,7 +127,7 @@ Rectangle {
 
         Rectangle { width: parent.width; height: 1; color: "#33FFFFFF"; visible: selectedModel.count > 0 }
 
-        // 3. SELECTED STACK (The Bucket)
+        // 3. SELECTED STACK
         Text { 
             text: "SELECTED STACK: " + selectedModel.count
             color: "gold"; font.pixelSize: 10; font.bold: true; visible: selectedModel.count > 0
@@ -107,8 +136,7 @@ Rectangle {
         ListView {
             id: bucketView
             width: parent.width
-            // Adjusted: Now expands to fill the space left by the removed button
-            height: parent.height - (resultsView.height + 100)
+            height: parent.height - (resultsView.height + 140)
             model: selectedModel
             spacing: 5
             clip: true
@@ -122,25 +150,35 @@ Rectangle {
                     Text { text: "🎬"; anchors.verticalCenter: parent.verticalCenter }
                     Text {
                         text: title
-                        color: "white"; font.pixelSize: 11
-                        width: parent.width - 50
+                        color: "white"; font.pixelSize: 11; width: parent.width - 60
                         elide: Text.ElideRight; anchors.verticalCenter: parent.verticalCenter
                     }
                     Text {
                         text: "✕"; color: "#FF4444"; font.bold: true; font.pixelSize: 14
                         anchors.verticalCenter: parent.verticalCenter
                         MouseArea {
-                            anchors.fill: parent; anchors.margins: -5
+                            anchors.fill: parent
                             onClicked: {
                                 selectedModel.remove(index);
-                                syncToParent();
+                                syncToPython();
                             }
                         }
                     }
                 }
             }
         }
-        
-        // REMOVED: Action Button (SAVE is now handled by the parent frame)
+
+        // 4. ACTION BUTTON
+        Button {
+            id: syncBtn
+            width: parent.width; height: 44
+            visible: selectedModel.count > 0
+            contentItem: Text {
+                text: "SYNC TO COLLECTION"; color: "black"; font.bold: true
+                horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter
+            }
+            background: Rectangle { color: syncBtn.pressed ? "#00C2CC" : "#00F2FF"; radius: 6 }
+            onClicked: syncToPython()
+        }
     }
 }

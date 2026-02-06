@@ -38,7 +38,6 @@ class ArchitectController(QObject):
     @Slot(str)
     def get_sub_folders(self, current_path):
         """ Used by ArchitectFolderNav to drill down into library directories """
-        # Base root as defined in your setup
         base_root = "W:\\Collection"
         search_path = os.path.join(base_root, current_path.replace("/", "\\"))
         if not search_path.endswith("\\"): search_path += "\\"
@@ -55,22 +54,20 @@ class ArchitectController(QObject):
                 if len(parts) > 1: 
                     folders.add(parts[0])
         
-        # Update the UI with the subfolders found
         self.foldersUpdated.emit(sorted(list(folders)))
-        
-        # We broadcast the count found in this folder immediately
-        # panelIndex -1 is a convention for 'current active navigation'
         self.resultsCounted.emit(-1, matches_in_folder)
 
     def _run_panel_search(self, source, item):
         """ Internal logic for surgical filtering """
         category = item.get("category", "")
-        value = item.get("value", "")
-        if not value: return []
+        value = str(item.get("value", "")).strip()
+        
+        # HARD ZERO: Return empty list if no value is provided
+        if not value or value == "":
+            return []
 
-        # Folder Logic: Matches based on path prefix
         if category == "folder":
-            target = str(value).replace("/", "\\").lower()
+            target = value.replace("/", "\\").lower()
             return [m for m in source if target in str(m.get("Filename", "")).replace("/", "\\").lower()]
             
         mapping = {"Actors": "Actors", "Director": "Director", "Genre": "Genre", "Keywords": "Keywords", "Series": "Series"}
@@ -90,67 +87,82 @@ class ArchitectController(QObject):
         """
         The Bridge: Receives data from a QML panel and calculates the real-time hit count.
         """
-        # 1. Extract the search value from the results list
-        # For folders, results[0] is the path. For others, it's the keywords.
-        search_value = results[0] if results else ""
+        search_value = str(results[0]) if results else ""
         
-        # 2. Run the search against the full library to get the count
-        criteria_item = {"category": mode, "value": search_value}
-        matches = self._run_panel_search(self.library_data, criteria_item)
+        # HARD ZERO: Handle empty search values immediately
+        if not search_value or search_value == "" or search_value == "search_files = ":
+            print(f"🚀 [Python] Committing Panel {index} | Empty | Matches: 0")
+            self.resultsCounted.emit(index, 0)
+            self.totalCountUpdated.emit(0)
+            return
+
+        matches = []
         
-        # 3. Log the surgical result
-        print(f"🚀 [Python] Committing Panel {index} | Mode: {mode} | Search: {search_value} | Matches: {len(matches)}")
+        if (mode == "search_files") or (mode == "search" and "search_files =" in search_value):
+            raw_paths = search_value.split("=")[1].strip() if " = " in search_value else search_value
+            manual_files = [f.replace("/", "\\").lower() for f in raw_paths.split("|") if f.strip()]
+            
+            matches = [
+                m for m in self.library_data 
+                if str(m.get("Filename", "")).replace("/", "\\").lower() in manual_files
+            ]
+        else:
+            criteria_item = {"category": mode, "value": search_value}
+            matches = self._run_panel_search(self.library_data, criteria_item)
         
-        # 4. Update the HUD and confirm to QML
+        print(f"🚀 [Python] Committing Panel {index} | Mode: {mode} | Matches: {len(matches)}")
         self.resultsCounted.emit(index, len(matches))
         self.totalCountUpdated.emit(len(matches)) 
         self.saveConfirmed.emit(f"Panel {index} Logic Committed")
 
     @Slot(str)
     def update_live_preview(self, criteria_json):
-        """ Global recalculation engine for multi-panel rules """
         try:
             criteria_list = json.loads(criteria_json)
-            cumulative_bucket = set() 
-            previous_panel_output = self.library_data 
+            if not criteria_list: return
 
-            for i, item in enumerate(criteria_list):
-                val = item.get("value", "")
-                if not val:
-                    self.resultsCounted.emit(item.get("panelIndex"), 0)
-                    continue
+            active_item = criteria_list[-1]
+            active_index = active_item.get("panelIndex", 0)
+            category = active_item.get("category", "")
+            value = str(active_item.get("value", "")).strip()
 
-                is_checked = item.get("checked", False)
-                is_not = item.get("isNot", False)
+            # HARD ZERO: Return 0 if empty
+            if not value:
+                self.resultsCounted.emit(active_index, 0)
+                return
+
+            matches = []
+
+            if category == "search_files" or (category == "search" and "search_files =" in value):
+                raw_paths = value.split("=")[1].strip() if " = " in value else value
+                manual_files = [f.replace("/", "\\").lower() for f in raw_paths.split("|") if f.strip()]
                 
-                # Source Selection: Narrow down or restart from full library
-                source = previous_panel_output if (is_checked and i > 0) else self.library_data
-
-                matches = self._run_panel_search(source, item)
-                match_paths = {m.get("Filename") for m in matches if m.get("Filename")}
-                
-                previous_panel_output = matches
-
-                # Set Math
-                if i == 0:
-                    cumulative_bucket = match_paths
+                matches = [
+                    m for m in self.library_data 
+                    if str(m.get("Filename", "")).replace("/", "\\").lower() in manual_files
+                ]
+            elif category == "folder":
+                target = value.replace("/", "\\").lower()
+                matches = [
+                    m for m in self.library_data 
+                    if target in str(m.get("Filename", "")).replace("/", "\\").lower()
+                ]
+            else:
+                mapping = {"Actors": "Actors", "Director": "Director", "Genre": "Genre"}
+                search_dict = {}
+                if " = " in value:
+                    k, v = value.split(" = ", 1)
+                    search_dict[mapping.get(k.strip(), k.strip())] = v.strip()
                 else:
-                    if is_checked:
-                        cumulative_bucket = cumulative_bucket.intersection(match_paths)
-                    else:
-                        cumulative_bucket = cumulative_bucket.union(match_paths)
+                    search_dict[mapping.get(category, category)] = value
+                
+                matches = self.collectionLogic.get_collection_results(search_dict)
 
-                if is_not:
-                    cumulative_bucket -= match_paths
+            print(f"🚀 [Python] Result: {len(matches)} matches found for {category}")
+            self.resultsCounted.emit(active_index, len(matches))
 
-                self.resultsCounted.emit(item.get("panelIndex"), len(matches))
-
-            self._final_architect_list = list(cumulative_bucket)
-            self.totalCountUpdated.emit(len(self._final_architect_list))
-            print(f"✅ Architect Engine: Cumulative Total {len(self._final_architect_list)}")
-            
         except Exception as e:
-            print(f"❌ Architect Logic Error: {e}")
+            print(f"❌ Architect Preview Error: {e}")
 
     @Slot(str, str, result=list)
     def get_filtered_keywords(self, category, filter_text):
@@ -172,21 +184,31 @@ class ArchitectController(QObject):
 
     @Slot(str, str)
     def save_collection(self, name, logic_json):
-        # Implementation for saving rules to JSON (based on your instructions)
         print(f"💾 Saving Collection: {name}")
         self.saveConfirmed.emit(name)
 
     @Slot(str, str)
     def request_category_matches(self, category, items_str):
-        # Format the string exactly how your search engine expects it
         search_value = f"{category} = {items_str}"
-        
-        # Reuse your existing search logic
-        matches = self._run_panel_search(self.library_data, {"category": "category", "value": search_value})
-        
-        # Emit the count back to the HUD
-        # We use -1 so the active panel knows this is a "live" update
+        matches = self._run_panel_search(self.library_data, {"category": category, "value": search_value})
         self.resultsCounted.emit(-1, len(matches))
+
+    @Slot(str)
+    def search_library(self, text):
+        if not text or len(text) < 2:
+            self._search_results = []
+            self.searchResultsChanged.emit()
+            return
+
+        search_item = {"category": "Name", "value": text}
+        matches = self._run_panel_search(self.library_data, search_item)
         
-        # If your QML specifically needs 'onCategoryResultsUpdated', we emit that too
-        # self.categoryResultsUpdated.emit(matches)
+        formatted_results = []
+        for m in matches[:15]:
+            formatted_results.append({
+                "title": m.get("Name", "Unknown"),
+                "filename": m.get("Filename", "")
+            })
+            
+        self._search_results = formatted_results
+        self.searchResultsChanged.emit()
