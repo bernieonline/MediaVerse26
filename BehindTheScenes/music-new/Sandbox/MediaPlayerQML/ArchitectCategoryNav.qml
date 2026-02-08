@@ -27,19 +27,21 @@ Item {
         }
         var finalValue = items.join(", ");
         
+        // Follows FolderNav design: Update the holding tank with the 'Rule' string
+        // Note: If your engine requires paths, the Connection below will override this with the actual list.
         if (parentPanel) {
-            parentPanel.currentResults = [activeCategory + " = " + finalValue];
+            parentPanel.currentResults = (finalValue === "") ? [] : [activeCategory + " = " + finalValue];
         }
-        architectController.request_category_matches(activeCategory, finalValue);
+        
+        if (typeof architectController !== "undefined") {
+            architectController.request_category_matches(activeCategory, finalValue);
+        }
     }
 
     Column {
         id: mainLayout
-        width: parent.width
-        height: parent.height - 20 
-        anchors.top: parent.top
-        anchors.margins: 10
-        spacing: 12
+        width: parent.width; height: parent.height - 20 
+        anchors.top: parent.top; anchors.margins: 10; spacing: 12
 
         // --- NAVIGATION HEADER ---
         Rectangle {
@@ -59,7 +61,8 @@ Item {
                     background: Rectangle { color: "transparent" }
                     onClicked: { 
                         currentSubMode = "main"; activeCategory = ""; 
-                        filterField.text = ""; selectedItemsModel.clear(); 
+                        selectedItemsModel.clear(); 
+                        syncMasterRule();
                     }
                 }
                 Text {
@@ -69,7 +72,7 @@ Item {
             }
         }
 
-        // --- THE VISUAL STACK (Tags) ---
+        // --- SELECTION TAGS ---
         Flow {
             width: parent.width; spacing: 5
             visible: selectedItemsModel.count > 0 && currentSubMode !== "main"
@@ -96,9 +99,8 @@ Item {
             }
         }
 
-        // --- VIEW 1: CATEGORY TILES (RESTORED) ---
+        // --- VIEW 1: CATEGORY GRID ---
         Grid {
-            id: categoryGrid
             visible: currentSubMode === "main"
             columns: 2; spacing: 12; anchors.horizontalCenter: parent.horizontalCenter
             Repeater {
@@ -122,52 +124,73 @@ Item {
             }
         }
 
-        // --- VIEW 2: SEARCH + CLOUD (RESTORED) ---
+        // --- VIEW 2: SEARCH / CLOUD ---
         Column {
             visible: currentSubMode === "search"
             width: parent.width; spacing: 10
             TextField {
                 id: filterField
                 width: parent.width; height: 35; placeholderText: "Filter " + activeCategory + "..."
-                color: "white"; leftPadding: 35
-                background: Rectangle {
-                    color: "#15FFFFFF"; radius: 17
-                    border.color: filterField.activeFocus ? "gold" : "#444"
-                }
+                color: "white"; background: Rectangle { color: "#15FFFFFF"; radius: 17; border.color: filterField.activeFocus ? "gold" : "#444" }
             }
-            
             Flickable {
                 width: parent.width; height: 300; contentHeight: cloudFlow.height; clip: true
                 Flow {
                     id: cloudFlow; width: parent.width; spacing: 6
                     Repeater {
-                        // Crucial: Call Python to get keywords based on active category
-                        model: (currentSubMode === "search") ? architectController.get_filtered_keywords(activeCategory, filterField.text) : []
+                        model: (currentSubMode === "search" && typeof architectController !== "undefined") 
+                               ? architectController.get_filtered_keywords(activeCategory, filterField.text) : []
                         delegate: Button {
                             id: cloudItem; padding: 8
                             contentItem: Text { text: modelData; color: cloudItem.hovered ? "black" : "gold"; font.bold: true; font.pixelSize: 11 }
-                            background: Rectangle {
-                                color: cloudItem.hovered ? "gold" : "transparent"
-                                border.color: "gold"; radius: 14
-                            }
-                            onClicked: {
-                                selectedItemsModel.append({"val": modelData});
-                                syncMasterRule();
-                            }
+                            background: Rectangle { color: cloudItem.hovered ? "gold" : "transparent"; border.color: "gold"; radius: 14; border.width: 1 }
+                            onClicked: { selectedItemsModel.append({"val": modelData}); syncMasterRule(); }
                         }
                     }
                 }
                 ScrollBar.vertical: ScrollBar { active: true }
             }
         }
+
+        // --- VIEW 3: DECADE BUTTONS ---
+        Flow {
+            visible: currentSubMode === "year"
+            width: parent.width; spacing: 8; anchors.horizontalCenter: parent.horizontalCenter
+            Repeater {
+                model: [1930, 1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020]
+                delegate: Button {
+                    id: dBtn
+                    width: (parent.width / 3) - 10; height: 50; text: modelData + "s"
+                    background: Rectangle { color: dBtn.hovered ? "#3300F2FF" : "#11FFFFFF"; radius: 6; border.color: "#00F2FF"; border.width: 1 }
+                    contentItem: Text { text: dBtn.text; color: "white"; font.bold: true; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
+                    onClicked: {
+                        selectedItemsModel.clear();
+                        selectedItemsModel.append({"val": modelData + "-" + (modelData + 9)});
+                        syncMasterRule();
+                    }
+                }
+            }
+        }
     }
 
+    // --- CONNECTIONS (The Handshake) ---
     Connections {
         target: architectController
         ignoreUnknownSignals: true
+        
         function onResultsCounted(panelIndex, panelCount) {
             if (parentPanel && (panelIndex === parentPanel.panelIndex || panelIndex === -1)) {
                 parentPanel.hitCount = panelCount;
+                
+                // Mirroring FolderNav's 're-assertion' logic:
+                // Ensure parentPanel.currentResults reflects the current rule
+                var items = [];
+                for (var i = 0; i < selectedItemsModel.count; i++) {
+                    items.push(selectedItemsModel.get(i).val);
+                }
+                if (items.length > 0) {
+                    parentPanel.currentResults = [activeCategory + " = " + items.join(", ")];
+                }
             }
         }
     }

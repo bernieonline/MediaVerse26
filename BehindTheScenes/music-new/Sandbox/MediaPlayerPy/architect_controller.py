@@ -84,6 +84,12 @@ class ArchitectController(QObject):
             clean_key = mapping.get(category, category)
             clean_val = str(value).lower()
 
+        # --- RESTORED DECADE PREFIX LOGIC ---
+        # Matches the first 3 digits of the year (e.g., '195' matches 1950-1959)
+        if clean_key == "Decade":
+            prefix = clean_val[:3] 
+            return [m for m in source if str(m.get("Year", "")).startswith(prefix)]
+
         return [m for m in source if clean_val in str(m.get(clean_key, "")).lower()]
 
     
@@ -116,20 +122,35 @@ class ArchitectController(QObject):
                 if str(m.get("Filename", "")).replace("/", "\\").lower() in manual_files
             ]
         else:
-            # Standard criteria (Folders, Actors, etc.)
+            # Standard criteria (Folders, Actors, Decade, etc.)
             criteria_item = {"category": mode, "value": search_value}
             matches = self._run_panel_search(self.library_data, criteria_item)
         
+        # --- BREADCRUMB: LIST PROOF TRACE ---
+        # This prints to the console so you can prove the list contents
+        print(f"\n📑 --- ARCHITECT COMMIT PROOF (Panel {index}) ---")
+        print(f"🔎 Mode Identified: {mode}")
+        print(f"🔎 Raw Query: {search_value}")
+        print(f"📊 Total Matches Found: {len(matches)}")
+        
+        if len(matches) > 0:
+            print("🎬 MOVIE LIST CONTENT:")
+            for i, m in enumerate(matches):
+                title = m.get("Name", "Unknown")
+                year = m.get("Year", "####")
+                path = m.get("Filename", "No Path")
+                print(f"  [{i+1}] {title} ({year}) -> {path}")
+        else:
+            print("❌ NO MATCHES: The list is empty. Summary Engine will report 0.")
+        print("-----------------------------------------------\n")
+
         # 4. THE HANDSHAKE: Send results to ArchitectSummary class
-        # This triggers the 'Case 1' logic and the full terminal print-out
+        # This triggers the 'Case 1' logic and the secondary terminal print-out
         total_cumulative_count = self.summary.process_panel_save(index, matches)
         
         # 5. UI Feedback
-        # Update the specific Panel's hit count
         self.resultsCounted.emit(index, len(matches))
-        # Update the HUD Total using the Summary Engine's calculated count
         self.totalCountUpdated.emit(total_cumulative_count) 
-        
         self.saveConfirmed.emit(f"Panel {index} Logic Committed")
 
 
@@ -144,7 +165,6 @@ class ArchitectController(QObject):
             category = active_item.get("category", "")
             value = str(active_item.get("value", "")).strip()
 
-            # HARD ZERO: Return 0 if empty
             if not value:
                 self.resultsCounted.emit(active_index, 0)
                 return
@@ -166,17 +186,11 @@ class ArchitectController(QObject):
                     if target in str(m.get("Filename", "")).replace("/", "\\").lower()
                 ]
             else:
-                mapping = {"Actors": "Actors", "Director": "Director", "Genre": "Genre"}
-                search_dict = {}
-                if " = " in value:
-                    k, v = value.split(" = ", 1)
-                    search_dict[mapping.get(k.strip(), k.strip())] = v.strip()
-                else:
-                    search_dict[mapping.get(category, category)] = value
-                
-                matches = self.collectionLogic.get_collection_results(search_dict)
+                # Direct route for Category Navigation (Actors, Decades, etc.)
+                criteria_item = {"category": category, "value": value}
+                matches = self._run_panel_search(self.library_data, criteria_item)
 
-            print(f"🚀 [Python] Result: {len(matches)} matches found for {category}")
+            print(f"🚀 [Python] Live Preview: {len(matches)} matches found for {category}")
             self.resultsCounted.emit(active_index, len(matches))
 
         except Exception as e:
