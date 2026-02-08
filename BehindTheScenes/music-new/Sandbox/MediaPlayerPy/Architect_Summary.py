@@ -6,7 +6,7 @@ class ArchitectSummary:
         self.cumulative_list = []
         self.cumulative_count = 0
 
-    def process_panel_save(self, panel_num, panel_results, is_and=True, is_filter=False):
+    def process_panel_saveOLD(self, panel_num, panel_results, is_and=True, is_filter=False):
         """
         Processes logic using Full Pathnames as the unique keys.
         """
@@ -72,3 +72,21 @@ class ArchitectSummary:
         
         print("--------------------------------------")
         return self.cumulative_count
+    
+    def process_panel_save(self, index, new_matches, join_type="ADD", is_filtered=False):
+        print(f"\n--- 🧪 ARCHITECT ENGINE: PROCESSING PANEL {index} ---")
+        print(f"Logic Intent: {join_type} | Filter Checkbox: {is_filtered}")
+        print(f"Incoming Items: {len(new_matches)}")
+
+        if index == 0:
+            # Panel 1 is always the foundation
+            self.cumulative_list = new_matches
+            print("✅ LOGIC: Set Foundation (Case 1)")
+        else:
+            # Panel 2+ (This is our test zone)
+            print(f"📡 VERIFICATION: Panel {index} is ready to {join_type} with Filter={is_filtered}")
+            # FOR NOW: We won't change the cumulative list yet, just return the count
+            # This keeps the HUD from breaking while we test the buttons
+        
+        print(f"📊 Cumulative Count remains: {len(self.cumulative_list)}")
+        return len(self.cumulative_list)

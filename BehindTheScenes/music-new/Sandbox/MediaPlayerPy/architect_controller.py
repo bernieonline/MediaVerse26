@@ -93,8 +93,8 @@ class ArchitectController(QObject):
         return [m for m in source if clean_val in str(m.get(clean_key, "")).lower()]
 
     
-    @Slot(int, str, 'QVariantList')
-    def commit_panel_logic(self, index, mode, results):
+    @Slot(int, str, 'QVariantList', str, bool)
+    def commit_panel_logic(self, index, mode, results, join_type="ADD", is_filtered=False):
         """
         The Bridge: Receives data from QML and hands it to the Summary Engine.
         """
@@ -144,14 +144,30 @@ class ArchitectController(QObject):
             print("❌ NO MATCHES: The list is empty. Summary Engine will report 0.")
         print("-----------------------------------------------\n")
 
-        # 4. THE HANDSHAKE: Send results to ArchitectSummary class
-        # This triggers the 'Case 1' logic and the secondary terminal print-out
-        total_cumulative_count = self.summary.process_panel_save(index, matches)
+        # 4. THE HANDSHAKE: Send results AND the new logic flags to the Engine
+        total_cumulative_count = self.summary.process_panel_save(
+            index, 
+            matches, 
+            join_type, 
+            is_filtered
+        )
+
+        # Now 'join_type' is defined and can be passed to the summary
+        total_cumulative_count = self.summary.process_panel_save(
+            index, 
+            matches, 
+            join_type, 
+            is_filtered
+        )
         
         # 5. UI Feedback
         self.resultsCounted.emit(index, len(matches))
         self.totalCountUpdated.emit(total_cumulative_count) 
         self.saveConfirmed.emit(f"Panel {index} Logic Committed")
+
+        
+
+
 
 
     @Slot(str)
