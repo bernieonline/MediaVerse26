@@ -13,12 +13,12 @@ Item {
     property string panelValue: ""
     property string nextGate: "NONE" 
     
-    // THE HOLDING TANK: Stores results from Nav tools before 'SAVE' is clicked
+    // THE HOLDING TANK: Stores results from Nav tools before 'COMMIT' is clicked
     property var currentResults: []
     property bool isNotMode: false 
 
     // Logic Flags
-    property bool filterEnabled: false // Controlled by HUD (index >= 1)
+    property bool filterEnabled: false 
     readonly property bool isFilterActive: filterCheckbox.checked
 
     // Signal for the HUD to listen to
@@ -27,7 +27,6 @@ Item {
     width: 360
     height: 600
 
-    // Fixed path handling for FontLoader
     // --- ICON LOADER ---
     FontLoader { 
         id: iconFont
@@ -38,9 +37,7 @@ Item {
             } else if (typeof _paths !== 'undefined' && _paths.fonts) {
                 p = _paths.fonts;
             }
-            
             if (p === "") return "";
-            
             if (p.indexOf(":") !== -1 && p.indexOf("file:///") === -1) {
                 return "file:///" + p.replace(/\\/g, "/");
             }
@@ -61,7 +58,7 @@ Item {
         anchors.fill: parent
         color: "#1A1A1A"; radius: 12; border.color: "#FFFFFF"; border.width: 1; clip: true; z: 1
 
-        // 1. FLOATING TOOLBAR
+        // 1. PERSISTENT TOOLBAR (Top)
         Rectangle {
             id: toolbar
             width: parent.width - 24 
@@ -100,15 +97,25 @@ Item {
                         leftPadding: filterCheckbox.indicator.width + 4
                         verticalAlignment: Text.AlignVCenter
                     }
-
                     onCheckedChanged: panelRoot.filterChanged()
-                    
-                    ToolTip.visible: hovered
-                    ToolTip.text: "Apply logic to previous panel results only"
-                    ToolTip.delay: 500
                 }
 
                 Item { Layout.fillWidth: true } 
+
+                // --- MOD 2: PERSISTENT HELP BUTTON (H) ---
+                Text {
+                    text: "H"
+                    font.pixelSize: 20; font.bold: true; 
+                    color: helpMA.containsMouse ? "#3498db" : "white"
+                    MouseArea {
+                        id: helpMA; anchors.fill: parent; hoverEnabled: true
+                        onClicked: {
+                            console.log("❓ [UI] Opening Help Overlay...");
+                            // To be linked to the floating help panel
+                        }
+                    }
+                    ToolTip { visible: helpMA.containsMouse; text: "How this system works"; font.pixelSize: 14 }
+                }
 
                 // MODE (Gold M)
                 Text {
@@ -117,28 +124,11 @@ Item {
                         id: modeMA; anchors.fill: parent; hoverEnabled: true
                         onClicked: { 
                             currentMode = "selection"; 
-                            // Clean slate
                             panelRoot.hitCount = 0;
                             panelRoot.currentResults = [];
                         }
                     }
                     ToolTip { visible: modeMA.containsMouse; text: "Main Menu"; font.pixelSize: 16 }
-                }
-
-                // --- HIT COUNT ---
-                Rectangle {
-                    color: "transparent"
-                    Layout.preferredWidth: 50 
-                    Layout.preferredHeight: parent.height 
-                    
-                    Text {
-                        anchors.centerIn: parent
-                        text: panelRoot.hitCount
-                        color: "#00F2FF"; font.pixelSize: 18; font.bold: true
-                    }
-                    
-                    MouseArea { id: countMA; anchors.fill: parent; hoverEnabled: true }
-                    ToolTip { visible: countMA.containsMouse; text: "Matching Items"; font.pixelSize: 16 }
                 }
 
                 // CLOSE (Red X)
@@ -149,18 +139,19 @@ Item {
                         id: closeMA; anchors.fill: parent; hoverEnabled: true
                         onClicked: architectRoot.removePanel(panelIndex)
                     }
-                    ToolTip { visible: closeMA.containsMouse; text: "Close Panel"; font.pixelSize: 16 }
+                    ToolTip { visible: closeMA.containsMouse; text: "Remove Panel"; font.pixelSize: 16 }
                 }
             }
         }
 
-        // 2. CONTENT AREA
+        // 2. CONTENT AREA (Middle)
         Item {
             id: contentContainer
             anchors.top: toolbar.bottom
-            anchors.bottom: saveArea.top 
+            anchors.bottom: footerArea.top 
             anchors.left: parent.left; anchors.right: parent.right; anchors.margins: 10
 
+            // Selection View (Initial state)
             Column {
                 visible: currentMode === "selection"
                 anchors.centerIn: parent 
@@ -178,6 +169,7 @@ Item {
                 Button { text: "🏷️ Category Mode"; width: parent.width * 0.8; height: 55; anchors.horizontalCenter: parent.horizontalCenter; onClicked: currentMode = "category" }
             }
 
+            // Nav View (Active state)
             Loader {
                 id: toolLoader
                 anchors.fill: parent
@@ -196,11 +188,11 @@ Item {
             }
         }
 
-        // 3. STANDARDIZED SAVE BUTTON AREA
+        // 3. PERSISTENT FOOTER (Bottom - Contains SAVE and COMMIT)
         Rectangle {
-            id: saveArea
+            id: footerArea
             width: parent.width
-            height: 60
+            height: 70
             color: "#252525"
             anchors.bottom: parent.bottom
             visible: currentMode !== "selection"
@@ -210,43 +202,70 @@ Item {
                 width: parent.width; height: 1; color: "#33FFFFFF"; anchors.top: parent.top 
             }
 
-            Button {
-                id: saveButton
-                anchors.centerIn: parent
-                width: parent.width - 40
-                height: 40
+            RowLayout {
+                anchors.fill: parent
+                anchors.margins: 10
+                spacing: 12
 
-                contentItem: Text {
-                    text: "COMMIT LOGIC"
-                    color: "white"; font.bold: true; font.pixelSize: 14
-                    horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter
-                }
-
-                background: Rectangle {
-                    color: saveButton.pressed ? "#444" : "#111"
-                    radius: 4; border.color: "#00F2FF"; border.width: 1
-                }
-
-                onClicked: {
-                    console.log("💾 Committing Panel " + panelRoot.panelIndex);
+                // --- MOD 1: BLUE SAVE BUTTON ---
+                Button {
+                    id: saveBtn
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: 40
                     
-                    if (typeof architectController !== "undefined") {
-                        // FIXED: Corrected signature to (int, string, list)
-                        architectController.commit_panel_logic(
-                            panelRoot.panelIndex,
-                            panelRoot.currentMode,
-                            panelRoot.currentResults
-                        );
+                    contentItem: Text {
+                        text: "SAVE"
+                        color: "white"; font.bold: true; font.pixelSize: 14
+                        horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter
                     }
 
-                    if (typeof architectRoot !== "undefined") {
-                        // Keep the local UI rule sync
-                        architectRoot.updateRule(
-                            panelRoot.panelIndex, 
-                            panelRoot.currentMode, 
-                            panelRoot.currentResults, 
-                            filterCheckbox.checked
-                        );
+                    background: Rectangle {
+                        color: saveBtn.pressed ? "#1b4f72" : "#2980b9" // Royal Blue
+                        radius: 4; border.color: "white"; border.width: 1
+                    }
+
+                    onClicked: {
+                        console.log("💾 [UI] Opening Save/Description Dialog...");
+                        // This will trigger the floating dialog with 'Save', 'Back', and 'Bookshelf'
+                    }
+                }
+
+                // --- COMMIT LOGIC BUTTON ---
+                Button {
+                    id: commitBtn
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: 40
+
+                    contentItem: Text {
+                        text: "COMMIT"
+                        color: "white"; font.bold: true; font.pixelSize: 14
+                        horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter
+                    }
+
+                    background: Rectangle {
+                        color: commitBtn.pressed ? "#444" : "#111"
+                        radius: 4; border.color: "#00F2FF"; border.width: 1
+                    }
+
+                    onClicked: {
+                        console.log("🚀 [UI] Committing Panel " + panelRoot.panelIndex);
+                        
+                        if (typeof architectController !== "undefined") {
+                            architectController.commit_panel_logic(
+                                panelRoot.panelIndex,
+                                panelRoot.currentMode,
+                                panelRoot.currentResults
+                            );
+                        }
+
+                        if (typeof architectRoot !== "undefined") {
+                            architectRoot.updateRule(
+                                panelRoot.panelIndex, 
+                                panelRoot.currentMode, 
+                                panelRoot.currentResults, 
+                                filterCheckbox.checked
+                            );
+                        }
                     }
                 }
             }
