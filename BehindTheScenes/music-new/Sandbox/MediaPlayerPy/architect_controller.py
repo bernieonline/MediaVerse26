@@ -3,6 +3,7 @@ import json
 import logging
 from PySide6.QtCore import QObject, Signal, Slot, Property
 from project_paths import paths
+from Architect_Summary import ArchitectSummary
 
 class ArchitectController(QObject):
     resultsCounted = Signal(int, int)   
@@ -19,6 +20,9 @@ class ArchitectController(QObject):
         self._final_architect_list = []
         self.collectionLogic = xml_logic 
         self.load_library()
+
+        # Initialize the engine that will handle Case 1, Case 2, etc.
+        self.summary = ArchitectSummary()
 
     @Property('QVariantList', notify=searchResultsChanged)
     def searchResultsModel(self):
@@ -82,23 +86,28 @@ class ArchitectController(QObject):
 
         return [m for m in source if clean_val in str(m.get(clean_key, "")).lower()]
 
+    
     @Slot(int, str, 'QVariantList')
     def commit_panel_logic(self, index, mode, results):
         """
-        The Bridge: Receives data from a QML panel and calculates the real-time hit count.
+        The Bridge: Receives data from QML and hands it to the Summary Engine.
         """
+        # 1. Extract the primary search string from the QML result list
         search_value = str(results[0]) if results else ""
         
-        # HARD ZERO: Handle empty search values immediately
+        # 2. Hard Zero: If no selection, tell Summary 0 items were passed
         if not search_value or search_value == "" or search_value == "search_files = ":
-            print(f"🚀 [Python] Committing Panel {index} | Empty | Matches: 0")
+            print(f"⚠️ [Python] Panel {index} committed with no data.")
+            self.summary.process_panel_save(index, [])
             self.resultsCounted.emit(index, 0)
             self.totalCountUpdated.emit(0)
             return
 
         matches = []
         
+        # 3. Mode Processing: Convert the UI string into a list of movie records
         if (mode == "search_files") or (mode == "search" and "search_files =" in search_value):
+            # Peel the paths out: "search_files = path1|path2"
             raw_paths = search_value.split("=")[1].strip() if " = " in search_value else search_value
             manual_files = [f.replace("/", "\\").lower() for f in raw_paths.split("|") if f.strip()]
             
@@ -107,13 +116,22 @@ class ArchitectController(QObject):
                 if str(m.get("Filename", "")).replace("/", "\\").lower() in manual_files
             ]
         else:
+            # Standard criteria (Folders, Actors, etc.)
             criteria_item = {"category": mode, "value": search_value}
             matches = self._run_panel_search(self.library_data, criteria_item)
         
-        print(f"🚀 [Python] Committing Panel {index} | Mode: {mode} | Matches: {len(matches)}")
+        # 4. THE HANDSHAKE: Send results to ArchitectSummary class
+        # This triggers the 'Case 1' logic and the full terminal print-out
+        total_cumulative_count = self.summary.process_panel_save(index, matches)
+        
+        # 5. UI Feedback
+        # Update the specific Panel's hit count
         self.resultsCounted.emit(index, len(matches))
-        self.totalCountUpdated.emit(len(matches)) 
+        # Update the HUD Total using the Summary Engine's calculated count
+        self.totalCountUpdated.emit(total_cumulative_count) 
+        
         self.saveConfirmed.emit(f"Panel {index} Logic Committed")
+
 
     @Slot(str)
     def update_live_preview(self, criteria_json):
