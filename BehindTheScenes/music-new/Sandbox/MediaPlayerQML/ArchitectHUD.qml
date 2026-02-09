@@ -16,8 +16,9 @@ Rectangle {
     readonly property int joinGap: 40 
     
     property int totalMatches: 0
-    property var filterRules: []
+    property bool filterEnabled: false
 
+    // --- LOGIC MODEL ---
     ListModel {
         id: criteriaModel
         ListElement { 
@@ -29,59 +30,38 @@ Rectangle {
         }
     }
 
-    // --- THE REMOVAL FUNCTION ---
+    // --- VAULT MESSENGER FUNCTIONS ---
+    
     function removePanel(index) {
         if (criteriaModel.count <= 1) {
-            updateRule(0, "selection", "");
+            // Reset the only panel instead of deleting it
+            criteriaModel.setProperty(0, "panelType", "selection");
+            criteriaModel.setProperty(0, "panelHits", 0);
+            if (typeof architectController !== "undefined") architectController.reset_logic();
             return;
         }
-
         criteriaModel.remove(index);
-
+        
+        // Ensure the new last panel has no trailing gate
         if (criteriaModel.count > 0) {
-            var lastIdx = criteriaModel.count - 1;
-            criteriaModel.setProperty(lastIdx, "gateValue", "NONE");
+            criteriaModel.setProperty(criteriaModel.count - 1, "gateValue", "NONE");
         }
-
-        updateRule(-1, "refresh", ""); 
+        
+        // Tell Python to re-evaluate the vault based on the remaining slots
+        if (typeof architectController !== "undefined") {
+            architectController.recalculate_foundation();
+        }
     }
 
-    // --- FIXED HELPER FUNCTION ---
-    function updateRule(index, type, value) {
-        // SURGICAL FIX: QML ListModels are strictly typed. 
-        // If 'value' is an Array (from currentResults), flatten it to a String.
-        var safeValue = Array.isArray(value) ? value.join("|") : value.toString();
-
-        // Update the model first
+    // This function now primarily updates the UI Model; 
+    // The "ArchitectPanel.qml" itself handles the direct Python Vault commit.
+    function syncPanelData(index, type, hits) {
         if (index >= 0 && index < criteriaModel.count) {
             criteriaModel.setProperty(index, "panelType", type);
-            criteriaModel.setProperty(index, "panelValue", safeValue);
-        }
-
-        // Rebuild the logic rules for Python
-        var tempRules = [];
-        for (var i = 0; i < criteriaModel.count; i++) {
-            var item = criteriaModel.get(i);
-            if (item.panelType !== "selection" && item.panelType !== "refresh") {
-                tempRules.push({
-                    "panelIndex": i,
-                    "category": item.panelType,
-                    "value": item.panelValue, // This is now a safe String
-                    "gateValue": item.gateValue,
-                    "checked": item.isFilterMode,
-                    "isNot": (item.gateValue === "NOT")
-                });
-            }
-        }
-        filterRules = tempRules;
-        
-        if (typeof architectController !== "undefined") {
-            // Send the finalized ruleset to the Python Engine
-            architectController.update_live_preview(JSON.stringify(filterRules));
+            criteriaModel.setProperty(index, "panelHits", hits);
         }
     }
 
-    // --- THE STAGE ---
     Item {
         id: stage
         width: parent.width
@@ -96,80 +76,65 @@ Rectangle {
             Repeater {
                 model: criteriaModel
                 delegate: Row {
-                    // 1. THE PANEL
                     ArchitectPanel {
                         id: mainPanel
                         width: architectRoot.cardWidth
                         height: architectRoot.cardHeight
                         panelIndex: index
-                        hitCount: model.panelHits || 0
-                        nextGate: model.gateValue
                         
-                        // Rule: Only panels 2 and up (index 1+) can use the Filter Checkbox
+                        // Syncing properties from the vault-fed model
+                        hitCount: model.panelHits
+                        currentMode: model.panelType
+                        
+                        // Panel 0 is always the Foundation (No Filter Toggle)
                         filterEnabled: index >= 1
                         
-                        onFilterChanged: {
-                            model.isFilterMode = mainPanel.isFilterActive;
-                            architectRoot.updateRule(index, mainPanel.currentMode, mainPanel.currentResults);
-                        }
-                        
-                        // When the panel mode changes (e.g. Selection -> Folder)
-                        onCurrentModeChanged: {
-                             architectRoot.updateRule(index, mainPanel.currentMode, mainPanel.currentResults);
-                        }
-
-                        onNextGateChanged: {
-                            if (model.gateValue !== nextGate) {
-                                model.gateValue = nextGate;
-                                architectRoot.updateRule(index, mainPanel.currentMode, mainPanel.currentResults);
-                            }
-                        }
+                        // When the Panel commits to the Vault, update our local UI model
+                        onCurrentModeChanged: architectRoot.syncPanelData(index, currentMode, hitCount)
                     }
 
-                    // 2. THE GATE (The Joiner)
+                    // --- THE GATE (The Joiner) ---
                     Item {
                         width: architectRoot.joinGap
                         height: architectRoot.cardHeight
+                        // Only show gates between panels, max 4 panels total
                         visible: index < 3 && mainPanel.currentMode !== "selection"
 
                         Column {
                             width: 50
                             anchors.horizontalCenter: parent.horizontalCenter
-                            anchors.top: parent.bottom 
-                            anchors.topMargin: -120 // Adjusted for better visibility
-                            spacing: 8
+                            anchors.bottom: parent.bottom
+                            anchors.bottomMargin: 40
+                            spacing: 12
 
-                            // AND/ADD Gate
+                            // ADD GATE (Union)
                             Rectangle {
                                 width: 44; height: 44; radius: 22
                                 color: model.gateValue === "AND" ? "#00F2FF" : "#1A1A1A"
                                 border.color: "white"; border.width: 1
-                                Text { anchors.centerIn: parent; text: "+"; color: "white"; font.pixelSize: 18; font.bold: true }
+                                Text { anchors.centerIn: parent; text: "+"; color: "white"; font.pixelSize: 20; font.bold: true }
+                                
                                 MouseArea {
                                     anchors.fill: parent
                                     onClicked: {
-                                        if (model.gateValue === "NONE") {
+                                        model.gateValue = "AND";
+                                        if (criteriaModel.count <= index + 1) {
                                             criteriaModel.append({ "panelType": "selection", "panelValue": "", "gateValue": "NONE", "panelHits": 0, "isFilterMode": false });
                                         }
-                                        model.gateValue = "AND";
+                                        // Update Python if needed (Handled by Panel Commit usually)
                                     }
                                 }
                             }
 
-                            // NOT/SUBTRACT Gate
+                            // SUBTRACT GATE (Not yet implemented in vault, but UI ready)
                             Rectangle {
                                 width: 44; height: 44; radius: 22
                                 color: model.gateValue === "NOT" ? "#FF0055" : "#1A1A1A"
                                 border.color: "white"; border.width: 1
-                                Text { anchors.centerIn: parent; text: "-"; color: "white"; font.pixelSize: 18; font.bold: true }
+                                Text { anchors.centerIn: parent; text: "-"; color: "white"; font.pixelSize: 20; font.bold: true }
                                 MouseArea {
                                     anchors.fill: parent
-                                    onClicked: {
-                                        if (model.gateValue === "NONE") {
-                                            criteriaModel.append({ "panelType": "selection", "panelValue": "", "gateValue": "NONE", "panelHits": 0, "isFilterMode": false });
-                                        }
-                                        model.gateValue = "NOT";
-                                    }
+                                    onClicked: model.gateValue = "NOT"
                                 }
                             }
                         }
@@ -182,55 +147,59 @@ Rectangle {
     // --- MASTER FOOTER ---
     Rectangle {
         id: architectFooter
-        width: parent.width; height: 120
-        color: "#050505"
-        anchors.bottom: parent.bottom
-        z: 1000
+        width: parent.width; height: 120; color: "#050505"
+        anchors.bottom: parent.bottom; z: 1000
 
         Rectangle { width: parent.width; height: 1; color: "#22FFFFFF"; anchors.top: parent.top }
 
         Row {
-            anchors.centerIn: parent
-            spacing: 60
+            anchors.centerIn: parent; spacing: 60
 
             Column {
-                anchors.verticalCenter: parent.verticalCenter
-                Text { text: "CUMULATIVE MATCHES"; color: "#88FFFFFF"; font.pixelSize: 11 }
-                Text { text: architectRoot.totalMatches; color: "#00F2FF"; font.pixelSize: 32; font.bold: true }
+                spacing: 2
+                Text { text: "CUMULATIVE MATCHES"; color: "#88FFFFFF"; font.pixelSize: 11; font.letterSpacing: 1 }
+                Text { 
+                    text: architectRoot.totalMatches
+                    color: "#00F2FF"; font.pixelSize: 36; font.bold: true 
+                }
             }
 
             Button {
                 id: resetBtn
-                width: 150; height: 45
-                text: "RESET SCHEME"
+                width: 150; height: 45; text: "RESET SCHEME"
                 onClicked: {
                     criteriaModel.clear();
                     criteriaModel.append({ "panelType": "selection", "panelValue": "", "gateValue": "NONE", "panelHits": 0, "isFilterMode": false });
-                    architectRoot.totalMatches = 0;
+                    if (typeof architectController !== "undefined") architectController.reset_logic(); 
                 }
             }
 
             Button {
                 id: exitBtn
-                width: 150; height: 45
-                text: "EXIT ARCHITECT"
-                onClicked: architectRoot.visible = false
+                width: 150; height: 45; text: "EXIT ARCHITECT"
+                onClicked: {
+                    architectRoot.visible = false
+                    // We don't necessarily reset on exit now, allowing "Longevity"
+                }
             }
         }
     }
 
+    // --- VAULT CONNECTION ---
     Connections {
         target: (typeof architectController !== "undefined") ? architectController : null
         ignoreUnknownSignals: true
         
+        // Listen for the Vault's recalculated total
+        function onCountChanged(total) {
+            architectRoot.totalMatches = total;
+        }
+
+        // Listen for individual panel updates if Python pushes them back
         function onResultsCounted(panelIndex, panelCount) { 
             if (panelIndex >= 0 && panelIndex < criteriaModel.count) {
                 criteriaModel.setProperty(panelIndex, "panelHits", panelCount);
             }
-        }
-
-        function onTotalCountUpdated(total) {
-            architectRoot.totalMatches = total;
         }
     }
 }

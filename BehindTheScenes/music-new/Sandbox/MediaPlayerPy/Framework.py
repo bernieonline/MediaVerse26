@@ -109,6 +109,10 @@ def main():
         # Qt Application & Engine Setup
         # --------------------------------------------------------
         app = QApplication(sys.argv)
+
+
+
+
         
         # Setup DLLs and Plugins
         pyside_dir = Path(sys.modules["PySide6"].__file__).parent
@@ -117,13 +121,25 @@ def main():
             os.add_dll_directory(str(pyside_dir))
 
         engine = QQmlApplicationEngine()
+
+        def handle_qml_error(warnings):
+            for warning in warnings:
+                print(f"❌ QML ERROR: {warning.toString()}")
+
+        engine.warnings.connect(handle_qml_error)
+
+
+
+
+
         ctx = engine.rootContext()
 
         #playbackManager
         router = PlaybackRouter()
 
         #Architect
-        architect_engine = ArchitectController(xml_logic=xml_logic)
+        #architect_engine = ArchitectController(xml_logic=xml_logic)
+        architect_engine = ArchitectController()
 
      
 
@@ -157,7 +173,8 @@ def main():
         ctx.setContextProperty("SettingsManager", settings_manager)
         ctx.setContextProperty("centralMenuData", settings_manager.menu_data) # Point to manager's data
         
-        playback_bridge = PlaybackQmlBridge()
+        #playback_bridge = PlaybackQmlBridge()
+        playback_bridge = router.http_bridge
 
         search_controller = SearchController()
         ctx.setContextProperty("playbackBridge", playback_bridge)

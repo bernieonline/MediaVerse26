@@ -1,262 +1,112 @@
-import os
-import json
-import logging
-from PySide6.QtCore import QObject, Signal, Slot, Property
-from project_paths import paths
-from Architect_Summary import ArchitectSummary
+from PySide6.QtCore import QObject, Slot, Signal
 
 class ArchitectController(QObject):
-    resultsCounted = Signal(int, int)   
-    foldersUpdated = Signal(list)
-    searchResultsUpdated = Signal(list) 
-    saveConfirmed = Signal(str)
-    searchResultsChanged = Signal()
-    totalCountUpdated = Signal(int)     
+    # Signal to tell the HUD to update its display count
+    countChanged = Signal(int)
 
-    def __init__(self, xml_logic=None):
+    def __init__(self):
         super().__init__()
-        self.library_data = []
-        self._search_results = [] 
-        self._final_architect_list = []
-        self.collectionLogic = xml_logic 
-        self.load_library()
+        # THE VAULT: 4 slots for 4 panels. Persistent and Stable.
+        self._vault = {
+            0: {"movies": set(), "mode": "selection", "filter": False},
+            1: {"movies": set(), "mode": "selection", "filter": False},
+            2: {"movies": set(), "mode": "selection", "filter": False},
+            3: {"movies": set(), "mode": "selection", "filter": False}
+        }
+        self.foundation_list = [] # The final "Calculated Truth"
 
-        # Initialize the engine that will handle Case 1, Case 2, etc.
-        self.summary = ArchitectSummary()
+    @Slot(int, str, list, bool)
+    def commit_to_vault(self, index, mode, movie_list, is_filter):
+        """Secures data from a specific panel into its vault slot."""
+        # We use a set() for high-speed math (Intersections/Unions)
+        movie_set = set(movie_list)
+        
+        self._vault[index] = {
+            "movies": movie_set,
+            "mode": mode,
+            "filter": is_filter
+        }
+        
+        print(f"🔒 [VAULT] Slot {index} Locked. Items: {len(movie_set)} | Mode: {mode} | Filter: {is_filter}")
+        
+        # Every time a panel is committed, we re-run the chain of logic
+        self.recalculate_foundation()
 
-    @Property('QVariantList', notify=searchResultsChanged)
-    def searchResultsModel(self):
-        return self._search_results
+    def recalculate_foundation(self):
+        """The Engine: Processes all 4 slots to build the final collection."""
+        temp_result = set()
+        first_active_found = False
+
+        for i in range(4):
+            slot = self._vault[i]
+            current_movies = slot["movies"]
+            
+            # Skip empty slots that haven't been 'Selection'ed yet
+            if not current_movies and slot["mode"] == "selection":
+                continue
+
+            if not first_active_found:
+                # The first panel with data becomes the Foundation
+                temp_result = current_movies
+                first_active_found = True
+                print(f"🏗️ Foundation established by Panel {i} with {len(temp_result)} items.")
+            else:
+                # Subsequent panels apply logic
+                if slot["filter"]:
+                    # SURGICAL FILTER (AND): Only keep what's in both
+                    temp_result = temp_result.intersection(current_movies)
+                    print(f"✂️ Panel {i} filtered results down to {len(temp_result)} items.")
+                else:
+                    # MERGE UNION (OR): Add new items to the pile
+                    temp_result = temp_result.union(current_movies)
+                    print(f"➕ Panel {i} added items. Total now: {len(temp_result)}")
+
+        self.foundation_list = list(temp_result)
+        self.countChanged.emit(len(self.foundation_list))
+        print(f"✅ FINAL COLLECTION READY: {len(self.foundation_list)} items.")
 
     @Slot()
-    def load_library(self):
-        try:
-            target_path = paths["xmldate"]
-            if os.path.exists(target_path):
-                with open(target_path, 'r', encoding='utf-8') as f:
-                    self.library_data = json.load(f)
-                logging.info(f"🎯 Architect Engine: Loaded {len(self.library_data)} records.")
-        except Exception as e:
-            logging.error(f"❌ Architect Engine: Load failed: {e}")
-
-    @Slot(str)
-    def get_sub_folders(self, current_path):
-        """ Used by ArchitectFolderNav to drill down into library directories """
-        base_root = "W:\\Collection"
-        search_path = os.path.join(base_root, current_path.replace("/", "\\"))
-        if not search_path.endswith("\\"): search_path += "\\"
-
-        folders = set()
-        matches_in_folder = 0
-
-        for m in self.library_data:
-            fpath = m.get("Filename", "")
-            if fpath.lower().startswith(search_path.lower()):
-                matches_in_folder += 1
-                relative = fpath[len(search_path):]
-                parts = relative.split("\\")
-                if len(parts) > 1: 
-                    folders.add(parts[0])
+    def save_and_purge(self):
+        """Longevity ends here. Transfers data to DB and clears memory."""
+        # 1. Logic to save self.foundation_list to your JSON/Database
+        print("💾 Saving final collection to system...")
         
-        self.foldersUpdated.emit(sorted(list(folders)))
-        self.resultsCounted.emit(-1, matches_in_folder)
+        # 2. Reset the Vault
+        self.__init__()
+        print("🧹 Vault purged. Ready for next build.")
 
-    def _run_panel_search(self, source, item):
-        """ Internal logic for surgical filtering """
-        category = item.get("category", "")
-        value = str(item.get("value", "")).strip()
-        
-        # HARD ZERO: Return empty list if no value is provided
-        if not value or value == "":
-            return []
+    def recalculate_foundation(self):
+        """The Engine: Processes all 4 slots using the Gate Logic."""
+        temp_result = set()
+        first_active_found = False
 
-        if category == "folder":
-            target = value.replace("/", "\\").lower()
-            return [m for m in source if target in str(m.get("Filename", "")).replace("/", "\\").lower()]
+        # We iterate through the vault slots we've established
+        for i in range(4):
+            slot = self._vault[i]
+            current_movies = slot["movies"]
             
-        mapping = {"Actors": "Actors", "Director": "Director", "Genre": "Genre", "Keywords": "Keywords", "Series": "Series"}
-        
-        if " = " in str(value):
-            key_part, val_part = str(value).split(" = ", 1)
-            clean_key = mapping.get(key_part.strip(), key_part.strip())
-            clean_val = val_part.strip().lower()
-        else:
-            clean_key = mapping.get(category, category)
-            clean_val = str(value).lower()
+            # Skip empty/uninitialized panels
+            if not current_movies and slot["mode"] == "selection":
+                continue
 
-        # --- RESTORED DECADE PREFIX LOGIC ---
-        # Matches the first 3 digits of the year (e.g., '195' matches 1950-1959)
-        if clean_key == "Decade":
-            prefix = clean_val[:3] 
-            return [m for m in source if str(m.get("Year", "")).startswith(prefix)]
-
-        return [m for m in source if clean_val in str(m.get(clean_key, "")).lower()]
-
-    
-    @Slot(int, str, 'QVariantList', str, bool)
-    def commit_panel_logic(self, index, mode, results, join_type="ADD", is_filtered=False):
-        """
-        The Bridge: Receives data from QML and hands it to the Summary Engine.
-        """
-        # 1. Extract the primary search string from the QML result list
-        search_value = str(results[0]) if results else ""
-        
-        # 2. Hard Zero: If no selection, tell Summary 0 items were passed
-        if not search_value or search_value == "" or search_value == "search_files = ":
-            print(f"⚠️ [Python] Panel {index} committed with no data.")
-            self.summary.process_panel_save(index, [])
-            self.resultsCounted.emit(index, 0)
-            self.totalCountUpdated.emit(0)
-            return
-
-        matches = []
-        
-        # 3. Mode Processing: Convert the UI string into a list of movie records
-        if (mode == "search_files") or (mode == "search" and "search_files =" in search_value):
-            # Peel the paths out: "search_files = path1|path2"
-            raw_paths = search_value.split("=")[1].strip() if " = " in search_value else search_value
-            manual_files = [f.replace("/", "\\").lower() for f in raw_paths.split("|") if f.strip()]
-            
-            matches = [
-                m for m in self.library_data 
-                if str(m.get("Filename", "")).replace("/", "\\").lower() in manual_files
-            ]
-        else:
-            # Standard criteria (Folders, Actors, Decade, etc.)
-            criteria_item = {"category": mode, "value": search_value}
-            matches = self._run_panel_search(self.library_data, criteria_item)
-        
-        # --- BREADCRUMB: LIST PROOF TRACE ---
-        # This prints to the console so you can prove the list contents
-        print(f"\n📑 --- ARCHITECT COMMIT PROOF (Panel {index}) ---")
-        print(f"🔎 Mode Identified: {mode}")
-        print(f"🔎 Raw Query: {search_value}")
-        print(f"📊 Total Matches Found: {len(matches)}")
-        
-        if len(matches) > 0:
-            print("🎬 MOVIE LIST CONTENT:")
-            for i, m in enumerate(matches):
-                title = m.get("Name", "Unknown")
-                year = m.get("Year", "####")
-                path = m.get("Filename", "No Path")
-                print(f"  [{i+1}] {title} ({year}) -> {path}")
-        else:
-            print("❌ NO MATCHES: The list is empty. Summary Engine will report 0.")
-        print("-----------------------------------------------\n")
-
-        # 4. THE HANDSHAKE: Send results AND the new logic flags to the Engine
-        total_cumulative_count = self.summary.process_panel_save(
-            index, 
-            matches, 
-            join_type, 
-            is_filtered
-        )
-
-        # Now 'join_type' is defined and can be passed to the summary
-        total_cumulative_count = self.summary.process_panel_save(
-            index, 
-            matches, 
-            join_type, 
-            is_filtered
-        )
-        
-        # 5. UI Feedback
-        self.resultsCounted.emit(index, len(matches))
-        self.totalCountUpdated.emit(total_cumulative_count) 
-        self.saveConfirmed.emit(f"Panel {index} Logic Committed")
-
-        
-
-
-
-
-    @Slot(str)
-    def update_live_preview(self, criteria_json):
-        try:
-            criteria_list = json.loads(criteria_json)
-            if not criteria_list: return
-
-            active_item = criteria_list[-1]
-            active_index = active_item.get("panelIndex", 0)
-            category = active_item.get("category", "")
-            value = str(active_item.get("value", "")).strip()
-
-            if not value:
-                self.resultsCounted.emit(active_index, 0)
-                return
-
-            matches = []
-
-            if category == "search_files" or (category == "search" and "search_files =" in value):
-                raw_paths = value.split("=")[1].strip() if " = " in value else value
-                manual_files = [f.replace("/", "\\").lower() for f in raw_paths.split("|") if f.strip()]
-                
-                matches = [
-                    m for m in self.library_data 
-                    if str(m.get("Filename", "")).replace("/", "\\").lower() in manual_files
-                ]
-            elif category == "folder":
-                target = value.replace("/", "\\").lower()
-                matches = [
-                    m for m in self.library_data 
-                    if target in str(m.get("Filename", "")).replace("/", "\\").lower()
-                ]
+            if not first_active_found:
+                # Establishing the baseline
+                temp_result = current_movies
+                first_active_found = True
+                print(f"🏗️ Slot {i} set as Foundation.")
             else:
-                # Direct route for Category Navigation (Actors, Decades, etc.)
-                criteria_item = {"category": category, "value": value}
-                matches = self._run_panel_search(self.library_data, criteria_item)
+                # Apply Gate Logic from the PREVIOUS panel's choice
+                # (Panel 0's gate determines how Panel 1 joins the pile)
+                # Note: You can pass the gate value along with the commit_to_vault
+                gate = slot.get("gate", "AND") 
 
-            print(f"🚀 [Python] Live Preview: {len(matches)} matches found for {category}")
-            self.resultsCounted.emit(active_index, len(matches))
+                if gate == "NOT":
+                    temp_result = temp_result.difference(current_movies)
+                    print(f"➖ Slot {i} subtracted. Remaining: {len(temp_result)}")
+                else:
+                    # Default to ADD/UNION logic
+                    temp_result = temp_result.union(current_movies)
+                    print(f"➕ Slot {i} added. Total: {len(temp_result)}")
 
-        except Exception as e:
-            print(f"❌ Architect Preview Error: {e}")
-
-    @Slot(str, str, result=list)
-    def get_filtered_keywords(self, category, filter_text):
-        try:
-            keywords = set()
-            search_term = filter_text.lower()
-            mapping = {"Actors": "Actors", "Director": "Director", "Genre": "Genre", "Keywords": "Keywords", "Series": "Series"}
-            cat_key = mapping.get(category, category)
-            for movie in self.library_data:
-                data = movie.get(cat_key, "")
-                if not data: continue
-                items = data if isinstance(data, list) else str(data).split(";")
-                for item in items:
-                    clean_item = item.strip()
-                    if not search_term or search_term in clean_item.lower():
-                        keywords.add(clean_item)
-            return sorted(list(keywords))[:100]
-        except: return []
-
-    @Slot(str, str)
-    def save_collection(self, name, logic_json):
-        print(f"💾 Saving Collection: {name}")
-        self.saveConfirmed.emit(name)
-
-    @Slot(str, str)
-    def request_category_matches(self, category, items_str):
-        search_value = f"{category} = {items_str}"
-        matches = self._run_panel_search(self.library_data, {"category": category, "value": search_value})
-        self.resultsCounted.emit(-1, len(matches))
-
-    @Slot(str)
-    def search_library(self, text):
-        if not text or len(text) < 2:
-            self._search_results = []
-            self.searchResultsChanged.emit()
-            return
-
-        search_item = {"category": "Name", "value": text}
-        matches = self._run_panel_search(self.library_data, search_item)
-        
-        formatted_results = []
-        for m in matches[:15]:
-            formatted_results.append({
-                "title": m.get("Name", "Unknown"),
-                "filename": m.get("Filename", "")
-            })
-            
-        self._search_results = formatted_results
-        self.searchResultsChanged.emit()
+        self.foundation_list = list(temp_result)
+        self.countChanged.emit(len(self.foundation_list))
