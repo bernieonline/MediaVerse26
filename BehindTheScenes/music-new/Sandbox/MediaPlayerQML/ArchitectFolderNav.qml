@@ -147,7 +147,7 @@ Item {
                 folderListModel.append({ "modelData": folders[i] });
             }
             // Ensure the holding tank matches our current navigation state
-            if (parentPanel) parentPanel.currentResults = [currentRelativePath];
+            if (parentPanel) parentPanel.stagingResults = [currentRelativePath];
         }
 
         function onResultsCounted(panelIndex, panelCount) {

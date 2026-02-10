@@ -9,122 +9,210 @@ Item {
     // --- STABLE PROPERTIES ---
     property int panelIndex: 0
     property int hitCount: 0
-
-    property bool filterEnabled: false
-
+    property bool filterEnabled: false 
     property string currentMode: "selection" 
     
-    // The "Staging Area" - purely for the UI to show what's happening
+    // The "Staging Area" for results before Commit
     property var stagingResults: []
-    property bool isFilterMode: filterCheckbox.checked
 
     width: 360
     height: 600
 
-    // --- MAIN FRAME ---
+    // --- 1. THE PERFECT GLOW (Visual Gold Standard) ---
+    RectangularGlow {
+        id: effect
+        anchors.fill: cardFrame
+        glowRadius: 18        
+        spread: 0.18        
+        //color: "#AAFFFFFF"    // White luminosity halo
+        color: "#99FFD700"    // Goldenrod with 60% alpha for luminosity
+        cornerRadius: 12
+        z: 0
+    }
+
+    // --- 2. THE MAIN FRAME ---
     Rectangle {
         id: cardFrame
+        // Margins allow the glow to shine outside the white border
         anchors.fill: parent
-        color: "#1A1A1A"; radius: 12; border.color: "#FFFFFF"; border.width: 1; clip: true; z: 1
+        anchors.margins: 15 
+        
+        color: "#1A1A1A"
+        radius: 12 
+        border.color: "#FFFFFF" // Pure White Border
+        border.width: 1
+        clip: true 
+        z: 1
 
-        // 1. TOOLBAR
+        // --- 3. TOOLBAR (Restored Visuals + New Help Icon) ---
         Rectangle {
             id: toolbar
-            width: parent.width - 24; height: 48; color: "#2C2C2C"; radius: 8
-            anchors { top: parent.top; topMargin: 12; horizontalCenter: parent.horizontalCenter }
+            width: parent.width - 20; height: 48; color: "#2C2C2C"; radius: 8
+            anchors { top: parent.top; topMargin: 10; horizontalCenter: parent.horizontalCenter }
             z: 100
+            border.color: "#22FFFFFF"; border.width: 1
 
             RowLayout {
                 anchors.fill: parent; anchors.leftMargin: 12; anchors.rightMargin: 12
+                spacing: 8
                 
                 Text {
-                    text: "PANEL " + (panelIndex + 1) + " [" + panelRoot.hitCount + "]"
-                    color: "white"; font.bold: true; opacity: 0.6
+                    text: "#" + (panelIndex + 1)
+                    color: "white"; font.bold: true; opacity: 0.5; font.pixelSize: 12
                 }
 
+                // Filter Checkbox (Cyan accents)
                 CheckBox {
                     id: filterCheckbox
                     text: "FILTER"
-                    visible: currentMode !== "selection"
-                    onCheckedChanged: {
-                        // Immediately update the vault's filter state for this index
-                        if (typeof architectController !== "undefined") {
-                            architectController.update_vault_filter(panelIndex, checked)
-                        }
+                    visible: currentMode !== "selection" && panelRoot.filterEnabled
+                    contentItem: Text {
+                        text: filterCheckbox.text
+                        font.pixelSize: 10; font.bold: true
+                        color: filterCheckbox.checked ? "#00F2FF" : "#88FFFFFF"
+                        leftPadding: filterCheckbox.indicator.width + 4
+                        verticalAlignment: Text.AlignVCenter
                     }
                 }
 
                 Item { Layout.fillWidth: true } 
 
-                // Reset Mode Button
-                Button {
-                    text: "↺"
-                    onClicked: currentMode = "selection"
+                // HELP BUTTON (Future Help Panel Trigger)
+                Rectangle {
+                    id: helpBtn
+                    width: 26; height: 26; radius: 13
+                    color: helpMouse.containsMouse ? "#3300F2FF" : "transparent"
+                    border.color: "#00F2FF"; border.width: 1
+                    Layout.alignment: Qt.AlignVCenter
+
+                    Text {
+                        anchors.centerIn: parent
+                        text: "H"; color: "white"; font.bold: true; font.pixelSize: 13
+                    }
+
+                    MouseArea {
+                        id: helpMouse
+                        anchors.fill: parent; hoverEnabled: true
+                        onClicked: console.log("❓ Help requested for panel: " + panelIndex)
+                    }
+                    ToolTip.visible: helpMouse.containsMouse
+                    ToolTip.text: "View logic documentation"
+                    ToolTip.delay: 400
+                }
+
+                // GOLD MENU (M)
+                Text {
+                    text: "M"; font.pixelSize: 22; font.bold: true; color: "gold"
+                    opacity: menuMouse.containsMouse ? 1.0 : 0.8
+                    MouseArea { 
+                        id: menuMouse; anchors.fill: parent; hoverEnabled: true
+                        onClicked: currentMode = "selection" 
+                    }
+                }
+
+                // CYAN HIT COUNT
+                Text {
+                    text: panelRoot.hitCount
+                    color: "#00F2FF"; font.pixelSize: 18; font.bold: true
+                    Layout.preferredWidth: 35; horizontalAlignment: Text.AlignHCenter
+                }
+
+                // RED CLOSE (X)
+                Text {
+                    text: "×"; font.pixelSize: 26; color: "#FF4444"
+                    opacity: closeMouse.containsMouse ? 1.0 : 0.7
+                    MouseArea { 
+                        id: closeMouse; anchors.fill: parent; hoverEnabled: true
+                        onClicked: if (typeof architectRoot !== "undefined") architectRoot.removePanel(panelIndex)
+                    }
                 }
             }
         }
 
-        // 2. NAV LOADERS (The Input Devices)
+        // --- 4. CONTENT AREA (Nav Loaders) ---
         Loader {
             id: toolLoader
             anchors.top: toolbar.bottom; anchors.bottom: footerArea.top
-            anchors.left: parent.left; anchors.right: parent.right; anchors.margins: 10
+            anchors.left: parent.left; anchors.right: parent.right; anchors.margins: 5
+            z: 5
             source: {
                 if (currentMode === "folder") return "ArchitectFolderNav.qml";
                 if (currentMode === "search") return "ArchitectSearchNav.qml";
                 if (currentMode === "category") return "ArchitectCategoryNav.qml";
                 return "";
             }
-            onLoaded: {
-                if (item) {
-                    item.parentPanel = panelRoot
-                    // Update our staging count as the user interacts
-                    panelRoot.hitCount = Qt.binding(function() { return item.resultsCount || 0 })
-                    panelRoot.stagingResults = Qt.binding(function() { return item.movieResults || [] })
-                }
+            onLoaded: if (item) {
+                item.parentPanel = panelRoot
+                // Synchronize results from child to panelRoot
+                panelRoot.hitCount = Qt.binding(function() { return item.resultsCount || 0 })
+                panelRoot.stagingResults = Qt.binding(function() { return item.movieResults || [] })
             }
         }
 
-        // 3. SELECTION MENU (Visible only when no tool is loaded)
+        // --- 5. SELECTION MENU ---
         Column {
             visible: currentMode === "selection"
-            anchors.centerIn: parent; spacing: 10
-            Button { text: "🔍 SEARCH"; width: 200; onClicked: currentMode = "search" }
-            Button { text: "📁 FOLDER"; width: 200; onClicked: currentMode = "folder" }
-            Button { text: "🏷️ CATEGORY"; width: 200; onClicked: currentMode = "category" }
+            anchors.centerIn: parent; spacing: 15
+            z: 10
+            Text { 
+                text: "SELECT LOGIC"; color: "white"; font.pixelSize: 18; 
+                font.bold: true; anchors.horizontalCenter: parent.horizontalCenter; opacity: 0.6 
+            }
+            Button { text: "🔍 SEARCH"; width: 180; height: 45; onClicked: currentMode = "search" }
+            Button { text: "📁 FOLDER"; width: 180; height: 45; onClicked: currentMode = "folder" }
+            Button { text: "🏷️ CATEGORY"; width: 180; height: 45; onClicked: currentMode = "category" }
         }
 
-        // 4. FOOTER (The Postman)
+        // --- 6. FOOTER (Commit & Save Actions) ---
         Rectangle {
             id: footerArea
-            width: parent.width; height: 70; color: "#222"
+            width: parent.width; height: 75
+            color: "#111111"
             anchors.bottom: parent.bottom
             visible: currentMode !== "selection"
+            z: 100
 
-            Button {
-                anchors.centerIn: parent
-                width: parent.width - 40; height: 40
-                text: "COMMIT TO VAULT"
-                
-                onClicked: {
-                    console.log("📨 [UI] Sending Panel " + panelIndex + " to Vault...");
-                    
-                    // Flatten nested arrays if they exist
-                    var cleanList = [];
-                    if (Array.isArray(panelRoot.stagingResults)) {
-                        cleanList = (panelRoot.stagingResults.length === 1 && Array.isArray(panelRoot.stagingResults[0])) 
-                                    ? panelRoot.stagingResults[0] 
-                                    : panelRoot.stagingResults;
+            // Decorative separator
+            Rectangle { width: parent.width; height: 1; color: "#22FFFFFF"; anchors.top: parent.top }
+
+            RowLayout {
+                anchors.fill: parent; anchors.margins: 12; spacing: 10
+
+                // Commit Button (Sends to Vault)
+                Button {
+                    id: commitBtn
+                    Layout.fillWidth: true; Layout.preferredHeight: 40
+                    contentItem: Text { 
+                        text: "COMMIT"; color: "white"; font.bold: true; font.pixelSize: 11; 
+                        horizontalAlignment: Text.AlignHCenter 
                     }
+                    background: Rectangle {
+                        color: commitBtn.pressed ? "#000" : "#2C2C2C"
+                        radius: 6; border.color: "#444"; border.width: 1
+                    }
+                    onClicked: {
+                        if (typeof architectController !== "undefined") {
+                            architectController.commit_to_vault(panelIndex, currentMode, stagingResults, filterCheckbox.checked);
+                        }
+                    }
+                }
 
-                    if (typeof architectController !== "undefined") {
-                        // DEPOSIT INTO THE PYTHON VAULT
-                        architectController.commit_to_vault(
-                            panelIndex, 
-                            currentMode, 
-                            cleanList, 
-                            filterCheckbox.checked
-                        );
+                // Save Rules Button (Global Save)
+                Button {
+                    id: saveRulesBtn
+                    Layout.fillWidth: true; Layout.preferredHeight: 40
+                    contentItem: Text { 
+                        text: "SAVE RULES"; color: "white"; font.bold: true; font.pixelSize: 11; 
+                        horizontalAlignment: Text.AlignHCenter 
+                    }
+                    background: Rectangle {
+                        color: saveRulesBtn.pressed ? "#0044AA" : "#0066FF"
+                        radius: 6; border.color: "white"; border.width: saveRulesBtn.hovered ? 1 : 0
+                    }
+                    onClicked: {
+                        if (typeof architectController !== "undefined") {
+                            architectController.save_collection_rules();
+                        }
                     }
                 }
             }
