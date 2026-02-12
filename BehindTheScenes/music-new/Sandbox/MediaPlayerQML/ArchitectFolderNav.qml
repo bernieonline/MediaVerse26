@@ -10,7 +10,11 @@ Item {
     property Item parentPanel: null
     property string currentRelativePath: "" 
 
-    // FIXED: Protocol-aware FontLoader to handle Windows paths
+
+    //property alias folderNameField: currentRelativePath
+    property string folderNameField: currentRelativePath // ✅ Just keep them in sync
+
+
     // --- ICON LOADER ---
     FontLoader { 
         id: iconFont
@@ -21,9 +25,7 @@ Item {
             } else if (typeof _paths !== 'undefined' && _paths.fonts) {
                 p = _paths.fonts;
             }
-            
             if (p === "") return "";
-            
             if (p.indexOf(":") !== -1 && p.indexOf("file:///") === -1) {
                 return "file:///" + p.replace(/\\/g, "/");
             }
@@ -39,19 +41,12 @@ Item {
         // --- BREADCRUMB STRIP ---
         Rectangle {
             id: breadcrumbBar
-            width: parent.width
-            height: 40
-            color: "#22FFFFFF" 
-            radius: 6
-            
+            width: parent.width; height: 40; color: "#22FFFFFF"; radius: 6
             Row {
                 anchors.fill: parent; anchors.leftMargin: 8; spacing: 8
                 
-                // HOME BUTTON
                 Button { 
-                    id: homeBtn
-                    width: 35; height: 30
-                    anchors.verticalCenter: parent.verticalCenter
+                    id: homeBtn; width: 35; height: 30; anchors.verticalCenter: parent.verticalCenter
                     contentItem: Text {
                         text: iconFont.status === FontLoader.Ready ? "\uf015" : "H"
                         font.family: iconFont.name; font.pixelSize: 16
@@ -61,17 +56,13 @@ Item {
                     background: Rectangle { color: homeBtn.pressed ? "#44FFFFFF" : "transparent" }
                     onClicked: { 
                         currentRelativePath = ""; 
-                        // Update the holding tank to root immediately
-                        if (parentPanel) parentPanel.currentResults = [""];
+                        if (parentPanel) parentPanel.stagingResults = [""];
                         architectController.get_sub_folders(""); 
                     }
                 }
 
-                // BACK BUTTON
                 Button {
-                    id: internalBackBtn
-                    width: 35; height: 30
-                    anchors.verticalCenter: parent.verticalCenter
+                    id: internalBackBtn; width: 35; height: 30; anchors.verticalCenter: parent.verticalCenter
                     enabled: currentRelativePath !== "" 
                     opacity: enabled ? 1.0 : 0.3 
                     contentItem: Text {
@@ -85,8 +76,7 @@ Item {
                         var parts = currentRelativePath.split('/');
                         parts.pop(); 
                         currentRelativePath = parts.join('/');
-                        // Update holding tank to parent folder
-                        if (parentPanel) parentPanel.currentResults = [currentRelativePath];
+                        if (parentPanel) parentPanel.stagingResults = [currentRelativePath];
                         architectController.get_sub_folders(currentRelativePath);
                     }
                 }
@@ -94,8 +84,7 @@ Item {
                 Text {
                     text: currentRelativePath === "" ? "Root" : currentRelativePath
                     color: "gold"; font.pixelSize: 12; font.bold: true; elide: Text.ElideMiddle 
-                    width: parent.width - 110 
-                    anchors.verticalCenter: parent.verticalCenter
+                    width: parent.width - 110; anchors.verticalCenter: parent.verticalCenter
                 }
             }
         }
@@ -103,33 +92,31 @@ Item {
         // --- FOLDER LIST ---
         ListView {
             id: folderListView
-            width: parent.width
-            height: parent.height - breadcrumbBar.height - 20
-            clip: true
-            model: folderListModel
-            spacing: 4
-
+            width: parent.width; height: parent.height - breadcrumbBar.height - 20
+            clip: true; model: folderListModel; spacing: 4
             ScrollBar.vertical: ScrollBar { active: true; width: 8; policy: ScrollBar.AlwaysOn }
             
             delegate: ItemDelegate {
-                width: folderListView.width - 12
-                height: 38
+                width: folderListView.width - 12; height: 38
                 contentItem: Text {
                     text: "📁 " + model.modelData
                     color: "white"; font.pixelSize: 13; verticalAlignment: Text.AlignVCenter
                 }
                 background: Rectangle {
+                    // Visual feedback: Subtle cyan border when hovering
                     color: parent.hovered ? "#3300F2FF" : "#11FFFFFF"
-                    radius: 4
+                    radius: 4; border.color: parent.hovered ? "#00F2FF" : "transparent"; border.width: 1
                 }
                 onClicked: {
                     var newPath = currentRelativePath === "" ? model.modelData : currentRelativePath + "/" + model.modelData;
                     currentRelativePath = newPath;
                     
-                    // CRITICAL: Update the holding tank so Python sees the selection
-                    if (parentPanel) parentPanel.currentResults = [newPath];
+                    // Push choice to ArchitectPanel immediately
+                    if (parentPanel) parentPanel.stagingResults = [newPath];
                     
-                    architectController.get_sub_folders(currentRelativePath);
+                    //architectController.get_sub_folders(currentRelativePath);
+                    architectController.load_movies_for_path(currentRelativePath)
+
                 }
             }
         }
@@ -137,31 +124,45 @@ Item {
 
     ListModel { id: folderListModel }
 
+    // --- BRIDGE TO PYTHON ---
     Connections {
-        target: architectController
+        target: fileSystem          // ✅ CHANGED from architectController
         ignoreUnknownSignals: true
         
-        function onFoldersUpdated(folders) {
-            folderListModel.clear();
-            for (var i = 0; i < folders.length; i++) {
-                folderListModel.append({ "modelData": folders[i] });
+        function onFoldersChanged() {
+        // ✅ CHANGED from onFoldersUpdated
+            console.log("📁 FileSystem → foldersChanged")
+            //console.log("📁 Folders:", fileSystem.folders)
+
+            folderListModel.clear()
+            for (let f of fileSystem.folders) {
+                folderListModel.append({ "modelData": f.folderName })
             }
-            // Ensure the holding tank matches our current navigation state
+
             if (parentPanel) parentPanel.stagingResults = [currentRelativePath];
         }
 
         function onResultsCounted(panelIndex, panelCount) {
-            // panelIndex -1 comes from get_sub_folders logic for 'current view'
+            // Signal check: -1 is global, otherwise match this panel's index
             if (parentPanel && (panelIndex === parentPanel.panelIndex || panelIndex === -1)) {
+                
+                // 1. UPDATE GOLDEN HEADER (Step 3 Verified)
                 parentPanel.hitCount = panelCount;
+
+                // 2. CONSOLE EVIDENCE
+                console.log("-----------------------------------------");
+                console.log("📁 FOLDER NAV SYNC | Panel: " + panelRoot.parentPanel.panelIndex);
+                console.log("Target Path: " + (currentRelativePath === "" ? "Root" : currentRelativePath));
+                console.log("Hit Count: " + panelCount);
+                console.log("-----------------------------------------");
             }
         }
     }
 
     Component.onCompleted: {
         if (typeof architectController !== "undefined") {
-            // Initial load
-            if (parentPanel) parentPanel.currentResults = [currentRelativePath];
+            // Initial path registration
+            if (parentPanel) parentPanel.stagingResults = [currentRelativePath];
             architectController.get_sub_folders(currentRelativePath);
         }
     }

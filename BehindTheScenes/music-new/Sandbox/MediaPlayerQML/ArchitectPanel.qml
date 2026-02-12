@@ -11,9 +11,9 @@ Item {
     property int hitCount: 0
     property bool filterEnabled: false 
     property string currentMode: "selection" 
-    
-    // The "Staging Area" for results before Commit
     property var stagingResults: []
+    
+  
 
     width: 360
     height: 600
@@ -142,10 +142,11 @@ Item {
                 return "";
             }
             onLoaded: if (item) {
+                // ONLY link the panel reference
                 item.parentPanel = panelRoot
-                // Synchronize results from child to panelRoot
-                panelRoot.hitCount = Qt.binding(function() { return item.resultsCount || 0 })
-                panelRoot.stagingResults = Qt.binding(function() { return item.movieResults || [] })
+                
+                // REMOVED the Qt.bindings that were forcing the count back to 0
+                console.log("🛠️ Tool Loaded: " + currentMode + " linked to Panel " + panelIndex)
             }
         }
 
@@ -192,7 +193,15 @@ Item {
                     }
                     onClicked: {
                         if (typeof architectController !== "undefined") {
-                            architectController.commit_to_vault(panelIndex, currentMode, stagingResults, filterCheckbox.checked);
+
+                            if (currentMode === "folder") {
+                                architectController.folder_mode_select(
+                                    panelIndex,
+                                    toolLoader.item.folderNameField.text
+                                )
+                            }
+
+                            // Search and Category modes will be added later
                         }
                     }
                 }
@@ -215,6 +224,14 @@ Item {
                         }
                     }
                 }
+            }
+        }
+    }
+    Connections {
+        target: architectController
+        function onResultsCounted(index, count) {
+            if (panelIndex === index) {
+                panelRoot.hitCount = count
             }
         }
     }

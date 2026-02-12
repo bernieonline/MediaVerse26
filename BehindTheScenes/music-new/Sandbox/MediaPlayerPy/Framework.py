@@ -69,6 +69,8 @@ def main():
         # --------------------------------------------------------
         myLibrary = getLibraryList()
         fileSystem = FileSystem()
+
+
         settings_manager = SettingsManager(paths["config"], fileSystem)
         settings_manager.load_settings()
         drive_logic = DriveManager()
@@ -134,12 +136,16 @@ def main():
 
         ctx = engine.rootContext()
 
+
+
         #playbackManager
         router = PlaybackRouter()
+        print("1..........................................")
 
         #Architect
         #architect_engine = ArchitectController(xml_logic=xml_logic)
-        architect_engine = ArchitectController()
+        #architect_engine = ArchitectController()
+        architect_engine = ArchitectController(file_system=fileSystem) # Critical!
 
      
 
@@ -158,6 +164,7 @@ def main():
         # --------------------------------------------------------
         # Menu Data Handling (The Source of Truth)
         # --------------------------------------------------------
+
         with open(paths["menu"], encoding="utf-8") as f:
             menu_template = json.load(f)
 
@@ -172,7 +179,7 @@ def main():
         ctx.setContextProperty("splashModel", splash_model)
         ctx.setContextProperty("SettingsManager", settings_manager)
         ctx.setContextProperty("centralMenuData", settings_manager.menu_data) # Point to manager's data
-        
+
         #playback_bridge = PlaybackQmlBridge()
         playback_bridge = router.http_bridge
 
@@ -185,6 +192,7 @@ def main():
         ctx.setContextProperty("todoManager", todo_manager)
         ctx.setContextProperty("imagesPath", Path(paths["assets"]).as_uri())
         ctx.setContextProperty("fileSystemManager", fileSystem)
+        ctx.setContextProperty("fileSystem", fileSystem)
         ctx.setContextProperty("fontPathFA", paths["fonts"].as_uri())
         ctx.setContextProperty("notificationManager", notifier)
         ctx.setContextProperty("manifestUpdater", manifest_updater)
@@ -193,6 +201,8 @@ def main():
         ctx.setContextProperty("myLibraryModel", myLibrary)
         ctx.setContextProperty("thumbsPath", paths["thumbs"].as_uri())
         ctx.setContextProperty("displayPath", paths["display"].as_uri())
+
+        print("2..........................................")
 
         engine.addImportPath(os.path.join(os.path.dirname(PySide6.__file__), "qml"))
         engine.addImportPath(QLibraryInfo.path(QLibraryInfo.LibraryPath.Qml2ImportsPath))
