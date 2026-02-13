@@ -115,7 +115,8 @@ Item {
                     if (parentPanel) parentPanel.stagingResults = [newPath];
                     
                     //architectController.get_sub_folders(currentRelativePath);
-                    architectController.load_movies_for_path(currentRelativePath)
+                    //architectController.load_movies_for_path(currentRelativePath)
+                    architectController.load_movies_for_path(currentRelativePath, parentPanel.panelIndex)
 
                 }
             }
