@@ -170,7 +170,6 @@ class ArchitectController(QObject):
 
         self.resultsCounted.emit(panel_index, len(movies))
 
-        
     @Slot(str, str, result=list)
     def get_filtered_keywords(self, category, filter_text):
         try:
@@ -188,11 +187,15 @@ class ArchitectController(QObject):
             json_key = mapping.get(category, category)
 
             for movie in self.collection:
+
+                # ⭐ FIX: Skip TV shows in the cloud
+                if movie.get("Media Sub Type") == "TV Show":
+                    continue
+
                 data = movie.get(json_key, "")
                 if not data:
                     continue
 
-                # Actors is a list; others are semicolon-separated
                 items = data if isinstance(data, list) else str(data).split(";")
 
                 for item in items:
@@ -205,4 +208,10 @@ class ArchitectController(QObject):
         except Exception as e:
             print("Keyword filter error:", e)
             return []
+            
+        
 
+    
+    @Slot()
+    def reset_logic(self):
+        print("[ArchitectController] reset_logic() called — no action needed.")
