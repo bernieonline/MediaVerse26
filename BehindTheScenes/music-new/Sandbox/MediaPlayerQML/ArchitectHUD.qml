@@ -10,7 +10,6 @@ Rectangle {
     z: 5000
     clip: true
 
-    // --- DIMENSIONS ---
     readonly property int cardWidth: 360    
     readonly property int cardHeight: 600   
     readonly property int joinGap: 40 
@@ -18,7 +17,6 @@ Rectangle {
     property int totalMatches: 0
     property bool filterEnabled: false
 
-    // --- LOGIC MODEL ---
     ListModel {
         id: criteriaModel
         ListElement { 
@@ -26,15 +24,16 @@ Rectangle {
             panelValue: ""; 
             gateValue: "NONE"; 
             panelHits: 0; 
-            isFilterMode: false 
+            isFilterMode: false;
+            isCommitted: false // ⭐ Added to initialize the role
         }
     }
 
-    // --- VAULT MESSENGER FUNCTIONS ---
     function removePanel(index) {
         if (criteriaModel.count <= 1) {
             criteriaModel.setProperty(0, "panelType", "selection");
             criteriaModel.setProperty(0, "panelHits", 0);
+            criteriaModel.setProperty(0, "isCommitted", false);
             if (typeof architectController !== "undefined") architectController.reset_logic();
             return;
         }
@@ -56,8 +55,11 @@ Rectangle {
         }
     }
 
-    // --- STEP 2: HUD HANDLERS ---
-    function handleCommit(index)  { console.log("HUD: Commit", index) }
+    function handleCommit(panelIndex) {
+        console.log("HUD: Commit Received for Panel", panelIndex)
+        criteriaModel.setProperty(panelIndex, "isCommitted", true)
+    }
+
     function handleFinish(index)  { finishPopup.visible = true }
     function handleShelf(index)   { shelfPopup.visible = true }
     function handleList(index)    { listPopup.visible = true }
@@ -89,7 +91,7 @@ Rectangle {
                         
                         onCurrentModeChanged: architectRoot.syncPanelData(index, currentMode, hitCount)
 
-                        // --- STEP 2: NEW SIGNAL HANDLERS ---
+                        // --- SIGNAL HANDLERS ---
                         onCommitRequested: architectRoot.handleCommit(panelIndex)
                         onFinishRequested: architectRoot.handleFinish(panelIndex)
                         onShelfRequested: architectRoot.handleShelf(panelIndex)
@@ -100,7 +102,8 @@ Rectangle {
                     Item {
                         width: architectRoot.joinGap
                         height: architectRoot.cardHeight
-                        visible: index < 3 && mainPanel.currentMode !== "selection"
+                        // Only show gate if THIS panel is committed
+                        visible: model.isCommitted 
 
                         Column {
                             width: 50
@@ -109,6 +112,7 @@ Rectangle {
                             anchors.bottomMargin: 40
                             spacing: 12
 
+                            // AND GATE (+)
                             Rectangle {
                                 width: 44; height: 44; radius: 22
                                 color: model.gateValue === "AND" ? "#00F2FF" : "#1A1A1A"
@@ -120,12 +124,20 @@ Rectangle {
                                     onClicked: {
                                         model.gateValue = "AND";
                                         if (criteriaModel.count <= index + 1) {
-                                            criteriaModel.append({ "panelType": "selection", "panelValue": "", "gateValue": "NONE", "panelHits": 0, "isFilterMode": false });
+                                            criteriaModel.append({ 
+                                                "panelType": "selection", 
+                                                "panelValue": "", 
+                                                "gateValue": "NONE", 
+                                                "panelHits": 0, 
+                                                "isFilterMode": false, 
+                                                "isCommitted": false 
+                                            });
                                         }
                                     }
                                 }
                             }
 
+                            // NOT GATE (-)
                             Rectangle {
                                 width: 44; height: 44; radius: 22
                                 color: model.gateValue === "NOT" ? "#FF0055" : "#1A1A1A"
@@ -133,7 +145,19 @@ Rectangle {
                                 Text { anchors.centerIn: parent; text: "-"; color: "white"; font.pixelSize: 20; font.bold: true }
                                 MouseArea {
                                     anchors.fill: parent
-                                    onClicked: model.gateValue = "NOT"
+                                    onClicked: {
+                                        model.gateValue = "NOT"
+                                        if (criteriaModel.count <= index + 1) {
+                                            criteriaModel.append({ 
+                                                "panelType": "selection", 
+                                                "panelValue": "", 
+                                                "gateValue": "NONE", 
+                                                "panelHits": 0, 
+                                                "isFilterMode": false, 
+                                                "isCommitted": false 
+                                            });
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -168,7 +192,14 @@ Rectangle {
                 width: 150; height: 45; text: "RESET SCHEME"
                 onClicked: {
                     criteriaModel.clear();
-                    criteriaModel.append({ "panelType": "selection", "panelValue": "", "gateValue": "NONE", "panelHits": 0, "isFilterMode": false });
+                    criteriaModel.append({ 
+                        "panelType": "selection", 
+                        "panelValue": "", 
+                        "gateValue": "NONE", 
+                        "panelHits": 0, 
+                        "isFilterMode": false,
+                        "isCommitted": false 
+                    });
                     if (typeof architectController !== "undefined") architectController.reset_logic(); 
                 }
             }
@@ -176,246 +207,14 @@ Rectangle {
             Button {
                 id: exitBtn
                 width: 150; height: 45; text: "EXIT ARCHITECT"
-                onClicked: {
-                    architectRoot.visible = false
-                }
+                onClicked: { architectRoot.visible = false }
             }
         }
     }
 
-    // ============================================================
-    // ⭐ STEP 3 — POPUPS (Finish, Shelf, List)
-    // ============================================================
+    // --- POPUPS & DIMMER (Code omitted for brevity, but keep yours as is) ---
+    // ... Dimmer, FinishPopup, ShelfPopup, ListPopup code here ...
 
-    // --- DIMMER ---
-    Rectangle {
-        id: dimmer
-        anchors.fill: parent
-        color: "#00000088"
-        visible: finishPopup.visible || shelfPopup.visible || listPopup.visible
-        z: 9000
-    }
-
-    // ============================================================
-    // ⭐ FINISH POPUP (small dialog)
-    // ============================================================
-    Rectangle {
-        id: finishPopup
-        width: 400; height: 240
-        radius: 12
-        color: "#1A1A1A"
-        border.width: 2
-        border.color: "#FFD700"
-        anchors.centerIn: parent
-        visible: false
-        z: 10000
-
-        RectangularGlow {
-            anchors.fill: parent
-            glowRadius: 18
-            spread: 0.2
-            color: "#80FFD700"
-            cornerRadius: 12
-        }
-
-        Rectangle {
-            anchors.fill: parent
-            radius: 12
-            border.width: 2
-            border.color: "transparent"
-            layer.enabled: true
-            layer.effect: LinearGradient {
-                start: Qt.point(0, 0)
-                end: Qt.point(0, parent.height)
-                gradient: Gradient {
-                    GradientStop { position: 0.0; color: "#FFE58A" }
-                    GradientStop { position: 1.0; color: "#D4A017" }
-                }
-            }
-        }
-
-        Column {
-            anchors.fill: parent
-            anchors.margins: 20
-            spacing: 12
-
-            Text {
-                text: "Save Collection"
-                color: "white"
-                font.pixelSize: 20
-                font.bold: true
-            }
-
-            TextField {
-                id: collectionNameField
-                placeholderText: "Enter collection name..."
-                font.pixelSize: 14
-                color: "white"
-                background: Rectangle { color: "#333"; radius: 6 }
-            }
-
-            Button {
-                text: "SAVE"
-                width: 120; height: 40
-                anchors.horizontalCenter: parent.horizontalCenter
-
-                onClicked: {
-                    finishPopup.visible = false
-
-                    criteriaModel.clear()
-                    criteriaModel.append({ 
-                        "panelType": "selection", 
-                        "panelValue": "", 
-                        "gateValue": "NONE", 
-                        "panelHits": 0, 
-                        "isFilterMode": false 
-                    })
-
-                    if (typeof architectController !== "undefined")
-                        architectController.reset_logic()
-                }
-            }
-
-            Button {
-                text: "CANCEL"
-                width: 120; height: 40
-                anchors.horizontalCenter: parent.horizontalCenter
-                onClicked: finishPopup.visible = false
-            }
-        }
-    }
-
-    // ============================================================
-    // ⭐ SHELF POPUP (large modal)
-    // ============================================================
-    Rectangle {
-        id: shelfPopup
-        width: 500; height: 400
-        radius: 12
-        color: "#1A1A1A"
-        border.width: 2
-        border.color: "#FFD700"
-        anchors.centerIn: parent
-        visible: false
-        z: 10000
-
-        RectangularGlow {
-            anchors.fill: parent
-            glowRadius: 18
-            spread: 0.2
-            color: "#80FFD700"
-            cornerRadius: 12
-        }
-
-        Rectangle {
-            anchors.fill: parent
-            radius: 12
-            border.width: 2
-            border.color: "transparent"
-            layer.enabled: true
-            layer.effect: LinearGradient {
-                start: Qt.point(0, 0)
-                end: Qt.point(0, parent.height)
-                gradient: Gradient {
-                    GradientStop { position: 0.0; color: "#FFE58A" }
-                    GradientStop { position: 1.0; color: "#D4A017" }
-                }
-            }
-        }
-
-        Column {
-            anchors.fill: parent
-            anchors.margins: 20
-            spacing: 12
-
-            Text {
-                text: "Cumulative List"
-                color: "white"
-                font.pixelSize: 20
-                font.bold: true
-            }
-
-            Text {
-                text: "List will appear here..."
-                color: "#CCCCCC"
-                font.pixelSize: 14
-            }
-
-            Button {
-                text: "CLOSE"
-                width: 120; height: 40
-                anchors.horizontalCenter: parent.horizontalCenter
-                onClicked: shelfPopup.visible = false
-            }
-        }
-    }
-
-    // ============================================================
-    // ⭐ LIST POPUP (same size as Shelf)
-    // ============================================================
-    Rectangle {
-        id: listPopup
-        width: 500; height: 400
-        radius: 12
-        color: "#1A1A1A"
-        border.width: 2
-        border.color: "#FFD700"
-        anchors.centerIn: parent
-        visible: false
-        z: 10000
-
-        RectangularGlow {
-            anchors.fill: parent
-            glowRadius: 18
-            spread: 0.2
-            color: "#80FFD700"
-            cornerRadius: 12
-        }
-
-        Rectangle {
-            anchors.fill: parent
-            radius: 12
-            border.width: 2
-            border.color: "transparent"
-            layer.enabled: true
-            layer.effect: LinearGradient {
-                start: Qt.point(0, 0)
-                end: Qt.point(0, parent.height)
-                gradient: Gradient {
-                    GradientStop { position: 0.0; color: "#FFE58A" }
-                    GradientStop { position: 1.0; color: "#D4A017" }
-                }
-            }
-        }
-
-        Column {
-            anchors.fill: parent
-            anchors.margins: 20
-            spacing: 12
-
-            Text {
-                text: "Panel Results"
-                color: "white"
-                font.pixelSize: 20
-                font.bold: true
-            }
-
-            Text {
-                text: "This panel’s list will appear here..."
-                color: "#CCCCCC"
-                font.pixelSize: 14
-            }
-
-            Button {
-                text: "CLOSE"
-                width: 120; height: 40
-                anchors.horizontalCenter: parent.horizontalCenter
-                onClicked: listPopup.visible = false
-            }
-        }
-    }
-
-    // --- VAULT CONNECTION ---
     Connections {
         target: (typeof architectController !== "undefined") ? architectController : null
         ignoreUnknownSignals: true
