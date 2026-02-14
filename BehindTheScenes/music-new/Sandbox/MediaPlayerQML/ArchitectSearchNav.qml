@@ -11,6 +11,9 @@ Rectangle {
     property Item parentPanel: null
     property int panelIndex: (parentPanel !== null) ? parentPanel.panelIndex : 0
 
+    // NEW: ArchitectPanel.qml will pull the selected list on Commit
+    signal searchSelected(string query, var panelList)
+
     // Safe Font Loader for the Search Icon
     FontLoader { 
         id: searchIconFont
@@ -36,12 +39,10 @@ Rectangle {
         // 1. Local Frame Update
         if (parentPanel) {
             parentPanel.hitCount = count;
-            //parentPanel.currentResults = count > 0 ? ["search_files = " + finalValue] : [];
         }
 
         // 2. Engine Update
         if (typeof architectController !== "undefined") {
-            // IF count is 0, we explicitly tell Python there are 0 matches
             if (count === 0) {
                 architectController.resultsCounted.emit(panelIndex, 0);
             } else {
@@ -50,7 +51,6 @@ Rectangle {
                     "category": "search_files",
                     "value": finalValue
                 }];
-                //architectController.update_live_preview(JSON.stringify(ruleObj));
             }
         }
     }
@@ -91,7 +91,6 @@ Rectangle {
             background: Rectangle { color: "#1AFFFFFF"; radius: 4; border.color: "#33FFFFFF" }
             
             onTextChanged: {
-                // Ensure architectController is globally accessible
                 if (typeof architectController !== "undefined") {
                     architectController.search_library(text);
                 }
@@ -104,7 +103,6 @@ Rectangle {
             width: parent.width
             height: (searchInput.text.length > 0 && count > 0) ? Math.min(contentHeight, 150) : 0
             clip: true
-            // Binds to your existing Python Property
             model: (typeof architectController !== "undefined") ? architectController.searchResultsModel : []
             
             delegate: ItemDelegate {
@@ -119,11 +117,12 @@ Rectangle {
                 onClicked: {
                     var finalPath = model.filePath
                     var finalTitle = model.title
+
+                    // Add to multi-select bucket (existing behaviour)
                     searchNavRoot.addMovieToBucket(finalTitle, finalPath)
+
+                    // Clear search field
                     searchInput.text = ""
-                    
-                    //addMovieToBucket(finalTitle, finalPath);
-                    //searchInput.text = ""; 
                 }
             }
         }

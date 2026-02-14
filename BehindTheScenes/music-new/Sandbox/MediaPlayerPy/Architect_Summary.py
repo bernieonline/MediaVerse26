@@ -1,79 +1,151 @@
-# Architect_Summary.py
+# architect_summary.py
+# Phase 1: JSON Loader + Panel 1 Case Statement
+# ---------------------------------------------
 
-class ArchitectSummary:
-    def __init__(self):
+import json
+import os
+from datetime import datetime
+from PySide6.QtCore import QObject, Slot, Signal
+
+
+# ------------------------------------------------------------
+# DataLoader: reads xml_collection_data.json and provides lookups
+# ------------------------------------------------------------
+class DataLoader:
+    def __init__(self, json_path):
+        self.movies = []
+
+        if os.path.exists(json_path):
+            with open(json_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+
+                # Filter out TV shows
+                self.movies = [
+                    m for m in data
+                    if m.get("Media Sub Type", "").lower() == "movie"
+                ]
+
+    # --------------------------------------------------------
+    # PANEL 1 LOOKUPS
+    # --------------------------------------------------------
+
+    def get_files_from_folder(self, folder_name):
+        """
+        Return all movie filenames where the folder name appears in the path.
+        Example: folder_name = "Bond Movies"
+        """
+        results = []
+        for m in self.movies:
+            filename = m.get("Filename", "")
+            if folder_name.lower() in filename.lower():
+                results.append(filename)
+        return results
+
+    def get_files_by_category(self, key, value):
+        """
+        Generic category lookup.
+        key examples: "Actor", "Director", "Genre", "Year"
+        """
+        results = []
+
+        for m in self.movies:
+            if key == "Actor":
+                if value in m.get("Actors", []):
+                    results.append(m["Filename"])
+
+            elif key == "Director":
+                if value == m.get("Director"):
+                    results.append(m["Filename"])
+
+            elif key == "Genre":
+                genres = m.get("Genre", "").split(";")
+                if value in genres:
+                    results.append(m["Filename"])
+
+            elif key == "Year":
+                if value == m.get("Year"):
+                    results.append(m["Filename"])
+
+        return results
+
+
+# ------------------------------------------------------------
+# ArchitectSummary: main backend logic
+# ------------------------------------------------------------
+class ArchitectSummary(QObject):
+
+    cumulativeListReady = Signal(list)
+    cumulativeCountReady = Signal(int)
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+
+        # Load movie metadata from local JSON
+        self.db = DataLoader("./xml_collection_data.json")
+
+        # In-memory rule store
+        self.rules = {}
+
+        # In-memory cumulative list
         self.cumulative_list = []
-        self.cumulative_count = 0
 
-    def process_panel_save(self, index, new_matches, join_type="ADD", is_filtered=False):
-        # 1. Helper to extract just the filename for comparison
-        def get_compare_key(item):
-            full_path = item.get("Filename") if isinstance(item, dict) else str(item)
-            if not full_path: return ""
-            return full_path.split("\\")[-1].split("/")[-1].strip().lower()
+    # --------------------------------------------------------
+    # PANEL 1 COMMIT ENTRY POINT
+    # --------------------------------------------------------
+    @Slot(dict)
+    def commit_panel(self, rule_data):
+        """
+        Called by QML when the user clicks Commit on any panel.
+        Phase 1: Only Panel 1 logic is implemented.
+        """
 
-        # --- CASE 1: THE FOUNDATION (Panel 0) ---
-        if index == 0:
-            self.cumulative_list = new_matches
-            self.cumulative_count = len(new_matches)
-            print(f"✅ FOUNDATION SET: {self.cumulative_count} items.")
-            return self.cumulative_count
-        
-        # --- CASE 2+: RELATIONAL LOGIC ---
-        foundation_map = {get_compare_key(m): m for m in self.cumulative_list}
-        incoming_map = {get_compare_key(m): m for m in new_matches}
-        
-        f_keys = set(foundation_map.keys())
-        i_keys = set(incoming_map.keys())
+        panel_index = rule_data.get("panelIndex")
+        mode = rule_data.get("mode")
+        data = rule_data.get("data")
+        checked = rule_data.get("checked")
+        gate = rule_data.get("gate")
 
-        # ==========================================================
-        # 🛠️ VISUAL PROOF DEBUG SECTION
-        # ==========================================================
-        overlap = f_keys.intersection(i_keys)
-        print(f"\n--- 🧪 ARCHITECT DEBUG (Panel {index}) ---")
-        print(f"| Foundation: {len(f_keys)} items")
-        print(f"| Incoming:   {len(i_keys)} items")
-        print(f"| Overlap:    {len(overlap)} shared items")
-        if len(overlap) > 0:
-            sample = list(overlap)[:3]
-            print(f"| Sample Shared: {sample}")
-        print(f"| Requested Action: {join_type} (Filtered: {is_filtered})")
-        print("------------------------------------------\n")
-        # ==========================================================
+        # 1. Evaluate rule using case statement
+        panel_list = self.evaluate_rule(mode, data)
 
-        # Decide which keys to keep 
-        # FIX: We now allow "AND" or "ADD" to trigger the Filter logic
-        if join_type in ["ADD", "AND"]:
-            if is_filtered:
-                print("🎯 ACTION: Surgical Filter (AND)")
-                result_keys = f_keys.intersection(i_keys)
-                # For INTERSECTION, we strictly use the foundation's objects
-                lookup = foundation_map 
-            else:
-                print("🎯 ACTION: Merge Union (OR)")
-                result_keys = f_keys.union(i_keys)
-                # For UNION, we need objects from both maps
-                lookup = {**foundation_map, **incoming_map}
-        
-        elif join_type == "NOT":
-            print("🎯 ACTION: Scalpel Exclusion (NOT)")
-            result_keys = f_keys.difference(i_keys)
-            lookup = foundation_map
-        
-        else:
-            print(f"⚠️ WARNING: Unknown join_type '{join_type}'. Defaulting to ADD.")
-            result_keys = f_keys.union(i_keys)
-            lookup = {**foundation_map, **incoming_map}
+        # 2. Store cumulative list (Panel 1 only)
+        self.cumulative_list = panel_list
 
-        # 3. Rebuild the objects using the specific lookup defined above
-        self.cumulative_list = [lookup[k] for k in sorted(list(result_keys)) if k in lookup]
-        self.cumulative_count = len(self.cumulative_list)
+        # 3. Store rule record
+        self.rules[str(panel_index)] = {
+            "mode": mode,
+            "data": data,
+            "checked": checked,
+            "gate": gate
+        }
 
-        print(f"📊 FINAL COUNT: {self.cumulative_count}")
-        return self.cumulative_count
-    
-    def reset_architect(self):
-        """Clears the memory for a fresh start."""
-        self.cumulative_list = []
-        self.cumulative_count = 0
-        print("🧹 ARCHITECT: Memory cleared. Ready for new Foundation.")
+        # 4. Send results back to QML
+        self.cumulativeListReady.emit(self.cumulative_list)
+        self.cumulativeCountReady.emit(len(self.cumulative_list))
+
+    # --------------------------------------------------------
+    # CASE STATEMENT (Panel 1)
+    # --------------------------------------------------------
+    def evaluate_rule(self, mode, data):
+        """
+        Case statement for Panel 1.
+        Later panels will reuse this logic.
+        """
+
+        if mode == "Folder":
+            return self.db.get_files_from_folder(data["folder"])
+
+        if mode == "Category":
+            return self.db.get_files_by_category(data["key"], data["value"])
+
+        if mode == "Files":
+            return data["paths"]
+
+        return []  # safety fallback
+
+    # --------------------------------------------------------
+    # SAVE LOGIC (Phase 2 — not implemented yet)
+    # --------------------------------------------------------
+    @Slot(dict)
+    def save_collection(self, save_data):
+        pass

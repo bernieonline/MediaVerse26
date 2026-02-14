@@ -10,6 +10,9 @@ Item {
     property Item parentPanel: null
     property string currentRelativePath: "" 
 
+    signal folderSelected(string folderName, var panelList)
+
+
 
     //property alias folderNameField: currentRelativePath
     property string folderNameField: currentRelativePath // ✅ Just keep them in sync
@@ -58,6 +61,13 @@ Item {
                         currentRelativePath = ""; 
                         if (parentPanel) parentPanel.stagingResults = [""];
                         architectController.get_sub_folders(""); 
+
+                        // Generate the list for this folder (your existing logic)
+                        // If you already have a list from architectController, use that instead.
+                        var list = [];   // placeholder until your movie list arrives
+
+                        // Emit the signal upward to ArchitectPanel.qml
+                        folderSelected("", list);
                     }
                 }
 

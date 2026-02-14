@@ -8,6 +8,7 @@ Item {
     property Item parentPanel: null
     property string currentSubMode: "main"
     property string activeCategory: ""
+    signal categorySelected(string key, string value, var panelList)
 
     FontLoader {
         id: catIconFont
@@ -167,11 +168,18 @@ Item {
                             }
 
                             onClicked: {
+                                var key = activeCategory
+                                var value = modelData
+                                var list = []   // placeholder
+
+                                // Emit the signal upward
+                                categorySelected(key, value, list)
+
                                 if (typeof architectController !== "undefined" && parentPanel) {
                                     architectController.category_mode_select(
                                         parentPanel.panelIndex,
-                                        activeCategory,
-                                        modelData
+                                        key,
+                                        value
                                     )
                                 }
                             }
@@ -215,11 +223,18 @@ Item {
                     }
 
                     onClicked: {
+                        var key = "Decade"
+                        var value = dBtn.text
+                        var list = []   // placeholder
+
+                        // Emit the signal upward
+                        categorySelected(key, value, list)
+
                         if (typeof architectController !== "undefined" && parentPanel) {
                             architectController.category_mode_select(
                                 parentPanel.panelIndex,
-                                "Decade",
-                                dBtn.text
+                                key,
+                                value
                             )
                         }
                     }
