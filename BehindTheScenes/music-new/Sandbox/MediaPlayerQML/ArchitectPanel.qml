@@ -17,6 +17,9 @@ Item {
     property bool filterEnabled: false 
     property string currentMode: "selection" 
     property var stagingResults: []
+
+    // ⭐ NEW: Track whether this panel has been committed
+    property bool isCommitted: false
     
     width: 360
     height: 600
@@ -172,10 +175,14 @@ Item {
                 rowSpacing: 6
                 columnSpacing: 6
 
-                // COMMIT
+                // ⭐ COMMIT
                 Button {
                     id: commitBtn
                     Layout.fillWidth: true; Layout.preferredHeight: 32
+
+                    enabled: hitCount > 0 && !panelRoot.isCommitted
+                    opacity: enabled ? 1.0 : 0.35
+
                     background: Rectangle {
                         color: commitBtn.pressed ? "#000" : "#222"
                         radius: 6; border.width: 1
@@ -186,13 +193,20 @@ Item {
                         horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter
                         anchors.fill: parent
                     }
-                    onClicked: commitRequested(panelIndex)
+                    onClicked: {
+                        panelRoot.isCommitted = true
+                        commitRequested(panelIndex)
+                    }
                 }
 
-                // FINISH
+                // ⭐ FINISH
                 Button {
                     id: finishBtn
                     Layout.fillWidth: true; Layout.preferredHeight: 32
+
+                    enabled: panelRoot.isCommitted
+                    opacity: enabled ? 1.0 : 0.35
+
                     background: Rectangle {
                         color: finishBtn.pressed ? "#000" : "#222"
                         radius: 6; border.width: 1
@@ -206,10 +220,14 @@ Item {
                     onClicked: finishRequested(panelIndex)
                 }
 
-                // SHELF
+                // ⭐ SHELF
                 Button {
                     id: shelfBtn
                     Layout.fillWidth: true; Layout.preferredHeight: 32
+
+                    enabled: panelRoot.isCommitted
+                    opacity: enabled ? 1.0 : 0.35
+
                     background: Rectangle {
                         color: shelfBtn.pressed ? "#000" : "#222"
                         radius: 6; border.width: 1
@@ -223,10 +241,14 @@ Item {
                     onClicked: shelfRequested(panelIndex)
                 }
 
-                // THIS LIST
+                // ⭐ THIS LIST
                 Button {
                     id: listBtn
                     Layout.fillWidth: true; Layout.preferredHeight: 32
+
+                    enabled: hitCount > 0
+                    opacity: enabled ? 1.0 : 0.35
+
                     background: Rectangle {
                         color: listBtn.pressed ? "#000" : "#222"
                         radius: 6; border.width: 1
