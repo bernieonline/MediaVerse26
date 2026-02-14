@@ -6,45 +6,37 @@ import Qt5Compat.GraphicalEffects
 Item {
     id: panelRoot
     
-    // --- STABLE PROPERTIES ---
     property int panelIndex: 0
     property int hitCount: 0
     property bool filterEnabled: false 
     property string currentMode: "selection" 
     property var stagingResults: []
     
-  
-
     width: 360
     height: 600
 
-    // --- 1. THE PERFECT GLOW (Visual Gold Standard) ---
     RectangularGlow {
         id: effect
         anchors.fill: cardFrame
         glowRadius: 18        
         spread: 0.18        
-        //color: "#AAFFFFFF"    // White luminosity halo
-        color: "#99FFD700"    // Goldenrod with 60% alpha for luminosity
+        color: "#99FFD700"
         cornerRadius: 12
         z: 0
     }
 
-    // --- 2. THE MAIN FRAME ---
     Rectangle {
         id: cardFrame
-        // Margins allow the glow to shine outside the white border
         anchors.fill: parent
         anchors.margins: 15 
         
         color: "#1A1A1A"
         radius: 12 
-        border.color: "#FFFFFF" // Pure White Border
+        border.color: "#FFFFFF"
         border.width: 1
         clip: true 
         z: 1
 
-        // --- 3. TOOLBAR (Restored Visuals + New Help Icon) ---
         Rectangle {
             id: toolbar
             width: parent.width - 20; height: 48; color: "#2C2C2C"; radius: 8
@@ -61,7 +53,6 @@ Item {
                     color: "white"; font.bold: true; opacity: 0.5; font.pixelSize: 12
                 }
 
-                // Filter Checkbox (Cyan accents)
                 CheckBox {
                     id: filterCheckbox
                     text: "FILTER"
@@ -77,7 +68,6 @@ Item {
 
                 Item { Layout.fillWidth: true } 
 
-                // HELP BUTTON (Future Help Panel Trigger)
                 Rectangle {
                     id: helpBtn
                     width: 26; height: 26; radius: 13
@@ -100,7 +90,6 @@ Item {
                     ToolTip.delay: 400
                 }
 
-                // GOLD MENU (M)
                 Text {
                     text: "M"; font.pixelSize: 22; font.bold: true; color: "gold"
                     opacity: menuMouse.containsMouse ? 1.0 : 0.8
@@ -110,14 +99,12 @@ Item {
                     }
                 }
 
-                // CYAN HIT COUNT
                 Text {
                     text: panelRoot.hitCount
                     color: "#00F2FF"; font.pixelSize: 18; font.bold: true
                     Layout.preferredWidth: 35; horizontalAlignment: Text.AlignHCenter
                 }
 
-                // RED CLOSE (X)
                 Text {
                     text: "×"; font.pixelSize: 26; color: "#FF4444"
                     opacity: closeMouse.containsMouse ? 1.0 : 0.7
@@ -129,7 +116,6 @@ Item {
             }
         }
 
-        // --- 4. CONTENT AREA (Nav Loaders) ---
         Loader {
             id: toolLoader
             anchors.top: toolbar.bottom; anchors.bottom: footerArea.top
@@ -142,15 +128,11 @@ Item {
                 return "";
             }
             onLoaded: if (item) {
-                // ONLY link the panel reference
                 item.parentPanel = panelRoot
-                
-                // REMOVED the Qt.bindings that were forcing the count back to 0
                 console.log("🛠️ Tool Loaded: " + currentMode + " linked to Panel " + panelIndex)
             }
         }
 
-        // --- 5. SELECTION MENU ---
         Column {
             visible: currentMode === "selection"
             anchors.centerIn: parent; spacing: 15
@@ -164,69 +146,101 @@ Item {
             Button { text: "🏷️ CATEGORY"; width: 180; height: 45; onClicked: currentMode = "category" }
         }
 
-        // --- 6. FOOTER (Commit & Save Actions) ---
+        // --- FOOTER AREA ---
         Rectangle {
             id: footerArea
-            width: parent.width; height: 75
+            // Fixed: Respecting margins so it doesn't overlap the border/glow
+            anchors.left: parent.left; anchors.right: parent.right; anchors.bottom: parent.bottom
+            anchors.margins: 1
+            height: 85
             color: "#111111"
-            anchors.bottom: parent.bottom
             visible: currentMode !== "selection"
             z: 100
+            radius: 12 // Matches cardFrame radius for the bottom corners
 
-            // Decorative separator
+            // Visual separator
             Rectangle { width: parent.width; height: 1; color: "#22FFFFFF"; anchors.top: parent.top }
 
-            RowLayout {
-                anchors.fill: parent; anchors.margins: 12; spacing: 10
+            GridLayout {
+                anchors.fill: parent
+                anchors.margins: 8
+                columns: 2
+                rowSpacing: 6
+                columnSpacing: 6
 
-                // Commit Button (Sends to Vault)
+                // COMMIT
                 Button {
                     id: commitBtn
-                    Layout.fillWidth: true; Layout.preferredHeight: 40
-                    contentItem: Text { 
-                        text: "COMMIT"; color: "white"; font.bold: true; font.pixelSize: 11; 
-                        horizontalAlignment: Text.AlignHCenter 
-                    }
+                    Layout.fillWidth: true; Layout.preferredHeight: 32
                     background: Rectangle {
-                        color: commitBtn.pressed ? "#000" : "#2C2C2C"
-                        radius: 6; border.color: "#444"; border.width: 1
+                        color: commitBtn.pressed ? "#000" : "#222"
+                        radius: 6; border.width: 1
+                        border.color: commitBtn.hovered ? "#FFD700" : "#555"
+                    }
+                    contentItem: Text {
+                        text: "COMMIT"; color: "gold"; font.bold: true; font.pixelSize: 11
+                        horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter
                     }
                     onClicked: {
                         if (typeof architectController !== "undefined") {
-
-                            if (currentMode === "folder") {
-                                architectController.folder_mode_select(
-                                    panelIndex,
-                                    toolLoader.item.folderNameField.text
-                                )
+                            if (currentMode === "folder" && toolLoader.item) {
+                                architectController.folder_mode_select(panelIndex, toolLoader.item.currentRelativePath)
                             }
-
-                            // Search and Category modes will be added later
                         }
                     }
                 }
 
-                // Save Rules Button (Global Save)
+                // FINISH
                 Button {
-                    id: saveRulesBtn
-                    Layout.fillWidth: true; Layout.preferredHeight: 40
-                    contentItem: Text { 
-                        text: "SAVE RULES"; color: "white"; font.bold: true; font.pixelSize: 11; 
-                        horizontalAlignment: Text.AlignHCenter 
-                    }
+                    id: finishBtn
+                    Layout.fillWidth: true; Layout.preferredHeight: 32
                     background: Rectangle {
-                        color: saveRulesBtn.pressed ? "#0044AA" : "#0066FF"
-                        radius: 6; border.color: "white"; border.width: saveRulesBtn.hovered ? 1 : 0
+                        color: finishBtn.pressed ? "#000" : "#222"
+                        radius: 6; border.width: 1
+                        border.color: finishBtn.hovered ? "#FFD700" : "#555"
                     }
-                    onClicked: {
-                        if (typeof architectController !== "undefined") {
-                            architectController.save_collection_rules();
-                        }
+                    contentItem: Text {
+                        text: "FINISH"; color: "gold"; font.bold: true; font.pixelSize: 11
+                        horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter
                     }
+                    onClicked: console.log("Finish clicked")
+                }
+
+                // SHELF
+                Button {
+                    id: shelfBtn
+                    Layout.fillWidth: true; Layout.preferredHeight: 32
+                    background: Rectangle {
+                        color: shelfBtn.pressed ? "#000" : "#222"
+                        radius: 6; border.width: 1
+                        border.color: shelfBtn.hovered ? "#FFD700" : "#555"
+                    }
+                    contentItem: Text {
+                        text: "SHELF"; color: "gold"; font.bold: true; font.pixelSize: 11
+                        horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter
+                    }
+                    onClicked: console.log("Bookshelf requested")
+                }
+
+                // THIS LIST
+                Button {
+                    id: listBtn
+                    Layout.fillWidth: true; Layout.preferredHeight: 32
+                    background: Rectangle {
+                        color: listBtn.pressed ? "#000" : "#222"
+                        radius: 6; border.width: 1
+                        border.color: listBtn.hovered ? "#FFD700" : "#555"
+                    }
+                    contentItem: Text {
+                        text: "THIS LIST"; color: "gold"; font.bold: true; font.pixelSize: 11
+                        horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter
+                    }
+                    onClicked: console.log("List requested for", panelIndex)
                 }
             }
         }
     }
+
     Connections {
         target: architectController
         function onResultsCounted(index, count) {

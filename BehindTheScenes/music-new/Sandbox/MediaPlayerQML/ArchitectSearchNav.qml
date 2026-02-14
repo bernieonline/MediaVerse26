@@ -36,7 +36,7 @@ Rectangle {
         // 1. Local Frame Update
         if (parentPanel) {
             parentPanel.hitCount = count;
-            parentPanel.currentResults = count > 0 ? ["search_files = " + finalValue] : [];
+            //parentPanel.currentResults = count > 0 ? ["search_files = " + finalValue] : [];
         }
 
         // 2. Engine Update
@@ -50,7 +50,7 @@ Rectangle {
                     "category": "search_files",
                     "value": finalValue
                 }];
-                architectController.update_live_preview(JSON.stringify(ruleObj));
+                //architectController.update_live_preview(JSON.stringify(ruleObj));
             }
         }
     }
@@ -109,18 +109,21 @@ Rectangle {
             
             delegate: ItemDelegate {
                 width: resultsView.width; height: 32
+
                 contentItem: Text {
-                    text: "➕ " + (modelData.title || modelData.filename || "Unknown")
+                    text: "➕ " + (model.title || model.filePath || "Unknown")
                     color: "white"; font.pixelSize: 12; verticalAlignment: Text.AlignVCenter
                 }
                 background: Rectangle { color: hovered ? "#2200F2FF" : "#05FFFFFF"; radius: 4 }
                 
                 onClicked: {
-                    var finalPath = modelData.filename || modelData.path || modelData.filePath;
-                    var finalTitle = modelData.title || (finalPath ? finalPath.split(/[\\/]/).pop() : "Unknown");
+                    var finalPath = model.filePath
+                    var finalTitle = model.title
+                    searchNavRoot.addMovieToBucket(finalTitle, finalPath)
+                    searchInput.text = ""
                     
-                    addMovieToBucket(finalTitle, finalPath);
-                    searchInput.text = ""; 
+                    //addMovieToBucket(finalTitle, finalPath);
+                    //searchInput.text = ""; 
                 }
             }
         }

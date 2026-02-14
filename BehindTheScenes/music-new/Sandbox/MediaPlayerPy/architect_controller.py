@@ -2,6 +2,8 @@ from PySide6.QtCore import QObject, Slot, Signal
 import os
 from project_paths import coll_data
 import json
+from PySide6.QtCore import Property
+from search_results_model import SearchResultsModel
 
 
 class ArchitectController(QObject):
@@ -19,6 +21,8 @@ class ArchitectController(QObject):
 
         # ADD THIS LINE NEAR THE TOP OF THE FILE
         print("DEBUG SLOT SIGNATURE:", self.category_mode_select)
+
+        self._searchResultsModel = SearchResultsModel()
 
        
 
@@ -41,6 +45,14 @@ class ArchitectController(QObject):
     def build_folder_prefix(self, folder_name):
         return f"W:\\Collection\\{folder_name}\\"
     
+   
+    @Property(QObject, constant=True)
+    def searchResultsModel(self):
+        return self._searchResultsModel
+
+   
+   
+   
     @Slot(int, str)
     def folder_mode_select(self, panel_index, folder_name):
 
@@ -215,3 +227,46 @@ class ArchitectController(QObject):
     @Slot()
     def reset_logic(self):
         print("[ArchitectController] reset_logic() called — no action needed.")
+
+
+    @Slot(str)
+    def search_library(self, text):
+        """Search movie names only, skip TV shows, dedupe by name."""
+        try:
+            text = text.strip().lower()
+            self.searchResultsModel.clear()
+
+            if not text:
+                return
+
+            seen_titles = set()
+
+            for item in self.collection:
+
+                # Skip TV shows
+                if item.get("Media Sub Type") == "TV Show":
+                    continue
+
+                name = item.get("Name", "")
+                if not name:
+                    continue
+
+                # Match name only
+                if text in name.lower():
+
+                    # Deduplicate by movie name
+                    if name in seen_titles:
+                        continue
+                    seen_titles.add(name)
+
+                    path = item.get("Filename", "")
+
+                    self.searchResultsModel.append({
+                        "title": name,
+                        "filePath": path
+                    })
+
+        except Exception as e:
+            print("Search error:", e)
+
+    
