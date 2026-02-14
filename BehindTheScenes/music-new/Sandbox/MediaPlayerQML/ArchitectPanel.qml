@@ -5,7 +5,13 @@ import Qt5Compat.GraphicalEffects
 
 Item {
     id: panelRoot
-    
+
+    // --- STEP 2: NEW SIGNALS ---
+    signal commitRequested(int panelIndex)
+    signal finishRequested(int panelIndex)
+    signal shelfRequested(int panelIndex)
+    signal listRequested(int panelIndex)
+
     property int panelIndex: 0
     property int hitCount: 0
     property bool filterEnabled: false 
@@ -149,16 +155,14 @@ Item {
         // --- FOOTER AREA ---
         Rectangle {
             id: footerArea
-            // Fixed: Respecting margins so it doesn't overlap the border/glow
             anchors.left: parent.left; anchors.right: parent.right; anchors.bottom: parent.bottom
             anchors.margins: 1
             height: 85
             color: "#111111"
             visible: currentMode !== "selection"
             z: 100
-            radius: 12 // Matches cardFrame radius for the bottom corners
+            radius: 12
 
-            // Visual separator
             Rectangle { width: parent.width; height: 1; color: "#22FFFFFF"; anchors.top: parent.top }
 
             GridLayout {
@@ -180,14 +184,9 @@ Item {
                     contentItem: Text {
                         text: "COMMIT"; color: "gold"; font.bold: true; font.pixelSize: 11
                         horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter
+                        anchors.fill: parent
                     }
-                    onClicked: {
-                        if (typeof architectController !== "undefined") {
-                            if (currentMode === "folder" && toolLoader.item) {
-                                architectController.folder_mode_select(panelIndex, toolLoader.item.currentRelativePath)
-                            }
-                        }
-                    }
+                    onClicked: commitRequested(panelIndex)
                 }
 
                 // FINISH
@@ -202,8 +201,9 @@ Item {
                     contentItem: Text {
                         text: "FINISH"; color: "gold"; font.bold: true; font.pixelSize: 11
                         horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter
+                        anchors.fill: parent
                     }
-                    onClicked: console.log("Finish clicked")
+                    onClicked: finishRequested(panelIndex)
                 }
 
                 // SHELF
@@ -218,8 +218,9 @@ Item {
                     contentItem: Text {
                         text: "SHELF"; color: "gold"; font.bold: true; font.pixelSize: 11
                         horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter
+                        anchors.fill: parent
                     }
-                    onClicked: console.log("Bookshelf requested")
+                    onClicked: shelfRequested(panelIndex)
                 }
 
                 // THIS LIST
@@ -234,8 +235,9 @@ Item {
                     contentItem: Text {
                         text: "THIS LIST"; color: "gold"; font.bold: true; font.pixelSize: 11
                         horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter
+                        anchors.fill: parent
                     }
-                    onClicked: console.log("List requested for", panelIndex)
+                    onClicked: listRequested(panelIndex)
                 }
             }
         }
