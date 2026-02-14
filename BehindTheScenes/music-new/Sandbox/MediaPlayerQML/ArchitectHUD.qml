@@ -58,14 +58,14 @@ Rectangle {
         }
     }
 
-    function handleCommit(panelIndex) {
-        console.log("HUD: Commit Received for Panel", panelIndex)
-        criteriaModel.setProperty(panelIndex, "isCommitted", true)
+    function handleCommit(pIndex) {
+        console.log("HUD: Commit Received for Panel", pIndex)
+        criteriaModel.setProperty(pIndex, "isCommitted", true)
     }
 
-    function handleFinish(index)  { finishPopup.visible = true; finishPopup.forceActiveFocus(); }
-    function handleShelf(index)   { shelfPopup.visible = true; shelfPopup.forceActiveFocus(); }
-    function handleList(index)    { listPopup.visible = true; listPopup.forceActiveFocus(); }
+    function handleFinish(pIndex)  { finishPopup.visible = true; finishPopup.forceActiveFocus(); }
+    function handleShelf(pIndex)   { shelfPopup.visible = true; shelfPopup.forceActiveFocus(); }
+    function handleList(pIndex)    { listPopup.visible = true; listPopup.forceActiveFocus(); }
 
     // --- STEP 1: THE PANEL STAGE (Z: 1) ---
     Item {
@@ -96,10 +96,11 @@ Rectangle {
                         
                         onCurrentModeChanged: architectRoot.syncPanelData(index, currentMode, hitCount)
 
-                        onCommitRequested: architectRoot.handleCommit(panelIndex)
-                        onFinishRequested: architectRoot.handleFinish(panelIndex)
-                        onShelfRequested: architectRoot.handleShelf(panelIndex)
-                        onListRequested: architectRoot.handleList(panelIndex)
+                        // ⭐ SURGICAL FIX: Using formal function parameters to stop deprecation logs
+                        onCommitRequested: function(pIndex) { architectRoot.handleCommit(pIndex) }
+                        onFinishRequested: function(pIndex) { architectRoot.handleFinish(pIndex) }
+                        onShelfRequested: function(pIndex) { architectRoot.handleShelf(pIndex) }
+                        onListRequested: function(pIndex) { architectRoot.handleList(pIndex) }
                     }
 
                     // --- THE GATE ---
@@ -287,9 +288,9 @@ Rectangle {
             architectRoot.totalMatches = total;
         }
 
-        function onResultsCounted(panelIndex, panelCount) { 
-            if (panelIndex >= 0 && panelIndex < criteriaModel.count) {
-                criteriaModel.setProperty(panelIndex, "panelHits", panelCount);
+        function onResultsCounted(pIndex, pCount) { 
+            if (pIndex >= 0 && pIndex < criteriaModel.count) {
+                criteriaModel.setProperty(pIndex, "panelHits", pCount);
             }
         }
     }

@@ -6,7 +6,7 @@ import Qt5Compat.GraphicalEffects
 Item {
     id: panelRoot
 
-    // --- STEP 2: NEW SIGNALS ---
+    // --- SIGNALS ---
     signal commitRequested(int panelIndex)
     signal finishRequested(int panelIndex)
     signal shelfRequested(int panelIndex)
@@ -18,7 +18,7 @@ Item {
     property string currentMode: "selection" 
     property var stagingResults: []
 
-    // ⭐ NEW: Track whether this panel has been committed
+    // Track whether this panel has been committed
     property bool isCommitted: false
     
     width: 360
@@ -195,7 +195,7 @@ Item {
                     }
                     onClicked: {
                         panelRoot.isCommitted = true
-                        commitRequested(panelIndex)
+                        panelRoot.commitRequested(panelRoot.panelIndex)
                     }
                 }
 
@@ -217,7 +217,7 @@ Item {
                         horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter
                         anchors.fill: parent
                     }
-                    onClicked: finishRequested(panelIndex)
+                    onClicked: panelRoot.finishRequested(panelRoot.panelIndex)
                 }
 
                 // ⭐ SHELF
@@ -238,7 +238,7 @@ Item {
                         horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter
                         anchors.fill: parent
                     }
-                    onClicked: shelfRequested(panelIndex)
+                    onClicked: panelRoot.shelfRequested(panelRoot.panelIndex)
                 }
 
                 // ⭐ THIS LIST
@@ -259,17 +259,20 @@ Item {
                         horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter
                         anchors.fill: parent
                     }
-                    onClicked: listRequested(panelIndex)
+                    onClicked: panelRoot.listRequested(panelRoot.panelIndex)
                 }
             }
         }
     }
 
     Connections {
-        target: architectController
-        function onResultsCounted(index, count) {
-            if (panelIndex === index) {
-                panelRoot.hitCount = count
+        target: (typeof architectController !== "undefined") ? architectController : null
+        ignoreUnknownSignals: true
+        
+        // Fixed syntax to match the HUD surgical fix
+        function onResultsCounted(pIndex, pCount) {
+            if (panelRoot.panelIndex === pIndex) {
+                panelRoot.hitCount = pCount
             }
         }
     }
