@@ -172,7 +172,6 @@ Item {
                                 var value = modelData
                                 var list = []   // placeholder
 
-                                // Emit the signal upward
                                 categorySelected(key, value, list)
 
                                 if (typeof architectController !== "undefined" && parentPanel) {
@@ -227,7 +226,6 @@ Item {
                         var value = dBtn.text
                         var list = []   // placeholder
 
-                        // Emit the signal upward
                         categorySelected(key, value, list)
 
                         if (typeof architectController !== "undefined" && parentPanel) {

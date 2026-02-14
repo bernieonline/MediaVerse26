@@ -11,7 +11,7 @@ Rectangle {
     property Item parentPanel: null
     property int panelIndex: (parentPanel !== null) ? parentPanel.panelIndex : 0
 
-    // NEW: ArchitectPanel.qml will pull the selected list on Commit
+    // ArchitectPanel.qml will pull the selected list on Commit
     signal searchSelected(string query, var panelList)
 
     // Safe Font Loader for the Search Icon
@@ -26,7 +26,7 @@ Rectangle {
 
     ListModel { id: selectedModel }
 
-    // --- INTERNAL LOGIC (PRESERVED) ---
+    // --- INTERNAL LOGIC ---
     function syncToPython() {
         var paths = [];
         for(var i=0; i < selectedModel.count; i++) {
@@ -34,23 +34,19 @@ Rectangle {
         }
         
         var finalValue = paths.join("|");
-        var count = selectedModel.count;
+        var countVal = selectedModel.count;
 
-        // 1. Local Frame Update
         if (parentPanel) {
-            parentPanel.hitCount = count;
+            parentPanel.hitCount = countVal;
         }
 
-        // 2. Engine Update
         if (typeof architectController !== "undefined") {
-            if (count === 0) {
+            if (countVal === 0) {
                 architectController.resultsCounted.emit(panelIndex, 0);
             } else {
-                var ruleObj = [{
-                    "panelIndex": panelIndex,
-                    "category": "search_files",
-                    "value": finalValue
-                }];
+                // Sending updated rule to engine
+                architectController.update_logic_rule(panelIndex, "search_files", finalValue);
+                architectController.recalculate_foundation();
             }
         }
     }
@@ -101,6 +97,7 @@ Rectangle {
         ListView {
             id: resultsView
             width: parent.width
+            // ⭐ RESTORED: Using 'count' directly instead of 'model.count'
             height: (searchInput.text.length > 0 && count > 0) ? Math.min(contentHeight, 150) : 0
             clip: true
             model: (typeof architectController !== "undefined") ? architectController.searchResultsModel : []
@@ -118,7 +115,10 @@ Rectangle {
                     var finalPath = model.filePath
                     var finalTitle = model.title
 
-                    // Add to multi-select bucket (existing behaviour)
+                    // Notify listeners
+                    searchSelected(searchInput.text, [])
+
+                    // Add to multi-select bucket
                     searchNavRoot.addMovieToBucket(finalTitle, finalPath)
 
                     // Clear search field

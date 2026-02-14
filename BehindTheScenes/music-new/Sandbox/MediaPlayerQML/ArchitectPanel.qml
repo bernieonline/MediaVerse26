@@ -14,21 +14,26 @@ Item {
 
     property int panelIndex: 0
     property int hitCount: 0
-    property bool filterEnabled: false 
-    property string currentMode: "selection" 
+    property bool filterEnabled: false
+    property string currentMode: "selection"
     property var stagingResults: []
 
     // Track whether this panel has been committed
     property bool isCommitted: false
-    
+
+    // --- NEW: rule state for this panel ---
+    property string panelMode: ""
+    property var panelData: null
+    property var panelListData: []
+
     width: 360
     height: 600
 
     RectangularGlow {
         id: effect
         anchors.fill: cardFrame
-        glowRadius: 18        
-        spread: 0.18        
+        glowRadius: 18
+        spread: 0.18
         color: "#99FFD700"
         cornerRadius: 12
         z: 0
@@ -37,13 +42,13 @@ Item {
     Rectangle {
         id: cardFrame
         anchors.fill: parent
-        anchors.margins: 15 
-        
+        anchors.margins: 15
+
         color: "#1A1A1A"
-        radius: 12 
+        radius: 12
         border.color: "#FFFFFF"
         border.width: 1
-        clip: true 
+        clip: true
         z: 1
 
         Rectangle {
@@ -56,7 +61,7 @@ Item {
             RowLayout {
                 anchors.fill: parent; anchors.leftMargin: 12; anchors.rightMargin: 12
                 spacing: 8
-                
+
                 Text {
                     text: "#" + (panelIndex + 1)
                     color: "white"; font.bold: true; opacity: 0.5; font.pixelSize: 12
@@ -75,7 +80,7 @@ Item {
                     }
                 }
 
-                Item { Layout.fillWidth: true } 
+                Item { Layout.fillWidth: true }
 
                 Rectangle {
                     id: helpBtn
@@ -102,9 +107,9 @@ Item {
                 Text {
                     text: "M"; font.pixelSize: 22; font.bold: true; color: "gold"
                     opacity: menuMouse.containsMouse ? 1.0 : 0.8
-                    MouseArea { 
+                    MouseArea {
                         id: menuMouse; anchors.fill: parent; hoverEnabled: true
-                        onClicked: currentMode = "selection" 
+                        onClicked: currentMode = "selection"
                     }
                 }
 
@@ -117,7 +122,7 @@ Item {
                 Text {
                     text: "×"; font.pixelSize: 26; color: "#FF4444"
                     opacity: closeMouse.containsMouse ? 1.0 : 0.7
-                    MouseArea { 
+                    MouseArea {
                         id: closeMouse; anchors.fill: parent; hoverEnabled: true
                         onClicked: if (typeof architectRoot !== "undefined") architectRoot.removePanel(panelIndex)
                     }
@@ -146,9 +151,9 @@ Item {
             visible: currentMode === "selection"
             anchors.centerIn: parent; spacing: 15
             z: 10
-            Text { 
-                text: "SELECT LOGIC"; color: "white"; font.pixelSize: 18; 
-                font.bold: true; anchors.horizontalCenter: parent.horizontalCenter; opacity: 0.6 
+            Text {
+                text: "SELECT LOGIC"; color: "white"; font.pixelSize: 18;
+                font.bold: true; anchors.horizontalCenter: parent.horizontalCenter; opacity: 0.6
             }
             Button { text: "🔍 SEARCH"; width: 180; height: 45; onClicked: currentMode = "search" }
             Button { text: "📁 FOLDER"; width: 180; height: 45; onClicked: currentMode = "folder" }
@@ -194,6 +199,24 @@ Item {
                         anchors.fill: parent
                     }
                     onClicked: {
+                        // Guard: only commit if we have a valid mode + data
+                        if (panelRoot.panelMode === "" || panelRoot.panelData === null) {
+                            console.log("⚠️ Cannot commit panel", panelRoot.panelIndex, "- no selection state.")
+                            return
+                        }
+
+                        var rule = {
+                            panelIndex: panelRoot.panelIndex,
+                            mode: panelRoot.panelMode,
+                            data: panelRoot.panelData,
+                            list: panelRoot.panelListData
+                        }
+
+                        if (typeof architectController !== "undefined") {
+                            // Match existing pattern: send an array of rules
+                            architectController.update_live_preview(JSON.stringify([rule]))
+                        }
+
                         panelRoot.isCommitted = true
                         panelRoot.commitRequested(panelRoot.panelIndex)
                     }
@@ -265,15 +288,45 @@ Item {
         }
     }
 
+    // Listen to architectController for hit counts
     Connections {
         target: (typeof architectController !== "undefined") ? architectController : null
         ignoreUnknownSignals: true
-        
-        // Fixed syntax to match the HUD surgical fix
+
         function onResultsCounted(pIndex, pCount) {
             if (panelRoot.panelIndex === pIndex) {
                 panelRoot.hitCount = pCount
             }
+        }
+    }
+
+    // NEW: listen to the currently loaded tool (Folder / Category / Search)
+    Connections {
+        target: toolLoader.item
+        ignoreUnknownSignals: true
+
+        function onFolderSelected(folderName, panelList) {
+            panelRoot.panelMode = "folder"
+            panelRoot.panelData = folderName
+            panelRoot.panelListData = panelList || []
+            panelRoot.stagingResults = panelRoot.panelListData
+            console.log("📁 Panel", panelRoot.panelIndex, "folderSelected →", folderName)
+        }
+
+        function onCategorySelected(key, value, panelList) {
+            panelRoot.panelMode = "category"
+            panelRoot.panelData = { key: key, value: value }
+            panelRoot.panelListData = panelList || []
+            panelRoot.stagingResults = panelRoot.panelListData
+            console.log("🏷️ Panel", panelRoot.panelIndex, "categorySelected →", key, "=", value)
+        }
+
+        function onSearchSelected(query, panelList) {
+            panelRoot.panelMode = "search"
+            panelRoot.panelData = { query: query }
+            panelRoot.panelListData = panelList || []
+            panelRoot.stagingResults = panelRoot.panelListData
+            console.log("🔍 Panel", panelRoot.panelIndex, "searchSelected →", query)
         }
     }
 }
