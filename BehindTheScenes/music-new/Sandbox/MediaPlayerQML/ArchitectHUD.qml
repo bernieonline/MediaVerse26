@@ -173,6 +173,23 @@ Rectangle {
 
         Rectangle { width: parent.width; height: 1; color: "#22FFFFFF"; anchors.top: parent.top }
 
+        // ⭐ NEW: Mode Label on the left
+        Item {
+            anchors.left: parent.left
+            anchors.leftMargin: 40
+            anchors.verticalCenter: parent.verticalCenter
+            width: childrenRect.width; height: childrenRect.height
+            
+            Text {
+                text: "ARCHITECT MODE"
+                color: "gold"
+                font.pixelSize: 16
+                font.bold: true
+                font.letterSpacing: 2
+                opacity: 0.9
+            }
+        }
+
         Row {
             anchors.centerIn: parent; spacing: 60
 
