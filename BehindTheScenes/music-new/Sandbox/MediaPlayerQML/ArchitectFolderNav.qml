@@ -9,7 +9,7 @@ Item {
     // Reference to the ArchitectPanel frame
     property Item parentPanel: null
     property string currentRelativePath: "" 
-
+    property string selectedFolder: ""
     signal folderSelected(string folderName, var panelList)
 
     //property alias folderNameField: currentRelativePath
@@ -117,6 +117,8 @@ Item {
                 onClicked: {
                     var newPath = currentRelativePath === "" ? model.modelData : currentRelativePath + "/" + model.modelData;
                     currentRelativePath = newPath;
+
+                    selectedFolder = newPath
                     
                     if (parentPanel) parentPanel.stagingResults = [newPath];
                     

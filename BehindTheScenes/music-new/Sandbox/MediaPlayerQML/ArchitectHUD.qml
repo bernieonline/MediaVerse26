@@ -57,8 +57,16 @@ Rectangle {
 
     function handleCommit(pIndex) {
         console.log("HUD: Attempting Commit for Index:", pIndex);
+
+        // Mark panel as committed
         if (pIndex >= 0 && pIndex < criteriaModel.count) {
             criteriaModel.setProperty(pIndex, "isCommitted", true);
+        }
+
+        // TEMP: Direct JSON test
+        if (typeof folderNav !== "undefined" && folderNav.buildRuleSnippet) {
+            let snippet = folderNav.buildRuleSnippet(pIndex, "NONE", true)
+            console.log("TEST JSON SNIPPET:\n" + JSON.stringify(snippet, null, 2))
         }
     }
 

@@ -7,16 +7,17 @@ Item {
     id: panelRoot
 
     // --- SIGNALS ---
-    signal commitRequested(int panelIndex)
     signal finishRequested(int panelIndex)
     signal shelfRequested(int panelIndex)
     signal listRequested(int panelIndex)
+    signal commitRequested(int pIndex, var snippet)
 
     property int panelIndex: 0
     property int hitCount: 0
     property bool filterEnabled: false 
     property string currentMode: "selection" 
     property var stagingResults: []
+    property string currentGate: model.gateValue
 
     // Track whether this panel has been committed
     property bool isCommitted: false
@@ -219,7 +220,14 @@ Item {
                     }
                     onClicked: {
                         console.log("📤 COMMIT REQUESTED from panel", panelRoot.panelIndex)
-                        panelRoot.commitRequested(panelRoot.panelIndex)
+                        
+                        let tool = toolLoader.item
+                        let snippet = tool.buildRuleSnippet(panelIndex, currentGate, true)
+                        commitRequested(panelIndex, snippet)
+
+                        //panelRoot.commitRequested(panelRoot.panelIndex)
+                        panelRoot.commitRequested(panelRoot.panelIndex, null)
+
                     }
                 }
 
