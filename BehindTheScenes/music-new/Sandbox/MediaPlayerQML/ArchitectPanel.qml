@@ -20,6 +20,11 @@ Item {
 
     // Track whether this panel has been committed
     property bool isCommitted: false
+
+    // --- DEBUG: Monitor incoming signals from MODE files ---
+    function debugSignal(name, payload) {
+        console.log("📡 PANEL " + panelIndex + " RECEIVED SIGNAL:", name, JSON.stringify(payload))
+    }
     
     width: 360
     height: 600
@@ -139,6 +144,25 @@ Item {
             onLoaded: if (item) {
                 item.parentPanel = panelRoot
                 console.log("🛠️ Tool Loaded: " + currentMode + " linked to Panel " + panelIndex)
+
+                // --- CONNECT MODE SIGNALS TO DEBUG LOGGER ---
+                if (item.folderSelected) {
+                    item.folderSelected.connect(function(folderPath, list) {
+                        debugSignal("folderSelected", { folderPath: folderPath, list: list })
+                    })
+                }
+
+                if (item.categorySelected) {
+                    item.categorySelected.connect(function(categoryName, list) {
+                        debugSignal("categorySelected", { categoryName: categoryName, list: list })
+                    })
+                }
+
+                if (item.searchSelected) {
+                    item.searchSelected.connect(function(query, list) {
+                        debugSignal("searchSelected", { query: query, list: list })
+                    })
+                }
             }
         }
 

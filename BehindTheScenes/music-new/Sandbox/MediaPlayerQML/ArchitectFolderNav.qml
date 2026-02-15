@@ -150,17 +150,6 @@ Item {
             if (parentPanel) parentPanel.stagingResults = [currentRelativePath];
         }
 
-        function onResultsCounted(panelIndex, panelCount) {
-            if (parentPanel && (panelIndex === parentPanel.panelIndex || panelIndex === -1)) {
-                parentPanel.hitCount = panelCount;
-
-                console.log("-----------------------------------------");
-                console.log("📁 FOLDER NAV SYNC | Panel: " + folderNavRoot.parentPanel.panelIndex);
-                console.log("Target Path: " + (currentRelativePath === "" ? "Root" : currentRelativePath));
-                console.log("Hit Count: " + panelCount);
-                console.log("-----------------------------------------");
-            }
-        }
     }
 
     Component.onCompleted: {
@@ -168,5 +157,49 @@ Item {
             if (parentPanel) parentPanel.stagingResults = [currentRelativePath];
             architectController.get_sub_folders(currentRelativePath);
         }
+    }
+    // ------------------------------------------------------------
+    // Debugging toggle
+    // ------------------------------------------------------------
+    property bool debugEnabled: true
+
+    // ------------------------------------------------------------
+    // Debug helper
+    // ------------------------------------------------------------
+    function debugLog(message, object) {
+        if (!debugEnabled)
+            return
+
+        if (object !== undefined) {
+            console.log("[FolderNav] " + message + ":\n" +
+                        JSON.stringify(object, null, 2))
+        } else {
+            console.log("[FolderNav] " + message)
+        }
+    }
+
+    // ------------------------------------------------------------
+    // Build JSON snippet for Folder mode
+    // Called by HUD when user clicks Finish or Commit
+    // ------------------------------------------------------------
+    function buildRuleSnippet(panelIndex, gate, checked) {
+
+        let snippet = {
+            panelIndex: panelIndex,
+            mode: "Folder",
+            data: {
+                folder: selectedFolder
+            },
+            gate: gate
+        }
+
+        // Only panels 1–3 include checked
+        if (panelIndex > 0) {
+            snippet.checked = checked
+        }
+
+        debugLog("Generated Folder JSON snippet", snippet)
+
+        return snippet
     }
 }

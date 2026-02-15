@@ -241,8 +241,11 @@ Rectangle {
                 onClicked: {
                     finishPopup.visible = false
                     architectRoot.visible = false
-                    if (typeof architectController !== "undefined")
-                        architectController.finalize_logic()
+                    //if (typeof architectController !== "undefined")
+                        //architectController.finalize_logic()
+                    finishPopup.visible = false
+                    architectRoot.visible = false
+
                 }
             }
             Button {

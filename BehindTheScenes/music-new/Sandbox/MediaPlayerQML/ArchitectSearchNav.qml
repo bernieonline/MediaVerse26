@@ -45,8 +45,8 @@ Rectangle {
                 architectController.resultsCounted.emit(panelIndex, 0);
             } else {
                 // Sending updated rule to engine
-                architectController.update_logic_rule(panelIndex, "search_files", finalValue);
-                architectController.recalculate_foundation();
+                //architectController.update_logic_rule(panelIndex, "search_files", finalValue);
+                //architectController.recalculate_foundation();
             }
         }
     }
