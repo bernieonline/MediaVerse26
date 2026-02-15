@@ -194,7 +194,7 @@ Item {
                         anchors.fill: parent
                     }
                     onClicked: {
-                        panelRoot.isCommitted = true
+                        console.log("📤 COMMIT REQUESTED from panel", panelRoot.panelIndex)
                         panelRoot.commitRequested(panelRoot.panelIndex)
                     }
                 }
