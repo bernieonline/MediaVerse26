@@ -30,6 +30,7 @@ Rectangle {
             isCommitted: false 
         }
     }
+    
 
     // --- VAULT MESSENGER FUNCTIONS ---
     function removePanel(index) {
@@ -106,13 +107,25 @@ Rectangle {
                         filterEnabled: index >= 1
                         
                         onCurrentModeChanged: architectRoot.syncPanelData(index, currentMode, hitCount)
+                       
+                        onCommitRequested: function(pIdx, snippet) {
+                            architectRoot.handleCommit(pIdx, snippet)
+                        }
 
-                        onCommitRequested: function(pIdx) { architectRoot.handleCommit(pIdx) }
+                        
                         onFinishRequested: function(pIdx) { architectRoot.handleFinish(pIdx) }
                         onShelfRequested: function(pIdx) { architectRoot.handleShelf(pIdx) }
                         onListRequested: function(pIdx) { architectRoot.handleList(pIdx) }
                     }
+                    Connections {
+                        target: mainPanel
+                        ignoreUnknownSignals: true
 
+                        function onCommitRequested(pIdx, snippet) {
+                            console.log("HUD: Snippet Received:", JSON.stringify(snippet, null, 2))
+                            architectRoot.handleCommit(pIdx, snippet)
+                        }
+                    }
                     // THE GATE (Only shows if this panel is committed)
                     Item {
                         id: gateWrapper

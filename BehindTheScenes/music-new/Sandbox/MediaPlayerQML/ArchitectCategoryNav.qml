@@ -9,6 +9,7 @@ Item {
     property string currentSubMode: "main"
     property string activeCategory: ""
     signal categorySelected(string key, string value, var panelList)
+    property string selectedCategoryValue: ""
 
     FontLoader {
         id: catIconFont
@@ -105,6 +106,8 @@ Item {
                     onClicked: {
                         activeCategory = modelData
                         currentSubMode = (modelData === "Decade") ? "year" : "search"
+                        selectedCategoryValue = ""
+
                     }
                 }
             }
@@ -171,6 +174,7 @@ Item {
                                 var key = activeCategory
                                 var value = modelData
                                 var list = []   // placeholder
+                                selectedCategoryValue = value
 
                                 categorySelected(key, value, list)
 
@@ -225,6 +229,7 @@ Item {
                         var key = "Decade"
                         var value = dBtn.text
                         var list = []   // placeholder
+                        selectedCategoryValue = value
 
                         categorySelected(key, value, list)
 
@@ -250,6 +255,17 @@ Item {
             if (parentPanel && panelIndex === parentPanel.panelIndex) {
                 parentPanel.hitCount = panelCount
             }
+        }
+    }
+    function buildRuleSnippet(panelIndex, gate, includeGate) {
+        return {
+            panelIndex: panelIndex,
+            mode: "Category",
+            data: {
+                category: activeCategory,
+                value: selectedCategoryValue
+            },
+            gate: includeGate ? gate : "NONE"
         }
     }
 }

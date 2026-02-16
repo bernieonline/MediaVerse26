@@ -226,7 +226,7 @@ Item {
                         commitRequested(panelIndex, snippet)
 
                         //panelRoot.commitRequested(panelRoot.panelIndex)
-                        panelRoot.commitRequested(panelRoot.panelIndex, null)
+                        //panelRoot.commitRequested(panelRoot.panelIndex, null)
 
                     }
                 }
