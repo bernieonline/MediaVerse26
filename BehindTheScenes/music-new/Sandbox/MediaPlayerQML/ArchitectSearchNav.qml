@@ -11,6 +11,7 @@ Rectangle {
     property Item parentPanel: null
     property int panelIndex: (parentPanel !== null) ? parentPanel.panelIndex : 0
 
+
     // ArchitectPanel.qml will pull the selected list on Commit
     signal searchSelected(string query, var panelList)
 
@@ -58,6 +59,22 @@ Rectangle {
         }
         selectedModel.append({"title": title, "filePath": path});
         syncToPython();
+    }
+    // --- SNIPPET GENERATOR FOR ARCHITECT PANEL ---
+    function buildRuleSnippet(panelIndex, gate, includeGate) {
+        var files = [];
+        for (var i = 0; i < selectedModel.count; i++) {
+            files.push(selectedModel.get(i).filePath);
+        }
+
+        return {
+            panelIndex: panelIndex,
+            mode: "Files",
+            data: {
+                files: files
+            },
+            gate: includeGate ? gate : "NONE"
+        };
     }
 
     Column {
