@@ -30,24 +30,22 @@ display_dir = project_root / "cache" / "display"
 # FONT AWESOME PATH
 # ---------------------------------------------------------
 font_path = (
-    project_root
-    / "Fonts"
-    / "fontawesome-free-7.1.0-desktop"
-    / "webfonts"
+    project_root 
+    / "Fonts" 
+    / "fontawesome-free-7.1.0-desktop" 
+    / "webfonts" 
     / "fa-solid-900.ttf"
-
-
-
 )
 
-#basic icons 
+# Basic icons 
 svg_solid_path = (
-    project_root
-    / "Fonts"
-    / "fontawesome-free-7.1.0-desktop"
-    / "svgs"
+    project_root 
+    / "Fonts" 
+    / "fontawesome-free-7.1.0-desktop" 
+    / "svgs" 
     / "solid"
 )
+
 
 # ---------------------------------------------------------
 # JSON CONFIG FILES
