@@ -13,23 +13,33 @@ Item {
     property int unreadCount: 0  
     property bool hasUrgent: false 
 
-    // --- NEW: Helper Function for your main button ---
+    // --- Helper Function: Show Collection Creator ---
     function showCollectionCreator() {
-        // 1. Close other panels
         notificationPanel.isShown = false
         todoPanel.isShown = false
-        
-        // 2. Open this panel
         collectionCreatorPanel.isShown = true
-        
-        // 3. Refresh data from Python
         collectionLogic.refresh_master_cache()
     }
 
     FontLoader { 
-        id: faSolid;
-        Component.onCompleted: {
-            faSolid.source = fontPathFA 
+        id: faSolid
+        // This dynamic source cleans the path at runtime
+        source: {
+            let p = String(fontPathFA);
+            // 1. Convert Windows backslashes to QML forward slashes
+            p = p.replace(/\\/g, "/");
+            // 2. Ensure it starts with the file:/// protocol
+            if (!p.startsWith("file:///")) {
+                p = "file:///" + p;
+            }
+            return p;
+        }
+        
+        onStatusChanged: {
+            if (status == FontLoader.Error) 
+                console.log("❌ Sidebar Font Error: " + source)
+            else if (status == FontLoader.Ready)
+                console.log("✅ Sidebar Font Loaded: " + name)
         }
     }
 
@@ -50,24 +60,17 @@ Item {
         }
     }
 
-    
     // --- 1. THE DISMISSAL SHIELD ---
     MouseArea {
         id: dismissalShield
         anchors.fill: parent
-        
-        // ENABLED if EITHER the sidebar is open OR the collection panel is shown
         enabled: root.isOpen || collectionCreatorPanel.isShown
-        
         z: 997 
         onClicked: {
-            // Close everything
             root.isOpen = false
             notificationPanel.isShown = false
             todoPanel.isShown = false
             collectionCreatorPanel.isShown = false 
-            
-            //console.log("Shield clicked: Closing all panels")
         }
     }
 
@@ -92,7 +95,6 @@ Item {
     }
 
     // --- 4. THE TODO PANEL ---
-    // (Existing code remains the same inside this rectangle)
     Rectangle {
         id: todoPanel
         property bool isShown: false
@@ -101,7 +103,6 @@ Item {
         x: root.isOpen && isShown ? (parent.width - sidebarBody.width - width) : parent.width
         Behavior on x { NumberAnimation { duration: 300; easing.type: Easing.OutCubic } }
         
-        // ... rest of your Column/TextArea code here ...
         Column {
             anchors.fill: parent; anchors.margins: 20; spacing: 15
             Text { text: "SHARED TO-DO LIST"; color: "yellow"; font.pixelSize: 18; font.bold: true }
@@ -123,18 +124,13 @@ Item {
         }
     }
 
-    // --- 5. NEW: THE COLLECTION CREATOR PANEL ---
+    // --- 5. THE COLLECTION CREATOR PANEL ---
     CollectionCreator {
         id: collectionCreatorPanel
         property bool isShown: false
-        z: 1100 // Set this higher than sidebarBody (which is 1000)
-        
-        // If isShown is true, it slides to its open position. 
-        // If false, it hides off-screen to the right.
+        z: 1100 
         x: isShown ? (parent.width - width) : parent.width
-        
-        width: 600 // Or whatever width you want for the builder
-        
+        width: 600 
         Behavior on x { NumberAnimation { duration: 350; easing.type: Easing.OutCubic } }
     }
 
@@ -168,7 +164,7 @@ Item {
                     unreadBadge: root.unreadCount; isUrgent: root.hasUrgent
                     onClicked: {
                         todoPanel.isShown = false
-                        collectionCreatorPanel.isShown = false // Added this
+                        collectionCreatorPanel.isShown = false 
                         notificationPanel.isShown = !notificationPanel.isShown
                     }
                 }
@@ -177,28 +173,24 @@ Item {
                     iconCode: "\uf044"; toolName: "To-Do" 
                     onClicked: {
                         notificationPanel.isShown = false
-                        collectionCreatorPanel.isShown = false // Added this
+                        collectionCreatorPanel.isShown = false 
                         todoPanel.isShown = !todoPanel.isShown
                         if (todoPanel.isShown) todoTextArea.text = todoManager.load_todo()
                     }
                 }
 
-                // New icon for the Collection Creator within the sidebar
                 ToolButton { 
                     iconCode: "\uf00b" 
                     toolName: "Collections" 
                     onClicked: root.showCollectionCreator()
                 }
 
-                ToolButton { iconCode: "\uf5dc"; toolName: "AI" }
-                ToolButton { iconCode: "\uf002"; toolName: "Search" }
-                ToolButton { iconCode: "\uf07c"; toolName: "Files" }
+                // AI, Search, and Files options have been removed per request.
             }
         }
     }
 
     // --- TOOL BUTTON COMPONENT ---
-    // (Existing ToolButton component remains exactly the same)
     component ToolButton: Rectangle {
         id: btnRoot
         property string iconCode; property string toolName

@@ -16,13 +16,12 @@ Rectangle {
     signal searchSelected(string query, var panelList)
 
     // Safe Font Loader for the Search Icon
+    // Safe Font Loader for the Search Icon
+   
     FontLoader { 
         id: searchIconFont
-        source: {
-            var p = (typeof _paths !== 'undefined' && _paths.fonts) ? _paths.fonts.toString() : "";
-            if (p === "") return "";
-            return (p.indexOf("file:///") === -1) ? "file:///" + p.replace(/\\/g, "/") : p;
-        }
+        // fontPathFA is already a "file:///" URI from main.py
+        source: fontPathFA 
     }
 
     ListModel { id: selectedModel }

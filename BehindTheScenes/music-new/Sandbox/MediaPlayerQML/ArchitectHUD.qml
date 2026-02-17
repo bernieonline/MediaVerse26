@@ -13,7 +13,7 @@ Rectangle {
     // --- DIMENSIONS ---
     readonly property int cardWidth: 360    
     readonly property int cardHeight: 600   
-    readonly property int joinGap: 60 // Increased for better spacing
+    readonly property int joinGap: 60 
     
     property int totalMatches: 0
     property bool filterEnabled: false
@@ -30,7 +30,6 @@ Rectangle {
             isCommitted: false 
         }
     }
-    
 
     // --- VAULT MESSENGER FUNCTIONS ---
     function removePanel(index) {
@@ -59,19 +58,13 @@ Rectangle {
     function handleCommit(pIndex) {
         console.log("HUD: Attempting Commit for Index:", pIndex);
 
-        // Mark panel as committed
         if (pIndex >= 0 && pIndex < criteriaModel.count) {
             criteriaModel.setProperty(pIndex, "isCommitted", true);
         }
 
-        // TEMP: Direct JSON test
-        if (typeof folderNav !== "undefined" && folderNav.buildRuleSnippet) {
-            let snippet = folderNav.buildRuleSnippet(pIndex, "NONE", true)
-            console.log("TEST JSON SNIPPET:\n" + JSON.stringify(snippet, null, 2))
-        }
+        // Note: The specific tool lookup is now handled during the Finish process
     }
 
-    function handleFinish(pIndex)  { finishPopup.visible = true; finishPopup.forceActiveFocus(); }
     function handleShelf(pIndex)   { shelfPopup.visible = true; shelfPopup.forceActiveFocus(); }
     function handleList(pIndex)    { listPopup.visible = true; listPopup.forceActiveFocus(); }
 
@@ -79,7 +72,7 @@ Rectangle {
     Item {
         id: stage
         anchors.fill: parent
-        anchors.bottomMargin: 120 // Space for footer
+        anchors.bottomMargin: 120
         z: 1
 
         Row {
@@ -88,35 +81,36 @@ Rectangle {
             spacing: 0 
 
             Repeater {
+                id: cardRepeater
                 model: criteriaModel
+
                 delegate: Row {
                     id: delegateRow
+                    property alias mainPanelRef: mainPanel
                     height: architectRoot.cardHeight
-                    
-                    // THE PANEL
+
                     ArchitectPanel {
                         id: mainPanel
                         width: architectRoot.cardWidth
                         height: architectRoot.cardHeight
                         panelIndex: index
-                        
-                        // Syncing visibility state from model to panel
+
                         isCommitted: model.isCommitted
                         hitCount: model.panelHits
                         currentMode: model.panelType
                         filterEnabled: index >= 1
-                        
+
                         onCurrentModeChanged: architectRoot.syncPanelData(index, currentMode, hitCount)
-                       
+
                         onCommitRequested: function(pIdx, snippet) {
                             architectRoot.handleCommit(pIdx, snippet)
                         }
 
-                        
                         onFinishRequested: function(pIdx) { architectRoot.handleFinish(pIdx) }
                         onShelfRequested: function(pIdx) { architectRoot.handleShelf(pIdx) }
                         onListRequested: function(pIdx) { architectRoot.handleList(pIdx) }
                     }
+
                     Connections {
                         target: mainPanel
                         ignoreUnknownSignals: true
@@ -126,66 +120,63 @@ Rectangle {
                             architectRoot.handleCommit(pIdx, snippet)
                         }
                     }
-                    // THE GATE (Only shows if this panel is committed)
+
                     Item {
                         id: gateWrapper
-                        // Using a ternary with a hard value to prevent "undefined" layout crashes
                         width: (model.isCommitted === true) ? architectRoot.joinGap : 0
                         height: architectRoot.cardHeight
                         visible: (model.isCommitted === true)
                         clip: true
 
-                        // Animation to slide panels apart when gate appears
                         Behavior on width { NumberAnimation { duration: 250; easing.type: Easing.OutCubic } }
 
                         Column {
                             anchors.centerIn: parent
                             spacing: 15
 
-                            // AND GATE (+)
                             Rectangle {
                                 width: 44; height: 44; radius: 22
                                 color: model.gateValue === "AND" ? "#00F2FF" : "#222"
                                 border.color: "white"; border.width: 1
                                 Text { anchors.centerIn: parent; text: "+"; color: "white"; font.pixelSize: 22; font.bold: true }
-                                
+
                                 MouseArea {
                                     anchors.fill: parent
                                     onClicked: {
                                         model.gateValue = "AND";
                                         if (criteriaModel.count <= index + 1) {
                                             criteriaModel.append({ 
-                                                "panelType": "selection", "panelValue": "", 
-                                                "gateValue": "NONE", "panelHits": 0, 
-                                                "isFilterMode": false, "isCommitted": false 
+                                                "panelType": "selection", "panelValue": "",
+                                                "gateValue": "NONE", "panelHits": 0,
+                                                "isFilterMode": false, "isCommitted": false
                                             });
                                         }
                                     }
                                 }
                             }
 
-                            // NOT GATE (-)
                             Rectangle {
                                 width: 44; height: 44; radius: 22
                                 color: model.gateValue === "NOT" ? "#FF0055" : "#222"
                                 border.color: "white"; border.width: 1
                                 Text { anchors.centerIn: parent; text: "-"; color: "white"; font.pixelSize: 22; font.bold: true }
+
                                 MouseArea {
                                     anchors.fill: parent
                                     onClicked: {
                                         model.gateValue = "NOT"
                                         if (criteriaModel.count <= index + 1) {
                                             criteriaModel.append({ 
-                                                "panelType": "selection", "panelValue": "", 
-                                                "gateValue": "NONE", "panelHits": 0, 
-                                                "isFilterMode": false, "isCommitted": false 
+                                                "panelType": "selection", "panelValue": "",
+                                                "gateValue": "NONE", "panelHits": 0,
+                                                "isFilterMode": false, "isCommitted": false
                                             });
                                         }
                                     }
                                 }
                             }
                         }
-                    } 
+                    }
                 }
             }
         }
@@ -200,24 +191,25 @@ Rectangle {
 
         Row {
             anchors.centerIn: parent; spacing: 60
+
             Column {
                 spacing: 2
                 Text { text: "CUMULATIVE MATCHES"; color: "#88FFFFFF"; font.pixelSize: 11; font.letterSpacing: 1 }
                 Text { text: architectRoot.totalMatches; color: "#00F2FF"; font.pixelSize: 36; font.bold: true }
             }
+
             Button {
                 text: "RESET SCHEME"
                 onClicked: {
                     criteriaModel.clear();
                     criteriaModel.append({ "panelType": "selection", "panelValue": "", "gateValue": "NONE", "panelHits": 0, "isFilterMode": false, "isCommitted": false });
-                    if (typeof architectController !== "undefined") architectController.reset_logic(); 
+                    if (typeof architectController !== "undefined") architectController.reset_logic();
                 }
             }
+
             Button { text: "EXIT"; onClicked: architectRoot.visible = false }
         }
     }
-
-    // --- POPUPS (Premium gold-gradient modals) ---
 
     // --- FINISH POPUP ---
     Rectangle {
@@ -262,13 +254,9 @@ Rectangle {
                 onClicked: {
                     finishPopup.visible = false
                     architectRoot.visible = false
-                    //if (typeof architectController !== "undefined")
-                        //architectController.finalize_logic()
-                    finishPopup.visible = false
-                    architectRoot.visible = false
-
                 }
             }
+
             Button {
                 text: "CANCEL"
                 onClicked: finishPopup.visible = false
@@ -322,6 +310,7 @@ Rectangle {
                         architectController.save_to_shelf()
                 }
             }
+
             Button {
                 text: "CANCEL"
                 onClicked: shelfPopup.visible = false
@@ -375,6 +364,7 @@ Rectangle {
                         architectController.export_list()
                 }
             }
+
             Button {
                 text: "CANCEL"
                 onClicked: listPopup.visible = false
@@ -382,12 +372,73 @@ Rectangle {
         }
     }
 
-    // --- VAULT CONNECTION ---////
+    // --- FIXED FINISH LOOP USING DELEGATE ALIAS ---
+    function buildFullRuleSet() {
+        var rules = [];
+        console.log("HUD: Final Assembly Started...");
+
+        for (var i = 0; i < cardRepeater.count; i++) {
+            var delegateItem = cardRepeater.itemAt(i);
+            if (!delegateItem) {
+                console.log("HUD: Skipping index " + i + " - Delegate not ready.");
+                continue;
+            }
+
+            // Reach the ArchitectPanel via the alias
+            var panel = delegateItem.mainPanelRef;
+            if (!panel) {
+                console.log("HUD: Skipping index " + i + " - Panel reference missing.");
+                continue;
+            }
+
+            // Safety: Ensure the tool loader exists and has an active item
+            if (panel.toolLoader && panel.toolLoader.item) {
+                var tool = panel.toolLoader.item;
+                
+                // Only proceed if the tool has the snippet builder function
+                if (typeof tool.buildRuleSnippet === "function") {
+                    var currentGate = criteriaModel.get(i).gateValue;
+                    var snippet = tool.buildRuleSnippet(i, currentGate, i > 0);
+                    
+                    // CRITICAL FIX: Only set properties if the snippet isn't null
+                    if (snippet !== null && typeof snippet !== "undefined") {
+                        snippet.checked = true;
+                        rules.push(snippet);
+                        console.log("HUD: Successfully captured snippet for Panel " + i);
+                    } else {
+                        console.log("HUD: Panel " + i + " returned null (likely no selection made).");
+                    }
+                }
+            } else {
+                console.log("HUD: Panel " + i + " has no tool loaded.");
+            }
+        }
+
+        var finalPayload = { 
+            "collectionName": "New Collection",
+            "rules": rules,
+            "timestamp": new Date().toISOString()
+        };
+
+        return finalPayload;
+    }
+
+    function handleFinish(pIndex) {
+        var fullSet = buildFullRuleSet();
+        console.log("FULL RULE SET:\n" + JSON.stringify(fullSet, null, 2));
+
+        finishPopup.visible = true;
+        finishPopup.forceActiveFocus();
+    }
+
+    // --- VAULT CONNECTION ---
     Connections {
         target: (typeof architectController !== "undefined") ? architectController : null
         ignoreUnknownSignals: true
+
         function onCountChanged(total) { architectRoot.totalMatches = total; }
-        function onResultsCounted(pIndex, pCount) { 
+
+        function onResultsCounted(pIndex, pCount) {
             if (pIndex >= 0 && pIndex < criteriaModel.count) {
                 criteriaModel.setProperty(pIndex, "panelHits", pCount);
             }

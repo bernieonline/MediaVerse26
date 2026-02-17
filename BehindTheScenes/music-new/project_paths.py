@@ -108,8 +108,8 @@ paths = {
     "display": display_dir,
     "config": config_json,
     "fonts": font_path,
-   "xmldate" : coll_data,
-   "jsoncoll" : coll_json,
+    "xmldate" : coll_data,
+    "jsoncoll" : coll_json,
 
 
     # Server V2
@@ -132,7 +132,9 @@ paths = {
     "fallback_image": fallback_image,
     "splash_json": splash_json,
 
-    
-
-
+    # --- QML SPECIFIC STRING OVERRIDES ---
+    # These extra keys provide the file:/// URI without changing the original Path keys
+    "font_url": "file:///" + str(font_path.resolve()).replace("\\", "/"),
+    "fallback_url": "file:///" + str(fallback_image.resolve()).replace("\\", "/"),
+    "assets_url": "file:///" + str(assets_path.resolve()).replace("\\", "/")
 }

@@ -6,6 +6,10 @@ import Qt5Compat.GraphicalEffects
 Item {
     id: panelRoot
 
+    // --- PUBLIC INTERFACE ---
+    // This alias is the "bridge" that allows ArchitectHUD to see the tools
+    property alias toolLoader: toolLoader 
+
     // --- SIGNALS ---
     signal finishRequested(int panelIndex)
     signal shelfRequested(int panelIndex)
@@ -17,7 +21,7 @@ Item {
     property bool filterEnabled: false 
     property string currentMode: "selection" 
     property var stagingResults: []
-    property string currentGate: model.gateValue
+    property string currentGate: "NONE"
 
     // Track whether this panel has been committed
     property bool isCommitted: false
@@ -47,8 +51,8 @@ Item {
         
         color: "#1A1A1A"
         radius: 12 
-        border.color: "#FFFFFF"
-        border.width: 1
+        border.color: isCommitted ? "#00F2FF" : "#FFFFFF"
+        border.width: isCommitted ? 2 : 1
         clip: true 
         z: 1
 
@@ -110,7 +114,10 @@ Item {
                     opacity: menuMouse.containsMouse ? 1.0 : 0.8
                     MouseArea { 
                         id: menuMouse; anchors.fill: parent; hoverEnabled: true
-                        onClicked: currentMode = "selection" 
+                        onClicked: {
+                            currentMode = "selection"
+                            isCommitted = false
+                        }
                     }
                 }
 
@@ -129,10 +136,11 @@ Item {
                     }
                 }
             }
-        }
+        } // End of Toolbar
 
         Loader {
-            id: toolLoader
+            id: toolLoader 
+            asynchronous: false
             anchors.top: toolbar.bottom; anchors.bottom: footerArea.top
             anchors.left: parent.left; anchors.right: parent.right; anchors.margins: 5
             z: 5
@@ -152,13 +160,11 @@ Item {
                         debugSignal("folderSelected", { folderPath: folderPath, list: list })
                     })
                 }
-
                 if (item.categorySelected) {
                     item.categorySelected.connect(function(categoryName, list) {
                         debugSignal("categorySelected", { categoryName: categoryName, list: list })
                     })
                 }
-
                 if (item.searchSelected) {
                     item.searchSelected.connect(function(query, list) {
                         debugSignal("searchSelected", { query: query, list: list })
@@ -204,7 +210,6 @@ Item {
                 Button {
                     id: commitBtn
                     Layout.fillWidth: true; Layout.preferredHeight: 32
-
                     enabled: hitCount > 0 && !panelRoot.isCommitted
                     opacity: enabled ? 1.0 : 0.35
 
@@ -214,20 +219,18 @@ Item {
                         border.color: commitBtn.hovered ? "#FFD700" : "#555"
                     }
                     contentItem: Text {
-                        text: "COMMIT"; color: "gold"; font.bold: true; font.pixelSize: 11
+                        text: panelRoot.isCommitted ? "COMMITTED" : "COMMIT"
+                        color: panelRoot.isCommitted ? "#00F2FF" : "gold"
+                        font.bold: true; font.pixelSize: 11
                         horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter
-                        anchors.fill: parent
                     }
                     onClicked: {
                         console.log("📤 COMMIT REQUESTED from panel", panelRoot.panelIndex)
-                        
                         let tool = toolLoader.item
-                        let snippet = tool.buildRuleSnippet(panelIndex, currentGate, true)
-                        commitRequested(panelIndex, snippet)
-
-                        //panelRoot.commitRequested(panelRoot.panelIndex)
-                        panelRoot.commitRequested(panelRoot.panelIndex, null)
-
+                        if (tool && typeof tool.buildRuleSnippet === "function") {
+                            let snippet = tool.buildRuleSnippet(panelIndex, currentGate, true)
+                            commitRequested(panelIndex, snippet)
+                        }
                     }
                 }
 
@@ -235,7 +238,6 @@ Item {
                 Button {
                     id: finishBtn
                     Layout.fillWidth: true; Layout.preferredHeight: 32
-
                     enabled: panelRoot.isCommitted
                     opacity: enabled ? 1.0 : 0.35
 
@@ -247,7 +249,6 @@ Item {
                     contentItem: Text {
                         text: "FINISH"; color: "gold"; font.bold: true; font.pixelSize: 11
                         horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter
-                        anchors.fill: parent
                     }
                     onClicked: panelRoot.finishRequested(panelRoot.panelIndex)
                 }
@@ -256,7 +257,6 @@ Item {
                 Button {
                     id: shelfBtn
                     Layout.fillWidth: true; Layout.preferredHeight: 32
-
                     enabled: panelRoot.isCommitted
                     opacity: enabled ? 1.0 : 0.35
 
@@ -268,7 +268,6 @@ Item {
                     contentItem: Text {
                         text: "SHELF"; color: "gold"; font.bold: true; font.pixelSize: 11
                         horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter
-                        anchors.fill: parent
                     }
                     onClicked: panelRoot.shelfRequested(panelRoot.panelIndex)
                 }
@@ -277,7 +276,6 @@ Item {
                 Button {
                     id: listBtn
                     Layout.fillWidth: true; Layout.preferredHeight: 32
-
                     enabled: hitCount > 0
                     opacity: enabled ? 1.0 : 0.35
 
@@ -289,7 +287,6 @@ Item {
                     contentItem: Text {
                         text: "THIS LIST"; color: "gold"; font.bold: true; font.pixelSize: 11
                         horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter
-                        anchors.fill: parent
                     }
                     onClicked: panelRoot.listRequested(panelRoot.panelIndex)
                 }
@@ -301,7 +298,6 @@ Item {
         target: (typeof architectController !== "undefined") ? architectController : null
         ignoreUnknownSignals: true
         
-        // Fixed syntax to match the HUD surgical fix
         function onResultsCounted(pIndex, pCount) {
             if (panelRoot.panelIndex === pIndex) {
                 panelRoot.hitCount = pCount
