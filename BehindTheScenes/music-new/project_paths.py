@@ -1,51 +1,53 @@
 # project_paths.py
 # Centralised path definitions for MediaVerse.
 # Prevents hard‑coded paths and ensures portability across machines.
-# main.py imports this file and exposes selected paths to QML.
 
+import os
 from pathlib import Path
 
 # ---------------------------------------------------------
-# PROJECT ROOT (relative to this file)
+# DYNAMIC PROJECT ROOT (The "music-new" Anchor)
 # ---------------------------------------------------------
-project_root = Path(__file__).resolve().parent
-# This is 1 level down from BehindTheScenes in your structure.
+def find_music_new_root():
+    """
+    Climbs up from this file to find the 'music-new' directory.
+    This bypasses the 'BehindTheScenes' nesting irritant.
+    """
+    current = Path(__file__).resolve().parent
+    for _ in range(5):
+        if current.name == "music-new":
+            return current
+        current = current.parent
+    return Path(__file__).resolve().parent
+
+project_root = find_music_new_root()
+print(f"🚀 [PATHS] Project Root Anchored at: {project_root}")
 
 # ---------------------------------------------------------
 # COMMON PROJECT PATHS
 # ---------------------------------------------------------
-assets_path = project_root / "images"
+# Check: if mediaverse2.png is in Assets/images, use project_root / "Assets" / "images"
+assets_path = project_root / "images" 
 py_path = project_root / "Sandbox" / "MediaPlayerPy"
 qml_path = project_root / "Sandbox" / "MediaPlayerQML"
 db_path = project_root / "dbMySql"
 log_path = project_root / "application.log"
 req_path = project_root / "requirements.txt"
 
-
-# Local cache (old system)
+# Local cache
 thumb_dir = project_root / "cache" / "thumbnails"
 display_dir = project_root / "cache" / "display"
 
 # ---------------------------------------------------------
-# FONT AWESOME PATH
+# FONT AWESOME PATH (Corrected for .otf and 'otfs' folder)
 # ---------------------------------------------------------
-font_path = (
-    project_root 
-    / "Fonts" 
-    / "fontawesome-free-7.1.0-desktop" 
-    / "webfonts" 
-    / "fa-solid-900.ttf"
-)
+font_base = project_root / "Fonts" / "fontawesome-free-7.1.0-desktop"
 
-# Basic icons 
-svg_solid_path = (
-    project_root 
-    / "Fonts" 
-    / "fontawesome-free-7.1.0-desktop" 
-    / "svgs" 
-    / "solid"
-)
+# Targeting the exact file you found on your drive
+font_path = font_base / "otfs" / "Font Awesome 7 Free-Solid-900.otf"
 
+# Basic icons (usually sitting in svgs/solid)
+svg_solid_path = font_base / "svgs" / "solid"
 
 # ---------------------------------------------------------
 # JSON CONFIG FILES
@@ -54,22 +56,17 @@ json_path = project_root / "Assets" / "XMLCategories.json"
 menu_json_path = project_root / "Assets" / "MainMenu.json"
 config_json = project_root / "Assets" / "Config.json"
 coll_data = project_root / "Assets" / "xml_collection_data.json"
-coll_json = project_root / "Assets" /"xml_collection.json"
+coll_json = project_root / "Assets" / "xml_collection.json"
 splash_json = project_root / "Assets" / "Splash.json"
 
-
-
-#collections paths
+# Collections paths
 collection_bg = project_root / "Assets" / "Collections.jpg"
 movies_coll_v2 = Path(r"W:\MediaVerse\Collections\Movies_Collections_v2.json")
+
 # ---------------------------------------------------------
 # SERVER PATHS (MediaVerse V2)
 # ---------------------------------------------------------
 server_manifest_v2 = Path(r"W:\MediaVerse\manifest\manifest.json")
-
-
-
-
 server_cache_root_v2 = Path(r"W:\MediaVerse\cache\images")
 server_cache_thumb_v2 = server_cache_root_v2 / "thumb"
 server_cache_display_v2 = server_cache_root_v2 / "display"
@@ -84,7 +81,6 @@ local_cache_images_v2 = local_cache_v2 / "images"
 
 fallback_image = project_root / "Assets" / "MediaVerse 1.jpg"
 splash_path = project_root / "Assets" / "Splash"
-
 
 local_thumb_v2 = local_cache_images_v2 / "thumb"
 local_display_v2 = local_cache_images_v2 / "display"
@@ -108,9 +104,8 @@ paths = {
     "display": display_dir,
     "config": config_json,
     "fonts": font_path,
-    "xmldate" : coll_data,
-    "jsoncoll" : coll_json,
-
+    "xmldate": coll_data,
+    "jsoncoll": coll_json,
 
     # Server V2
     "server_manifest_v2": server_manifest_v2,
@@ -133,8 +128,7 @@ paths = {
     "splash_json": splash_json,
 
     # --- QML SPECIFIC STRING OVERRIDES ---
-    # These extra keys provide the file:/// URI without changing the original Path keys
-    "font_url": "file:///" + str(font_path.resolve()).replace("\\", "/"),
-    "fallback_url": "file:///" + str(fallback_image.resolve()).replace("\\", "/"),
-    "assets_url": "file:///" + str(assets_path.resolve()).replace("\\", "/")
+    "font_url": font_path.resolve().as_uri(),
+    "fallback_url": fallback_image.resolve().as_uri(),
+    "assets_url": assets_path.resolve().as_uri()
 }
