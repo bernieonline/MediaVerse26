@@ -62,8 +62,8 @@ Item {
                         }
 
                         // Emit selection for Root
-                        var list = [];   // placeholder until movie list arrives
-                        folderSelected("", list);
+                        //var list = [];   // placeholder until movie list arrives
+                        //closefolderSelected("", list);
                     }
                 }
 
@@ -124,6 +124,7 @@ Item {
                     
                     if (typeof architectController !== "undefined" && parentPanel) {
                         architectController.load_movies_for_path(currentRelativePath, parentPanel.panelIndex);
+                        //architectController.list_folder_content_v2(currentRelativePath)
                     }
 
                     // Emit selection for this folder
@@ -177,6 +178,34 @@ Item {
                         JSON.stringify(object, null, 2))
         } else {
             console.log("[FolderNav] " + message)
+        }
+    }
+    Connections {
+        target: fileSystem
+        ignoreUnknownSignals: true
+
+        function onImages_listed(mappedResults) {
+            // Update the panel’s staging results
+            if (parentPanel) {
+                parentPanel.stagingResults = mappedResults
+            }
+
+            // Emit the real list to ArchitectPanel
+            folderSelected(selectedFolder, mappedResults)
+        }
+    }
+    Connections {
+        target: architectController
+        ignoreUnknownSignals: true
+
+        function onImages_listed(mappedResults) {
+            console.log("📥 FolderNav received movie list:", mappedResults.length)
+
+            // Store results in the panel
+            if (parentPanel) parentPanel.stagingResults = mappedResults
+
+            // Emit the selection with the real list
+            folderSelected(currentRelativePath, mappedResults)
         }
     }
 

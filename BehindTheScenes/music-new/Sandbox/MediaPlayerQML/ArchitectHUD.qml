@@ -18,6 +18,93 @@ Rectangle {
     property int totalMatches: 0
     property bool filterEnabled: false
 
+
+    // ============================================================
+    // ⭐ LIST POPUP (functional + styled)
+    // ============================================================
+    Rectangle {
+        id: listPopup
+        width: 500
+        height: 400
+        radius: 12
+        color: "#1A1A1A"
+        border.width: 2
+        border.color: "#FFD700"
+        anchors.centerIn: parent
+        visible: false
+        z: 10000
+
+        // ⭐ Required for HUD to assign the list
+        property var listData: []
+
+        // --- GOLD GLOW ---
+        RectangularGlow {
+            anchors.fill: parent
+            glowRadius: 18
+            spread: 0.2
+            color: "#80FFD700"
+            cornerRadius: 12
+        }
+
+        // --- GOLD GRADIENT FRAME ---
+        Rectangle {
+            anchors.fill: parent
+            radius: 12
+            border.width: 2
+            border.color: "transparent"
+            layer.enabled: true
+            layer.effect: LinearGradient {
+                start: Qt.point(0, 0)
+                end: Qt.point(0, parent.height)
+                gradient: Gradient {
+                    GradientStop { position: 0.0; color: "#FFE58A" }
+                    GradientStop { position: 1.0; color: "#D4A017" }
+                }
+            }
+        }
+
+        // --- CONTENT ---
+        Column {
+            anchors.fill: parent
+            anchors.margins: 20
+            spacing: 12
+
+            Text {
+                text: "Panel Results"
+                color: "white"
+                font.pixelSize: 20
+                font.bold: true
+            }
+
+            // ⭐ REAL LIST VIEW
+            ListView {
+                id: resultsList
+                width: parent.width
+                height: 250
+                clip: true
+                model: listPopup.listData
+
+                delegate: Text {
+                    text: typeof modelData === "string"
+                        ? modelData
+                        : modelData.title || modelData.filePath || JSON.stringify(modelData)
+                    color: "white"
+                    font.pixelSize: 14
+                }
+
+                ScrollBar.vertical: ScrollBar { active: true }
+            }
+
+            Button {
+                text: "CLOSE"
+                width: 120
+                height: 40
+                anchors.horizontalCenter: parent.horizontalCenter
+                onClicked: listPopup.visible = false
+            }
+        }
+    }
+ 
     // --- LOGIC MODEL ---
     ListModel {
         id: criteriaModel
@@ -66,7 +153,12 @@ Rectangle {
     }
 
     function handleShelf(pIndex)   { shelfPopup.visible = true; shelfPopup.forceActiveFocus(); }
-    function handleList(pIndex)    { listPopup.visible = true; listPopup.forceActiveFocus(); }
+    //function handleList(pIndex)    { listPopup.visible = true; listPopup.forceActiveFocus(); }
+    function handleList(pIdx, list) {
+        listPopup.listData = list
+        listPopup.visible = true
+    }
+
 
     // --- STEP 1: THE PANEL STAGE ---
     Item {
@@ -108,8 +200,14 @@ Rectangle {
 
                         onFinishRequested: function(pIdx) { architectRoot.handleFinish(pIdx) }
                         onShelfRequested: function(pIdx) { architectRoot.handleShelf(pIdx) }
-                        onListRequested: function(pIdx) { architectRoot.handleList(pIdx) }
+                        
+                        //onListRequested: function(pIdx) { architectRoot.handleList(pIdx) }
+                        onListRequested: function(pIdx, list) {
+                            console.log("HUD received list:", list.length)
+                            architectRoot.handleList(pIdx, list)
+                        }
                     }
+
 
                     Connections {
                         target: mainPanel
@@ -318,59 +416,7 @@ Rectangle {
         }
     }
 
-    // --- LIST POPUP ---
-    Rectangle {
-        id: listPopup
-        anchors.centerIn: parent
-        width: 420; height: 240
-        radius: 18
-        visible: false
-        color: "#111111EE"
-        border.color: "#FFD700"
-        border.width: 2
-        z: 9999
-
-        RectangularGlow {
-            anchors.fill: parent
-            glowRadius: 28
-            spread: 0.25
-            color: "#FFD700AA"
-            cornerRadius: 18
-        }
-
-        Column {
-            anchors.centerIn: parent
-            spacing: 20
-
-            Text {
-                text: "THIS LIST"
-                font.pixelSize: 22
-                font.bold: true
-                color: "gold"
-            }
-
-            Text {
-                text: "Export this panel’s results as a standalone list."
-                color: "white"
-                font.pixelSize: 14
-                horizontalAlignment: Text.AlignHCenter
-            }
-
-            Button {
-                text: "EXPORT LIST"
-                onClicked: {
-                    listPopup.visible = false
-                    if (typeof architectController !== "undefined")
-                        architectController.export_list()
-                }
-            }
-
-            Button {
-                text: "CANCEL"
-                onClicked: listPopup.visible = false
-            }
-        }
-    }
+    
 
     // --- FIXED FINISH LOOP USING DELEGATE ALIAS ---
     function buildFullRuleSet() {

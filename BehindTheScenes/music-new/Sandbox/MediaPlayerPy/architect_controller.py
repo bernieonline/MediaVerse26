@@ -9,6 +9,7 @@ from search_results_model import SearchResultsModel
 class ArchitectController(QObject):
     # --- CRITICAL SIGNALS ---
     
+    images_listed = Signal(list)
     resultsCounted = Signal(int, int) # Updates hitCount on individual panels
     foldersUpdated = Signal(list)
     VIDEO_EXTS = {'.mp4', '.m2ts', '.ts', '.mkv', '.avi', '.mov', '.m4v', '.iso'}
@@ -80,7 +81,36 @@ class ArchitectController(QObject):
         # 5. Emit count to QML
         self.resultsCounted.emit(panel_index, len(movies))
 
-   
+        #mapped_results = [{"filePath": m["Filename"]} for m in movies]
+        mapped_results = self.file_system.map_folder_v2(full_path)
+
+        self.images_listed.emit(mapped_results)
+        
+
+
+    @Slot(str)
+    def list_folder_content_v2(self, folder_path):
+        """
+        Bridge function so QML can call the V2 file scanner.
+        Converts the relative folder path into a full path and
+        forwards it to FileSystem.list_folder_content_v2().
+        """
+
+        if not folder_path:
+            print("⚠ list_folder_content_v2 called with empty path")
+            self.images_listed.emit([])
+            return
+
+        base_path = "W:\\Collection\\"
+        full_path = os.path.join(base_path, folder_path.replace("/", "\\"))
+
+        # Convert to file:/// URL for the FileSystem
+        url = "file:///" + full_path.replace("\\", "/")
+
+        print(f"🔗 Controller forwarding to FileSystem.list_folder_content_v2: {url}")
+
+        # Call the FileSystem V2 function
+        self.file_system.list_folder_content_v2(url)
 
     @Slot(str)
     def get_sub_folders(self, folder_path):
@@ -122,6 +152,10 @@ class ArchitectController(QObject):
 
         # Emit count to QML
         self.resultsCounted.emit(panel_index, len(files))
+
+        # Emit the actual list back to QML
+        mapped_results = [{"filePath": f} for f in files]
+        self.images_listed.emit(mapped_results)
 
     @Slot(int, str, str)
     def category_mode_select(self, panel_index, category, value):

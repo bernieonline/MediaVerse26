@@ -13,7 +13,10 @@ Item {
     // --- SIGNALS ---
     signal finishRequested(int panelIndex)
     signal shelfRequested(int panelIndex)
-    signal listRequested(int panelIndex)
+    
+    signal listRequested(int panelIndex, var list)
+
+
     signal commitRequested(int pIndex, var snippet)
 
     property int panelIndex: 0
@@ -288,7 +291,7 @@ Item {
                         text: "THIS LIST"; color: "gold"; font.bold: true; font.pixelSize: 11
                         horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter
                     }
-                    onClicked: panelRoot.listRequested(panelRoot.panelIndex)
+                    onClicked: panelRoot.listRequested(panelRoot.panelIndex, panelRoot.stagingResults)
                 }
             }
         }
