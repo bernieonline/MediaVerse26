@@ -8,15 +8,16 @@ Item {
     
     // Reference to the ArchitectPanel frame
     property Item parentPanel: null
-    property string currentRelativePath: "" 
+    property string currentRelativePath: ""
     property string selectedFolder: ""
     signal folderSelected(string folderName, var panelList)
 
-    //property alias folderNameField: currentRelativePath
-    property string folderNameField: currentRelativePath // ✅ Just keep them in sync
+    property string folderNameField: currentRelativePath
+
+   
 
     // --- ICON LOADER ---
-    FontLoader { 
+    FontLoader {
         id: iconFont
         source: {
             var p = "";
@@ -45,7 +46,7 @@ Item {
             Row {
                 anchors.fill: parent; anchors.leftMargin: 8; spacing: 8
                 
-                Button { 
+                Button {
                     id: homeBtn; width: 35; height: 30; anchors.verticalCenter: parent.verticalCenter
                     contentItem: Text {
                         text: iconFont.status === FontLoader.Ready ? "\uf015" : "H"
@@ -54,16 +55,12 @@ Item {
                         horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter
                     }
                     background: Rectangle { color: homeBtn.pressed ? "#44FFFFFF" : "transparent" }
-                    onClicked: { 
+                    onClicked: {
                         currentRelativePath = "";
                         if (parentPanel) parentPanel.stagingResults = [""];
                         if (typeof architectController !== "undefined") {
                             architectController.get_sub_folders("");
                         }
-
-                        // Emit selection for Root
-                        //var list = [];   // placeholder until movie list arrives
-                        //closefolderSelected("", list);
                     }
                 }
 
@@ -124,12 +121,10 @@ Item {
                     
                     if (typeof architectController !== "undefined" && parentPanel) {
                         architectController.load_movies_for_path(currentRelativePath, parentPanel.panelIndex);
-                        //architectController.list_folder_content_v2(currentRelativePath)
                     }
 
-                    // Emit selection for this folder
-                    var list = [];   // placeholder until movie list arrives
-                    folderSelected(newPath, list);
+                    // Emit placeholder list until real list arrives
+                    folderSelected(newPath, []);
                 }
             }
         }
@@ -137,7 +132,7 @@ Item {
 
     ListModel { id: folderListModel }
 
-    // --- BRIDGE TO PYTHON ---
+    // --- FOLDERS CHANGED ---
     Connections {
         target: fileSystem
         ignoreUnknownSignals: true
@@ -152,7 +147,6 @@ Item {
 
             if (parentPanel) parentPanel.stagingResults = [currentRelativePath];
         }
-
     }
 
     Component.onCompleted: {
@@ -161,39 +155,8 @@ Item {
             architectController.get_sub_folders(currentRelativePath);
         }
     }
-    // ------------------------------------------------------------
-    // Debugging toggle
-    // ------------------------------------------------------------
-    property bool debugEnabled: true
 
-    // ------------------------------------------------------------
-    // Debug helper
-    // ------------------------------------------------------------
-    function debugLog(message, object) {
-        if (!debugEnabled)
-            return
-
-        if (object !== undefined) {
-            console.log("[FolderNav] " + message + ":\n" +
-                        JSON.stringify(object, null, 2))
-        } else {
-            console.log("[FolderNav] " + message)
-        }
-    }
-    Connections {
-        target: fileSystem
-        ignoreUnknownSignals: true
-
-        function onImages_listed(mappedResults) {
-            // Update the panel’s staging results
-            if (parentPanel) {
-                parentPanel.stagingResults = mappedResults
-            }
-
-            // Emit the real list to ArchitectPanel
-            folderSelected(selectedFolder, mappedResults)
-        }
-    }
+    // --- CORRECT MOVIE LIST CONNECTION ---
     Connections {
         target: architectController
         ignoreUnknownSignals: true
@@ -201,18 +164,15 @@ Item {
         function onImages_listed(mappedResults) {
             console.log("📥 FolderNav received movie list:", mappedResults.length)
 
-            // Store results in the panel
-            if (parentPanel) parentPanel.stagingResults = mappedResults
+            if (parentPanel)
+                parentPanel.stagingResults = mappedResults
 
-            // Emit the selection with the real list
-            folderSelected(currentRelativePath, mappedResults)
+            // Forward to ArchitectPanel only
+            folderSelected(selectedFolder, mappedResults)
         }
     }
 
-    // ------------------------------------------------------------
-    // Build JSON snippet for Folder mode
-    // Called by HUD when user clicks Finish or Commit
-    // ------------------------------------------------------------
+    // --- JSON BUILDER ---
     function buildRuleSnippet(panelIndex, gate, checked) {
 
         let snippet = {
@@ -224,12 +184,9 @@ Item {
             gate: gate
         }
 
-        // Only panels 1–3 include checked
         if (panelIndex > 0) {
             snippet.checked = checked
         }
-
-        debugLog("Generated Folder JSON snippet", snippet)
 
         return snippet
     }

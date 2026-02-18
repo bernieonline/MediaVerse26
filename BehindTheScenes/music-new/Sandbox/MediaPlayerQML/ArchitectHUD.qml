@@ -18,93 +18,11 @@ Rectangle {
     property int totalMatches: 0
     property bool filterEnabled: false
 
-
-    // ============================================================
-    // ⭐ LIST POPUP (functional + styled)
-    // ============================================================
-    Rectangle {
-        id: listPopup
-        width: 500
-        height: 400
-        radius: 12
-        color: "#1A1A1A"
-        border.width: 2
-        border.color: "#FFD700"
-        anchors.centerIn: parent
-        visible: false
-        z: 10000
-
-        // ⭐ Required for HUD to assign the list
-        property var listData: []
-
-        // --- GOLD GLOW ---
-        RectangularGlow {
-            anchors.fill: parent
-            glowRadius: 18
-            spread: 0.2
-            color: "#80FFD700"
-            cornerRadius: 12
-        }
-
-        // --- GOLD GRADIENT FRAME ---
-        Rectangle {
-            anchors.fill: parent
-            radius: 12
-            border.width: 2
-            border.color: "transparent"
-            layer.enabled: true
-            layer.effect: LinearGradient {
-                start: Qt.point(0, 0)
-                end: Qt.point(0, parent.height)
-                gradient: Gradient {
-                    GradientStop { position: 0.0; color: "#FFE58A" }
-                    GradientStop { position: 1.0; color: "#D4A017" }
-                }
-            }
-        }
-
-        // --- CONTENT ---
-        Column {
-            anchors.fill: parent
-            anchors.margins: 20
-            spacing: 12
-
-            Text {
-                text: "Panel Results"
-                color: "white"
-                font.pixelSize: 20
-                font.bold: true
-            }
-
-            // ⭐ REAL LIST VIEW
-            ListView {
-                id: resultsList
-                width: parent.width
-                height: 250
-                clip: true
-                model: listPopup.listData
-
-                delegate: Text {
-                    text: typeof modelData === "string"
-                        ? modelData
-                        : modelData.title || modelData.filePath || JSON.stringify(modelData)
-                    color: "white"
-                    font.pixelSize: 14
-                }
-
-                ScrollBar.vertical: ScrollBar { active: true }
-            }
-
-            Button {
-                text: "CLOSE"
-                width: 120
-                height: 40
-                anchors.horizontalCenter: parent.horizontalCenter
-                onClicked: listPopup.visible = false
-            }
-        }
+     // --- POPUP INSTANCE ---
+    ArchitectMoviePopup {
+        id: moviePopup
     }
- 
+
     // --- LOGIC MODEL ---
     ListModel {
         id: criteriaModel
@@ -144,21 +62,32 @@ Rectangle {
 
     function handleCommit(pIndex) {
         console.log("HUD: Attempting Commit for Index:", pIndex);
-
         if (pIndex >= 0 && pIndex < criteriaModel.count) {
             criteriaModel.setProperty(pIndex, "isCommitted", true);
         }
-
-        // Note: The specific tool lookup is now handled during the Finish process
     }
 
-    function handleShelf(pIndex)   { shelfPopup.visible = true; shelfPopup.forceActiveFocus(); }
-    //function handleList(pIndex)    { listPopup.visible = true; listPopup.forceActiveFocus(); }
-    function handleList(pIdx, list) {
-        listPopup.listData = list
-        listPopup.visible = true
+    function handleShelf(pIndex) { 
+        shelfPopup.visible = true; 
+        shelfPopup.forceActiveFocus(); 
     }
+   
+    // FIXED: Unified function with explicit safety checks
+    function handleList(pIdx, list, folderName) {
+        var safeList = list || [];
 
+        if (safeList.length === 0) {
+            console.log("HUD: Ignoring empty list signal to prevent overwriting results.");
+            return; 
+        }
+
+        var safeName = folderName || "Architect Results";
+        
+        console.log("HUD received list for index", pIdx, "count:", safeList.length);
+        
+        // Open the popup using the correct ID and parameters
+        moviePopup.openWith(safeName, safeList);
+    }
 
     // --- STEP 1: THE PANEL STAGE ---
     Item {
@@ -195,27 +124,22 @@ Rectangle {
                         onCurrentModeChanged: architectRoot.syncPanelData(index, currentMode, hitCount)
 
                         onCommitRequested: function(pIdx, snippet) {
-                            architectRoot.handleCommit(pIdx, snippet)
+                            architectRoot.handleCommit(pIdx)
                         }
 
                         onFinishRequested: function(pIdx) { architectRoot.handleFinish(pIdx) }
                         onShelfRequested: function(pIdx) { architectRoot.handleShelf(pIdx) }
                         
-                        //onListRequested: function(pIdx) { architectRoot.handleList(pIdx) }
-                        onListRequested: function(pIdx, list) {
-                            console.log("HUD received list:", list.length)
-                            architectRoot.handleList(pIdx, list)
-                        }
-                    }
-
-
-                    Connections {
-                        target: mainPanel
-                        ignoreUnknownSignals: true
-
-                        function onCommitRequested(pIdx, snippet) {
-                            console.log("HUD: Snippet Received:", JSON.stringify(snippet, null, 2))
-                            architectRoot.handleCommit(pIdx, snippet)
+                        // SURGICAL FIX: Handling parameter swap from Panel signal
+                        onListRequested: function(pIdx, listOrName, maybeList) {
+                            // If the 2nd arg is a string, it's the folder name (e.g., "Caine")
+                            var actualList = (typeof listOrName === "string") ? maybeList : listOrName;
+                            var actualName = (typeof listOrName === "string") ? listOrName : "Panel " + (pIdx + 1);
+                            
+                            var len = (actualList && typeof actualList.length !== "undefined") ? actualList.length : 0;
+                            console.log("HUD Signal Check - Name:", actualName, "Count:", len);
+                            
+                            architectRoot.handleList(pIdx, actualList, actualName);
                         }
                     }
 
@@ -416,74 +340,46 @@ Rectangle {
         }
     }
 
-    
-
-    // --- FIXED FINISH LOOP USING DELEGATE ALIAS ---
     function buildFullRuleSet() {
         var rules = [];
-        console.log("HUD: Final Assembly Started...");
-
         for (var i = 0; i < cardRepeater.count; i++) {
             var delegateItem = cardRepeater.itemAt(i);
-            if (!delegateItem) {
-                console.log("HUD: Skipping index " + i + " - Delegate not ready.");
-                continue;
-            }
+            if (!delegateItem) continue;
 
-            // Reach the ArchitectPanel via the alias
             var panel = delegateItem.mainPanelRef;
-            if (!panel) {
-                console.log("HUD: Skipping index " + i + " - Panel reference missing.");
-                continue;
-            }
+            if (!panel) continue;
 
-            // Safety: Ensure the tool loader exists and has an active item
             if (panel.toolLoader && panel.toolLoader.item) {
                 var tool = panel.toolLoader.item;
-                
-                // Only proceed if the tool has the snippet builder function
                 if (typeof tool.buildRuleSnippet === "function") {
                     var currentGate = criteriaModel.get(i).gateValue;
                     var snippet = tool.buildRuleSnippet(i, currentGate, i > 0);
-                    
-                    // CRITICAL FIX: Only set properties if the snippet isn't null
-                    if (snippet !== null && typeof snippet !== "undefined") {
+                    if (snippet) {
                         snippet.checked = true;
                         rules.push(snippet);
-                        console.log("HUD: Successfully captured snippet for Panel " + i);
-                    } else {
-                        console.log("HUD: Panel " + i + " returned null (likely no selection made).");
                     }
                 }
-            } else {
-                console.log("HUD: Panel " + i + " has no tool loaded.");
             }
         }
 
-        var finalPayload = { 
+        return { 
             "collectionName": "New Collection",
             "rules": rules,
             "timestamp": new Date().toISOString()
         };
-
-        return finalPayload;
     }
 
     function handleFinish(pIndex) {
         var fullSet = buildFullRuleSet();
-        console.log("FULL RULE SET:\n" + JSON.stringify(fullSet, null, 2));
-
         finishPopup.visible = true;
         finishPopup.forceActiveFocus();
     }
 
-    // --- VAULT CONNECTION ---
+    // --- VAULT CONNECTIONS ---
     Connections {
         target: (typeof architectController !== "undefined") ? architectController : null
         ignoreUnknownSignals: true
-
         function onCountChanged(total) { architectRoot.totalMatches = total; }
-
         function onResultsCounted(pIndex, pCount) {
             if (pIndex >= 0 && pIndex < criteriaModel.count) {
                 criteriaModel.setProperty(pIndex, "panelHits", pCount);

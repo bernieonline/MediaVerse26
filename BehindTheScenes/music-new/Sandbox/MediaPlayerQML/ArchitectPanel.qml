@@ -7,31 +7,29 @@ Item {
     id: panelRoot
 
     // --- PUBLIC INTERFACE ---
-    // This alias is the "bridge" that allows ArchitectHUD to see the tools
     property alias toolLoader: toolLoader 
 
     // --- SIGNALS ---
     signal finishRequested(int panelIndex)
     signal shelfRequested(int panelIndex)
-    
-    signal listRequested(int panelIndex, var list)
-
-
+    signal listRequested(int panelIndex, string folderName, var list)
     signal commitRequested(int pIndex, var snippet)
 
+    // --- PROPERTIES ---
     property int panelIndex: 0
     property int hitCount: 0
     property bool filterEnabled: false 
     property string currentMode: "selection" 
-    property var stagingResults: []
     property string currentGate: "NONE"
-
-    // Track whether this panel has been committed
     property bool isCommitted: false
+
+    // --- DATA PERSISTENCE ---
+    property string selectedFolder: "Results"
+    property var stagingResults: []
 
     // --- DEBUG: Monitor incoming signals from MODE files ---
     function debugSignal(name, payload) {
-        console.log("📡 PANEL " + panelIndex + " RECEIVED SIGNAL:", name, JSON.stringify(payload))
+        console.log("📡 PANEL " + panelIndex + " RECEIVED SIGNAL:", name, "Items:", (payload.list ? payload.list.length : 0))
     }
     
     width: 360
@@ -40,7 +38,7 @@ Item {
     RectangularGlow {
         id: effect
         anchors.fill: cardFrame
-        glowRadius: 18        
+        glowRadius: 18         
         spread: 0.18        
         color: "#99FFD700"
         cornerRadius: 12
@@ -59,6 +57,7 @@ Item {
         clip: true 
         z: 1
 
+        // --- TOOLBAR ---
         Rectangle {
             id: toolbar
             width: parent.width - 20; height: 48; color: "#2C2C2C"; radius: 8
@@ -90,6 +89,7 @@ Item {
 
                 Item { Layout.fillWidth: true } 
 
+                // HELP BUTTON WITH TOOLTIP
                 Rectangle {
                     id: helpBtn
                     width: 26; height: 26; radius: 13
@@ -107,11 +107,13 @@ Item {
                         anchors.fill: parent; hoverEnabled: true
                         onClicked: console.log("❓ Help requested for panel: " + panelIndex)
                     }
+                    
                     ToolTip.visible: helpMouse.containsMouse
                     ToolTip.text: "View logic documentation"
                     ToolTip.delay: 400
                 }
 
+                // MENU RESET (M)
                 Text {
                     text: "M"; font.pixelSize: 22; font.bold: true; color: "gold"
                     opacity: menuMouse.containsMouse ? 1.0 : 0.8
@@ -120,16 +122,20 @@ Item {
                         onClicked: {
                             currentMode = "selection"
                             isCommitted = false
+                            stagingResults = []
+                            hitCount = 0
                         }
                     }
                 }
 
+                // HIT COUNTER
                 Text {
                     text: panelRoot.hitCount
                     color: "#00F2FF"; font.pixelSize: 18; font.bold: true
                     Layout.preferredWidth: 35; horizontalAlignment: Text.AlignHCenter
                 }
 
+                // CLOSE BUTTON
                 Text {
                     text: "×"; font.pixelSize: 26; color: "#FF4444"
                     opacity: closeMouse.containsMouse ? 1.0 : 0.7
@@ -139,8 +145,9 @@ Item {
                     }
                 }
             }
-        } // End of Toolbar
+        }
 
+        // --- DYNAMIC CONTENT LOADER ---
         Loader {
             id: toolLoader 
             asynchronous: false
@@ -155,27 +162,32 @@ Item {
             }
             onLoaded: if (item) {
                 item.parentPanel = panelRoot
-                console.log("🛠️ Tool Loaded: " + currentMode + " linked to Panel " + panelIndex)
+                
+                // DATA SYNC LOGIC WITH SAFETY GATE
+                let syncData = function(label, list) {
+                    if (!list || list.length === 0) {
+                        console.log("⚠️ Panel " + panelIndex + " suppressed empty list from " + label);
+                        return; 
+                    }
+                    console.log("✅ Panel " + panelIndex + " synchronized " + list.length + " items.");
+                    panelRoot.selectedFolder = label;
+                    panelRoot.stagingResults = list;
+                    panelRoot.hitCount = list.length;
+                }
 
-                // --- CONNECT MODE SIGNALS TO DEBUG LOGGER ---
                 if (item.folderSelected) {
-                    item.folderSelected.connect(function(folderPath, list) {
-                        debugSignal("folderSelected", { folderPath: folderPath, list: list })
-                    })
+                    item.folderSelected.connect(function(p, l) { syncData(p, l) });
                 }
                 if (item.categorySelected) {
-                    item.categorySelected.connect(function(categoryName, list) {
-                        debugSignal("categorySelected", { categoryName: categoryName, list: list })
-                    })
+                    item.categorySelected.connect(function(c, l) { syncData(c, l) });
                 }
                 if (item.searchSelected) {
-                    item.searchSelected.connect(function(query, list) {
-                        debugSignal("searchSelected", { query: query, list: list })
-                    })
+                    item.searchSelected.connect(function(q, l) { syncData("Search: " + q, l) });
                 }
             }
         }
 
+        // --- SELECTION OVERLAY ---
         Column {
             visible: currentMode === "selection"
             anchors.centerIn: parent; spacing: 15
@@ -203,11 +215,7 @@ Item {
             Rectangle { width: parent.width; height: 1; color: "#22FFFFFF"; anchors.top: parent.top }
 
             GridLayout {
-                anchors.fill: parent
-                anchors.margins: 8
-                columns: 2
-                rowSpacing: 6
-                columnSpacing: 6
+                anchors.fill: parent; anchors.margins: 8; columns: 2; rowSpacing: 6; columnSpacing: 6
 
                 // ⭐ COMMIT
                 Button {
@@ -228,7 +236,6 @@ Item {
                         horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter
                     }
                     onClicked: {
-                        console.log("📤 COMMIT REQUESTED from panel", panelRoot.panelIndex)
                         let tool = toolLoader.item
                         if (tool && typeof tool.buildRuleSnippet === "function") {
                             let snippet = tool.buildRuleSnippet(panelIndex, currentGate, true)
@@ -291,16 +298,23 @@ Item {
                         text: "THIS LIST"; color: "gold"; font.bold: true; font.pixelSize: 11
                         horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter
                     }
-                    onClicked: panelRoot.listRequested(panelRoot.panelIndex, panelRoot.stagingResults)
+                    onClicked: {
+                        console.log("🚀 Emitting listRequested for HUD:", panelRoot.selectedFolder, "count:", stagingResults.length)
+                        panelRoot.listRequested(
+                            panelRoot.panelIndex,
+                            panelRoot.selectedFolder,
+                            panelRoot.stagingResults
+                        )
+                    }
                 }
             }
         }
     }
 
+    // --- EXTERNAL CONTROLLER SYNC ---
     Connections {
         target: (typeof architectController !== "undefined") ? architectController : null
         ignoreUnknownSignals: true
-        
         function onResultsCounted(pIndex, pCount) {
             if (panelRoot.panelIndex === pIndex) {
                 panelRoot.hitCount = pCount
