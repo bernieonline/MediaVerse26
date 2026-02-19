@@ -302,13 +302,14 @@ Item {
                     // SURGICAL FIX: The Smart Router
                     onClicked: {
                         if (panelRoot.currentMode === "category") {
-                            console.log("🎯 Category Join: Fetching path-corrected list...")
-                            // Call only the one method. It now does everything!
-                            architectController.category_mode_select(
+                            console.log("🎯 Category Join: Launching list from staged results...")
+                            
+                            // STOP calling Python here. Use the data we already saved!
+                            panelRoot.listRequested(
                                 panelRoot.panelIndex, 
-                                panelRoot.selectedCategory, 
-                                panelRoot.selectedKeyword
-                            ) 
+                                panelRoot.selectedFolder, // This has the "Actors: John Wayne" label
+                                panelRoot.stagingResults  // This has the 31 movies
+                            )
                         } else {
                             console.log("📁 Standard Mode: Using staging results.")
                             panelRoot.listRequested(
@@ -335,16 +336,29 @@ Item {
     }
     // This ensures that when Python finishes the "Strip and Send", 
     // the Panel actually opens the HUD.
+    // --- EXTERNAL CONTROLLER SYNC (REVISED) ---
+    // This handles both Folder results and Category results
     Connections {
-        target: architectController
+        target: (typeof architectController !== "undefined") ? architectController : null
         ignoreUnknownSignals: true
 
         function onOnMovieListReady(pIdx, list, label) {
             if (panelRoot.panelIndex === pIdx) {
-                console.log("🚀 Panel " + pIdx + " catching list for popup: " + label)
+                console.log("📥 Panel " + pIdx + " syncing data for: " + label)
                 
-                // This is the call that actually triggers your HUD/Popup
-                panelRoot.listRequested(pIdx, label, list)
+                // 1. ALWAYS store the results so the "THIS LIST" button can use them
+                panelRoot.stagingResults = list
+                panelRoot.selectedFolder = label 
+
+                // 2. THE SMART ROUTER
+                if (panelRoot.currentMode === "folder") {
+                    // FOLDERS: Keep the instant-pop behavior you like
+                    console.log("📁 Folder Mode: Auto-launching popup.")
+                    panelRoot.listRequested(pIdx, label, list)
+                } else {
+                    // CATEGORIES: Stay silent! Just wait for the button click.
+                    console.log("🛡️ Category Mode: Data cached. Suppression active.")
+                }
             }
         }
     }
