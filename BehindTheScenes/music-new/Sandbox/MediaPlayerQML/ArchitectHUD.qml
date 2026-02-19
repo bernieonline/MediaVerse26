@@ -18,10 +18,29 @@ Rectangle {
     property int totalMatches: 0
     property bool filterEnabled: false
 
-    // --- POPUP INSTANCE ---
-    ArchitectMoviePopup {
-        id: moviePopup
+    // --- POPUP INSTANCES ---
+    ArchitectMoviePopup { id: moviePopup }
+
+    // SURGICAL FIX: We use a Loader here. This prevents the "Type ArchitectHUD unavailable" 
+    // crash by isolating the Finish Dialog from the main startup sequence.
+    Loader {
+        id: finishPopupLoader
+        anchors.fill: parent
+        source: "FinishPopup.qml" // Updated to match your renamed file
+        asynchronous: false 
+        active: true
+        z: 15000 // Higher than the HUD's z: 5000 and the footer's z: 1000
+        onStatusChanged: {
+            if (status === Loader.Error) {
+                console.log("‼️ LOADER ERROR: " + errorString());
+            } else if (status === Loader.Ready) {
+                console.log("✅ LOADER READY: FinishPopup is live.");
+            }
+        }
     }
+
+    // This alias ensures all your functions below can still use "finishPopup"
+    property var finishPopup: finishPopupLoader.item
 
     // --- LOGIC MODEL ---
     ListModel {
@@ -68,18 +87,13 @@ Rectangle {
     }
 
     function handleShelf(pIndex) { 
-        shelfPopup.visible = true; 
-        shelfPopup.forceActiveFocus(); 
+        console.log("HUD: Shelf requested for index " + pIndex + " (Shelf Logic Disabled)");
     }
    
     function handleList(pIdx, list, folderName) {
         var safeList = list || [];
-        if (safeList.length === 0) {
-            console.log("HUD: Ignoring empty list signal to prevent overwriting results.");
-            return; 
-        }
+        if (safeList.length === 0) return;
         var safeName = folderName || "Architect Results";
-        console.log("HUD received list for index", pIdx, "count:", safeList.length);
         moviePopup.openWith(safeName, safeList);
     }
 
@@ -118,22 +132,11 @@ Rectangle {
                         onCurrentModeChanged: architectRoot.syncPanelData(index, currentMode, hitCount)
 
                         onCommitRequested: function(pIdx, snippet) {
-                            // First, update the visual commit state in the model
                             architectRoot.handleCommit(pIdx) 
-
                             if (typeof architectController !== "undefined") {
-                                // SURGICAL FIX: A panel must select the gate to its LEFT
-                                // Panel 0 (Foundation) is always NONE. 
-                                // Panel 1 looks at Gate 0, Panel 2 looks at Gate 1, etc.
-                                let logicGate = "NONE";
-                                if (pIdx > 0) {
-                                    logicGate = criteriaModel.get(pIdx - 1).gateValue;
-                                }
-                                
+                                let logicGate = (pIdx > 0) ? criteriaModel.get(pIdx - 1).gateValue : "NONE";
                                 snippet.gate = logicGate; 
                                 snippet.checked = criteriaModel.get(pIdx).isCommitted;
-
-                                console.log("📤 HUD: Stamping Gate [" + logicGate + "] from PREVIOUS panel onto Panel " + pIdx);
                                 architectController.process_commit(pIdx, JSON.stringify(snippet))
                             }
                         }
@@ -144,8 +147,6 @@ Rectangle {
                         onListRequested: function(pIdx, listOrName, maybeList) {
                             var actualList = (typeof listOrName === "string") ? maybeList : listOrName;
                             var actualName = (typeof listOrName === "string") ? listOrName : "Panel " + (pIdx + 1);
-                            var len = (actualList && typeof actualList.length !== "undefined") ? actualList.length : 0;
-                            console.log("HUD Signal Check - Name:", actualName, "Count:", len);
                             architectRoot.handleList(pIdx, actualList, actualName);
                         }
                     }
@@ -163,7 +164,6 @@ Rectangle {
                             anchors.centerIn: parent
                             spacing: 15
 
-                            // AND GATE (+)
                             Rectangle {
                                 width: 44; height: 44; radius: 22
                                 color: model.gateValue === "AND" ? "#00F2FF" : "#222"
@@ -174,8 +174,6 @@ Rectangle {
                                     anchors.fill: parent
                                     onClicked: {
                                         criteriaModel.setProperty(index, "gateValue", "AND");
-                                        console.log("🧬 HUD: Bridge " + index + " set to AND (Logic for Panel " + (index + 1) + ")");
-
                                         if (criteriaModel.count <= index + 1) {
                                             criteriaModel.append({ 
                                                 "panelType": "selection", "panelValue": "",
@@ -187,7 +185,6 @@ Rectangle {
                                 }
                             }
 
-                            // NOT GATE (-)
                             Rectangle {
                                 width: 44; height: 44; radius: 22
                                 color: model.gateValue === "NOT" ? "#FF0055" : "#222"
@@ -198,8 +195,6 @@ Rectangle {
                                     anchors.fill: parent
                                     onClicked: {
                                         criteriaModel.setProperty(index, "gateValue", "NOT");
-                                        console.log("🧬 HUD: Bridge " + index + " set to NOT (Logic for Panel " + (index + 1) + ")");
-
                                         if (criteriaModel.count <= index + 1) {
                                             criteriaModel.append({ 
                                                 "panelType": "selection", "panelValue": "",
@@ -246,9 +241,7 @@ Rectangle {
         }
     }
 
-    // --- POPUPS ---
-    // (Existing ArchitectMoviePopup, finishPopup, and shelfPopup logic remains in the implementation)
-
+    // --- FINISH LOGIC ---
     function buildFullRuleSet() {
         var rules = [];
         for (var i = 0; i < cardRepeater.count; i++) {
@@ -256,10 +249,10 @@ Rectangle {
             if (!delegateItem) continue;
             var panel = delegateItem.mainPanelRef;
             if (!panel) continue;
+
             if (panel.toolLoader && panel.toolLoader.item) {
                 var tool = panel.toolLoader.item;
                 if (typeof tool.buildRuleSnippet === "function") {
-                    // When building the full set, we apply the same "look left" logic
                     var logicGate = (i === 0) ? "NONE" : criteriaModel.get(i - 1).gateValue;
                     var snippet = tool.buildRuleSnippet(i, logicGate, i > 0);
                     if (snippet) {
@@ -278,8 +271,27 @@ Rectangle {
 
     function handleFinish(pIndex) {
         var fullSet = buildFullRuleSet();
-        finishPopup.visible = true;
-        finishPopup.forceActiveFocus();
+        console.log("🏁 DNA Finalized: " + JSON.stringify(fullSet));
+        
+        // Safety: If for some reason the loader isn't active, kick it
+        if (finishPopupLoader.status !== Loader.Ready) {
+            console.log("🛠️ HUD: Force-loading Dialog...");
+            finishPopupLoader.active = true;
+        }
+
+        var popup = finishPopupLoader.item;
+        
+        if (popup) {
+            if (typeof popup.prepareDNA === "function") {
+                popup.prepareDNA(fullSet);
+            }
+            popup.visible = true; 
+            popup.forceActiveFocus();
+        } else {
+            // This is the error you are seeing. 
+            // It means "ArchtectFinishDialog.qml" is likely missing or has a typo in the filename.
+            console.log("⚠️ HUD: Popup item NOT READY. Check filename: " + finishPopupLoader.source);
+        }
     }
 
     // --- VAULT CONNECTIONS ---
