@@ -23,11 +23,15 @@ Item {
     property string currentGate: "NONE"
     property bool isCommitted: false
 
-    // --- DATA PERSISTENCE ---
+    // --- DATA PERSISTENCE & STATE MEMORY ---
     property string selectedFolder: "Results"
     property var stagingResults: []
+    
+    // NEW: Memory slots to store Category intent for the "This List" Join
+    property string selectedCategory: ""
+    property string selectedKeyword: ""
 
-    // --- DEBUG: Monitor incoming signals from MODE files ---
+    // --- DEBUG ---
     function debugSignal(name, payload) {
         console.log("📡 PANEL " + panelIndex + " RECEIVED SIGNAL:", name, "Items:", (payload.list ? payload.list.length : 0))
     }
@@ -124,6 +128,8 @@ Item {
                             isCommitted = false
                             stagingResults = []
                             hitCount = 0
+                            selectedCategory = ""
+                            selectedKeyword = ""
                         }
                     }
                 }
@@ -163,16 +169,12 @@ Item {
             onLoaded: if (item) {
                 item.parentPanel = panelRoot
                 
-                // DATA SYNC LOGIC WITH SAFETY GATE
                 let syncData = function(label, list) {
-                    if (!list || list.length === 0) {
-                        console.log("⚠️ Panel " + panelIndex + " suppressed empty list from " + label);
-                        return; 
+                    if (list && list.length > 0) {
+                        console.log("✅ Panel " + panelIndex + " synchronized " + list.length + " items.");
+                        panelRoot.selectedFolder = label;
+                        panelRoot.stagingResults = list;
                     }
-                    console.log("✅ Panel " + panelIndex + " synchronized " + list.length + " items.");
-                    panelRoot.selectedFolder = label;
-                    panelRoot.stagingResults = list;
-                    panelRoot.hitCount = list.length;
                 }
 
                 if (item.folderSelected) {
@@ -181,13 +183,10 @@ Item {
                 if (item.categorySelected) {
                     item.categorySelected.connect(function(c, l) { syncData(c, l) });
                 }
-                if (item.searchSelected) {
-                    item.searchSelected.connect(function(q, l) { syncData("Search: " + q, l) });
-                }
             }
         }
 
-        // --- SELECTION OVERLAY ---
+        // --- SELECTION OVERLAY (The Master Mode Switches) ---
         Column {
             visible: currentMode === "selection"
             anchors.centerIn: parent; spacing: 15
@@ -196,9 +195,10 @@ Item {
                 text: "SELECT LOGIC"; color: "white"; font.pixelSize: 18; 
                 font.bold: true; anchors.horizontalCenter: parent.horizontalCenter; opacity: 0.6 
             }
-            Button { text: "🔍 SEARCH"; width: 180; height: 45; onClicked: currentMode = "search" }
-            Button { text: "📁 FOLDER"; width: 180; height: 45; onClicked: currentMode = "folder" }
-            Button { text: "🏷️ CATEGORY"; width: 180; height: 45; onClicked: currentMode = "category" }
+            // SURGICAL FIX: We set the mode explicitly here
+            Button { text: "🔍 SEARCH"; width: 180; height: 45; onClicked: { currentMode = "search" } }
+            Button { text: "📁 FOLDER"; width: 180; height: 45; onClicked: { currentMode = "folder" } }
+            Button { text: "🏷️ CATEGORY"; width: 180; height: 45; onClicked: { currentMode = "category" } }
         }
 
         // --- FOOTER AREA ---
@@ -282,7 +282,7 @@ Item {
                     onClicked: panelRoot.shelfRequested(panelRoot.panelIndex)
                 }
 
-                // ⭐ THIS LIST
+                // ⭐ THIS LIST (The Decision Engine)
                 Button {
                     id: listBtn
                     Layout.fillWidth: true; Layout.preferredHeight: 32
@@ -298,13 +298,25 @@ Item {
                         text: "THIS LIST"; color: "gold"; font.bold: true; font.pixelSize: 11
                         horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter
                     }
+                    // SURGICAL FIX: The Smart Router
+                    // SURGICAL FIX: The Smart Router
                     onClicked: {
-                        console.log("🚀 Emitting listRequested for HUD:", panelRoot.selectedFolder, "count:", stagingResults.length)
-                        panelRoot.listRequested(
-                            panelRoot.panelIndex,
-                            panelRoot.selectedFolder,
-                            panelRoot.stagingResults
-                        )
+                        if (panelRoot.currentMode === "category") {
+                            console.log("🎯 Category Join: Fetching path-corrected list...")
+                            // Call only the one method. It now does everything!
+                            architectController.category_mode_select(
+                                panelRoot.panelIndex, 
+                                panelRoot.selectedCategory, 
+                                panelRoot.selectedKeyword
+                            ) 
+                        } else {
+                            console.log("📁 Standard Mode: Using staging results.")
+                            panelRoot.listRequested(
+                                panelRoot.panelIndex, 
+                                panelRoot.selectedFolder, 
+                                panelRoot.stagingResults
+                            )
+                        }
                     }
                 }
             }
@@ -318,6 +330,21 @@ Item {
         function onResultsCounted(pIndex, pCount) {
             if (panelRoot.panelIndex === pIndex) {
                 panelRoot.hitCount = pCount
+            }
+        }
+    }
+    // This ensures that when Python finishes the "Strip and Send", 
+    // the Panel actually opens the HUD.
+    Connections {
+        target: architectController
+        ignoreUnknownSignals: true
+
+        function onOnMovieListReady(pIdx, list, label) {
+            if (panelRoot.panelIndex === pIdx) {
+                console.log("🚀 Panel " + pIdx + " catching list for popup: " + label)
+                
+                // This is the call that actually triggers your HUD/Popup
+                panelRoot.listRequested(pIdx, label, list)
             }
         }
     }

@@ -13,10 +13,13 @@ class ArchitectController(QObject):
     resultsCounted = Signal(int, int) # Updates hitCount on individual panels
     foldersUpdated = Signal(list)
     VIDEO_EXTS = {'.mp4', '.m2ts', '.ts', '.mkv', '.avi', '.mov', '.m4v', '.iso'}
+    # --- CRITICAL SIGNALS ---
+    onMovieListReady = Signal(int, list, str) # panel_index, movie_list, display_label
+    
 
 
 
-    def __init__(self, file_system=None):
+    def __init__(self, file_system=None):   
         super().__init__()
         self.file_system = file_system
 
@@ -159,10 +162,10 @@ class ArchitectController(QObject):
 
     @Slot(int, str, str)
     def category_mode_select(self, panel_index, category, value):
-        """Filter movies by category/value pair, including decade logic."""
+        """Filter movies by category/value pair, including decade logic and stripped paths."""
+        import os  # Ensure os is imported at the top of your file
 
         print(f"\n🎬 Panel {panel_index} — Category Mode: {category} = {value}")
-
         movies = []
 
         mapping = {
@@ -173,48 +176,57 @@ class ArchitectController(QObject):
             "Series": "Series"
         }
 
-        # --- DECADE SPECIAL CASE ---
+        # --- 1. FILTERING LOGIC (Preserved) ---
         if category == "Decade":
             decade = value[:-1]  # "1950s" → "1950"
-
             for item in self.collection:
-                if item.get("Media Sub Type") == "TV Show":
-                    continue
-
+                if item.get("Media Sub Type") == "TV Show": continue
                 year = item.get("Year")
-                if not year or not year.isdigit():
-                    continue
-
+                if not year or not year.isdigit(): continue
                 item_decade = year[:-1] + "0"
                 if item_decade == decade:
                     movies.append(item)
-
         else:
             json_key = mapping.get(category, category)
-
             for item in self.collection:
-                if item.get("Media Sub Type") == "TV Show":
-                    continue
-
+                if item.get("Media Sub Type") == "TV Show": continue
                 data = item.get(json_key, "")
-
                 if isinstance(data, list):
-                    if value in data:
-                        movies.append(item)
+                    if value in data: movies.append(item)
                 else:
-                    parts = str(data).split(";")
-                    if value in parts:
-                        movies.append(item)
+                    parts = [p.strip() for p in str(data).split(";")]
+                    if value in parts: movies.append(item)
 
+        # --- 2. STATE STORAGE ---
         self.panels[panel_index]["mode"] = "category"
         self.panels[panel_index]["criteria"] = f"{category} = {value}"
+        # Note: Storing full records in 'movies' for logic, but we send 'leafs' to QML
         self.panels[panel_index]["movies"] = movies
 
-        print(f"📄 {len(movies)} movies found:")
-        for m in movies:
-            print("   ", m["Filename"])
+        print(f"📄 {len(movies)} movies found for {category}: {value}")
 
+        # --- 3. EMIT SIGNALS TO QML (With the Strip Join) ---
         self.resultsCounted.emit(panel_index, len(movies))
+
+        mapped_results = []
+        for m in movies:
+            full_path = m.get("Filename", "")
+            # THE STRIP JOIN: Get "Movie.mp4" from "W:\Path\Movie.mp4"
+            leaf_name = os.path.basename(full_path) if full_path else ""
+            
+            mapped_results.append({
+                "title": m.get("Name", "Unknown Title"),
+                "filePath": leaf_name # <--- HUD uses this to look up thumb
+            })
+        
+        display_label = f"{category}: {value}"
+        
+        # Send to ArchitectHUD to open the popup
+        if hasattr(self, 'onMovieListReady'):
+            self.onMovieListReady.emit(panel_index, mapped_results, display_label)
+            print(f"🚀 Sent {len(mapped_results)} stripped filenames to HUD.")
+        else:
+            print("⚠ Signal 'onMovieListReady' not found.")
 
     @Slot(str, str, result=list)
     def get_filtered_keywords(self, category, filter_text):
@@ -303,4 +315,48 @@ class ArchitectController(QObject):
         except Exception as e:
             print("Search error:", e)
 
-    
+
+    @Slot(int)
+    def generate_list_for_panel(self, panel_index):
+        """
+        THE STRIP JOIN:
+        1. Grabs the stored criteria (e.g., Genre: Western)
+        2. Searches the collection for matches
+        3. Strips the path from the Filename record
+        4. Sends ONLY the filename+extension to QML
+        """
+        try:
+            # Retrieve the intent we stored during 'category_mode_select'
+            state = self.panels.get(panel_index, {})
+            criteria_str = state.get("criteria", "") # "Genre: Western"
+            
+            if not criteria_str or ":" not in criteria_str:
+                return
+
+            category, value = [x.strip() for x in criteria_str.split(":")]
+            
+            # Recalculate matches to ensure we are fresh
+            matches = []
+            for item in self.collection:
+                if item.get("Media Sub Type") == "TV Show": 
+                    continue
+                
+                # Map QML Category to JSON Key
+                json_key = category # Simplified for brevity, uses your mapping
+                data = item.get(json_key, "")
+                if value in [p.strip() for p in str(data).split(";")]:
+                    # THE STRIP: Get "The Searchers (1956).mp4" from "W:\Movies\The Searchers (1956).mp4"
+                    full_path = item.get("Filename", "")
+                    if full_path:
+                        leaf_name = os.path.basename(full_path)
+                        matches.append({
+                            "title": item.get("Name", leaf_name),
+                            "filePath": leaf_name  # This is the Name + Extension join
+                        })
+
+            # Send the clean list back to the HUD
+            self.onMovieListReady.emit(panel_index, matches, criteria_str)
+            print(f"📦 Joint Complete: Sent {len(matches)} stripped filenames to HUD.")
+
+        except Exception as e:
+            print(f"❌ Error in Generate List Join: {e}")

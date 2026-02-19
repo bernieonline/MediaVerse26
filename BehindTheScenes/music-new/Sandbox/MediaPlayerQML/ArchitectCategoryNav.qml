@@ -107,7 +107,6 @@ Item {
                         activeCategory = modelData
                         currentSubMode = (modelData === "Decade") ? "year" : "search"
                         selectedCategoryValue = ""
-
                     }
                 }
             }
@@ -149,7 +148,7 @@ Item {
                                ? architectController.get_filtered_keywords(
                                      activeCategory,
                                      filterField.text
-                                 )
+                                   )
                                : []
 
                         delegate: Button {
@@ -173,10 +172,15 @@ Item {
                             onClicked: {
                                 var key = activeCategory
                                 var value = modelData
-                                var list = []   // placeholder
                                 selectedCategoryValue = value
 
-                                categorySelected(key, value, list)
+                                // STAMP THE PARENT PANEL (Surgical Join)
+                                if (parentPanel) {
+                                    parentPanel.selectedCategory = key
+                                    parentPanel.selectedKeyword = value
+                                }
+
+                                categorySelected(key, value, [])
 
                                 if (typeof architectController !== "undefined" && parentPanel) {
                                     architectController.category_mode_select(
@@ -189,7 +193,6 @@ Item {
                         }
                     }
                 }
-
                 ScrollBar.vertical: ScrollBar { active: true }
             }
         }
@@ -228,10 +231,15 @@ Item {
                     onClicked: {
                         var key = "Decade"
                         var value = dBtn.text
-                        var list = []   // placeholder
                         selectedCategoryValue = value
 
-                        categorySelected(key, value, list)
+                        // STAMP THE PARENT PANEL (Surgical Join)
+                        if (parentPanel) {
+                            parentPanel.selectedCategory = key
+                            parentPanel.selectedKeyword = value
+                        }
+
+                        categorySelected(key, value, [])
 
                         if (typeof architectController !== "undefined" && parentPanel) {
                             architectController.category_mode_select(
@@ -256,7 +264,25 @@ Item {
                 parentPanel.hitCount = panelCount
             }
         }
+
+        function onMovieListReady(pIdx, list, label) {
+            if (parentPanel && pIdx === parentPanel.panelIndex) {
+                console.log("CategoryNav: List ready for Panel", pIdx, "Count:", list.length);
+                parentPanel.listRequested(pIdx, label, list);
+            }
+        }
     }
+
+    // Corrected helper function to use parentPanel
+    function handleCategorySelection(category, value) {
+        if (parentPanel) {
+            parentPanel.currentMode = "category"; 
+            parentPanel.selectedCategory = category;
+            parentPanel.selectedKeyword = value;
+            architectController.category_mode_select(parentPanel.panelIndex, category, value);
+        }
+    }
+
     function buildRuleSnippet(panelIndex, gate, includeGate) {
         return {
             panelIndex: panelIndex,
