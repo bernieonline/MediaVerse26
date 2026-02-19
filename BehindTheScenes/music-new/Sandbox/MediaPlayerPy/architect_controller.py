@@ -360,3 +360,28 @@ class ArchitectController(QObject):
 
         except Exception as e:
             print(f"❌ Error in Generate List Join: {e}")
+
+    @Slot(int, str)
+    def process_commit(self, panel_index, snippet_json):
+        """
+        Receives the JSON snippet string, turns it back into a 
+        Python dictionary, and prints the DNA to the log.
+        """
+        try:
+            # Reconstruct the object
+            snippet_data = json.loads(snippet_json)
+            
+            # --- THE BASICS LOG ---
+            print("\n" + "📂" * 15)
+            print(f"  PANEL {panel_index} RULE COMMITTED")
+            print("—" * 30)
+            
+            # This prints the raw JSON DNA you requested
+            print(json.dumps(snippet_data, indent=4))
+            
+            print("—" * 30)
+            print(f"📦 Status: DNA Recorded in Workhorse.")
+            print("📂" * 15 + "\n")
+
+        except Exception as e:
+            print(f"❌ Bridge Error: Could not process snippet DNA: {e}")
