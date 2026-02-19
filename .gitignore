@@ -101,7 +101,7 @@ BehindTheScenes/music-new/Sandbox/MediaPlayerQML/PlayerPanelBack.qml
 BehindTheScenes/music-new/Sandbox/MediaPlayerQML/SplashScreen copy.qml
 BehindTheScenes/music-new/Sandbox/MediaPlayerQML/StyledMenu copy.qml
 BehindTheScenes/music-new/Sandbox/Playback/PlaybackRouter copy.py
-*.qml
+
 BehindTheScenes/music-new/Sandbox/MediaPlayerQML/PlayerPanelBack.qml
 BehindTheScenes/music-new/Testing/test_manifest_v2_wrapper.py
 BehindTheScenes/music-new/Sandbox/MediaPlayerPy/architect_controller copy.py
