@@ -363,25 +363,69 @@ class ArchitectController(QObject):
 
     @Slot(int, str)
     def process_commit(self, panel_index, snippet_json):
-        """
-        Receives the JSON snippet string, turns it back into a 
-        Python dictionary, and prints the DNA to the log.
-        """
         try:
-            # Reconstruct the object
-            snippet_data = json.loads(snippet_json)
+            # 1. PARSE THE INCOMING DNA
+            snippet = json.loads(snippet_json)
             
-            # --- THE BASICS LOG ---
-            print("\n" + "📂" * 15)
+            # 2. LOG THE EVENT (Preserving your 'Workhorse' style)
+            print(f"\n📂📂📂📂📂📂📂📂📂📂📂📂📂📂📂")
             print(f"  PANEL {panel_index} RULE COMMITTED")
-            print("—" * 30)
+            print(f"——————————————————————————————")
+            # Pretty print the snippet so you can see the details in the log
+            print(json.dumps(snippet, indent=4))
+            print(f"——————————————————————————————")
+
+            # 3. EXTRACT DETAILS FOR SET THEORY
+            mode = snippet.get("mode", "")
+            gate = snippet.get("gate", "NONE")
+            is_narrowing = snippet.get("checked", False)
             
-            # This prints the raw JSON DNA you requested
-            print(json.dumps(snippet_data, indent=4))
-            
-            print("—" * 30)
+            current_ids = []
+
+            if mode == "Folder":
+                target_folder = snippet.get("data", {}).get("folder", "")
+                
+                # --- SURGICAL FIX START ---
+                # We move away from startswith(prefix) because of backslash encoding issues.
+                # Instead, we look for the folder name surrounded by slashes within the path.
+                search_term = target_folder.strip().lower()
+
+                current_ids = [
+                    item.get("Filename") for item in self.collection 
+                    if f"\\{search_term}\\" in item.get("Filename", "").lower() 
+                    or f"/{search_term}/" in item.get("Filename", "").lower()
+                ]
+                # --- SURGICAL FIX END ---
+
+                # 2. THE TEST PRINT
+                print(f"\n🔍 --- BG SEARCH TEST: {target_folder} ---")
+                print(f"✅ Found {len(current_ids)} matches in JSON database.")
+                print(f"📋 Full List of IDs (Filenames):")
+                for movie_id in current_ids:
+                    print(f"   ↳ {movie_id}")
+                print(f"------------------------------------------\n")
+
+            # 4. PERFORM THE MATH
+            if hasattr(self, 'summary_engine'):
+                new_total = self.summary_engine.apply_logic(
+                    panel_index, 
+                    current_ids, 
+                    gate, 
+                    is_narrowing
+                )
+                # Update the HUD Footer via the Signal
+                self.onCountChanged.emit(new_total)
+                print(f"🧬 [Set Theory] Matches calculated: {len(current_ids)}")
+                print(f"📊 [Global] Total now: {new_total}")
+
+            # 5. FINAL STATUS (The 'Workhorse' confirmation)
             print(f"📦 Status: DNA Recorded in Workhorse.")
-            print("📂" * 15 + "\n")
+            print(f"📂📂📂📂📂📂📂📂📂📂📂📂📂📂📂")
+            
+            import sys
+            sys.stdout.flush()
 
         except Exception as e:
-            print(f"❌ Bridge Error: Could not process snippet DNA: {e}")
+            print(f"❌ Error in process_commit: {e}")
+            import traceback
+            traceback.print_exc()

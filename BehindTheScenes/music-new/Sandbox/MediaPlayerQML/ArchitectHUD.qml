@@ -18,6 +18,7 @@ Rectangle {
     property int totalMatches: 0
     property bool filterEnabled: false
 
+
     // --- POPUP INSTANCES ---
     ArchitectMoviePopup { id: moviePopup }
 
