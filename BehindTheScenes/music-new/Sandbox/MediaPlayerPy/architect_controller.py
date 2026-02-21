@@ -1,5 +1,7 @@
-from PySide6.QtCore import QObject, Slot, Signal
+
+from PySide6.QtCore import QObject, Slot, Signal 
 import os
+import random
 from project_paths import coll_data
 import json
 from PySide6.QtCore import Property
@@ -16,7 +18,12 @@ class ArchitectController(QObject):
     # --- CRITICAL SIGNALS ---
     onMovieListReady = Signal(int, list, str) # panel_index, movie_list, display_label
     
+    # --- NEW BOOKSHELF SIGNALS ---
+    countChanged = Signal(int) 
+    bookshelfListChanged = Signal()
 
+    # Premium Palette for the Spines
+    SPINE_PALETTE = ["#2c3e50", "#2980b9", "#8e44ad", "#27ae60", "#d35400", "#c0392b", "#16a085", "#34495e"]
 
 
     def __init__(self, file_system=None):   
@@ -27,9 +34,8 @@ class ArchitectController(QObject):
         print("DEBUG SLOT SIGNATURE:", self.category_mode_select)
 
         self._searchResultsModel = SearchResultsModel()
-
-       
-
+        self._bookshelfList = [] # This holds the final "DNA" for the shelf
+        self._current_ids = []  # Initialize it here
 
         # Load the full movie collection once
         with open(coll_data, "r", encoding="utf-8") as f:
@@ -55,7 +61,12 @@ class ArchitectController(QObject):
         return self._searchResultsModel
 
    
-   
+    @Slot(result=list)
+    def get_bookshelf_list(self):
+        """Standard Slot to return the current spine data to QML."""
+        # This print will show up in your terminal whenever the HUD refreshes
+        print(f"📦 [PYTHON] Handing {len(self._bookshelfList)} spines to HUD.")
+        return self._bookshelfList
    
     @Slot(int, str)
     def folder_mode_select(self, panel_index, folder_name):
@@ -273,7 +284,7 @@ class ArchitectController(QObject):
     @Slot()
     def reset_logic(self):
         print("[ArchitectController] reset_logic() called — no action needed.")
-
+        self.bookshelfListChanged.emit() # This clears the UI spines
 
     @Slot(str)
     def search_library(self, text):
@@ -363,19 +374,21 @@ class ArchitectController(QObject):
 
     @Slot(int, str)
     def process_commit(self, panel_index, snippet_json):
+        # IDENTITY CHECK: Confirming which controller instance is working
+        print(f"🆔 DEBUG: Controller ID {id(self)} is processing Panel {panel_index}")
+
         try:
             # 1. PARSE THE INCOMING DNA
             snippet = json.loads(snippet_json)
             
-            # 2. LOG THE EVENT (Preserving your 'Workhorse' style)
+            # 2. LOG THE EVENT
             print(f"\n📂📂📂📂📂📂📂📂📂📂📂📂📂📂📂")
-            print(f"  PANEL {panel_index} RULE COMMITTED")
+            print(f"   PANEL {panel_index} RULE COMMITTED")
             print(f"——————————————————————————————")
-            # Pretty print the snippet so you can see the details in the log
             print(json.dumps(snippet, indent=4))
             print(f"——————————————————————————————")
 
-            # 3. EXTRACT DETAILS FOR SET THEORY
+            # 3. EXTRACT DETAILS
             mode = snippet.get("mode", "")
             gate = snippet.get("gate", "NONE")
             is_narrowing = snippet.get("checked", False)
@@ -384,10 +397,6 @@ class ArchitectController(QObject):
 
             if mode == "Folder":
                 target_folder = snippet.get("data", {}).get("folder", "")
-                
-                # --- SURGICAL FIX START ---
-                # We move away from startswith(prefix) because of backslash encoding issues.
-                # Instead, we look for the folder name surrounded by slashes within the path.
                 search_term = target_folder.strip().lower()
 
                 current_ids = [
@@ -395,17 +404,17 @@ class ArchitectController(QObject):
                     if f"\\{search_term}\\" in item.get("Filename", "").lower() 
                     or f"/{search_term}/" in item.get("Filename", "").lower()
                 ]
-                # --- SURGICAL FIX END ---
 
-                # 2. THE TEST PRINT
+                self._current_ids = current_ids
+
                 print(f"\n🔍 --- BG SEARCH TEST: {target_folder} ---")
                 print(f"✅ Found {len(current_ids)} matches in JSON database.")
-                print(f"📋 Full List of IDs (Filenames):")
-                for movie_id in current_ids:
-                    print(f"   ↳ {movie_id}")
                 print(f"------------------------------------------\n")
 
             # 4. PERFORM THE MATH
+            # Initialize new_total with current_ids length as a baseline
+            new_total = len(current_ids)
+
             if hasattr(self, 'summary_engine'):
                 new_total = self.summary_engine.apply_logic(
                     panel_index, 
@@ -413,12 +422,21 @@ class ArchitectController(QObject):
                     gate, 
                     is_narrowing
                 )
-                # Update the HUD Footer via the Signal
-                self.onCountChanged.emit(new_total)
-                print(f"🧬 [Set Theory] Matches calculated: {len(current_ids)}")
-                print(f"📊 [Global] Total now: {new_total}")
+                
+                # OPTIONAL: Only build spines if you actually want them now
+                # cumulative_ids = self.summary_engine.get_current_result()
+                # self._bookshelfList = [ ... your spine logic ... ]
+            
+            # --- THE SURGICAL STRIKE: EMIT SIGNALS ---
+            # We use the clean 'countChanged' name defined in your Signal list
+            print(f"📡 [SIGNAL] Emitting countChanged({new_total}) from ID {id(self)}")
+            self.countChanged.emit(new_total)
+            
+            # If you want the shelf to refresh too:
+            # self.bookshelfListChanged.emit()
 
-            # 5. FINAL STATUS (The 'Workhorse' confirmation)
+            # 5. FINAL STATUS
+            print(f"📊 [Global] Total now: {new_total}")
             print(f"📦 Status: DNA Recorded in Workhorse.")
             print(f"📂📂📂📂📂📂📂📂📂📂📂📂📂📂📂")
             
@@ -429,3 +447,29 @@ class ArchitectController(QObject):
             print(f"❌ Error in process_commit: {e}")
             import traceback
             traceback.print_exc()
+
+    @Slot(int)
+    def handle_shelf_request(self, panel_index):
+        # self._current_ids was saved during the 'process_commit'
+        print(f"📚 [SHELF] Baking spines for {len(self._current_ids)} items...")
+        
+        new_spines = []
+        for path in self._current_ids:
+            if not path: continue
+            
+            # 1. Clean up the title (e.g., "Rocky (1976).mp4" -> "Rocky (1976)")
+            filename = os.path.basename(path)
+            title_clean = os.path.splitext(filename)[0]
+            
+            # 2. Package it for QML
+            new_spines.append({
+                "title": title_clean,
+                "spineColor": random.choice(self.SPINE_PALETTE),
+                "filePath": path
+            })
+        
+        # 3. Store in the 'warehouse' and ring the 'dinner bell'
+        self._bookshelfList = new_spines
+        self.bookshelfListChanged.emit()
+        
+        print(f"✅ [SHELF] {len(new_spines)} spines ready in warehouse.")

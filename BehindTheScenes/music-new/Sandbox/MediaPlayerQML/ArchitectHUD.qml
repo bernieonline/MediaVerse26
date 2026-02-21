@@ -87,9 +87,7 @@ Rectangle {
         }
     }
 
-    function handleShelf(pIndex) { 
-        console.log("HUD: Shelf requested for index " + pIndex + " (Shelf Logic Disabled)");
-    }
+    
    
     function handleList(pIdx, list, folderName) {
         var safeList = list || [];
@@ -220,6 +218,37 @@ Rectangle {
         anchors.bottom: parent.bottom; z: 1000
         Rectangle { width: parent.width; height: 1; color: "#22FFFFFF"; anchors.top: parent.top }
 
+        // NEW: THE BOOKSHELF ROW
+        Row {
+            id: spineRow
+            anchors.left: parent.left
+            anchors.leftMargin: 20
+            anchors.verticalCenter: parent.verticalCenter
+            spacing: 1
+            
+            Repeater {
+                id: shelfRepeater  // This is the NEW ID for the spines
+                model: (typeof architectController !== "undefined") ? architectController.get_bookshelf_list() : []
+                
+                delegate: Rectangle {
+                    width: 8   // Thin like a book spine
+                    height: 60 // Shorter than the footer
+                    color: modelData.spineColor
+                    radius: 1
+                    
+                    ToolTip.visible: shelfMouse.containsMouse
+                    ToolTip.text: modelData.title
+
+                    MouseArea {
+                        id: shelfMouse
+                        anchors.fill: parent
+                        hoverEnabled: true
+                    }
+                }
+            }
+        }
+
+
         Row {
             anchors.centerIn: parent; spacing: 60
 
@@ -270,37 +299,37 @@ Rectangle {
         };
     }
 
-    function handleFinish(pIndex) {
-        var fullSet = buildFullRuleSet();
-        console.log("🏁 DNA Finalized: " + JSON.stringify(fullSet));
+    // --- UPDATED HUD LOGIC ---
+    function handleShelf(pIndex) { 
+        console.log("🚀 HUD: Requesting shelf build for panel " + pIndex);
         
-        // Safety: If for some reason the loader isn't active, kick it
-        if (finishPopupLoader.status !== Loader.Ready) {
-            console.log("🛠️ HUD: Force-loading Dialog...");
-            finishPopupLoader.active = true;
-        }
-
-        var popup = finishPopupLoader.item;
-        
-        if (popup) {
-            if (typeof popup.prepareDNA === "function") {
-                popup.prepareDNA(fullSet);
-            }
-            popup.visible = true; 
-            popup.forceActiveFocus();
+        // Check if the controller exists, then call the Python Slot
+        if (typeof architectController !== "undefined") {
+            architectController.handle_shelf_request(pIndex);
         } else {
-            // This is the error you are seeing. 
-            // It means "ArchtectFinishDialog.qml" is likely missing or has a typo in the filename.
-            console.log("⚠️ HUD: Popup item NOT READY. Check filename: " + finishPopupLoader.source);
+            console.log("❌ HUD Error: architectController is not available.");
         }
     }
 
     // --- VAULT CONNECTIONS ---
+    // --- VAULT CONNECTIONS ---
     Connections {
         target: (typeof architectController !== "undefined") ? architectController : null
         ignoreUnknownSignals: true
-        function onCountChanged(total) { architectRoot.totalMatches = total; }
-        function onResultsCounted(pIndex, pCount) {
+
+        // Use the signal name directly as a property (no 'function' keyword)
+        onCountChanged: (total) => { 
+            console.log("🎯 [QML HUD] Signal Received! Value: " + total);
+            architectRoot.totalMatches = total; 
+        }
+
+        // Fixes the "Duplicate method name" crash
+        onBookshelfListChanged: {
+            console.log("📖 HUD: Refreshing bookshelf spines...");
+            shelfRepeater.model = architectController.get_bookshelf_list();
+        }
+
+        onResultsCounted: (pIndex, pCount) => {
             if (pIndex >= 0 && pIndex < criteriaModel.count) {
                 criteriaModel.setProperty(pIndex, "panelHits", pCount);
             }
