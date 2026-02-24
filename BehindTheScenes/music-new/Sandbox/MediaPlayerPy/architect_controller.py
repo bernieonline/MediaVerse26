@@ -374,7 +374,6 @@ class ArchitectController(QObject):
 
     @Slot(int, str)
     def process_commit(self, panel_index, snippet_json):
-        # IDENTITY CHECK: Confirming which controller instance is working
         print(f"🆔 DEBUG: Controller ID {id(self)} is processing Panel {panel_index}")
 
         try:
@@ -396,11 +395,10 @@ class ArchitectController(QObject):
             
             current_ids = []
 
-            # --- BRANCH 1: FOLDER MODE ---
+            # --- MODE: FOLDER ---
             if mode == "Folder":
                 target_folder = data_payload.get("folder", "")
                 search_term = target_folder.strip().lower()
-
                 current_ids = [
                     os.path.basename(item.get("Filename")) for item in self.collection 
                     if item.get("Filename") and (
@@ -409,41 +407,43 @@ class ArchitectController(QObject):
                     )
                 ]
 
-            # --- BRANCH 2: CATEGORY MODE (JSON-Specific) ---
+            # --- MODE: CATEGORY ---
             elif mode == "Category":
                 cat = data_payload.get("category", "")
                 val = data_payload.get("value", "")
                 
+                # Mapping QML Category names to your JSON keys
                 key_map = {
                     "Genres": ["Genre"],
                     "Actors": ["Actors"],
-                    "Directors": ["Director"]
+                    "Directors": ["Director"],
+                    "Decade": ["Year"]
                 }
                 search_keys = key_map.get(cat, [cat])
 
                 for item in self.collection:
-                    if item.get("Media Sub Type") != "Movie":
-                        continue
+                    if item.get("Media Sub Type") != "Movie": continue
                     
                     match_found = False
                     for k in search_keys:
                         raw_data = item.get(k, "")
                         
-                        # Handle JSON Lists (e.g., "Actors": ["Pierce Brosnan", ...])
-                        if isinstance(raw_data, list):
+                        # Fix: Decade Matching (Prefix logic)
+                        if cat == "Decade":
+                            target_prefix = str(val)[:3] # "1960s" -> "196"
+                            if str(raw_data).startswith(target_prefix):
+                                match_found = True
+                        
+                        # Handle JSON Lists (Actors)
+                        elif isinstance(raw_data, list):
                             if val in raw_data:
                                 match_found = True
                         
-                        # Handle Semicolon Strings (e.g., "Genre": "Action;Thriller")
+                        # Handle Semicolon Strings (Genre/Keywords)
                         elif isinstance(raw_data, str):
-                            if cat == "Decade":
-                                decade_prefix = val[:-1] # "1960s" -> "1960"
-                                if str(item.get("Year", "")).startswith(decade_prefix):
-                                    match_found = True
-                            else:
-                                parts = [p.strip() for p in raw_data.split(";")]
-                                if val in parts:
-                                    match_found = True
+                            parts = [p.strip() for p in raw_data.split(";")]
+                            if val in parts:
+                                match_found = True
 
                         if match_found: break 
 
@@ -452,11 +452,9 @@ class ArchitectController(QObject):
                         if path:
                             current_ids.append(os.path.basename(path))
 
-            # --- BRANCH 3: FILES MODE (Bespoke Series/Picks) ---
+            # --- MODE: FILES ---
             elif mode == "Files":
-                # Extracts manually picked files (from 'files' or 'list' keys)
                 file_list = data_payload.get("files", []) or data_payload.get("list", [])
-                # Normalize: Store only the leaf name
                 current_ids = [os.path.basename(f) for f in file_list if f]
 
             # --- THE SURGICAL CHECK ---
@@ -466,35 +464,20 @@ class ArchitectController(QObject):
                 print(f"First 3 Normalized Items:")
                 for i, leaf in enumerate(current_ids[:3]):
                     print(f"  {i+1}. {leaf}")
-            else:
-                print("  ⚠️ List is EMPTY. Check keys or selection.")
             print(f"------------------------------------------\n")
 
             # 4. PERFORM THE MATH
-            new_total = len(current_ids)
-
             if hasattr(self, 'summary_engine'):
-                # Process logic (AND/NOT) using the normalized list
                 new_total = self.summary_engine.apply_logic(
-                    panel_index, 
-                    current_ids, 
-                    gate, 
-                    is_narrowing
+                    panel_index, current_ids, gate, is_narrowing
                 )
-                # Sync Master list with Cumulative engine result
                 self._current_ids = self.summary_engine.get_current_result()
             else:
+                new_total = len(current_ids)
                 self._current_ids = current_ids
 
             # 5. EMIT SIGNALS
-            # After EVERY panel, we update the HUD count.
-            print(f"📡 [SIGNAL] Emitting countChanged({new_total}) from ID {id(self)}")
             self.countChanged.emit(new_total)
-            
-            # 6. FINAL STATUS
-            print(f"📊 [Global] Total now: {new_total}")
-            print(f"📦 Status: DNA Recorded and Normalized.")
-            print(f"📂📂📂📂📂📂📂📂📂📂📂📂📂📂📂")
             
             import sys
             sys.stdout.flush()
