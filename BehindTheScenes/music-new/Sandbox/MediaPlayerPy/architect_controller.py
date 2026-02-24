@@ -396,7 +396,7 @@ class ArchitectController(QObject):
             
             current_ids = []
 
-            # --- BRANCH: FOLDER MODE ---
+            # --- BRANCH 1: FOLDER MODE ---
             if mode == "Folder":
                 target_folder = data_payload.get("folder", "")
                 search_term = target_folder.strip().lower()
@@ -409,12 +409,11 @@ class ArchitectController(QObject):
                     )
                 ]
 
-            # --- BRANCH: CATEGORY MODE (Tailored for your JSON) ---
+            # --- BRANCH 2: CATEGORY MODE (JSON-Specific) ---
             elif mode == "Category":
                 cat = data_payload.get("category", "")
                 val = data_payload.get("value", "")
                 
-                # Maps HUD keys to your specific JSON keys
                 key_map = {
                     "Genres": ["Genre"],
                     "Actors": ["Actors"],
@@ -423,7 +422,6 @@ class ArchitectController(QObject):
                 search_keys = key_map.get(cat, [cat])
 
                 for item in self.collection:
-                    # CONSTRAINT: Must be a Movie
                     if item.get("Media Sub Type") != "Movie":
                         continue
                     
@@ -431,12 +429,12 @@ class ArchitectController(QObject):
                     for k in search_keys:
                         raw_data = item.get(k, "")
                         
-                        # Handle JSON Lists (like your Actors field)
+                        # Handle JSON Lists (e.g., "Actors": ["Pierce Brosnan", ...])
                         if isinstance(raw_data, list):
                             if val in raw_data:
                                 match_found = True
                         
-                        # Handle Semicolon Strings (like your Genre field)
+                        # Handle Semicolon Strings (e.g., "Genre": "Action;Thriller")
                         elif isinstance(raw_data, str):
                             if cat == "Decade":
                                 decade_prefix = val[:-1] # "1960s" -> "1960"
@@ -452,8 +450,14 @@ class ArchitectController(QObject):
                     if match_found:
                         path = item.get("Filename")
                         if path:
-                            # NORMALIZATION: Stripping path for the logical key
                             current_ids.append(os.path.basename(path))
+
+            # --- BRANCH 3: FILES MODE (Bespoke Series/Picks) ---
+            elif mode == "Files":
+                # Extracts manually picked files (from 'files' or 'list' keys)
+                file_list = data_payload.get("files", []) or data_payload.get("list", [])
+                # Normalize: Store only the leaf name
+                current_ids = [os.path.basename(f) for f in file_list if f]
 
             # --- THE SURGICAL CHECK ---
             print(f"\n🧪 --- NORMALIZATION CHECK (Panel {panel_index}) ---")
@@ -463,26 +467,27 @@ class ArchitectController(QObject):
                 for i, leaf in enumerate(current_ids[:3]):
                     print(f"  {i+1}. {leaf}")
             else:
-                print("  ⚠️ List is EMPTY. Check JSON keys or Category value.")
+                print("  ⚠️ List is EMPTY. Check keys or selection.")
             print(f"------------------------------------------\n")
 
             # 4. PERFORM THE MATH
             new_total = len(current_ids)
 
             if hasattr(self, 'summary_engine'):
-                # Process through your engine to update working_foundation
+                # Process logic (AND/NOT) using the normalized list
                 new_total = self.summary_engine.apply_logic(
                     panel_index, 
                     current_ids, 
                     gate, 
                     is_narrowing
                 )
-                # Sync controller's master list with engine's cumulative result
+                # Sync Master list with Cumulative engine result
                 self._current_ids = self.summary_engine.get_current_result()
             else:
                 self._current_ids = current_ids
 
             # 5. EMIT SIGNALS
+            # After EVERY panel, we update the HUD count.
             print(f"📡 [SIGNAL] Emitting countChanged({new_total}) from ID {id(self)}")
             self.countChanged.emit(new_total)
             
