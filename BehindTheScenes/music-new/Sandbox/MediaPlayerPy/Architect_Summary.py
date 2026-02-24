@@ -2,10 +2,11 @@ import json
 
 class ArchitectSummary:
     def __init__(self):
-        self.master_ids = set()
+        # Unified variable name to match your Controller's expectations
+        self.working_foundation = []
         self.panel_results = {} # Used for session history
 
-    # --- THE MATH PIPES (Kept for your original style) ---
+    # --- THE MATH PIPES ---
     def pipe_union(self, set_a, set_b):
         return set_a.union(set_b)
 
@@ -18,33 +19,44 @@ class ArchitectSummary:
     # --- THE ENGINE ---
     def apply_logic(self, panel_index, incoming_ids, gate, is_narrowing):
         incoming_set = set(incoming_ids)
+        # Convert existing list to set for math
+        current_set = set(self.working_foundation)
 
-        # Initializing Panel 0
+        # Initializing Panel 0: The Anchor
         if panel_index == 0:
-            self.master_ids = incoming_set
-            print(f"🎬 [ENGINE] Base layer: {len(self.master_ids)} items.")
-            return list(self.master_ids)
+            self.working_foundation = sorted(list(incoming_set))
+            print(f"⚓ [ENGINE] Panel 0 Foundation set: {len(self.working_foundation)} items.")
+            return len(self.working_foundation)
 
         # THE OVERRIDE LOGIC
-        # If user unchecks the box, we FORCE a union regardless of the gate.
+        # If user unchecks the box, we FORCE a union (Addition)
         if not is_narrowing:
             print(f"➕ [ENGINE] Mode: ADDITIVE (Merge).")
-            self.master_ids = self.pipe_union(self.master_ids, incoming_set)
+            result_set = self.pipe_union(current_set, incoming_set)
         
         else:
             # Standard Narrowing/Filtering
             if gate == "AND":
                 print(f"✂️ [ENGINE] Mode: NARROWING (Filter).")
-                self.master_ids = self.pipe_intersection(self.master_ids, incoming_set)
+                result_set = self.pipe_intersection(current_set, incoming_set)
             elif gate == "NOT":
                 print(f"🚫 [ENGINE] Mode: EXCLUSION (Subtract).")
-                self.master_ids = self.pipe_difference(self.master_ids, incoming_set)
+                result_set = self.pipe_difference(current_set, incoming_set)
             elif gate == "OR":
-                self.master_ids = self.pipe_union(self.master_ids, incoming_set)
+                result_set = self.pipe_union(current_set, incoming_set)
+            else:
+                result_set = current_set # Fallback
 
-        return sorted(list(self.master_ids))
+        # Update the foundation with the result
+        self.working_foundation = sorted(list(result_set))
+        return len(self.working_foundation)
+
+    def get_current_result(self):
+        """Returns the finalized list of filenames to the Controller."""
+        # Now this will work because the name matches apply_logic
+        return self.working_foundation
 
     def reset(self):
-        self.master_ids = set()
+        self.working_foundation = []
         self.panel_results = {}
         print("🧹 [ENGINE] Logic Reset.")

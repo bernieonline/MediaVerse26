@@ -238,7 +238,12 @@ Item {
                     onClicked: {
                         let tool = toolLoader.item
                         if (tool && typeof tool.buildRuleSnippet === "function") {
-                            let snippet = tool.buildRuleSnippet(panelIndex, currentGate, true)
+                            // USE THE CHECKBOX STATE: filterCheckbox.checked
+                            let snippet = tool.buildRuleSnippet(panelIndex, currentGate, filterCheckbox.checked)
+                            
+                            // Ensure the snippet carries the value explicitly
+                            snippet.checked = filterCheckbox.checked 
+                            
                             commitRequested(panelIndex, snippet)
                         }
                     }

@@ -135,7 +135,10 @@ Rectangle {
                             if (typeof architectController !== "undefined") {
                                 let logicGate = (pIdx > 0) ? criteriaModel.get(pIdx - 1).gateValue : "NONE";
                                 snippet.gate = logicGate; 
-                                snippet.checked = criteriaModel.get(pIdx).isCommitted;
+
+                                // REMOVE OR COMMENT OUT THE snippet.checked OVERRIDE
+                                // It is now already set correctly by the Panel's toolLoader
+                                
                                 architectController.process_commit(pIdx, JSON.stringify(snippet))
                             }
                         }

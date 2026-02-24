@@ -6,7 +6,7 @@ from project_paths import coll_data
 import json
 from PySide6.QtCore import Property
 from search_results_model import SearchResultsModel
-
+from Architect_Summary import ArchitectSummary # Add this at the top
 
 class ArchitectController(QObject):
     # --- CRITICAL SIGNALS ---
@@ -29,6 +29,8 @@ class ArchitectController(QObject):
     def __init__(self, file_system=None):   
         super().__init__()
         self.file_system = file_system
+
+        self.summary_engine = ArchitectSummary()
 
         # ADD THIS LINE NEAR THE TOP OF THE FILE
         print("DEBUG SLOT SIGNATURE:", self.category_mode_select)
