@@ -388,56 +388,107 @@ class ArchitectController(QObject):
             print(json.dumps(snippet, indent=4))
             print(f"——————————————————————————————")
 
-            # 3. EXTRACT DETAILS
+            # 3. EXTRACT AND NORMALIZE DETAILS
             mode = snippet.get("mode", "")
             gate = snippet.get("gate", "NONE")
             is_narrowing = snippet.get("checked", False)
+            data_payload = snippet.get("data", {})
             
             current_ids = []
 
+            # --- BRANCH: FOLDER MODE ---
             if mode == "Folder":
-                target_folder = snippet.get("data", {}).get("folder", "")
+                target_folder = data_payload.get("folder", "")
                 search_term = target_folder.strip().lower()
 
                 current_ids = [
-                    item.get("Filename") for item in self.collection 
-                    if f"\\{search_term}\\" in item.get("Filename", "").lower() 
-                    or f"/{search_term}/" in item.get("Filename", "").lower()
+                    os.path.basename(item.get("Filename")) for item in self.collection 
+                    if item.get("Filename") and (
+                        f"\\{search_term}\\" in item.get("Filename", "").lower() 
+                        or f"/{search_term}/" in item.get("Filename", "").lower()
+                    )
                 ]
 
-                self._current_ids = current_ids
+            # --- BRANCH: CATEGORY MODE (Tailored for your JSON) ---
+            elif mode == "Category":
+                cat = data_payload.get("category", "")
+                val = data_payload.get("value", "")
+                
+                # Maps HUD keys to your specific JSON keys
+                key_map = {
+                    "Genres": ["Genre"],
+                    "Actors": ["Actors"],
+                    "Directors": ["Director"]
+                }
+                search_keys = key_map.get(cat, [cat])
 
-                print(f"\n🔍 --- BG SEARCH TEST: {target_folder} ---")
-                print(f"✅ Found {len(current_ids)} matches in JSON database.")
-                print(f"------------------------------------------\n")
+                for item in self.collection:
+                    # CONSTRAINT: Must be a Movie
+                    if item.get("Media Sub Type") != "Movie":
+                        continue
+                    
+                    match_found = False
+                    for k in search_keys:
+                        raw_data = item.get(k, "")
+                        
+                        # Handle JSON Lists (like your Actors field)
+                        if isinstance(raw_data, list):
+                            if val in raw_data:
+                                match_found = True
+                        
+                        # Handle Semicolon Strings (like your Genre field)
+                        elif isinstance(raw_data, str):
+                            if cat == "Decade":
+                                decade_prefix = val[:-1] # "1960s" -> "1960"
+                                if str(item.get("Year", "")).startswith(decade_prefix):
+                                    match_found = True
+                            else:
+                                parts = [p.strip() for p in raw_data.split(";")]
+                                if val in parts:
+                                    match_found = True
+
+                        if match_found: break 
+
+                    if match_found:
+                        path = item.get("Filename")
+                        if path:
+                            # NORMALIZATION: Stripping path for the logical key
+                            current_ids.append(os.path.basename(path))
+
+            # --- THE SURGICAL CHECK ---
+            print(f"\n🧪 --- NORMALIZATION CHECK (Panel {panel_index}) ---")
+            print(f"Total Items Found: {len(current_ids)}")
+            if len(current_ids) > 0:
+                print(f"First 3 Normalized Items:")
+                for i, leaf in enumerate(current_ids[:3]):
+                    print(f"  {i+1}. {leaf}")
+            else:
+                print("  ⚠️ List is EMPTY. Check JSON keys or Category value.")
+            print(f"------------------------------------------\n")
 
             # 4. PERFORM THE MATH
-            # Initialize new_total with current_ids length as a baseline
             new_total = len(current_ids)
 
             if hasattr(self, 'summary_engine'):
+                # Process through your engine to update working_foundation
                 new_total = self.summary_engine.apply_logic(
                     panel_index, 
                     current_ids, 
                     gate, 
                     is_narrowing
                 )
-                
-                # OPTIONAL: Only build spines if you actually want them now
-                # cumulative_ids = self.summary_engine.get_current_result()
-                # self._bookshelfList = [ ... your spine logic ... ]
-            
-            # --- THE SURGICAL STRIKE: EMIT SIGNALS ---
-            # We use the clean 'countChanged' name defined in your Signal list
+                # Sync controller's master list with engine's cumulative result
+                self._current_ids = self.summary_engine.get_current_result()
+            else:
+                self._current_ids = current_ids
+
+            # 5. EMIT SIGNALS
             print(f"📡 [SIGNAL] Emitting countChanged({new_total}) from ID {id(self)}")
             self.countChanged.emit(new_total)
             
-            # If you want the shelf to refresh too:
-            # self.bookshelfListChanged.emit()
-
-            # 5. FINAL STATUS
+            # 6. FINAL STATUS
             print(f"📊 [Global] Total now: {new_total}")
-            print(f"📦 Status: DNA Recorded in Workhorse.")
+            print(f"📦 Status: DNA Recorded and Normalized.")
             print(f"📂📂📂📂📂📂📂📂📂📂📂📂📂📂📂")
             
             import sys
