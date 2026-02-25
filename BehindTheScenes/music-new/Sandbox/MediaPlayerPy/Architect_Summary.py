@@ -2,61 +2,63 @@ import json
 
 class ArchitectSummary:
     def __init__(self):
-        # Unified variable name to match your Controller's expectations
+        # This is our 'Bookshelf' - the cumulative list of movie leaf-names
         self.working_foundation = []
-        self.panel_results = {} # Used for session history
-
-    # --- THE MATH PIPES ---
-    def pipe_union(self, set_a, set_b):
-        return set_a.union(set_b)
-
-    def pipe_intersection(self, set_a, set_b):
-        return set_a.intersection(set_b)
-
-    def pipe_difference(self, set_a, set_b):
-        return set_a.difference(set_b)
+        self.panel_results = {} # Session history tracking
 
     # --- THE ENGINE ---
-    def apply_logic(self, panel_index, incoming_ids, gate, is_narrowing):
-        incoming_set = set(incoming_ids)
-        # Convert existing list to set for math
-        current_set = set(self.working_foundation)
-
-        # Initializing Panel 0: The Anchor
-        if panel_index == 0:
-            self.working_foundation = sorted(list(incoming_set))
-            print(f"⚓ [ENGINE] Panel 0 Foundation set: {len(self.working_foundation)} items.")
+    def apply_logic(self, panel_index, new_ids, gate, is_narrowing):
+        """
+        Routes panel data to the correct set operation.
+        - gate="NOT": Subtracts from foundation (list_excluding)
+        - is_narrowing=True: Intersection (list_featuring)
+        - else: Addition (list_union)
+        """
+        
+        # Rule 0: First panel sets the base foundation
+        if panel_index == 0 or not self.working_foundation:
+            self.working_foundation = list(set(new_ids))
             return len(self.working_foundation)
 
-        # THE OVERRIDE LOGIC
-        # If user unchecks the box, we FORCE a union (Addition)
-        if not is_narrowing:
-            print(f"➕ [ENGINE] Mode: ADDITIVE (Merge).")
-            result_set = self.pipe_union(current_set, incoming_set)
-        
-        else:
-            # Standard Narrowing/Filtering
-            if gate == "AND":
-                print(f"✂️ [ENGINE] Mode: NARROWING (Filter).")
-                result_set = self.pipe_intersection(current_set, incoming_set)
-            elif gate == "NOT":
-                print(f"🚫 [ENGINE] Mode: EXCLUSION (Subtract).")
-                result_set = self.pipe_difference(current_set, incoming_set)
-            elif gate == "OR":
-                result_set = self.pipe_union(current_set, incoming_set)
-            else:
-                result_set = current_set # Fallback
+        # Rule 1: The Exclusion (NOT Gate)
+        if gate == "NOT":
+            self.working_foundation = self.list_excluding(self.working_foundation, new_ids)
 
-        # Update the foundation with the result
-        self.working_foundation = sorted(list(result_set))
+        # Rule 2: The Featuring (AND / Checked=TRUE)
+        elif is_narrowing:
+            # Operation: Westerns AND John Wayne (Intersection)
+            self.working_foundation = self.list_featuring(self.working_foundation, new_ids)
+        
+        # Rule 3: The Union (Addition / Default)
+        else:
+            # Operation: Westerns OR Sci-Fi (Addition)
+            self.working_foundation = self.list_union(self.working_foundation, new_ids)
+
         return len(self.working_foundation)
 
+    # --- THE MATH OPERATIONS ---
+
+    def list_featuring(self, foundation, new_panel):
+        """The 'AND' Gate: Keeps only items present in BOTH lists (A ∩ B)."""
+        # This is the '1960s Westerns' logic
+        return list(set(foundation) & set(new_panel))
+
+    def list_union(self, foundation, new_panel):
+        """The 'OR' Gate: Combines both lists, no duplicates (A ∪ B)."""
+        return list(set(foundation) | set(new_panel))
+
+    def list_excluding(self, foundation, new_panel):
+        """The 'NOT' Gate: Removes panel items from foundation (A - B)."""
+        return list(set(foundation) - set(new_panel))
+
+    # --- UTILITIES ---
+
     def get_current_result(self):
-        """Returns the finalized list of filenames to the Controller."""
-        # Now this will work because the name matches apply_logic
+        """Returns the finalized list to the Controller."""
         return self.working_foundation
 
     def reset(self):
+        """Clears the bookshelf."""
         self.working_foundation = []
         self.panel_results = {}
         print("🧹 [ENGINE] Logic Reset.")

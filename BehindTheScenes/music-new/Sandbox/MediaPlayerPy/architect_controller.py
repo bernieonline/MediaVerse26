@@ -392,7 +392,7 @@ class ArchitectController(QObject):
             # 3. EXTRACT AND NORMALIZE DETAILS
             mode = snippet.get("mode", "")
             gate = snippet.get("gate", "NONE")
-            is_narrowing = snippet.get("checked", False)
+            is_narrowing = snippet.get("checked", False) # The "FILTER" checkbox
             data_payload = snippet.get("data", {})
             
             current_ids = []
@@ -414,7 +414,6 @@ class ArchitectController(QObject):
                 cat = data_payload.get("category", "")
                 val = data_payload.get("value", "")
                 
-                # Mapping QML Category names to your JSON keys
                 key_map = {
                     "Genres": ["Genre"],
                     "Actors": ["Actors"],
@@ -430,18 +429,15 @@ class ArchitectController(QObject):
                     for k in search_keys:
                         raw_data = item.get(k, "")
                         
-                        # Fix: Decade Matching (Prefix logic)
                         if cat == "Decade":
-                            target_prefix = str(val)[:3] # "1960s" -> "196"
+                            target_prefix = str(val)[:3] 
                             if str(raw_data).startswith(target_prefix):
                                 match_found = True
                         
-                        # Handle JSON Lists (Actors)
                         elif isinstance(raw_data, list):
                             if val in raw_data:
                                 match_found = True
                         
-                        # Handle Semicolon Strings (Genre/Keywords)
                         elif isinstance(raw_data, str):
                             parts = [p.strip() for p in raw_data.split(";")]
                             if val in parts:
@@ -461,25 +457,28 @@ class ArchitectController(QObject):
 
             # --- THE SURGICAL CHECK ---
             print(f"\n🧪 --- NORMALIZATION CHECK (Panel {panel_index}) ---")
-            print(f"Total Items Found: {len(current_ids)}")
-            if len(current_ids) > 0:
-                print(f"First 3 Normalized Items:")
-                for i, leaf in enumerate(current_ids[:3]):
-                    print(f"  {i+1}. {leaf}")
-            print(f"------------------------------------------\n")
-
-            # 4. PERFORM THE MATH
+            print(f"Panel Selection Found: {len(current_ids)} items")
+            
+            # 4. PERFORM THE MATH (THE LOGIC ENGINE)
             if hasattr(self, 'summary_engine'):
+                # This triggers the Architect_Summary logic
+                # is_narrowing=True will now trigger 'list_featuring'
                 new_total = self.summary_engine.apply_logic(
                     panel_index, current_ids, gate, is_narrowing
                 )
+                # Update the controller's internal tracking
                 self._current_ids = self.summary_engine.get_current_result()
             else:
+                # Fallback if engine is missing
                 new_total = len(current_ids)
                 self._current_ids = current_ids
 
-            # 5. EMIT SIGNALS
+            # 5. EMIT SIGNALS BACK TO HUD
+            print(f"📊 RESULT: Bookshelf now contains {new_total} items.")
             self.countChanged.emit(new_total)
+            
+            # Refresh the bookshelf list in the HUD (the "spines")
+            self.bookshelfListChanged.emit()
             
             import sys
             sys.stdout.flush()
