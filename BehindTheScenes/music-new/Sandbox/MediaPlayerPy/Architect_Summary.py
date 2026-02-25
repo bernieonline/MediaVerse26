@@ -8,30 +8,23 @@ class ArchitectSummary:
 
     # --- THE ENGINE ---
     def apply_logic(self, panel_index, new_ids, gate, is_narrowing):
-        """
-        Routes panel data to the correct set operation.
-        - gate="NOT": Subtracts from foundation (list_excluding)
-        - is_narrowing=True: Intersection (list_featuring)
-        - else: Addition (list_union)
-        """
-        
-        # Rule 0: First panel sets the base foundation
+        # Rule 0: Foundation Setup
         if panel_index == 0 or not self.working_foundation:
             self.working_foundation = list(set(new_ids))
             return len(self.working_foundation)
 
-        # Rule 1: The Exclusion (NOT Gate)
+        # RULE 1: THE NOT GATE (Highest Priority)
+        # We ignore 'is_narrowing' here to avoid double negatives.
         if gate == "NOT":
+            print(f"➖ [ENGINE] Excluding {len(new_ids)} items from foundation.")
             self.working_foundation = self.list_excluding(self.working_foundation, new_ids)
 
-        # Rule 2: The Featuring (AND / Checked=TRUE)
+        # RULE 2: THE FEATURING LOGIC (Intersection)
         elif is_narrowing:
-            # Operation: Westerns AND John Wayne (Intersection)
             self.working_foundation = self.list_featuring(self.working_foundation, new_ids)
         
-        # Rule 3: The Union (Addition / Default)
+        # RULE 3: THE UNION LOGIC (Addition)
         else:
-            # Operation: Westerns OR Sci-Fi (Addition)
             self.working_foundation = self.list_union(self.working_foundation, new_ids)
 
         return len(self.working_foundation)
@@ -62,3 +55,17 @@ class ArchitectSummary:
         self.working_foundation = []
         self.panel_results = {}
         print("🧹 [ENGINE] Logic Reset.")
+
+    def list_excluding(self, foundation, new_panel):
+        """
+        The 'NOT' Gate: Removes panel items from the foundation.
+        Logic: A - (A ∩ B)
+        """
+        set_foundation = set(foundation)
+        set_panel = set(new_panel)
+        
+        # Mathematical Difference: Keep everything in foundation NOT in panel
+        result_set = set_foundation - set_panel
+        
+        # Return as a list (conversion back for the HUD)
+        return list(result_set)
