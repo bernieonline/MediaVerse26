@@ -313,23 +313,27 @@ Rectangle {
             console.log("❌ HUD Error: architectController is not available.");
         }
     }
+
+    
     function handleFinish(pIndex) {
-        console.log("🏁 HUD: Finalizing collection from Panel index:", pIndex);
+        console.log("🏁 HUD: Finalizing collection with Metadata...");
         
-        // 1. Collect the resident memory data into a single object
+        // 1. Get the base rules
         var finalPayload = buildFullRuleSet();
         
-        // 2. Log it so you can see the "Facts" in the console
-        console.log("🧬 FINAL COLLECTION RECORD:\n" + JSON.stringify(finalPayload, null, 2));
+        // 2. Append the additional Key/Value pairs (The "Tweak")
+        finalPayload.type = "Architect";
+        finalPayload.imagePath = "None"; // Placeholder
+        finalPayload.reviews = [];       // Array for future text snippets
+        finalPayload.description = "";   // Will be filled by the Popup
+        
+        console.log("🧬 ENRICHED DNA STRAND:\n" + JSON.stringify(finalPayload, null, 2));
 
-        // 3. Show the naming dialog
         if (finishPopup) {
-            // We set the payload into a property on the popup so it's ready when 'Save' is clicked
+            // Hand the enriched object to the popup
             finishPopup.collectionData = finalPayload; 
             finishPopup.visible = true;
             finishPopup.forceActiveFocus();
-        } else {
-            console.log("❌ Error: finishPopup object not found in HUD");
         }
     }
 
