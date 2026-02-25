@@ -8,10 +8,10 @@ Rectangle {
     visible: false
     z: 10000 
 
-    property var currentDNA: null
+    property var collectionData: null
 
     function prepareDNA(dna) {
-        currentDNA = dna;
+        collectionData = dna;
         console.log("✅ DIALOG: DNA Captured successfully!");
     }
 

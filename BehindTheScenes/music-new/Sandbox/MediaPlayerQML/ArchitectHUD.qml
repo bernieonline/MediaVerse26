@@ -313,6 +313,25 @@ Rectangle {
             console.log("❌ HUD Error: architectController is not available.");
         }
     }
+    function handleFinish(pIndex) {
+        console.log("🏁 HUD: Finalizing collection from Panel index:", pIndex);
+        
+        // 1. Collect the resident memory data into a single object
+        var finalPayload = buildFullRuleSet();
+        
+        // 2. Log it so you can see the "Facts" in the console
+        console.log("🧬 FINAL COLLECTION RECORD:\n" + JSON.stringify(finalPayload, null, 2));
+
+        // 3. Show the naming dialog
+        if (finishPopup) {
+            // We set the payload into a property on the popup so it's ready when 'Save' is clicked
+            finishPopup.collectionData = finalPayload; 
+            finishPopup.visible = true;
+            finishPopup.forceActiveFocus();
+        } else {
+            console.log("❌ Error: finishPopup object not found in HUD");
+        }
+    }
 
     // --- VAULT CONNECTIONS ---
     // --- VAULT CONNECTIONS ---
