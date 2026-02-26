@@ -298,7 +298,13 @@ Rectangle {
         return { 
             "collectionName": "New Collection",
             "rules": rules,
-            "timestamp": new Date().toISOString()
+            // Capture the actual results from the controller
+            "movies": (typeof architectController !== "undefined") ? architectController.get_current_results() : [],
+            "timestamp": new Date().toISOString(),
+            "type": "Architect",
+            "imagePath": "None",
+            "reviews": [],
+            "description": ""
         };
     }
 
@@ -316,24 +322,23 @@ Rectangle {
 
     
     function handleFinish(pIndex) {
-        console.log("🏁 HUD: Finalizing collection with Metadata...");
-        
-        // 1. Get the base rules
         var finalPayload = buildFullRuleSet();
         
-        // 2. Append the additional Key/Value pairs (The "Tweak")
-        finalPayload.type = "Architect";
-        finalPayload.imagePath = "None"; // Placeholder
-        finalPayload.reviews = [];       // Array for future text snippets
-        finalPayload.description = "";   // Will be filled by the Popup
-        
-        console.log("🧬 ENRICHED DNA STRAND:\n" + JSON.stringify(finalPayload, null, 2));
+        // --- LOG SUPPRESSION ---
+        // console.log("🧬 ENRICHED DNA STRAND:\n" + JSON.stringify(finalPayload, null, 2)); 
+        // -----------------------
 
-        if (finishPopup) {
-            // Hand the enriched object to the popup
-            finishPopup.collectionData = finalPayload; 
-            finishPopup.visible = true;
-            finishPopup.forceActiveFocus();
+        if (finishPopupLoader.item) {
+            if (typeof finishPopupLoader.item.prepareDNA === "function") {
+                finishPopupLoader.item.prepareDNA(finalPayload);
+            } else {
+                finishPopupLoader.item.collectionData = finalPayload;
+            }
+            finishPopupLoader.item.visible = true;
+            finishPopupLoader.item.forceActiveFocus();
+            
+            // A clean, single-line confirmation instead of a wall of text
+            console.log("🏁 [HUD]: Handoff complete. " + finalPayload.movies.length + " movies ready to save.");
         }
     }
 

@@ -59,6 +59,32 @@ class ArchitectController(QObject):
     def build_folder_prefix(self, folder_name):
         return f"W:\\Collection\\{folder_name}\\"
     
+    @Slot(result=list)
+    def get_current_results(self):
+        """
+        Returns the final filtered list of movie paths 
+        to the QML Finish logic.
+        """
+        # We use _current_ids because that is where process_commit stores the list
+        results = getattr(self, "_current_ids", [])
+        
+        # LOGIC CHECK: Are these full paths or just filenames? 
+        # If they are just filenames, we reconstruct the full W:\ path for the DB
+        final_paths = []
+        for item in results:
+            if not item.startswith("W:\\"):
+                # Reconstruct the path based on your collection data
+                # This ensures the 'movies' list in the JSON is valid for playback
+                for entry in self.collection:
+                    if entry.get("Filename", "").endswith(item):
+                        final_paths.append(entry.get("Filename"))
+                        break
+            else:
+                final_paths.append(item)
+
+        print(f"🎬 [CONTROLLER]: Exporting {len(final_paths)} full paths to QML.")
+        return final_paths
+    
    
     @Property(QObject, constant=True)
     def searchResultsModel(self):
@@ -164,9 +190,9 @@ class ArchitectController(QObject):
             and os.path.splitext(f)[1].lower() in self.VIDEO_EXTS
         ]
 
-        print(f"🎬 Movie files found ({len(files)}):")
-        for f in files:
-            print("   ", f)
+        #print(f"🎬 Movie files found ({len(files)}):")
+        #for f in files:
+            #print("   ", f)
 
         # Emit count to QML
         self.resultsCounted.emit(panel_index, len(files))
@@ -385,11 +411,11 @@ class ArchitectController(QObject):
             snippet = json.loads(snippet_json)
             
             # 2. LOG THE EVENT
-            print(f"\n📂📂📂📂📂📂📂📂📂📂📂📂📂📂📂")
-            print(f"   PANEL {panel_index} RULE COMMITTED")
-            print(f"——————————————————————————————")
-            print(json.dumps(snippet, indent=4))
-            print(f"——————————————————————————————")
+            #print(f"\n📂📂📂📂📂📂📂📂📂📂📂📂📂📂📂")
+            #print(f"   PANEL {panel_index} RULE COMMITTED")
+            #print(f"——————————————————————————————")
+            #print(json.dumps(snippet, indent=4))
+            #print(f"——————————————————————————————")
 
             # 3. EXTRACT AND NORMALIZE DETAILS
             mode = snippet.get("mode", "")
@@ -458,8 +484,8 @@ class ArchitectController(QObject):
                 current_ids = [os.path.basename(f) for f in file_list if f]
 
             # --- THE SURGICAL CHECK ---
-            print(f"\n🧪 --- NORMALIZATION CHECK (Panel {panel_index}) ---")
-            print(f"Panel Selection Found: {len(current_ids)} items")
+            #print(f"\n🧪 --- NORMALIZATION CHECK (Panel {panel_index}) ---")
+            #print(f"Panel Selection Found: {len(current_ids)} items")
             
             # 4. PERFORM THE MATH (THE LOGIC ENGINE)
             if hasattr(self, 'summary_engine'):
