@@ -111,17 +111,39 @@ Rectangle {
                     background: Rectangle { color: "gold"; radius: 6 }
                     onClicked: {
                         if (collectionData) {
+                            // 1. Inject the final Metadata from the input fields
                             collectionData.collectionName = nameInput.text;
                             collectionData.description = descInput.text;
+                            
+                            // 2. Set Architectural defaults
                             collectionData.type = "Architect";
-                            collectionData.imagePath = "None"; // Will be updated by Set Image later
+                            collectionData.imagePath = "None"; // Placeholder for the 'Set Image' feature
                             collectionData.reviews = []; 
+                            
+                            // 3. Add a timestamp for the record
+                            collectionData.dateCreated = new Date().toLocaleString();
 
+                            // 4. Generate the payload (indented for clear log inspection)
+                            var finalPayload = JSON.stringify(collectionData, null, 4);
+
+                            // 5. The Handover to Python
                             if (typeof architectController !== "undefined") {
-                                architectController.save_collection(JSON.stringify(collectionData));
+                                console.log("💾 [SYSTEM]: Sending Final Architect Record to Controller...");
+                                architectController.save_collection(finalPayload);
+                            } else {
+                                // Fallback print if the Python controller isn't connected yet
+                                console.log("⚠️ [DEBUG]: Controller not found. Record Content:\n" + finalPayload);
                             }
+
+                            // 6. UI Cleanup
                             finishOverlay.visible = false;
-                            if (typeof architectRoot !== 'undefined') architectRoot.visible = false;
+                            if (typeof architectRoot !== 'undefined') {
+                                architectRoot.visible = false;
+                            }
+                            
+                            // Optional: Reset inputs for next use
+                            nameInput.text = "";
+                            descInput.text = "";
                         }
                     }
                 }

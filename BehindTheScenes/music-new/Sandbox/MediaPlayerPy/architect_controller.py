@@ -8,6 +8,8 @@ from PySide6.QtCore import Property
 from search_results_model import SearchResultsModel
 from Architect_Summary import ArchitectSummary # Add this at the top
 
+
+
 class ArchitectController(QObject):
     # --- CRITICAL SIGNALS ---
     
@@ -513,3 +515,30 @@ class ArchitectController(QObject):
         self.bookshelfListChanged.emit()
         
         print(f"✅ [SHELF] {len(new_spines)} spines ready in warehouse.")
+
+
+
+    @Slot(str)
+    def save_collection(self, json_payload):
+        """
+        Receives the finalized record from QML.
+        Validates the 'DNA' and Metadata before we move to Disk I/O.
+        """
+        try:
+            # Parse the string into a Python Dictionary
+            data = json.loads(json_payload)
+            
+            print("\n" + "═"*60)
+            print("📥 [MEDIAVERSE ARCHITECT] - INBOUND RECORD")
+            print(f"   NAME:        {data.get('collectionName', 'N/A')}")
+            print(f"   DESCRIPTION: {data.get('description', 'No description provided.')}")
+            print(f"   TYPE:        {data.get('type')}")
+            print(f"   MOVIE COUNT: {len(data.get('movies', []))}")
+            print("═"*60)
+            
+            # Print the raw formatted JSON for path/logic inspection
+            print(json.dumps(data, indent=4))
+            print("═"*60 + "\n")
+
+        except Exception as e:
+            print(f"❌ [CONTROLLER ERROR]: Failed to receive Architect record: {e}")
