@@ -9,9 +9,11 @@ Rectangle {
     z: 10000 
 
     property var collectionData: null
+    property bool isSaved: false // Track if we should show the success message
 
     function prepareDNA(dna) {
         collectionData = dna;
+        isSaved = false; // Reset state whenever the dialog opens
         console.log("✅ DIALOG: DNA Captured successfully!");
     }
 
@@ -22,10 +24,56 @@ Rectangle {
         border.color: "gold"; border.width: 2
         radius: 10
 
+        // --- SUCCESS VIEW ---
         Column {
+            anchors.centerIn: parent
+            visible: isSaved
+            spacing: 30
+            width: parent.width - 60
+
+            Text {
+                text: "Architect Collection Record Saved"
+                color: "gold"
+                font.pixelSize: 24
+                font.bold: true
+                horizontalAlignment: Text.AlignHCenter
+                width: parent.width
+                wrapMode: Text.WordWrap
+            }
+
+            Text {
+                text: "The collection logic and metadata have been committed to the master manifest."
+                color: "#88FFFFFF"
+                font.pixelSize: 14
+                horizontalAlignment: Text.AlignHCenter
+                width: parent.width
+                wrapMode: Text.WordWrap
+            }
+
+            Button {
+                id: exitBtn
+                text: "EXIT ARCHITECT"
+                anchors.horizontalCenter: parent.horizontalCenter
+                width: 200; height: 50
+                contentItem: Text {
+                    text: parent.text; color: "black"; font.bold: true
+                    horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter
+                }
+                background: Rectangle { color: "gold"; radius: 6 }
+                onClicked: {
+                    finishOverlay.visible = false;
+                    if (typeof architectRoot !== 'undefined') architectRoot.visible = false;
+                }
+            }
+        }
+
+        // --- INPUT VIEW (Hidden once saved) ---
+        Column {
+            id: mainContent
             anchors.centerIn: parent
             width: parent.width - 60
             spacing: 18
+            visible: !isSaved
             
             Text {
                 text: "COLLECTION RECORDED"
@@ -33,7 +81,6 @@ Rectangle {
                 anchors.horizontalCenter: parent.horizontalCenter
             }
 
-            // --- NAME & IMAGE ROW ---
             Row {
                 width: parent.width
                 spacing: 15
@@ -68,12 +115,11 @@ Rectangle {
                             color: setImageBtn.hovered ? "#33FFFFFF" : "#11FFFFFF"
                             border.color: "gold"; border.width: 1; radius: 4
                         }
-                        onClicked: console.log("🖼️ Set Image clicked - functionality pending...")
+                        onClicked: console.log("🖼️ Set Image clicked")
                     }
                 }
             }
 
-            // --- DESCRIPTION INPUT ---
             Column {
                 width: parent.width; spacing: 5
                 Text { text: "DESCRIPTION / NOTES"; color: "#88FFFFFF"; font.pixelSize: 10; font.bold: true }
@@ -96,7 +142,6 @@ Rectangle {
                 anchors.horizontalCenter: parent.horizontalCenter
             }
 
-            // --- ACTION BUTTONS ---
             Row {
                 anchors.horizontalCenter: parent.horizontalCenter
                 spacing: 20
@@ -111,39 +156,23 @@ Rectangle {
                     background: Rectangle { color: "gold"; radius: 6 }
                     onClicked: {
                         if (collectionData) {
-                            // 1. Inject the final Metadata from the input fields
                             collectionData.collectionName = nameInput.text;
                             collectionData.description = descInput.text;
-                            
-                            // 2. Set Architectural defaults
                             collectionData.type = "Architect";
-                            collectionData.imagePath = "None"; // Placeholder for the 'Set Image' feature
+                            collectionData.imagePath = "None"; 
                             collectionData.reviews = []; 
-                            
-                            // 3. Add a timestamp for the record
                             collectionData.dateCreated = new Date().toLocaleString();
 
-                            // 4. Generate the payload (indented for clear log inspection)
                             var finalPayload = JSON.stringify(collectionData, null, 4);
 
-                            // 5. The Handover to Python
                             if (typeof architectController !== "undefined") {
                                 console.log("💾 [SYSTEM]: Sending Final Architect Record to Controller...");
                                 architectController.save_collection(finalPayload);
+                                isSaved = true; // Switch to the success message
                             } else {
-                                // Fallback print if the Python controller isn't connected yet
                                 console.log("⚠️ [DEBUG]: Controller not found. Record Content:\n" + finalPayload);
+                                isSaved = true; // Still show success in debug mode
                             }
-
-                            // 6. UI Cleanup
-                            finishOverlay.visible = false;
-                            if (typeof architectRoot !== 'undefined') {
-                                architectRoot.visible = false;
-                            }
-                            
-                            // Optional: Reset inputs for next use
-                            nameInput.text = "";
-                            descInput.text = "";
                         }
                     }
                 }
