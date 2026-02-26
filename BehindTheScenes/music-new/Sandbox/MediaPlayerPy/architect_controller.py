@@ -7,6 +7,8 @@ import json
 from PySide6.QtCore import Property
 from search_results_model import SearchResultsModel
 from Architect_Summary import ArchitectSummary # Add this at the top
+from project_paths import movies_coll_v2 # Ensure this is imported
+
 
 
 
@@ -543,28 +545,46 @@ class ArchitectController(QObject):
         print(f"✅ [SHELF] {len(new_spines)} spines ready in warehouse.")
 
 
-
     @Slot(str)
     def save_collection(self, json_payload):
-        """
-        Receives the finalized record from QML.
-        Validates the 'DNA' and Metadata before we move to Disk I/O.
-        """
         try:
-            # Parse the string into a Python Dictionary
             data = json.loads(json_payload)
+            target_path = str(movies_coll_v2) 
+
+            # 1. Load existing
+            collections_db = []
+            if os.path.exists(target_path):
+                with open(target_path, "r", encoding="utf-8") as f:
+                    try:
+                        collections_db = json.load(f)
+                    except: collections_db = []
+
+            new_name = data.get("collectionName", "New Architect Collection")
+            collections_db = [c for c in collections_db if c.get("name") != new_name]
+
+            # 2. Build the Record (CRITICAL CHANGE: NO 'movies' KEY)
+            final_entry = {
+                "name": new_name,
+                "type": "Architect",
+                "description": data.get("description", ""),
+                "rules": data.get("rules", []), # The DNA used to rebuild the list
+                "created": data.get("timestamp", "2026-01-01").split("T")[0],
+                "favorite": False,
+                "imagePath": data.get("imagePath", "None")
+                # We intentionally EXCLUDE "movies": data.get("movies") here
+            }
+
+            collections_db.append(final_entry)
             
-            print("\n" + "═"*60)
-            print("📥 [MEDIAVERSE ARCHITECT] - INBOUND RECORD")
-            print(f"   NAME:        {data.get('collectionName', 'N/A')}")
-            print(f"   DESCRIPTION: {data.get('description', 'No description provided.')}")
-            print(f"   TYPE:        {data.get('type')}")
-            print(f"   MOVIE COUNT: {len(data.get('movies', []))}")
-            print("═"*60)
-            
-            # Print the raw formatted JSON for path/logic inspection
-            print(json.dumps(data, indent=4))
-            print("═"*60 + "\n")
+            with open(target_path, "w", encoding="utf-8") as f:
+                json.dump(collections_db, f, indent=4)
+
+            print(f"✅ [DYNAMIC SAVE]: '{new_name}' recorded. Rules stored, paths omitted.")
 
         except Exception as e:
-            print(f"❌ [CONTROLLER ERROR]: Failed to receive Architect record: {e}")
+            print(f"❌ [SAVE ERROR]: {e}")
+    
+
+
+
+    

@@ -161,7 +161,8 @@ Rectangle {
                             collectionData.type = "Architect";
                             collectionData.imagePath = "None"; 
                             collectionData.reviews = []; 
-                            collectionData.dateCreated = new Date().toLocaleString();
+                            //collectionData.dateCreated = new Date().toLocaleString();
+                            collectionData.timestamp = new Date().toISOString();
 
                             var finalPayload = JSON.stringify(collectionData, null, 4);
 
