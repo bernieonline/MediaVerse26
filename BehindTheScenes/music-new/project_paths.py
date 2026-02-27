@@ -58,6 +58,7 @@ config_json = project_root / "Assets" / "Config.json"
 coll_data = project_root / "Assets" / "xml_collection_data.json"
 coll_json = project_root / "Assets" / "xml_collection.json"
 splash_json = project_root / "Assets" / "Splash.json"
+category_json = project_root / "Assets" / "Category.json"
 
 # Collections paths
 collection_bg = project_root / "Assets" / "Collections.jpg"
@@ -94,6 +95,7 @@ paths = {
     "assets": assets_path,
     "splash": splash_path,
     "splash_images": splash_path,
+    "categories": category_json,
     "qml": qml_path,
     "db": db_path,
     "log": log_path,
@@ -130,5 +132,7 @@ paths = {
     # --- QML SPECIFIC STRING OVERRIDES ---
     "font_url": font_path.resolve().as_uri(),
     "fallback_url": fallback_image.resolve().as_uri(),
-    "assets_url": assets_path.resolve().as_uri()
+    "assets_url": assets_path.resolve().as_uri(),
+    "categories_url": category_json.resolve().as_uri()
+
 }

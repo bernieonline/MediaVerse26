@@ -8,6 +8,7 @@ from PySide6.QtCore import Property
 from search_results_model import SearchResultsModel
 from Architect_Summary import ArchitectSummary # Add this at the top
 from project_paths import movies_coll_v2 # Ensure this is imported
+from project_paths import paths
 
 
 
@@ -16,6 +17,7 @@ class ArchitectController(QObject):
     # --- CRITICAL SIGNALS ---
     
     images_listed = Signal(list)
+    categoriesChanged = Signal()
     resultsCounted = Signal(int, int) # Updates hitCount on individual panels
     foldersUpdated = Signal(list)
     VIDEO_EXTS = {'.mp4', '.m2ts', '.ts', '.mkv', '.avi', '.mov', '.m4v', '.iso'}
@@ -33,6 +35,9 @@ class ArchitectController(QObject):
     def __init__(self, file_system=None):   
         super().__init__()
         self.file_system = file_system
+
+        self._categories = []
+        self.load_categories()
 
         self.summary_engine = ArchitectSummary()
 
@@ -60,6 +65,27 @@ class ArchitectController(QObject):
     #this sets up a path of a folder to search xml_collection_data for records
     def build_folder_prefix(self, folder_name):
         return f"W:\\Collection\\{folder_name}\\"
+    
+    @Slot()
+    def load_categories(self):
+        """Loads categories from the central Assets/categories.json"""
+        try:
+            # Using the key we just added to project_paths.py
+            category_path = paths["categories"] 
+            
+            if category_path.exists():
+                with open(category_path, 'r', encoding='utf-8') as f:
+                    self._categories = json.load(f)
+                print(f"🚀 [ARCHITECT] Registry Loaded: {len(self._categories)} items")
+                self.categoriesChanged.emit()
+            else:
+                print(f"⚠️ [ARCHITECT] Registry file not found at {category_path}")
+        except Exception as e:
+            print(f"❌ [ARCHITECT] Registry Load Error: {e}")
+
+    @Property("QVariantList", notify=categoriesChanged)
+    def categoryModel(self):
+        return self._categories
     
     @Slot(result=list)
     def get_current_results(self):
