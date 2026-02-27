@@ -1,5 +1,6 @@
 
 from PySide6.QtCore import QObject, Slot, Signal 
+
 import os
 import random
 from project_paths import coll_data
@@ -20,6 +21,10 @@ class ArchitectController(QObject):
     categoriesChanged = Signal()
     resultsCounted = Signal(int, int) # Updates hitCount on individual panels
     foldersUpdated = Signal(list)
+    #cateriesChanged = pyqtSignal()
+    #deletionComplete = pyqtSignal(int) # Sends the count of orphaned collections
+    deletionComplete = Signal(int) # Sends the count of orphaned collections
+
     VIDEO_EXTS = {'.mp4', '.m2ts', '.ts', '.mkv', '.avi', '.mov', '.m4v', '.iso'}
     # --- CRITICAL SIGNALS ---
     onMovieListReady = Signal(int, list, str) # panel_index, movie_list, display_label
@@ -66,23 +71,50 @@ class ArchitectController(QObject):
     def build_folder_prefix(self, folder_name):
         return f"W:\\Collection\\{folder_name}\\"
     
-    @Slot()
+
+# Note: Assuming 'paths' is accessible within your class scope 
+# or passed in via project_paths.py [2026-01-26]
+
     def load_categories(self):
-        """Loads categories from the central Assets/categories.json"""
+        """
+        Loads categories from Assets/categories.json via PySide6.
+        Guarantees the existence of a locked 'unassigned' pillar.
+        """
         try:
-            # Using the key we just added to project_paths.py
+            # project_paths.py provides the Path object [2026-01-26]
             category_path = paths["categories"] 
             
             if category_path.exists():
                 with open(category_path, 'r', encoding='utf-8') as f:
                     self._categories = json.load(f)
+                
+                # --- The Architect Safety Net ---
+                # Search for the 'unassigned' key in the loaded list
+                has_unassigned = any(c.get('key') == 'unassigned' for c in self._categories)
+                
+                if not has_unassigned:
+                    self._categories.append({
+                        "key": "unassigned", 
+                        "label": "UNASSIGNED", 
+                        "locked": True 
+                    })
+                    # Auto-sync the disk if we had to inject the safety net
+                    self._save_to_disk()
+
                 print(f"🚀 [ARCHITECT] Registry Loaded: {len(self._categories)} items")
+                # PySide6 uses .emit() just like PyQt5
                 self.categoriesChanged.emit()
+                
             else:
                 print(f"⚠️ [ARCHITECT] Registry file not found at {category_path}")
+                # Fallback initialization
+                self._categories = [{"key": "unassigned", "label": "UNASSIGNED", "locked": True}]
+                self.categoriesChanged.emit()
+
         except Exception as e:
             print(f"❌ [ARCHITECT] Registry Load Error: {e}")
-
+    
+    
     @Property("QVariantList", notify=categoriesChanged)
     def categoryModel(self):
         return self._categories
