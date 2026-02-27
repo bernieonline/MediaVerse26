@@ -37,10 +37,9 @@
         { "label": "MySql" },
         {
           "label": "Media Player",
-          "items": [
-           
-          ]
-        }
+          "items": []
+        },
+        { "label": "Categories" }
       ]
     }
   ]

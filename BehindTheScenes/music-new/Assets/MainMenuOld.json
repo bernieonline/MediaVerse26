@@ -20,23 +20,25 @@
     {
       "label": "Utilities",
       "items": [
-        { "label": "Test" },
-        { "label": "Edit" },
-        { "label": "Play" }
+        { "label": "IMDB" },
+        { "label": "Rotten Tomatoes" },
+        { "label": "FFMPEG" }
       ]
     },
     {
       "label": "Settings",
       "items": [
-        { "label": "Media Apps" },
+        {
+          "label": "Media Apps",
+          "items": [
+            { "label": "Manage Players ..." }
+          ]
+        },
         { "label": "MySql" },
         {
           "label": "Media Player",
           "items": [
-            { "label": "Mini Player" },
-            { "label": "JRiver" },
-            { "label": "PowerDVD" }
-          
+           
           ]
         }
       ]

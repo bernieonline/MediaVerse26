@@ -101,7 +101,22 @@
     "offsetX": -0.15,
     "offsetY": 0.50
 
+  },
+{
+    "image": "manwithnoname.jpg",
+    "title": "For a Fistfull of Dollars",
+    "quote": [
+      " Get three coffins ready. (A Fistful of Dollars, 1964) ",
+      "Alive or dead. That’s your choice. (For a Few Dollars More)",
+      "I think you people need a new Sheriff! (For a Few Dollars More)"
+    ],
+    "delay": 15,
+    "offsetX": -0.15,
+    "offsetY": 0.50
+
   }
+
+	
 
 
 ]

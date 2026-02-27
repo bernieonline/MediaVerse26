@@ -146,3 +146,6 @@ class SettingsManager(QObject):
         json_payload = json.dumps(self.menu_data)
         self.playerMenuChanged.emit(json_payload)
         print(f">>> SettingsManager: Menu synced with {len(player_items)} players.")
+
+
+   

@@ -68,8 +68,14 @@ ApplicationWindow {
 
         onMenuItemTriggered: function(label) { 
             console.log("qml: Clicked: " + label)
+            
             if (label === "Manage Players ...") {
                 playerExeBrowser.open()
+            } 
+            // --- THE NEW HANDLER ---
+            else if (label === "Categories") {
+                console.log("🛠️ Architect: Opening Category_Edit panel")
+                categoryEditPanel.open()
             }
         }
     }
@@ -254,5 +260,8 @@ ApplicationWindow {
         id: architectHUD
         anchors.fill: parent
         visible: false // Hidden by default
+    }
+    Category_Edit {
+        id: categoryEditPanel
     }
 }
