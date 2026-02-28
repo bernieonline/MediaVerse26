@@ -654,3 +654,38 @@ class ArchitectController(QObject):
 
         except Exception as e:
             print(f"❌ [SAVE ERROR]: {e}")
+
+
+    @Slot(result=list)
+    def get_architect_categories(self):
+        """
+        Harvests unique categories from the JSON where type is 'Architect'.
+        """
+        # 1. Start with your mandatory core categories
+        defaults = ["Actors", "Director", "Genre", "Year", "Top Ten"]
+        harvested = set(defaults)
+
+        try:
+            # Using the path from project_paths.py as per [2026-01-26]
+            target_path = str(movies_coll_v2) 
+            
+            if os.path.exists(target_path):
+                with open(target_path, "r", encoding="utf-8") as f:
+                    collections = json.load(f)
+                    
+                    for item in collections:
+                        # ACTION POINT: Only grab categories from 'Architect' types
+                        if item.get("type") == "Architect":
+                            cat = item.get("category")
+                            
+                            # Guard against 'Keywords', 'unassigned', or empty values
+                            if cat and cat not in ["Keywords", "unassigned", ""]:
+                                harvested.add(cat)
+                                
+        except Exception as e:
+            print(f"⚠️ [CATEOGRY HARVEST ERROR]: {e}")
+
+        # 2. Return as a sorted list for the ComboBox
+        final_list = sorted(list(harvested))
+        print(f"📊 [ARCHITECT] Refreshed {len(final_list)} categories for the UI.")
+        return final_list

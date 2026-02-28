@@ -16,6 +16,12 @@ Rectangle {
         isSaved = false; 
         nameInput.text = dna ? dna.collectionName : "";
         bespokeCategoryInput.text = ""; 
+        
+        // 🔥 REFRESH: Pull only 'Architect' categories from Python
+        var liveList = architectController.get_architect_categories();
+        categoryPicker.model = liveList;
+        
+        // Reset to top of list
         categoryPicker.currentIndex = 0; 
     }
 
