@@ -612,8 +612,12 @@ class ArchitectController(QObject):
     @Slot(str)
     def save_collection(self, json_payload):
         try:
+            # DEBUG: See exactly what QML sent
+            print("--- DEBUG: Incoming Save Request ---")
+            print(json_payload) 
+            print("------------------------------------")
+
             data = json.loads(json_payload)
-            # Use the path reference from project_paths.py as per [2026-01-26]
             target_path = str(movies_coll_v2) 
 
             # 1. Load existing
@@ -624,20 +628,19 @@ class ArchitectController(QObject):
                         collections_db = json.load(f)
                     except: collections_db = []
 
-            # FIX 1: Look for 'name' instead of 'collectionName' to match QML
             new_name = data.get("name", "New Architect Collection")
             
-            # Deduplication check
+            # Deduplication
             collections_db = [c for c in collections_db if c.get("name") != new_name]
 
             # 2. Build the Record
             final_entry = {
                 "name": new_name,
-                "category": data.get("category", "unassigned"), # FIX 2: Add the missing category key
+                "category": data.get("category", "unassigned"), 
                 "type": "Architect",
                 "description": data.get("description", ""),
                 "rules": data.get("rules", []), 
-                "created": data.get("created", "2026-02-28"),  # FIX 3: Match QML 'created' key
+                "created": data.get("created", "2026-02-28"),
                 "favorite": data.get("favorite", False),
                 "imagePath": data.get("imagePath", "None")
             }
@@ -651,5 +654,3 @@ class ArchitectController(QObject):
 
         except Exception as e:
             print(f"❌ [SAVE ERROR]: {e}")
-
-        
