@@ -109,7 +109,20 @@ Item {
                     MouseArea {
                         id: helpMouse
                         anchors.fill: parent; hoverEnabled: true
-                        onClicked: console.log("❓ Help requested for panel: " + panelIndex)
+                        //onClicked: console.log("❓ Help requested for panel: " + panelIndex)
+                        onClicked: {
+                            console.log("❓ Help requested for panel: " + panelIndex);
+                            
+                            // Use the sectionKey logic we built
+                            // Panel 0 gets 'modes', Panels 1-3 get 'logic'
+                            let section = (panelIndex === 0) ? "modes" : "logic";
+                            
+                            // We try to find the helpSlideout starting from the root of the app
+                            // This 'root' should be the ID of your main container in Framework-1.qml
+                            //helpSidebar.helpSlideout.openToSection(section);
+                            helpSlideout.openToSection(section);
+                        }
+                    
                     }
                     
                     ToolTip.visible: helpMouse.containsMouse
@@ -367,4 +380,5 @@ Item {
             }
         }
     }
+    
 }

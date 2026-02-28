@@ -366,4 +366,12 @@ Rectangle {
             }
         }
     }
+    HelpSlideout {
+        id: helpSlideout
+        // We set z to 100 so it stays on top of everything else
+        z: 100
+        
+        // Ensure it spans the full height of the main container
+        height: parent.height 
+    }
 }

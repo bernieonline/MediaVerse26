@@ -264,4 +264,5 @@ ApplicationWindow {
     Category_Edit {
         id: categoryEditPanel
     }
+    
 }
