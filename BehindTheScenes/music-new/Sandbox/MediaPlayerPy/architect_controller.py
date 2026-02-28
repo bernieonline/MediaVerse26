@@ -701,8 +701,8 @@ class ArchitectController(QObject):
             {"key": "Director", "label": "Director", "tooltip": "Film directors",        "locked": True},
             {"key": "Genre",    "label": "Genre",    "tooltip": "Movie genres",          "locked": True},
             {"key": "Year",     "label": "Year",     "tooltip": "Release timeline",      "locked": True},
-            {"key": "TopTen",   "label": "Top Ten",  "tooltip": "Personal favorites",    "locked": True},
-            {"key": "Studio",   "label": "Studio",   "tooltip": "Production houses",     "locked": True}
+            {"key": "TopTen",   "label": "Top Ten",  "tooltip": "Personal favorites",    "locked": True}
+            
         ]
         
         existing_keys = {item["key"] for item in registry}
@@ -736,3 +736,34 @@ class ArchitectController(QObject):
     def refresh_registry(self):
         """Call this from QML just before opening the Registry Popup."""
         self.categoryModelChanged.emit()
+
+    @Slot(str, str)
+    def rename_category_global(self, old_name, new_name):
+        """Searches the entire JSON and updates all instances of a category name."""
+        try:
+            target_path = str(movies_coll_v2)
+            if not os.path.exists(target_path): return
+
+            with open(target_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+
+            changes_made = 0
+            for collection in data:
+                if collection.get("category") == old_name:
+                    collection["category"] = new_name
+                    changes_made += 1
+
+            if changes_made > 0:
+                with open(target_path, "w", encoding="utf-8") as f:
+                    json.dump(data, f, indent=4)
+                print(f"✅ Backflushed {changes_made} collections to new category: {new_name}")
+                self.categoryModelChanged.emit() # Refresh the UI list
+                return True
+        except Exception as e:
+            print(f"❌ Rename Failed: {e}")
+        return False
+
+    @Slot(str)
+    def delete_category_global(self, category_to_remove):
+        """Replaces category with 'Unassigned' for all matching Architect collections."""
+        return self.rename_category_global(category_to_remove, "Unassigned")
