@@ -75,6 +75,12 @@ class ArchitectController(QObject):
 # Note: Assuming 'paths' is accessible within your class scope 
 # or passed in via project_paths.py [2026-01-26]
 
+    # This "Property" decorator makes 'categories' visible to QML
+    @Property(list, notify=categoriesChanged)
+    def categories(self):
+        return self._categories
+    
+    
     def load_categories(self):
         """
         Loads categories from Assets/categories.json via PySide6.
@@ -607,6 +613,7 @@ class ArchitectController(QObject):
     def save_collection(self, json_payload):
         try:
             data = json.loads(json_payload)
+            # Use the path reference from project_paths.py as per [2026-01-26]
             target_path = str(movies_coll_v2) 
 
             # 1. Load existing
@@ -617,19 +624,22 @@ class ArchitectController(QObject):
                         collections_db = json.load(f)
                     except: collections_db = []
 
-            new_name = data.get("collectionName", "New Architect Collection")
+            # FIX 1: Look for 'name' instead of 'collectionName' to match QML
+            new_name = data.get("name", "New Architect Collection")
+            
+            # Deduplication check
             collections_db = [c for c in collections_db if c.get("name") != new_name]
 
-            # 2. Build the Record (CRITICAL CHANGE: NO 'movies' KEY)
+            # 2. Build the Record
             final_entry = {
                 "name": new_name,
+                "category": data.get("category", "unassigned"), # FIX 2: Add the missing category key
                 "type": "Architect",
                 "description": data.get("description", ""),
-                "rules": data.get("rules", []), # The DNA used to rebuild the list
-                "created": data.get("timestamp", "2026-01-01").split("T")[0],
-                "favorite": False,
+                "rules": data.get("rules", []), 
+                "created": data.get("created", "2026-02-28"),  # FIX 3: Match QML 'created' key
+                "favorite": data.get("favorite", False),
                 "imagePath": data.get("imagePath", "None")
-                # We intentionally EXCLUDE "movies": data.get("movies") here
             }
 
             collections_db.append(final_entry)
@@ -637,12 +647,9 @@ class ArchitectController(QObject):
             with open(target_path, "w", encoding="utf-8") as f:
                 json.dump(collections_db, f, indent=4)
 
-            print(f"✅ [DYNAMIC SAVE]: '{new_name}' recorded. Rules stored, paths omitted.")
+            print(f"✅ [DYNAMIC SAVE]: '{new_name}' recorded in category '{final_entry['category']}'.")
 
         except Exception as e:
             print(f"❌ [SAVE ERROR]: {e}")
-    
 
-
-
-    
+        
