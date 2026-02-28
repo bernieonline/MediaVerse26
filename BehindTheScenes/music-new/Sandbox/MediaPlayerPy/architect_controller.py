@@ -24,6 +24,7 @@ class ArchitectController(QObject):
     #cateriesChanged = pyqtSignal()
     #deletionComplete = pyqtSignal(int) # Sends the count of orphaned collections
     deletionComplete = Signal(int) # Sends the count of orphaned collections
+    categoryModelChanged = Signal()
 
     VIDEO_EXTS = {'.mp4', '.m2ts', '.ts', '.mkv', '.avi', '.mov', '.m4v', '.iso'}
     # --- CRITICAL SIGNALS ---
@@ -42,6 +43,7 @@ class ArchitectController(QObject):
         self.file_system = file_system
 
         self._categories = []
+        self._category_model = []
         self.load_categories()
 
         self.summary_engine = ArchitectSummary()
@@ -689,3 +691,48 @@ class ArchitectController(QObject):
         final_list = sorted(list(harvested))
         print(f"📊 [ARCHITECT] Refreshed {len(final_list)} categories for the UI.")
         return final_list
+    
+    @Property(list, notify=categoryModelChanged)
+    def categoryModel(self):
+        # 1. THE LOCKED DEFAULTS
+        # These are your 'hard-coded' anchors
+        registry = [
+            {"key": "Actors",   "label": "Actors",   "tooltip": "Primary cast members",   "locked": True},
+            {"key": "Director", "label": "Director", "tooltip": "Film directors",        "locked": True},
+            {"key": "Genre",    "label": "Genre",    "tooltip": "Movie genres",          "locked": True},
+            {"key": "Year",     "label": "Year",     "tooltip": "Release timeline",      "locked": True},
+            {"key": "TopTen",   "label": "Top Ten",  "tooltip": "Personal favorites",    "locked": True},
+            {"key": "Studio",   "label": "Studio",   "tooltip": "Production houses",     "locked": True}
+        ]
+        
+        existing_keys = {item["key"] for item in registry}
+
+        # 2. THE UNLOCKED HARVEST
+        try:
+            # Using movies_coll_v2 path from project_paths.py
+            if os.path.exists(str(movies_coll_v2)):
+                with open(str(movies_coll_v2), "r", encoding="utf-8") as f:
+                    collections = json.load(f)
+                    for item in collections:
+                        # Only grab 'Architect' types
+                        if item.get("type") == "Architect":
+                            cat = item.get("category")
+                            
+                            # If it's a new unique category, add it as UNLOCKED
+                            if cat and cat not in existing_keys and cat != "Keywords":
+                                registry.append({
+                                    "key": cat,
+                                    "label": cat,
+                                    "tooltip": "User-defined Architect category",
+                                    "locked": False
+                                })
+                                existing_keys.add(cat)
+        except Exception as e:
+            print(f"❌ [REGISTRY REFRESH ERROR]: {e}")
+
+        return registry
+
+    @Slot()
+    def refresh_registry(self):
+        """Call this from QML just before opening the Registry Popup."""
+        self.categoryModelChanged.emit()

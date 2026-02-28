@@ -1,6 +1,6 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
-import Qt5Compat.GraphicalEffects
+import Qt5Compat.GraphicalEffects 6.0
 
 Popup {
     id: root
@@ -9,6 +9,13 @@ Popup {
     modal: true
     focus: true
     anchors.centerIn: Overlay.overlay
+    
+    // 🔥 SYNC ON OPEN: Re-scans the JSON for new bespoke categories
+    onOpened: {
+        if (typeof architectController !== "undefined") {
+            architectController.refresh_registry();
+        }
+    }
     
     background: Rectangle {
         color: "#121212" 
@@ -53,6 +60,7 @@ Popup {
 
                 Rectangle {
                     anchors.fill: parent
+                    // Uses modelData from Python: Locked = Gray, Bespoke = Gold-tinted
                     color: modelData.locked ? "#1a1a1a" : "#2a2418" 
                     radius: 4
                     border.color: modelData.locked ? "#333333" : "#FFD700"
@@ -61,7 +69,6 @@ Popup {
                         anchors.fill: parent
                         anchors.margins: 10
                         spacing: 15
-                        // Row doesn't support verticalAlignment, so children use anchors below
 
                         Text {
                             text: modelData.locked ? "🔒" : "👑"
@@ -90,7 +97,7 @@ Popup {
                             verticalAlignment: Text.AlignVCenter
                         }
 
-                        // --- Centered Action Icons ---
+                        // --- Action Icons (Visible only for non-locked bespoke items) ---
                         Row {
                             visible: !modelData.locked
                             spacing: 8
@@ -108,13 +115,13 @@ Popup {
                                 onClicked: console.log("Rename Category: " + modelData.key)
                             }
 
-                            // Red Cross Delete Button
+                            // Delete Button
                             Button {
                                 width: 32; height: 32; flat: true
                                 contentItem: Text { 
                                     text: "❌" 
                                     font.pixelSize: 14
-                                    color: parent.hovered ? "#ff0000" : "#ff4444"
+                                    color: hovered ? "#ff0000" : "#ff4444"
                                     horizontalAlignment: Text.AlignHCenter
                                     verticalAlignment: Text.AlignVCenter 
                                 }
@@ -145,7 +152,7 @@ Popup {
                 verticalAlignment: Text.AlignVCenter
             }
             onClicked: {
-                console.log("Saving Category Registry...")
+                console.log("Closing Category Registry...")
                 root.close()
             }
         }
