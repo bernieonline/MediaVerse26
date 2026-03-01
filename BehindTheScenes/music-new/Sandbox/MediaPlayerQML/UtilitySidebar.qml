@@ -52,6 +52,26 @@ Item {
             notificationPanel.addNewEntry(message, is_urgent)
         }
     }
+    // --- BACKUP SIGNAL BRIDGE ---
+    Connections {
+        target: architectController // Matches your Python BackupManager
+        
+        function onBackupFinished(message, success) {
+            // 1. Update the sidebar badge counts
+            root.unreadCount += 1
+            if (!success) root.hasUrgent = true
+            
+            // 2. Add to the notification list
+            // message: the folder report
+            // !success: if failed, it's urgent (red)
+            notificationPanel.addNewEntry(message, !success)
+            
+            // 3. Reset the "Working" state on the backup panel
+            backupSystemPanel.isProcessing = false
+            
+            console.log("📂 Backup Notification Processed: " + (success ? "Success" : "Failure"))
+        }
+    }
 
     Connections {
         target: todoManager
@@ -71,6 +91,7 @@ Item {
             notificationPanel.isShown = false
             todoPanel.isShown = false
             collectionCreatorPanel.isShown = false 
+            backupSystemPanel.visible = false // Close backup on background click
         }
     }
 
@@ -134,6 +155,15 @@ Item {
         Behavior on x { NumberAnimation { duration: 350; easing.type: Easing.OutCubic } }
     }
 
+    // --- 5.5 BACKUP SYSTEM OVERLAY ---
+    // Make sure SystemBackup.qml is in the same folder or imported
+    SystemBackup {
+        id: backupSystemPanel
+        visible: false
+        // We set z high so it's above the sidebar and the shield
+        z: 2000 
+    }
+
     // --- 6. THE SIDEBAR BODY ---
     Rectangle {
         id: sidebarBody
@@ -184,6 +214,36 @@ Item {
                     toolName: "Collections" 
                     onClicked: root.showCollectionCreator()
                 }
+
+                ToolButton { 
+                    iconCode: "\uf1c0" // FontAwesome Database icon
+                    toolName: "Backup System" 
+                    onClicked: {
+                        // 1. Close all other conflicting panels
+                        notificationPanel.isShown = false
+                        todoPanel.isShown = false
+                        collectionCreatorPanel.isShown = false
+                        
+                        // 2. Open our new Backup Panel
+                        backupSystemPanel.currentTab = "Home" // Always start on the info page
+                        backupSystemPanel.visible = true
+                        
+                        // 3. Close the sidebar body to show the centered panel clearly
+                        root.isOpen = false 
+                        
+                        console.log("🚀 Backup System Panel Deployed");
+                    }
+                }
+
+
+
+
+
+
+
+
+
+
 
                 // AI, Search, and Files options have been removed per request.
             }

@@ -6,6 +6,7 @@ import threading
 import subprocess
 from pathlib import Path
 from ai_controller import AIController
+from BackupSystem import BackupManager # Add this with your other imports
 
 # ------------------------------------------------------------
 # PATHS & CONFIG
@@ -70,6 +71,16 @@ def main():
         myLibrary = getLibraryList()
         fileSystem = FileSystem()
 
+        # --- Backup System Setup ---
+        backup_manager = BackupManager()
+
+             # SURGICAL ADDITION: Connect the backup signal to the existing notifier
+        # msg is the text, success is the boolean. We use 'not success' because 
+        # post_notification(text, is_error) expects True if it's an error.
+        backup_manager.backupFinished.connect(
+            lambda msg, success: notifier.post_notification(msg, not success)
+        )
+
 
         settings_manager = SettingsManager(paths["config"], fileSystem)
         settings_manager.load_settings()
@@ -112,10 +123,6 @@ def main():
         # --------------------------------------------------------
         app = QApplication(sys.argv)
 
-
-
-
-        
         # Setup DLLs and Plugins
         pyside_dir = Path(sys.modules["PySide6"].__file__).parent
         QCoreApplication.addLibraryPath(str(pyside_dir / "plugins"))
@@ -130,15 +137,9 @@ def main():
 
         engine.warnings.connect(handle_qml_error)
 
-
-
-
-
         ctx = engine.rootContext()
-
-
-
         #playbackManager
+
         router = PlaybackRouter()
         print("1..........................................")
 
@@ -156,8 +157,11 @@ def main():
             print("WARNING: GOOGLE_AI_KEY not found in sqlCreds.env")
 
         ai_controller = AIController(api_key=gemini_key)
-
+        
         ctx.setContextProperty("playbackRouter", router)
+
+        ctx.setContextProperty("backupManager", backup_manager)
+   
 
         ctx.setContextProperty("aiController", ai_controller)
 
