@@ -88,10 +88,9 @@ Rectangle {
                     font.pixelSize: 18; lineHeight: 1.4 
                     text: "• <b>JSON:</b> Databases, configs, and manifests.<br>" +
                           "• <b>Code:</b> Development source protection.<br>" +
-                          "• <b>Movie Assets:</b> Covers, backdrops, and XML data.<br>" +
+                          "• <b>Movie Assets:</b> Covers, backdrops, and XML metadata.<br>" +
                           "• <b>Sync:</b> Real-time mirrored backup of assets."
                 }
-                // --- Simple Path Label (Home) ---
                 Text {
                     text: "BACKUP ROOT: <b>U:\\Movie System Backup\\</b>"
                     color: "#666"; font.pixelSize: 14; anchors.horizontalCenter: parent.horizontalCenter
@@ -122,7 +121,6 @@ Rectangle {
                         }
                     }
                 }
-                // --- Simple Path Label (JSON) ---
                 Text {
                     text: "DESTINATION: <b>U:\\Movie System Backup\\JSON\\</b>"
                     color: "#888"; font.pixelSize: 14; anchors.horizontalCenter: parent.horizontalCenter
@@ -145,17 +143,53 @@ Rectangle {
                     spacing: 30; anchors.horizontalCenter: parent.horizontalCenter
                     Rectangle {
                         width: 220; height: 60; radius: 8
-                        color: backupOverlay.isProcessing ? "#444" : (backupMouse.containsMouse ? "#FFD700" : "gold")
+                        color: backupOverlay.isProcessing ? "#444" : (codeBtnMouse.containsMouse ? "#FFD700" : "gold")
                         Text { text: "BACKUP NOW"; anchors.centerIn: parent; font.bold: true; font.pixelSize: 18; color: "black" }
                         MouseArea {
-                            id: backupMouse; anchors.fill: parent; hoverEnabled: true; enabled: !backupOverlay.isProcessing
+                            id: codeBtnMouse; anchors.fill: parent; hoverEnabled: true; enabled: !backupOverlay.isProcessing
                             onClicked: { backupOverlay.isProcessing = true; backupManager.run_code_backup() }
                         }
                     }
                 }
-                // --- Simple Path Label (Code) ---
                 Text {
                     text: "DESTINATION: <b>U:\\Movie System Backup\\Code\\</b>"
+                    color: "#888"; font.pixelSize: 14; anchors.horizontalCenter: parent.horizontalCenter
+                    textFormat: Text.RichText
+                }
+            }
+
+            // --- Movie Assets Panel (Surgically Inserted) ---
+            Column {
+                anchors.fill: parent; anchors.margins: 30
+                visible: currentTab === "Movie Assets"
+                spacing: 25
+
+                Text { text: "METADATA & ARTWORK PROTECTION"; color: "gold"; font.pixelSize: 22; font.bold: true }
+
+                Text {
+                    width: parent.width; wrapMode: Text.WordWrap; color: "white"
+                    font.pixelSize: 16; lineHeight: 1.3
+                    textFormat: Text.RichText
+                    text: "This backup protects the image and XML data files stored alongside the movie folders in the library. " +
+                          "They are generated individually inside JRiver or other systems and need protecting against possible loss.<br><br>" +
+                          "<i>Note: Video files and 'thumbs' files are excluded to keep backup size efficient.</i>"
+                }
+
+                Row {
+                    spacing: 30; anchors.horizontalCenter: parent.horizontalCenter
+                    Rectangle {
+                        width: 220; height: 60; radius: 8
+                        color: backupOverlay.isProcessing ? "#444" : (assetBtnMouse.containsMouse ? "#FFD700" : "gold")
+                        Text { text: "BACKUP ASSETS"; anchors.centerIn: parent; font.bold: true; font.pixelSize: 18; color: "black" }
+                        MouseArea {
+                            id: assetBtnMouse; anchors.fill: parent; hoverEnabled: true; enabled: !backupOverlay.isProcessing
+                            onClicked: { backupOverlay.isProcessing = true; backupManager.run_movie_assets_backup() }
+                        }
+                    }
+                }
+
+                Text {
+                    text: "DESTINATION: <b>U:\\Movie System Backup\\Collection\\</b>"
                     color: "#888"; font.pixelSize: 14; anchors.horizontalCenter: parent.horizontalCenter
                     textFormat: Text.RichText
                 }
