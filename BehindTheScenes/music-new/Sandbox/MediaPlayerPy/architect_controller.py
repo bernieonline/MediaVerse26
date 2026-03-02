@@ -381,9 +381,19 @@ class ArchitectController(QObject):
     
     @Slot()
     def reset_logic(self):
-        print("[ArchitectController] reset_logic() called — no action needed.")
-        self.bookshelfListChanged.emit() # This clears the UI spines
-
+        # 1. Clear your internal Python lists/logic
+        self.active_rules = []
+        self.current_results = []
+        self._current_total = 0 
+        
+        # 2. Use the EXISTING signal to tell QML the count is now 0
+        # This is what updates the "CUMULATIVE MATCHES" text
+        self.countChanged.emit(0) 
+        
+        # 3. Tell the bookshelf spines to refresh (which will now be empty)
+        self.bookshelfListChanged.emit()
+        
+        print("🧹 Python: Logic reset and signals broadcasted.")
     @Slot(str)
     def search_library(self, text):
         """Search movie names only, skip TV shows, dedupe by name."""

@@ -24,21 +24,51 @@ Rectangle {
 
     // SURGICAL FIX: We use a Loader here. This prevents the "Type ArchitectHUD unavailable" 
     // crash by isolating the Finish Dialog from the main startup sequence.
+
+
+    
     Loader {
         id: finishPopupLoader
         anchors.fill: parent
-        source: "FinishPopup.qml" // Updated to match your renamed file
-        asynchronous: false 
+        source: "FinishPopup.qml" 
         active: true
-        z: 15000 // Higher than the HUD's z: 5000 and the footer's z: 1000
-        onStatusChanged: {
-            if (status === Loader.Error) {
-                console.log("‼️ LOADER ERROR: " + errorString());
-            } else if (status === Loader.Ready) {
-                console.log("✅ LOADER READY: FinishPopup is live.");
-            }
+        z: 15000 
+        
+        onLoaded: {
+            item.requestFullReset.connect(function() {
+                console.log("♻️ HUD: Collection Saved. Re-priming for next creation...");
+                
+                // 1. Reset Python Logic immediately
+                if (typeof architectController !== "undefined") {
+                    architectController.reset_logic(); 
+                }
+
+                // 2. Clear the UI and restore the "Starter" panel
+                criteriaModel.clear();
+                criteriaModel.append({ 
+                    "panelType": "selection", 
+                    "panelValue": "", 
+                    "gateValue": "NONE", 
+                    "panelHits": 0, 
+                    "isFilterMode": false, 
+                    "isCommitted": false 
+                });
+
+                // 3. Clear the Shelf and Counters
+                architectRoot.totalMatches = 0;
+                shelfRepeater.model = []; 
+
+                // 4. IMPORTANT: Close only the Popup, NOT the HUD
+                if (finishPopupLoader.item) {
+                    finishPopupLoader.item.visible = false;
+                }
+                
+                // The Architect HUD stays visible, and the user is back at square one.
+            });
         }
+        //end onloaded
     }
+    //end Loader
 
     // This alias ensures all your functions below can still use "finishPopup"
     property var finishPopup: finishPopupLoader.item
@@ -264,13 +294,72 @@ Rectangle {
             Button {
                 text: "RESET SCHEME"
                 onClicked: {
+                    console.log("♻️ HUD: Resetting Scheme and Logic...");
+
+                    // 1. Reset the UI Model to exactly one "Starter" panel
                     criteriaModel.clear();
-                    criteriaModel.append({ "panelType": "selection", "panelValue": "", "gateValue": "NONE", "panelHits": 0, "isFilterMode": false, "isCommitted": false });
-                    if (typeof architectController !== "undefined") architectController.reset_logic();
+                    criteriaModel.append({ 
+                        "panelType": "selection", 
+                        "panelValue": "", 
+                        "gateValue": "NONE", 
+                        "panelHits": 0, 
+                        "isFilterMode": false, 
+                        "isCommitted": false 
+                    });
+
+                    // 2. Clear the Python Logic (Zeroes out the backend lists)
+                    if (typeof architectController !== "undefined") {
+                        architectController.reset_logic();
+                    }
+
+                    // 3. Force the UI counters and bookshelf spines to clear
+                    architectRoot.totalMatches = 0;
+                    shelfRepeater.model = []; 
+                    
+                    // 4. Ensure the finish popup is hidden if it was open
+                    if (finishPopupLoader.item) {
+                        finishPopupLoader.item.visible = false;
+                    }
+                }
+            }
+            //end button
+
+            //Button { text: "EXIT"; onClicked: architectRoot.visible = false }
+
+            Button { 
+                text: "EXIT"
+                onClicked: {
+                    console.log("🎬 [HUD]: Closing and re-priming Architect...");
+
+                    // 1. Tell Python to wipe the current session data
+                    if (typeof architectController !== "undefined") {
+                        architectController.reset_logic();
+                    }
+
+                    // 2. Reset the UI Model to its "Factory" state
+                    criteriaModel.clear();
+                    criteriaModel.append({ 
+                        "panelType": "selection", 
+                        "panelValue": "", 
+                        "gateValue": "NONE", 
+                        "panelHits": 0, 
+                        "isFilterMode": false, 
+                        "isCommitted": false 
+                    });
+
+                    // 3. Zero out the HUD's visual properties
+                    architectRoot.totalMatches = 0;
+                    
+                    // 4. Hide the HUD
+                    architectRoot.visible = false;
+                    
+                    // Note: Because the criteriaModel now has 1 item, 
+                    // the Repeater will naturally build 1 panel the moment it becomes visible again.
                 }
             }
 
-            Button { text: "EXIT"; onClicked: architectRoot.visible = false }
+
+            //end button
         }
     }
 
