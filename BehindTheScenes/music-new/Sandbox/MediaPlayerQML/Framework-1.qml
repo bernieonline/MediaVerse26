@@ -95,6 +95,27 @@ ApplicationWindow {
         }
     }
 
+    // --- Connect the RowButton to the Loader ---
+    Connections {
+        target: rowButtons
+        // Assuming your RowButton emits a signal like 'architectClicked'
+        // or 'modeChanged'
+        function onArchitectClicked() {
+            console.log("🚀 Switching to Architect Gallery Mode")
+            if (splash) splash.deactivate() // Hide splash if active
+            
+            // This is the swap that loads our new premium view
+            contentLoader.setSource("ArchitectGallery.qml")
+            
+            // Close other panels just in case
+            //libraryPanel.isOpen = false
+        }
+    }
+
+
+
+
+
     Rectangle {
         id: logoFrame
         width: buttonRows.height * 1.5
@@ -196,7 +217,7 @@ ApplicationWindow {
         radius: 25
         color: "transparent"
         border.color: "#2566c2"
-        border.width: 1
+        border.width: 2
         clip: true
 
         SplashScreen {

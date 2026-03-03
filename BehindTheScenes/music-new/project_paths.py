@@ -7,7 +7,7 @@ from pathlib import Path
 
 # ---------------------------------------------------------
 # DYNAMIC PROJECT ROOT (The "music-new" Anchor)
-# ---------------------------------------------------------
+# -----------------------------------onacc----------------------
 def find_music_new_root():
     """
     Climbs up from this file to find the 'music-new' directory.

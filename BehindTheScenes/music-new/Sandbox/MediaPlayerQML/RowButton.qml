@@ -2,11 +2,15 @@ import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
 
+
+
 Column {
     id: buttonColumn
     width: parent.width
     spacing: 12
     z: 9999 
+    signal architectClicked() // <--- Add this line!
+
 
     Row {
         id: buttonRow
@@ -74,8 +78,18 @@ Column {
             }
             onClicked: {
                 if (typeof splash !== "undefined") splash.deactivate()
-                console.log("📚 Opening Saved Architect Collections...")
-                // This is where we will trigger the Michael Caine/Top 10 display
+                console.log("📚 Launching Architect Gallery...")
+
+                buttonColumn.architectClicked()
+                
+                // 1. Swap the main view to our new Gallery
+                contentLoader.setSource("ArchitectGallery.qml")
+                
+                // 2. Ensure sidebar/HUD are tucked away for the "cinematic" look
+                if (typeof utilitySidebar !== "undefined") utilitySidebar.isOpen = false
+                if (typeof architectHUD !== "undefined") architectHUD.visible = false
+
+                //end click
             }
         }
 

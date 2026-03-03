@@ -43,6 +43,8 @@ from DriveManager import DriveManager
 from search_controller import SearchController
 from SplashModel import SplashModel
 from architect_controller import ArchitectController
+from Architect_view import ArchitectView
+from splash_layout import generate_splash_layout
 
 from dotenv import load_dotenv
 
@@ -73,6 +75,9 @@ def main():
 
         # --- Backup System Setup ---
         backup_manager = BackupManager()
+
+
+        arch_view_instance = ArchitectView()
 
              # SURGICAL ADDITION: Connect the backup signal to the existing notifier
         # msg is the text, success is the boolean. We use 'not success' because 
@@ -159,10 +164,9 @@ def main():
         ai_controller = AIController(api_key=gemini_key)
         
         ctx.setContextProperty("playbackRouter", router)
-
+        ctx.setContextProperty("splashLayout", generate_splash_layout())
+        ctx.setContextProperty("architectView", arch_view_instance)
         ctx.setContextProperty("backupManager", backup_manager)
-   
-
         ctx.setContextProperty("aiController", ai_controller)
 
         # --------------------------------------------------------
