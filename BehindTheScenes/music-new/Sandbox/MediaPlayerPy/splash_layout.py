@@ -103,6 +103,7 @@ def generate_splash_layout(count: int = 10, seed: int = None) -> list:
 
     # ── Step 1: resolve TopTen collection images via manifest ─────────────────
     resolved: list[tuple[str, str]] = []   # [(uri, title), …]
+    top_ten_found = False
     index = _build_manifest_index()
 
     if index and collections_path and Path(collections_path).exists():
@@ -117,29 +118,42 @@ def generate_splash_layout(count: int = 10, seed: int = None) -> list:
             )
 
             if top_ten:
+                top_ten_found = True
                 print(f"✅ [SPLASH LAYOUT] Using TopTen: '{top_ten.get('name')}'")
                 for rule in top_ten.get("rules", []):
                     if rule.get("mode") != "Files":
                         continue
                     for file_path in rule.get("data", {}).get("files", []):
                         stem = Path(file_path).stem          # "Rocky (1976)"
+
+                        # ── Primary: direct cache lookup ──────────────────────
+                        # The cache file is simply {stem}.jpg — fast and reliable.
+                        direct = cache_root / (stem + ".jpg")
+                        if direct.exists():
+                            resolved.append((direct.as_uri(), stem))
+                            continue
+
+                        # ── Secondary: manifest lookup ─────────────────────────
+                        # Only reached if the direct cache file wasn't found.
                         record = index.get(stem)
                         if record:
                             uri = _uri_from_record(record, cache_root)
                             if uri:
                                 resolved.append((uri, stem))
-                            else:
-                                print(f"⚠️ [SPLASH LAYOUT] Not in local cache: {stem}")
-                        else:
-                            print(f"⚠️ [SPLASH LAYOUT] Not in manifest: {stem}")
+                                continue
+
+                        print(f"⚠️ [SPLASH LAYOUT] No image found for: {stem}")
             else:
                 print("⚠️ [SPLASH LAYOUT] No TopTen Architect collection found.")
 
         except Exception as e:
             print(f"❌ [SPLASH LAYOUT] Collection error: {e}")
 
-    # ── Step 2: pad with random local cache images if needed ─────────────────
-    if len(resolved) < count:
+    # ── Step 2: random fallback — only when TopTen was not found at all ───────
+    # If TopTen exists but some images are missing from the local cache,
+    # we still show only the TopTen images that did resolve rather than
+    # mixing in unrelated random images.
+    if not top_ten_found:
         used = {uri for uri, _ in resolved}
         pool = [
             f for f in cache_root.iterdir()
