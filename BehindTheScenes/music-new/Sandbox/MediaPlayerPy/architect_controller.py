@@ -910,7 +910,66 @@ class ArchitectController(QObject):
             import traceback
             traceback.print_exc()
 
-    collectionImageReady = Signal(str)
+    collectionImageReady  = Signal(str)
+    collectionMoviesReady = Signal(list)
+
+    @Slot(str)
+    def resolve_collection_for_grid(self, collection_name):
+        """
+        Resolves all rules for the named collection and emits collectionMoviesReady
+        with a list of {title, year, imageUri, display, basename} dicts.
+        """
+        import re
+        try:
+            if not os.path.exists(str(movies_coll_v2)):
+                print("❌ [GRID] Collections file not found")
+                self.collectionMoviesReady.emit([])
+                return
+
+            with open(str(movies_coll_v2), "r", encoding="utf-8") as f:
+                collections = json.load(f)
+
+            record = next(
+                (c for c in collections
+                 if c.get("type") == "Architect" and c.get("name") == collection_name),
+                None
+            )
+            if not record:
+                print(f"❌ [GRID] '{collection_name}' not found")
+                self.collectionMoviesReady.emit([])
+                return
+
+            print(f"\n🎬 [GRID] Resolving '{collection_name}'...")
+            final_basenames = self._resolve_collection_rules(record.get("rules", []))
+            print(f"✅ [GRID] {len(final_basenames)} movies resolved")
+
+            cache_root = Path(paths.get("local_display_v2"))
+            movies = []
+            for basename in final_basenames:
+                stem  = Path(basename).stem
+                m     = re.search(r'\((\d{4})\)', stem)
+                year  = m.group(1) if m else ""
+                title = re.sub(r'\s*\(\d{4}\)\s*$', '', stem).strip()
+                img   = cache_root / (stem + ".jpg")
+                movies.append({
+                    "title":    title,
+                    "year":     year,
+                    "imageUri": img.as_uri() if img.exists() else "",
+                    "display":  f"Cache/display/{stem}.jpg",
+                    "basename": basename,
+                })
+
+            found = sum(1 for mv in movies if mv["imageUri"])
+            print(f"🖼️  [GRID] {found}/{len(movies)} images found in cache")
+            for mv in movies:
+                print(f"   {'✅' if mv['imageUri'] else '⚠️ '} {mv['title']} ({mv['year']})")
+            self.collectionMoviesReady.emit(movies)
+
+        except Exception as e:
+            print(f"❌ [GRID] Error: {e}")
+            import traceback
+            traceback.print_exc()
+            self.collectionMoviesReady.emit([])
 
     @Slot(str)
     def getCollectionImage(self, collection_name):
