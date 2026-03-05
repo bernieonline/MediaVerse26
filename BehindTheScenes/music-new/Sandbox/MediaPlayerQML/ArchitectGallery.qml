@@ -354,12 +354,33 @@ Item {
                                 color:  "#111"
                                 clip:   true
 
+                                // Layer + drop shadow: card floats above the glass surface
+                                layer.enabled: true
+                                layer.effect: DropShadow {
+                                    horizontalOffset: 0
+                                    verticalOffset:   10
+                                    radius:           16
+                                    samples:          33
+                                    color:            Qt.rgba(0, 0, 0, 0.72)
+                                    spread:           0
+                                }
+
                                 Image {
                                     anchors.fill: parent
                                     source:       cellItem.movieData.imageUri || ""
                                     fillMode:     Image.PreserveAspectCrop
                                     smooth:       true
                                     asynchronous: true
+                                }
+
+                                // Top-lit sheen — plain QML gradient, no effect chaining
+                                Rectangle {
+                                    anchors.fill: parent
+                                    radius:       parent.radius
+                                    gradient: Gradient {
+                                        GradientStop { position: 0.0;  color: Qt.rgba(1, 1, 1, 0.09) }
+                                        GradientStop { position: 0.42; color: "transparent" }
+                                    }
                                 }
 
                                 // Year badge — top right
