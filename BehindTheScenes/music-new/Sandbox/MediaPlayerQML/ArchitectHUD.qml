@@ -161,14 +161,12 @@ Rectangle {
                         onCurrentModeChanged: architectRoot.syncPanelData(index, currentMode, hitCount)
 
                         onCommitRequested: function(pIdx, snippet) {
-                            architectRoot.handleCommit(pIdx) 
+                            architectRoot.handleCommit(pIdx)
                             if (typeof architectController !== "undefined") {
                                 let logicGate = (pIdx > 0) ? criteriaModel.get(pIdx - 1).gateValue : "NONE";
-                                snippet.gate = logicGate; 
-
-                                // REMOVE OR COMMENT OUT THE snippet.checked OVERRIDE
-                                // It is now already set correctly by the Panel's toolLoader
-                                
+                                snippet.gate = logicGate;
+                                // Persist the filter checkbox state so buildFullRuleSet can read it later
+                                criteriaModel.setProperty(pIdx, "isFilterMode", snippet.checked === true);
                                 architectController.process_commit(pIdx, JSON.stringify(snippet))
                             }
                         }
@@ -376,9 +374,9 @@ Rectangle {
                 var tool = panel.toolLoader.item;
                 if (typeof tool.buildRuleSnippet === "function") {
                     var logicGate = (i === 0) ? "NONE" : criteriaModel.get(i - 1).gateValue;
-                    var snippet = tool.buildRuleSnippet(i, logicGate, i > 0);
+                    var snippet = tool.buildRuleSnippet(i, logicGate, criteriaModel.get(i).isFilterMode);
                     if (snippet) {
-                        snippet.checked = criteriaModel.get(i).isCommitted;
+                        snippet.checked = criteriaModel.get(i).isFilterMode;
                         rules.push(snippet);
                     }
                 }
