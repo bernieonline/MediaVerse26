@@ -1,8 +1,9 @@
 
-from PySide6.QtCore import QObject, Slot, Signal 
+from PySide6.QtCore import QObject, Slot, Signal
 
 import os
 import random
+from pathlib import Path
 from project_paths import coll_data
 import json
 from PySide6.QtCore import Property
@@ -122,10 +123,6 @@ class ArchitectController(QObject):
         except Exception as e:
             print(f"❌ [ARCHITECT] Registry Load Error: {e}")
     
-    
-    @Property("QVariantList", notify=categoriesChanged)
-    def categoryModel(self):
-        return self._categories
     
     @Slot(result=list)
     def get_current_results(self):
@@ -741,6 +738,219 @@ class ArchitectController(QObject):
             print(f"❌ [REGISTRY REFRESH ERROR]: {e}")
 
         return registry
+
+    # ── Gallery category / collection menu ───────────────────────────────────
+
+    collectionsForCategoryReady = Signal(list)
+
+    @Property("QVariantList", notify=categoryModelChanged)
+    def galleryCategoryModel(self):
+        """Unique category values from Architect records only — pure JSON, no defaults."""
+        try:
+            if os.path.exists(str(movies_coll_v2)):
+                with open(str(movies_coll_v2), "r", encoding="utf-8") as f:
+                    collections = json.load(f)
+                cats = sorted(set(
+                    item["category"]
+                    for item in collections
+                    if item.get("type") == "Architect" and item.get("category")
+                ))
+                print(f"📋 [galleryCategoryModel] {len(cats)} categories: {cats}")
+                return [{"key": c, "label": c} for c in cats]
+        except Exception as e:
+            print(f"❌ [galleryCategoryModel] Error: {e}")
+        return []
+
+    @Slot(str)
+    def getCollectionsForCategory(self, category):
+        """Emits sorted collection names for the selected category tile."""
+        try:
+            if os.path.exists(str(movies_coll_v2)):
+                with open(str(movies_coll_v2), "r", encoding="utf-8") as f:
+                    collections = json.load(f)
+                names = sorted(
+                    item["name"]
+                    for item in collections
+                    if item.get("type") == "Architect"
+                    and item.get("category") == category
+                    and item.get("name")
+                )
+                print(f"📋 [getCollectionsForCategory] '{category}' → {len(names)} collections")
+                self.collectionsForCategoryReady.emit([{"name": n} for n in names])
+                return
+        except Exception as e:
+            print(f"❌ [getCollectionsForCategory] Error: {e}")
+        self.collectionsForCategoryReady.emit([])
+
+    # ── Collection rule resolver ──────────────────────────────────────────────
+
+    def _generate_panel_list(self, rule):
+        """Return a list of filename basenames for a single panel rule."""
+        mode = rule.get("mode", "")
+        data = rule.get("data", {})
+        result = []
+
+        if mode == "Folder":
+            folder = data.get("folder", "").strip().lower()
+            result = [
+                os.path.basename(item["Filename"])
+                for item in self.collection
+                if item.get("Filename") and (
+                    f"\\{folder}\\" in item["Filename"].lower() or
+                    f"/{folder}/"  in item["Filename"].lower()
+                )
+            ]
+
+        elif mode == "Category":
+            cat     = data.get("category", "")
+            val     = data.get("value", "")
+            val_low = val.lower()
+            key_map = {
+                "Genres":    ["Genre"],
+                "Actors":    ["Actors"],
+                "Directors": ["Director"],
+                "Decade":    ["Year"],
+            }
+            search_keys = key_map.get(cat, [cat])
+
+            for item in self.collection:
+                if item.get("Media Sub Type") == "TV Show":
+                    continue
+                match_found = False
+                for k in search_keys:
+                    raw = item.get(k, "")
+                    if cat == "Decade":
+                        if str(raw).startswith(str(val)[:3]):
+                            match_found = True
+                    elif isinstance(raw, list):
+                        if any(v.strip().lower() == val_low for v in raw):
+                            match_found = True
+                    elif isinstance(raw, str):
+                        if val_low in [p.strip().lower() for p in raw.split(";")]:
+                            match_found = True
+                    if match_found:
+                        break
+                if match_found:
+                    path = item.get("Filename", "")
+                    if path:
+                        result.append(os.path.basename(path))
+
+        elif mode == "Files":
+            file_list = data.get("files", []) or data.get("list", [])
+            result = [os.path.basename(f) for f in file_list if f]
+
+        return result
+
+    def _resolve_collection_rules(self, rules):
+        """
+        Process a saved rules array and return the final list of filename
+        basenames.  Uses a fresh ArchitectSummary so it has no side-effects
+        on the live summary_engine used by the Architect creator.
+        """
+        engine = ArchitectSummary()
+        for rule in sorted(rules, key=lambda r: r.get("panelIndex", 0)):
+            panel_idx = rule.get("panelIndex", 0)
+            gate      = rule.get("gate",    "NONE")
+            checked   = rule.get("checked", False)
+            ids       = self._generate_panel_list(rule)
+            engine.apply_logic(panel_idx, ids, gate, checked)
+            print(f"  Panel {panel_idx} [{rule.get('mode')}] "
+                  f"gate={gate} checked={checked} → "
+                  f"{len(ids)} movies | foundation now {len(engine.get_current_result())}")
+        return engine.get_current_result()
+
+    @Slot(str)
+    def resolve_collection_for_display(self, collection_name):
+        """
+        Console-only verification: resolves all rules for the named collection
+        and prints the final movie list with image cache status.
+        """
+        try:
+            if not os.path.exists(str(movies_coll_v2)):
+                print("❌ [RESOLVE] Collections file not found")
+                return
+
+            with open(str(movies_coll_v2), "r", encoding="utf-8") as f:
+                collections = json.load(f)
+
+            record = next(
+                (c for c in collections
+                 if c.get("type") == "Architect" and c.get("name") == collection_name),
+                None
+            )
+            if not record:
+                print(f"❌ [RESOLVE] '{collection_name}' not found")
+                return
+
+            print(f"\n🎬 [RESOLVE] '{collection_name}' — {len(record.get('rules', []))} panel(s)")
+            final = self._resolve_collection_rules(record.get("rules", []))
+            print(f"\n✅ [RESOLVE] Final list: {len(final)} movies")
+
+            cache_root    = paths.get("local_display_v2")
+            print(f"🗂️  Cache path: {cache_root}")
+            found_images  = []
+            missing_cache = []
+            for basename in final:
+                stem = Path(basename).stem
+                img  = Path(cache_root) / (stem + ".jpg")
+                if img.exists():
+                    found_images.append(img.as_uri())
+                else:
+                    missing_cache.append(stem)
+                    print(f"⚠️  Missing — looked for: {img}")
+
+            print(f"🖼️  Images in cache : {len(found_images)}")
+            if missing_cache:
+                print(f"⚠️  Missing from cache ({len(missing_cache)}): {missing_cache}")
+            for i, uri in enumerate(found_images[:10]):
+                print(f"   [{i+1}] {Path(uri).name}")
+
+        except Exception as e:
+            print(f"❌ [RESOLVE] Error: {e}")
+            import traceback
+            traceback.print_exc()
+
+    collectionImageReady = Signal(str)
+
+    @Slot(str)
+    def getCollectionImage(self, collection_name):
+        """
+        Finds the Architect collection by name and emits its splash image as a
+        file URI.  Emits "" if imagePath is absent or "None" — the QML will
+        handle that case later (animated scatter from rules).
+        """
+        try:
+            if os.path.exists(str(movies_coll_v2)):
+                with open(str(movies_coll_v2), "r", encoding="utf-8") as f:
+                    collections = json.load(f)
+
+                record = next(
+                    (c for c in collections
+                     if c.get("type") == "Architect" and c.get("name") == collection_name),
+                    None
+                )
+
+                if record:
+                    img_path = record.get("imagePath", "None")
+                    if img_path and img_path != "None":
+                        p = Path(img_path)
+                        # If relative / filename-only, resolve against Assets/Splash
+                        if not p.is_absolute():
+                            splash_dir = paths.get("splash")
+                            if splash_dir:
+                                p = Path(splash_dir) / p.name
+                        if p.exists():
+                            print(f"🖼️  [getCollectionImage] '{collection_name}' → {p}")
+                            self.collectionImageReady.emit(p.as_uri())
+                            return
+                    # imagePath is "None" or file missing — deferred to scatter mode
+                    print(f"ℹ️  [getCollectionImage] '{collection_name}' has no splash image (deferred)")
+                    self.collectionImageReady.emit("")
+                    return
+
+        except Exception as e:
+            print(f"❌ [getCollectionImage] Error: {e}")
+        self.collectionImageReady.emit("")
 
     @Slot()
     def refresh_registry(self):
