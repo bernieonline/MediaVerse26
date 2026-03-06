@@ -206,6 +206,13 @@ Item {
         property string imageSource: ""
         Behavior on opacity { NumberAnimation { duration: 900; easing.type: Easing.InOutQuad } }
 
+        // Dismiss hover-preview when clicking blank background areas
+        MouseArea {
+            anchors.fill: parent
+            z: 0
+            onClicked: gridPane.hoveredMovie = null
+        }
+
         // Dark stage
         Rectangle { anchors.fill: parent; color: "#0d0d0d" }
 
@@ -257,6 +264,23 @@ Item {
             readonly property real imgGap:     12
             readonly property real posterH: (parent.height - edgeMargin * 2 - imgGap * 3) / 2 - 36
             readonly property real posterW: posterH * 2 / 3
+
+            // ── Hover-preview state ─────────────────────────────────────────────
+            property var hoveredMovie: null
+
+            Timer {
+                id: showTimer
+                interval: 380
+                repeat:   false
+                property var pendingMovie: null
+                onTriggered: if (pendingMovie) gridPane.hoveredMovie = pendingMovie
+            }
+            Timer {
+                id: hideTimer
+                interval: 180
+                repeat:   false
+                onTriggered: gridPane.hoveredMovie = null
+            }
 
             // ── Smoky glass panel — wraps grid with equal imgGap border ─────────
             // Three-item OpacityMask pattern: content (layer) + mask (layer) → clean rounded clip
@@ -426,6 +450,19 @@ Item {
                                     property bool dblActive: false
                                     property var  singleTimer: null
 
+                                    onEntered: {
+                                        hideTimer.stop()
+                                        if (cellItem.hasData) {
+                                            showTimer.pendingMovie = cellItem.movieData
+                                            showTimer.restart()
+                                        }
+                                    }
+                                    onExited: {
+                                        showTimer.stop()
+                                        showTimer.pendingMovie = null
+                                        hideTimer.restart()
+                                    }
+
                                     onClicked: {
                                         if (!cellItem.hasData) return
                                         if (singleTimer) singleTimer.stop()
@@ -533,6 +570,155 @@ Item {
                         id: nextHov; anchors.fill: parent; hoverEnabled: true
                         enabled: gridPane.currentPage < gridPane.totalPages - 1
                         onClicked: gridPane.flipPage(gridPane.currentPage + 1, true)
+                    }
+                }
+            }
+
+            // ── Hover-preview — large portrait right of nav buttons ─────────────
+            Item {
+                id: hoverPreview
+                z: 9
+                x: navButtons.x + navButtons.width + 20
+                anchors.verticalCenter: parent.verticalCenter
+                // Half of the remaining screen width after navButtons
+                width:  Math.floor((galleryRoot.width - navButtons.x - navButtons.width) / 2 - 32)
+                height: width * 1.5   // portrait 2:3 ratio
+
+                opacity: gridPane.hoveredMovie !== null ? 1.0 : 0.0
+                visible: opacity > 0
+                Behavior on opacity { NumberAnimation { duration: 220; easing.type: Easing.InOutQuad } }
+
+                Rectangle {
+                    id: previewRect
+                    anchors.fill: parent
+                    radius: 10
+                    color:  "#111"
+                    clip:   true
+
+                    layer.enabled: true
+                    layer.effect: DropShadow {
+                        horizontalOffset: 0
+                        verticalOffset:   20
+                        radius:           30
+                        samples:          33
+                        color:            Qt.rgba(0, 0, 0, 0.90)
+                    }
+
+                    Image {
+                        anchors.fill: parent
+                        source:       gridPane.hoveredMovie ? gridPane.hoveredMovie.imageUri : ""
+                        fillMode:     Image.PreserveAspectCrop
+                        smooth:       true
+                        asynchronous: true
+                    }
+
+                    // Top-lit sheen
+                    Rectangle {
+                        anchors.fill: parent
+                        radius: parent.radius
+                        gradient: Gradient {
+                            GradientStop { position: 0.0;  color: Qt.rgba(1, 1, 1, 0.07) }
+                            GradientStop { position: 0.38; color: "transparent" }
+                        }
+                    }
+
+                    // Year badge — top right
+                    Rectangle {
+                        visible: gridPane.hoveredMovie !== null && gridPane.hoveredMovie.year !== ""
+                        anchors.top:     parent.top
+                        anchors.right:   parent.right
+                        anchors.margins: 10
+                        width:  previewYrTxt.implicitWidth + 16
+                        height: 26; radius: 5
+                        color:  Qt.rgba(0, 0, 0, 0.75)
+                        Text {
+                            id: previewYrTxt
+                            anchors.centerIn: parent
+                            text:  gridPane.hoveredMovie ? gridPane.hoveredMovie.year : ""
+                            color: "#e0e0e0"
+                            font.pixelSize: 15; font.bold: true
+                        }
+                    }
+
+                    // Title bar — bottom
+                    Rectangle {
+                        anchors.bottom: parent.bottom
+                        anchors.left:   parent.left
+                        anchors.right:  parent.right
+                        height: 56
+                        color:  Qt.rgba(0, 0, 0, 0.76)
+
+                        Text {
+                            anchors.verticalCenter: parent.verticalCenter
+                            anchors.left:        parent.left
+                            anchors.right:       parent.right
+                            anchors.leftMargin:  14
+                            anchors.rightMargin: 14
+                            text:                gridPane.hoveredMovie ? gridPane.hoveredMovie.title : ""
+                            color:               "white"
+                            font.pixelSize:      20
+                            font.bold:           true
+                            horizontalAlignment: Text.AlignHCenter
+                            elide:               Text.ElideRight
+                            maximumLineCount:    1
+                        }
+                    }
+
+                    // Blue bottom accent
+                    Rectangle {
+                        anchors.bottom: parent.bottom
+                        width: parent.width; height: 3
+                        color: "#2566c2"
+                    }
+                }
+
+                // ── Click / double-click (mirrors grid cell behaviour) ───────────
+                MouseArea {
+                    id: previewMouse
+                    anchors.fill:    hoverPreview
+                    hoverEnabled:    true
+                    acceptedButtons: Qt.LeftButton
+                    property bool dblActive: false
+                    property var  singleTimer: null
+
+                    onEntered: hideTimer.stop()
+                    onExited:  hideTimer.restart()
+
+                    onClicked: {
+                        if (!gridPane.hoveredMovie) return
+                        if (singleTimer) singleTimer.stop()
+                        var md = gridPane.hoveredMovie
+                        singleTimer = Qt.createQmlObject(
+                            'import QtQuick 2.15; Timer { interval: 250; repeat: false }',
+                            galleryRoot
+                        )
+                        singleTimer.triggered.connect(function() {
+                            if (!dblActive) {
+                                galleryRoot.v2OpenDetail({
+                                    display:  md.imageUri,
+                                    filePath: md.imageUri,
+                                    title:    md.title,
+                                    year:     md.year
+                                })
+                            }
+                            dblActive = false
+                        })
+                        singleTimer.start()
+                    }
+
+                    onDoubleClicked: {
+                        if (!gridPane.hoveredMovie) return
+                        dblActive = true
+                        if (singleTimer) singleTimer.stop()
+                        var md = gridPane.hoveredMovie
+                        let resolved = _xmlController.resolve_paths(md.display)
+                        if (resolved && resolved.video) {
+                            let cleanPath = resolved.video.toString().replace(/\\/g, "/")
+                            playbackBridge.playVideo(cleanPath)
+                            galleryRoot.v2PlayMovie(cleanPath)
+                        } else {
+                            console.log("❌ No video path for: " + md.title)
+                        }
                     }
                 }
             }
