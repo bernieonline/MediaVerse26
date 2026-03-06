@@ -16,6 +16,7 @@ Item {
     property bool   currentFavorite:        false
     property bool   renamingActive:         false
     property string pendingNewName:         ""
+    property bool   filmStripVisible:       false
 
     // ── Data models ───────────────────────────────────────────────────────────
     ListModel { id: collectionsModel }
@@ -100,27 +101,67 @@ Item {
         delegate: Item {
             id: categoryTile
             width: 190; height: 62
-            property bool hovered: false
+            property bool hovered:   false
+            property bool isActive:  categoryList.currentIndex === index
 
+            // Glass body
             Rectangle {
                 anchors.fill: parent
                 radius: 7
-                color: categoryList.currentIndex === index
-                    ? Qt.rgba(0.15, 0.40, 0.76, 0.92)
-                    : categoryTile.hovered
-                        ? Qt.rgba(0.12, 0.12, 0.12, 0.88)
-                        : Qt.rgba(0.04, 0.04, 0.04, 0.78)
-                Behavior on color { ColorAnimation { duration: 120 } }
-                border.color: categoryList.currentIndex === index ? "#2566c2" : Qt.rgba(1,1,1,0.14)
-                border.width: categoryList.currentIndex === index ? 2 : 1
+                gradient: Gradient {
+                    GradientStop { position: 0.0; color: categoryTile.isActive
+                        ? Qt.rgba(0.10, 0.28, 0.60, 0.96)
+                        : categoryTile.hovered ? Qt.rgba(0.10, 0.10, 0.14, 0.90)
+                                               : Qt.rgba(0.05, 0.05, 0.08, 0.82) }
+                    GradientStop { position: 1.0; color: categoryTile.isActive
+                        ? Qt.rgba(0.08, 0.20, 0.50, 0.96)
+                        : categoryTile.hovered ? Qt.rgba(0.07, 0.07, 0.11, 0.90)
+                                               : Qt.rgba(0.03, 0.03, 0.06, 0.82) }
+                }
+                Behavior on gradient { }   // keeps ColorAnimation from firing on gradient change
+                border.color: categoryTile.isActive ? "#2566c2" : Qt.rgba(1,1,1, categoryTile.hovered ? 0.22 : 0.10)
+                border.width: 1
 
+                // Left accent bar
+                Rectangle {
+                    anchors.left:   parent.left
+                    anchors.top:    parent.top
+                    anchors.bottom: parent.bottom
+                    anchors.margins: 1
+                    width:  categoryTile.isActive ? 4 : (categoryTile.hovered ? 3 : 2)
+                    radius: 3
+                    color:  categoryTile.isActive ? "#2566c2" : Qt.rgba(0.37, 0.50, 0.76, categoryTile.hovered ? 0.70 : 0.30)
+                    Behavior on width { NumberAnimation { duration: 150 } }
+                    Behavior on color { ColorAnimation { duration: 150 } }
+                }
+
+                // Label
                 Text {
-                    anchors.centerIn:   parent
+                    anchors.left:           parent.left
+                    anchors.right:          parent.right
+                    anchors.verticalCenter: parent.verticalCenter
+                    anchors.leftMargin:     16
+                    anchors.rightMargin:    28
                     text:               modelData.label.toUpperCase()
                     color:              "white"
-                    font.pixelSize:     20
+                    font.pixelSize:     18
                     font.bold:          true
-                    font.letterSpacing: 2.0
+                    font.letterSpacing: 1.5
+                    elide:              Text.ElideRight
+                }
+
+                // Chevron — only on selected
+                Text {
+                    anchors.right:          parent.right
+                    anchors.verticalCenter: parent.verticalCenter
+                    anchors.rightMargin:    10
+                    text:    "›"
+                    color:   "#2566c2"
+                    font.pixelSize: 22
+                    font.bold: true
+                    visible: categoryTile.isActive
+                    opacity: categoryTile.isActive ? 1.0 : 0.0
+                    Behavior on opacity { NumberAnimation { duration: 150 } }
                 }
             }
             MouseArea {
@@ -158,35 +199,58 @@ Item {
         delegate: Item {
             id: collectionTile
             width: 190; height: 62
-            property bool hovered: false
+            property bool hovered:  false
+            property bool isActive: collectionList.currentIndex === index
+
+            // Slide in from right when column first appears
+            x: collectionList.visible ? 0 : 30
+            opacity: collectionList.visible ? 1.0 : 0.0
+            Behavior on x       { NumberAnimation { duration: 220; easing.type: Easing.OutCubic } }
+            Behavior on opacity { NumberAnimation { duration: 180 } }
 
             Rectangle {
                 anchors.fill: parent
                 radius: 7
-                color: collectionList.currentIndex === index
-                    ? Qt.rgba(0.15, 0.40, 0.76, 0.92)
-                    : collectionTile.hovered
-                        ? Qt.rgba(0.12, 0.12, 0.12, 0.88)
-                        : Qt.rgba(0.04, 0.04, 0.04, 0.78)
-                Behavior on color { ColorAnimation { duration: 120 } }
-                border.color: collectionList.currentIndex === index ? "#2566c2" : Qt.rgba(1,1,1,0.14)
-                border.width: collectionList.currentIndex === index ? 2 : 1
+                gradient: Gradient {
+                    GradientStop { position: 0.0; color: collectionTile.isActive
+                        ? Qt.rgba(0.10, 0.28, 0.60, 0.96)
+                        : collectionTile.hovered ? Qt.rgba(0.10, 0.10, 0.14, 0.90)
+                                                 : Qt.rgba(0.05, 0.05, 0.08, 0.82) }
+                    GradientStop { position: 1.0; color: collectionTile.isActive
+                        ? Qt.rgba(0.08, 0.20, 0.50, 0.96)
+                        : collectionTile.hovered ? Qt.rgba(0.07, 0.07, 0.11, 0.90)
+                                                 : Qt.rgba(0.03, 0.03, 0.06, 0.82) }
+                }
+                border.color: collectionTile.isActive ? "#2566c2" : Qt.rgba(1,1,1, collectionTile.hovered ? 0.22 : 0.10)
+                border.width: 1
+
+                // Left accent bar
+                Rectangle {
+                    anchors.left:   parent.left
+                    anchors.top:    parent.top
+                    anchors.bottom: parent.bottom
+                    anchors.margins: 1
+                    width:  collectionTile.isActive ? 4 : (collectionTile.hovered ? 3 : 2)
+                    radius: 3
+                    color:  collectionTile.isActive ? "#2566c2" : Qt.rgba(0.37, 0.50, 0.76, collectionTile.hovered ? 0.70 : 0.30)
+                    Behavior on width { NumberAnimation { duration: 150 } }
+                    Behavior on color { ColorAnimation { duration: 150 } }
+                }
 
                 Text {
                     anchors.left:           parent.left
                     anchors.right:          parent.right
                     anchors.verticalCenter: parent.verticalCenter
-                    anchors.leftMargin:     8
-                    anchors.rightMargin:    8
+                    anchors.leftMargin:     16
+                    anchors.rightMargin:    10
                     text:               model.name
                     color:              "white"
                     font.pixelSize:     15
                     font.bold:          true
-                    font.letterSpacing: 1.0
+                    font.letterSpacing: 0.8
                     wrapMode:           Text.WordWrap
                     maximumLineCount:   2
-                    horizontalAlignment: Text.AlignHCenter
-                    verticalAlignment:   Text.AlignVCenter
+                    verticalAlignment:  Text.AlignVCenter
                 }
             }
             MouseArea {
@@ -734,6 +798,82 @@ Item {
                 }
             }
 
+            // ── Film strip dim — darkens glass+grid, sits above glass (z:0) but
+            //    below nav/toggle (z:3) so those remain fully interactive ────────
+            Rectangle {
+                anchors.fill: parent
+                z:       1
+                color:   "black"
+                opacity: galleryRoot.filmStripVisible ? 0.62 : 0.0
+                visible: opacity > 0
+                // enabled: true (default) — intentionally blocks grid interaction
+                Behavior on opacity { NumberAnimation { duration: 350; easing.type: Easing.InOutQuad } }
+            }
+
+            // ── Film strip toggle button — below nav buttons ───────────────────
+            Item {
+                id: filmToggle
+                z: 3
+                x: navButtons.x
+                y: navButtons.y + navButtons.height + 22
+                width: 70; height: 58
+                property bool hovered: false
+
+                ToolTip.visible: hovered
+                ToolTip.text:    "Fast Browse"
+                ToolTip.delay:   500
+
+                Rectangle {
+                    anchors.fill: parent; radius: 10
+                    color: galleryRoot.filmStripVisible
+                        ? Qt.rgba(0.15, 0.40, 0.76, 0.92)
+                        : (filmToggle.hovered
+                            ? Qt.rgba(0.15, 0.40, 0.76, 0.55)
+                            : Qt.rgba(0.08, 0.08, 0.08, 0.82))
+                    border.color: "#2566c2"; border.width: 2
+                    Behavior on color { ColorAnimation { duration: 120 } }
+                }
+
+                // Mini drawn film strip icon — 4 frames with sprocket holes
+                Row {
+                    anchors.centerIn: parent
+                    spacing: 2
+                    Repeater {
+                        model: 4
+                        Item {
+                            width: 8; height: 22
+                            // Frame body
+                            Rectangle {
+                                x: 0; y: 4; width: 8; height: 14
+                                color: Qt.rgba(1, 1, 1, galleryRoot.filmStripVisible ? 0.95 : 0.70)
+                                radius: 1
+                            }
+                            // Top hole
+                            Rectangle {
+                                x: 1; y: 0; width: 6; height: 3; radius: 1
+                                color: Qt.rgba(1, 1, 1, galleryRoot.filmStripVisible ? 0.40 : 0.28)
+                            }
+                            // Bottom hole
+                            Rectangle {
+                                x: 1; y: 19; width: 6; height: 3; radius: 1
+                                color: Qt.rgba(1, 1, 1, galleryRoot.filmStripVisible ? 0.40 : 0.28)
+                            }
+                        }
+                    }
+                }
+
+                MouseArea {
+                    anchors.fill: parent; hoverEnabled: true
+                    onEntered: filmToggle.hovered = true
+                    onExited:  filmToggle.hovered = false
+                    onClicked: {
+                        galleryRoot.filmStripVisible = !galleryRoot.filmStripVisible
+                        // Clear any lingering grid hover preview
+                        if (galleryRoot.filmStripVisible) gridPane.hoveredMovie = null
+                    }
+                }
+            }
+
             // ── Page-flip animation ───────────────────────────────────────────
             function flipPage(target, forward) {
                 flipAnim.nextTarget = target
@@ -756,6 +896,42 @@ Item {
                     target: pageRotation; property: "angle"
                     from: flipAnim.goForward ? 90 : -90; to: 0
                     duration: 320; easing.type: Easing.OutCubic
+                }
+            }
+        }
+
+        // ── Film strip — floats low, overlays dimmed grid ────────────────────
+        FilmStrip {
+            id: theFilmStrip
+            z: 20
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.bottom:           parent.bottom
+            anchors.bottomMargin:     50
+            width:  parent.width - 40
+            height: parent.height * 0.40
+
+            movieModel: movieGridModel
+
+            opacity: galleryRoot.filmStripVisible ? 1.0 : 0.0
+            visible: opacity > 0
+            Behavior on opacity { NumberAnimation { duration: 350; easing.type: Easing.InOutQuad } }
+
+            onOpenDetail: function(movie) {
+                galleryRoot.v2OpenDetail({
+                    display:  movie.imageUri,
+                    filePath: movie.imageUri,
+                    title:    movie.title,
+                    year:     movie.year
+                })
+            }
+            onPlayMovie: function(movie) {
+                var resolved = _xmlController.resolve_paths(movie.display)
+                if (resolved && resolved.video) {
+                    var cleanPath = resolved.video.toString().replace(/\\/g, "/")
+                    playbackBridge.playVideo(cleanPath)
+                    galleryRoot.v2PlayMovie(cleanPath)
+                } else {
+                    console.log("❌ [FilmStrip] No video path for: " + movie.title)
                 }
             }
         }
@@ -1002,6 +1178,7 @@ Item {
                 galleryRoot.pendingNewName        = ""
                 galleryRoot.currentFavorite       = false
                 galleryRoot.currentCollectionName = ""
+                galleryRoot.filmStripVisible      = false
                 movieGridModel.clear()
                 collectionHero.imageSource = ""
             }
@@ -1062,6 +1239,7 @@ Item {
                             galleryRoot.pendingNewName        = ""
                             galleryRoot.currentFavorite       = false
                             galleryRoot.currentCollectionName = ""
+                            galleryRoot.filmStripVisible      = false
                             movieGridModel.clear()
                             collectionHero.imageSource = ""
                             categoryList.currentIndex  = -1
