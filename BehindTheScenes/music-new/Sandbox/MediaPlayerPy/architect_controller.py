@@ -910,8 +910,9 @@ class ArchitectController(QObject):
             import traceback
             traceback.print_exc()
 
-    collectionImageReady  = Signal(str)
-    collectionMoviesReady = Signal(list)
+    collectionImageReady   = Signal(str)
+    collectionMoviesReady  = Signal(list)
+    collectionFavoriteState = Signal(bool)
 
     @Slot(str)
     def resolve_collection_for_grid(self, collection_name):
@@ -938,6 +939,9 @@ class ArchitectController(QObject):
                 print(f"❌ [GRID] '{collection_name}' not found")
                 self.collectionMoviesReady.emit([])
                 return
+
+            # Emit favourite state so the gallery action bar can reflect it
+            self.collectionFavoriteState.emit(bool(record.get("favorite", False)))
 
             print(f"\n🎬 [GRID] Resolving '{collection_name}'...")
             final_basenames = self._resolve_collection_rules(record.get("rules", []))
@@ -1046,3 +1050,66 @@ class ArchitectController(QObject):
     def delete_category_global(self, category_to_remove):
         """Replaces category with 'Unassigned' for all matching Architect collections."""
         return self.rename_category_global(category_to_remove, "Unassigned")
+
+    # ── Per-collection edit actions ───────────────────────────────────────────
+
+    @Slot(str)
+    def toggle_favorite_architect(self, collection_name):
+        """Toggle the favorite flag on a named Architect collection."""
+        try:
+            target_path = str(movies_coll_v2)
+            if not os.path.exists(target_path):
+                return
+            with open(target_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            for item in data:
+                if item.get("type") == "Architect" and item.get("name") == collection_name:
+                    item["favorite"] = not bool(item.get("favorite", False))
+                    print(f"⭐ [FAVORITE] '{collection_name}' → {item['favorite']}")
+                    break
+            with open(target_path, "w", encoding="utf-8") as f:
+                json.dump(data, f, indent=4)
+        except Exception as e:
+            print(f"❌ [toggle_favorite_architect] Error: {e}")
+
+    @Slot(str)
+    def delete_architect_collection(self, collection_name):
+        """Delete a named Architect collection and refresh the category model."""
+        try:
+            target_path = str(movies_coll_v2)
+            if not os.path.exists(target_path):
+                return
+            with open(target_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            before = len(data)
+            data = [
+                item for item in data
+                if not (item.get("type") == "Architect" and item.get("name") == collection_name)
+            ]
+            if len(data) < before:
+                with open(target_path, "w", encoding="utf-8") as f:
+                    json.dump(data, f, indent=4)
+                print(f"🗑️  [DELETE] '{collection_name}' removed from collections.")
+                self.categoryModelChanged.emit()
+        except Exception as e:
+            print(f"❌ [delete_architect_collection] Error: {e}")
+
+    @Slot(str, str)
+    def rename_architect_collection(self, old_name, new_name):
+        """Rename a named Architect collection and refresh the category model."""
+        try:
+            target_path = str(movies_coll_v2)
+            if not os.path.exists(target_path):
+                return
+            with open(target_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            for item in data:
+                if item.get("type") == "Architect" and item.get("name") == old_name:
+                    item["name"] = new_name
+                    print(f"✏️  [RENAME] '{old_name}' → '{new_name}'")
+                    break
+            with open(target_path, "w", encoding="utf-8") as f:
+                json.dump(data, f, indent=4)
+            self.categoryModelChanged.emit()
+        except Exception as e:
+            print(f"❌ [rename_architect_collection] Error: {e}")

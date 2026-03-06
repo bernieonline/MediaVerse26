@@ -1,4 +1,5 @@
 import QtQuick 2.15
+import QtQuick.Controls 2.15
 import Qt5Compat.GraphicalEffects
 
 Item {
@@ -10,8 +11,11 @@ Item {
     signal v2PlayMovie(var movie)
 
     // true once a collection has been selected and its movies resolved
-    property bool showingCollection: false
-    property string currentCollectionName: ""
+    property bool   showingCollection:      false
+    property string currentCollectionName:  ""
+    property bool   currentFavorite:        false
+    property bool   renamingActive:         false
+    property string pendingNewName:         ""
 
     // ── Data models ───────────────────────────────────────────────────────────
     ListModel { id: collectionsModel }
@@ -39,6 +43,10 @@ Item {
                 movieGridModel.append(data[i])
             if (data.length > 0)
                 galleryRoot.showingCollection = true
+        }
+
+        function onCollectionFavoriteState(isFav) {
+            galleryRoot.currentFavorite = isFav
         }
     }
 
@@ -189,6 +197,9 @@ Item {
                 onClicked: {
                     collectionList.currentIndex = index
                     galleryRoot.currentCollectionName = model.name
+                    galleryRoot.renamingActive  = false
+                    galleryRoot.pendingNewName  = ""
+                    galleryRoot.currentFavorite = false
                     collectionHero.imageSource = ""
                     architectController.getCollectionImage(model.name)
                     architectController.resolve_collection_for_grid(model.name)
@@ -751,6 +762,7 @@ Item {
 
         // ── Bottom-right: ARCHITECT label + collection name ───────────────────
         Column {
+            id: collectionLabelColumn
             anchors.bottom:       parent.bottom
             anchors.right:        parent.right
             anchors.bottomMargin: 36
@@ -766,16 +778,199 @@ Item {
                 font.bold:          true
                 font.letterSpacing: 6
             }
-            Text {
-                anchors.right:      parent.right
-                text:               galleryRoot.currentCollectionName
-                color:              "#FFD700"
-                font.pixelSize:     28
-                font.bold:          true
-                font.letterSpacing: 1
-                horizontalAlignment: Text.AlignRight
-                elide:              Text.ElideLeft
-                width:              480
+
+            // Rename-aware name block
+            Item {
+                width: 480; height: 42
+
+                // Normal view
+                Text {
+                    id: collectionNameLabel
+                    anchors.right:       parent.right
+                    anchors.verticalCenter: parent.verticalCenter
+                    visible:             !galleryRoot.renamingActive
+                    text:                galleryRoot.currentCollectionName
+                    color:               "#FFD700"
+                    font.pixelSize:      28
+                    font.bold:           true
+                    font.letterSpacing:  1
+                    horizontalAlignment: Text.AlignRight
+                    elide:               Text.ElideLeft
+                    width:               480
+                }
+
+                // Rename mode
+                TextField {
+                    id: renameField
+                    anchors.right:          parent.right
+                    anchors.verticalCenter: parent.verticalCenter
+                    visible:                galleryRoot.renamingActive
+                    width:                  480
+                    height:                 42
+                    text:                   galleryRoot.currentCollectionName
+                    color:                  "#FFD700"
+                    font.pixelSize:         24
+                    font.bold:              true
+                    horizontalAlignment:    Text.AlignRight
+                    selectByMouse:          true
+                    selectionColor:         Qt.rgba(0.55, 0.55, 0.55, 0.80)
+                    selectedTextColor:      "white"
+                    focus:                  galleryRoot.renamingActive
+                    background: Rectangle {
+                        color:        "transparent"
+                        border.color: "#FFD700"
+                        border.width: 1
+                        radius:       4
+                    }
+                    onAccepted: {
+                        var trimmed = renameField.text.trim()
+                        if (trimmed.length === 0 || trimmed === galleryRoot.currentCollectionName) {
+                            galleryRoot.renamingActive = false
+                            return
+                        }
+                        galleryRoot.pendingNewName = trimmed
+                        renameConfirmPopup.visible = true
+                    }
+                    Keys.onEscapePressed: {
+                        galleryRoot.renamingActive = false
+                        renameField.text = galleryRoot.currentCollectionName
+                    }
+                }
+            }
+        }
+
+        // ── Collection action bar — smoky glass, above the name label ──────────
+        Item {
+            id: actionBar
+            anchors.bottom:       collectionLabelColumn.top
+            anchors.right:        parent.right
+            anchors.bottomMargin: 10
+            anchors.rightMargin:  40
+            width:  168
+            height: 52
+            z: 4
+            opacity: galleryRoot.showingCollection ? 1.0 : 0.0
+            visible: opacity > 0
+            Behavior on opacity { NumberAnimation { duration: 400; easing.type: Easing.InOutQuad } }
+
+            Rectangle {
+                anchors.fill:  parent
+                radius:        10
+                color:         Qt.rgba(0.04, 0.04, 0.07, 0.50)
+                border.color:  Qt.rgba(1, 1, 1, 0.22)
+                border.width:  1
+            }
+
+            Row {
+                anchors.centerIn: parent
+                spacing:          16
+
+                // ── Favourite ──────────────────────────────────────────────────
+                Item {
+                    id: favBtn
+                    width: 40; height: 40
+                    property bool hovered: false
+
+                    ToolTip.visible: hovered
+                    ToolTip.text:    galleryRoot.currentFavorite ? "Remove from Favourites" : "Add to Favourites"
+                    ToolTip.delay:   500
+
+                    Rectangle {
+                        anchors.fill: parent; radius: 6
+                        color: favBtn.hovered ? Qt.rgba(1,1,1,0.10) : "transparent"
+                        Behavior on color { ColorAnimation { duration: 120 } }
+                    }
+                    Text {
+                        anchors.centerIn: parent
+                        text:           "♥"
+                        font.pixelSize: 22
+                        color: galleryRoot.currentFavorite
+                            ? "#FFD700"
+                            : (favBtn.hovered ? "white" : Qt.rgba(1,1,1,0.45))
+                        Behavior on color { ColorAnimation { duration: 150 } }
+                    }
+                    MouseArea {
+                        anchors.fill: parent; hoverEnabled: true
+                        onEntered: favBtn.hovered = true
+                        onExited:  favBtn.hovered = false
+                        onClicked: {
+                            galleryRoot.currentFavorite = !galleryRoot.currentFavorite
+                            architectController.toggle_favorite_architect(galleryRoot.currentCollectionName)
+                        }
+                    }
+                }
+
+                // ── Rename ─────────────────────────────────────────────────────
+                Item {
+                    id: renBtn
+                    width: 40; height: 40
+                    property bool hovered: false
+
+                    ToolTip.visible: hovered
+                    ToolTip.text:    "Rename Collection"
+                    ToolTip.delay:   500
+
+                    Rectangle {
+                        anchors.fill: parent; radius: 6
+                        color: renBtn.hovered ? Qt.rgba(1,1,1,0.10) : "transparent"
+                        Behavior on color { ColorAnimation { duration: 120 } }
+                    }
+                    Text {
+                        anchors.centerIn: parent
+                        text:           "✏"
+                        font.pixelSize: 20
+                        color: renBtn.hovered || galleryRoot.renamingActive
+                            ? "#5599ff"
+                            : "#2566c2"
+                        Behavior on color { ColorAnimation { duration: 150 } }
+                    }
+                    MouseArea {
+                        anchors.fill: parent; hoverEnabled: true
+                        onEntered: renBtn.hovered = true
+                        onExited:  renBtn.hovered = false
+                        onClicked: {
+                            if (!galleryRoot.renamingActive) {
+                                galleryRoot.renamingActive = true
+                                renameField.text = galleryRoot.currentCollectionName
+                                renameField.forceActiveFocus()
+                                renameField.selectAll()
+                            } else {
+                                galleryRoot.renamingActive = false
+                            }
+                        }
+                    }
+                }
+
+                // ── Delete ─────────────────────────────────────────────────────
+                Item {
+                    id: delBtn
+                    width: 40; height: 40
+                    property bool hovered: false
+
+                    ToolTip.visible: hovered
+                    ToolTip.text:    "Delete Collection"
+                    ToolTip.delay:   500
+
+                    Rectangle {
+                        anchors.fill: parent; radius: 6
+                        color: delBtn.hovered ? Qt.rgba(0.40, 0.04, 0.04, 0.55) : "transparent"
+                        Behavior on color { ColorAnimation { duration: 120 } }
+                    }
+                    Text {
+                        anchors.centerIn: parent
+                        text:           "✕"
+                        font.pixelSize: 20
+                        font.bold:      true
+                        color: delBtn.hovered ? "#FF6666" : "#CC2222"
+                        Behavior on color { ColorAnimation { duration: 150 } }
+                    }
+                    MouseArea {
+                        anchors.fill: parent; hoverEnabled: true
+                        onEntered: delBtn.hovered = true
+                        onExited:  delBtn.hovered = false
+                        onClicked: deleteConfirmPopup.visible = true
+                    }
+                }
             }
         }
     }
@@ -802,10 +997,185 @@ Item {
         MouseArea {
             id: closeBtnHov; anchors.fill: parent; hoverEnabled: true
             onClicked: {
-                galleryRoot.showingCollection = false
+                galleryRoot.showingCollection     = false
+                galleryRoot.renamingActive        = false
+                galleryRoot.pendingNewName        = ""
+                galleryRoot.currentFavorite       = false
+                galleryRoot.currentCollectionName = ""
                 movieGridModel.clear()
                 collectionHero.imageSource = ""
-                galleryRoot.currentCollectionName = ""
+            }
+        }
+    }
+
+    // ── Delete confirm popup ──────────────────────────────────────────────────
+    Rectangle {
+        id: deleteConfirmPopup
+        anchors.centerIn: parent
+        width: 440; height: 188
+        radius: 12
+        visible: false
+        z: 500
+        color:        Qt.rgba(0.07, 0.07, 0.10, 0.97)
+        border.color: "#FF4444"
+        border.width: 2
+
+        Column {
+            anchors.centerIn: parent
+            spacing: 20
+
+            Text {
+                anchors.horizontalCenter: parent.horizontalCenter
+                text:            "Delete this collection?"
+                color:           "white"
+                font.pixelSize:  20
+                font.bold:       true
+            }
+            Text {
+                anchors.horizontalCenter: parent.horizontalCenter
+                text:            "\u201c" + galleryRoot.currentCollectionName + "\u201d"
+                color:           "#FFD700"
+                font.pixelSize:  16
+                elide:           Text.ElideMiddle
+                width:           380
+                horizontalAlignment: Text.AlignHCenter
+            }
+            Row {
+                anchors.horizontalCenter: parent.horizontalCenter
+                spacing: 20
+
+                Item {
+                    width: 130; height: 40
+                    Rectangle {
+                        anchors.fill: parent; radius: 8
+                        color: yesDelHov.containsMouse ? "#CC2222" : "#882222"
+                        Behavior on color { ColorAnimation { duration: 120 } }
+                    }
+                    Text { anchors.centerIn: parent; text: "YES, DELETE"; color: "white"; font.pixelSize: 14; font.bold: true }
+                    MouseArea {
+                        id: yesDelHov; anchors.fill: parent; hoverEnabled: true
+                        onClicked: {
+                            deleteConfirmPopup.visible = false
+                            architectController.delete_architect_collection(galleryRoot.currentCollectionName)
+                            galleryRoot.showingCollection     = false
+                            galleryRoot.renamingActive        = false
+                            galleryRoot.pendingNewName        = ""
+                            galleryRoot.currentFavorite       = false
+                            galleryRoot.currentCollectionName = ""
+                            movieGridModel.clear()
+                            collectionHero.imageSource = ""
+                            categoryList.currentIndex  = -1
+                        }
+                    }
+                }
+
+                Item {
+                    width: 90; height: 40
+                    Rectangle {
+                        anchors.fill: parent; radius: 8
+                        color: noDelHov.containsMouse ? Qt.rgba(1,1,1,0.15) : Qt.rgba(1,1,1,0.06)
+                        border.color: Qt.rgba(1,1,1,0.30); border.width: 1
+                        Behavior on color { ColorAnimation { duration: 120 } }
+                    }
+                    Text { anchors.centerIn: parent; text: "CANCEL"; color: "white"; font.pixelSize: 14 }
+                    MouseArea { id: noDelHov; anchors.fill: parent; hoverEnabled: true; onClicked: deleteConfirmPopup.visible = false }
+                }
+            }
+        }
+    }
+
+    // ── Rename confirm popup ──────────────────────────────────────────────────
+    Rectangle {
+        id: renameConfirmPopup
+        anchors.centerIn: parent
+        width: 460; height: 210
+        radius: 12
+        visible: false
+        z: 500
+        color:        Qt.rgba(0.07, 0.07, 0.10, 0.97)
+        border.color: "#2566c2"
+        border.width: 2
+
+        Column {
+            anchors.centerIn: parent
+            spacing: 18
+
+            Text {
+                anchors.horizontalCenter: parent.horizontalCenter
+                text:           "Rename this collection?"
+                color:          "white"
+                font.pixelSize: 20
+                font.bold:      true
+            }
+            Column {
+                anchors.horizontalCenter: parent.horizontalCenter
+                spacing: 4
+                Text {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    text:  "\u201c" + galleryRoot.currentCollectionName + "\u201d"
+                    color: Qt.rgba(1,1,1,0.50); font.pixelSize: 14
+                }
+                Text {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    text: "↓"; color: Qt.rgba(1,1,1,0.35); font.pixelSize: 13
+                }
+                Text {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    text:  "\u201c" + galleryRoot.pendingNewName + "\u201d"
+                    color: "#FFD700"; font.pixelSize: 16; font.bold: true
+                }
+            }
+            Row {
+                anchors.horizontalCenter: parent.horizontalCenter
+                spacing: 20
+
+                Item {
+                    width: 130; height: 40
+                    Rectangle {
+                        anchors.fill: parent; radius: 8
+                        color: yesRenHov.containsMouse ? "#1a56b0" : "#0d3a7a"
+                        Behavior on color { ColorAnimation { duration: 120 } }
+                    }
+                    Text { anchors.centerIn: parent; text: "YES, RENAME"; color: "white"; font.pixelSize: 14; font.bold: true }
+                    MouseArea {
+                        id: yesRenHov; anchors.fill: parent; hoverEnabled: true
+                        onClicked: {
+                            renameConfirmPopup.visible = false
+                            var oldName = galleryRoot.currentCollectionName
+                            architectController.rename_architect_collection(oldName, galleryRoot.pendingNewName)
+                            galleryRoot.currentCollectionName = galleryRoot.pendingNewName
+                            galleryRoot.pendingNewName        = ""
+                            galleryRoot.renamingActive        = false
+                            // Patch the tile in the collection list model
+                            for (var i = 0; i < collectionsModel.count; i++) {
+                                if (collectionsModel.get(i).name === oldName) {
+                                    collectionsModel.setProperty(i, "name", galleryRoot.currentCollectionName)
+                                    break
+                                }
+                            }
+                        }
+                    }
+                }
+
+                Item {
+                    width: 90; height: 40
+                    Rectangle {
+                        anchors.fill: parent; radius: 8
+                        color: noRenHov.containsMouse ? Qt.rgba(1,1,1,0.15) : Qt.rgba(1,1,1,0.06)
+                        border.color: Qt.rgba(1,1,1,0.30); border.width: 1
+                        Behavior on color { ColorAnimation { duration: 120 } }
+                    }
+                    Text { anchors.centerIn: parent; text: "CANCEL"; color: "white"; font.pixelSize: 14 }
+                    MouseArea {
+                        id: noRenHov; anchors.fill: parent; hoverEnabled: true
+                        onClicked: {
+                            renameConfirmPopup.visible = false
+                            galleryRoot.renamingActive = false
+                            galleryRoot.pendingNewName = ""
+                            renameField.text = galleryRoot.currentCollectionName
+                        }
+                    }
+                }
             }
         }
     }
