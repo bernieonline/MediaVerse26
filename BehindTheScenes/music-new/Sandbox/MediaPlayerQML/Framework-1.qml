@@ -99,17 +99,15 @@ ApplicationWindow {
     // --- Connect the RowButton to the Loader ---
     Connections {
         target: rowButtons
-        // Assuming your RowButton emits a signal like 'architectClicked'
-        // or 'modeChanged'
+
         function onArchitectClicked() {
             console.log("🚀 Switching to Architect Gallery Mode")
-            if (splash) splash.deactivate() // Hide splash if active
-            
-            // This is the swap that loads our new premium view
+            if (splash) splash.deactivate()
             contentLoader.setSource("ArchitectGallery.qml")
-            
-            // Close other panels just in case
-            //libraryPanel.isOpen = false
+        }
+
+        function onSnatcherClicked() {
+            snatcher2Panel.visible = true
         }
     }
 
@@ -293,6 +291,11 @@ ApplicationWindow {
     }
     Category_Edit {
         id: categoryEditPanel
+    }
+    Snatcher2 {
+        id: snatcher2Panel
+        anchors.fill: parent
+        visible: false
     }
     
 }

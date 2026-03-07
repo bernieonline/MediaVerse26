@@ -45,6 +45,7 @@ from SplashModel import SplashModel
 from architect_controller import ArchitectController
 from Architect_view import ArchitectView
 from splash_layout import generate_splash_layout
+from snatcher2_backend import Snatcher2Backend
 
 from dotenv import load_dotenv
 
@@ -78,6 +79,7 @@ def main():
 
 
         arch_view_instance = ArchitectView()
+        snatcher2_backend  = Snatcher2Backend()
 
              # SURGICAL ADDITION: Connect the backup signal to the existing notifier
         # msg is the text, success is the boolean. We use 'not success' because 
@@ -183,7 +185,8 @@ def main():
         # --------------------------------------------------------
         # Expose Python Objects to QML
         # --------------------------------------------------------
-        ctx.setContextProperty("architectController", architect_engine)  # <--- ADD THIS LINE
+        ctx.setContextProperty("architectController", architect_engine)
+        ctx.setContextProperty("snatcher2Backend",   snatcher2_backend)
         ctx.setContextProperty("splashModel", splash_model)
         ctx.setContextProperty("SettingsManager", settings_manager)
         ctx.setContextProperty("centralMenuData", settings_manager.menu_data) # Point to manager's data

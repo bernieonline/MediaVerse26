@@ -9,7 +9,8 @@ Column {
     width: parent.width
     spacing: 12
     z: 9999 
-    signal architectClicked() // <--- Add this line!
+    signal architectClicked()
+    signal snatcherClicked()
 
 
     Row {
@@ -93,9 +94,9 @@ Column {
             }
         }
 
-        // --- 4. CATEGORIES (Renamed from Collections to avoid confusion) ---
+        // --- 4. QUICK GALLERY ---
         StyledButton {
-            text: "Categories"
+            text: "Quick Gallery"
             fixedWidth: buttonRow.buttonWidth; fixedHeight: buttonRow.buttonHeight
             onClicked: {
                 if (typeof splash !== "undefined") splash.deactivate()
@@ -103,7 +104,25 @@ Column {
             }
         }
 
-        // --- 5. CREATE ---
+        // --- 5. SNATCHER ---
+        StyledButton {
+            fixedWidth: buttonRow.buttonWidth; fixedHeight: buttonRow.buttonHeight
+            contentItem: Item {
+                anchors.fill: parent
+                Text {
+                    text: "Snatcher"
+                    anchors.centerIn: parent
+                    color: "#FF9800"; font.bold: true; font.letterSpacing: 1; z: 2
+                }
+                Text {
+                    text: "📷"; anchors.centerIn: parent
+                    opacity: 0.3; font.pixelSize: 22; z: 1
+                }
+            }
+            onClicked: buttonColumn.snatcherClicked()
+        }
+
+        // --- 7. CREATE ---
         StyledButton {
             text: "Create"
             fixedWidth: 120; fixedHeight: buttonRow.buttonHeight
@@ -113,7 +132,7 @@ Column {
             }
         }
 
-        // --- 6. CLOSE ---
+        // --- 8. CLOSE ---
         StyledButton {
             text: "Close"
             fixedWidth: 80; fixedHeight: buttonRow.buttonHeight

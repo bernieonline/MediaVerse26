@@ -54,7 +54,7 @@ Rectangle {
         spacing: 25 
 
         Text {
-            text: "QUICK COLLECTION"
+            text: "QUICK COLLECTION 2"
             color: "gold"; font.pixelSize: 22; font.bold: true; font.letterSpacing: 2
         }
 
