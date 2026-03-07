@@ -910,9 +910,10 @@ class ArchitectController(QObject):
             import traceback
             traceback.print_exc()
 
-    collectionImageReady   = Signal(str)
-    collectionMoviesReady  = Signal(list)
+    collectionImageReady    = Signal(str)
+    collectionMoviesReady   = Signal(list)
     collectionFavoriteState = Signal(bool)
+    collectionImagePathReady = Signal(str)   # raw imagePath string from JSON ("None" or filename)
 
     @Slot(str)
     def resolve_collection_for_grid(self, collection_name):
@@ -940,8 +941,9 @@ class ArchitectController(QObject):
                 self.collectionMoviesReady.emit([])
                 return
 
-            # Emit favourite state so the gallery action bar can reflect it
+            # Emit favourite and imagePath states for the gallery action bar
             self.collectionFavoriteState.emit(bool(record.get("favorite", False)))
+            self.collectionImagePathReady.emit(str(record.get("imagePath", "None")))
 
             print(f"\n🎬 [GRID] Resolving '{collection_name}'...")
             final_basenames = self._resolve_collection_rules(record.get("rules", []))
@@ -1113,3 +1115,23 @@ class ArchitectController(QObject):
             self.categoryModelChanged.emit()
         except Exception as e:
             print(f"❌ [rename_architect_collection] Error: {e}")
+
+    @Slot(str, str)
+    def update_collection_image(self, collection_name, filename):
+        """Store a new splash image filename in the named Architect collection."""
+        try:
+            target_path = str(movies_coll_v2)
+            if not os.path.exists(target_path):
+                return
+            with open(target_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            for item in data:
+                if item.get("type") == "Architect" and item.get("name") == collection_name:
+                    item["imagePath"] = filename
+                    print(f"🖼️  [IMAGE] '{collection_name}' → '{filename}'")
+                    break
+            with open(target_path, "w", encoding="utf-8") as f:
+                json.dump(data, f, indent=4)
+            self.collectionImagePathReady.emit(filename)
+        except Exception as e:
+            print(f"❌ [update_collection_image] Error: {e}")

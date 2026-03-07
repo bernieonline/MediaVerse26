@@ -1,6 +1,7 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 import Qt5Compat.GraphicalEffects
+import Qt.labs.platform 1.1
 
 Item {
     id: galleryRoot
@@ -17,6 +18,7 @@ Item {
     property bool   renamingActive:         false
     property string pendingNewName:         ""
     property bool   filmStripVisible:       false
+    property string currentImagePath:       "None"
 
     // ── Data models ───────────────────────────────────────────────────────────
     ListModel { id: collectionsModel }
@@ -48,6 +50,10 @@ Item {
 
         function onCollectionFavoriteState(isFav) {
             galleryRoot.currentFavorite = isFav
+        }
+
+        function onCollectionImagePathReady(imgPath) {
+            galleryRoot.currentImagePath = imgPath
         }
     }
 
@@ -1015,29 +1021,44 @@ Item {
             anchors.right:        parent.right
             anchors.bottomMargin: 10
             anchors.rightMargin:  40
-            width:  168
-            height: 52
+            width:  284   // 4 × 60px icons + 3 × 14px gaps + 2 × 11px padding
+            height: 72
             z: 4
             opacity: galleryRoot.showingCollection ? 1.0 : 0.0
             visible: opacity > 0
             Behavior on opacity { NumberAnimation { duration: 400; easing.type: Easing.InOutQuad } }
 
+            // 80% transparent background (was 50%)
             Rectangle {
                 anchors.fill:  parent
-                radius:        10
-                color:         Qt.rgba(0.04, 0.04, 0.07, 0.50)
-                border.color:  Qt.rgba(1, 1, 1, 0.22)
+                radius:        12
+                color:         Qt.rgba(0.04, 0.04, 0.07, 0.20)
+                border.color:  Qt.rgba(1, 1, 1, 0.28)
                 border.width:  1
+            }
+
+            // ── File dialog — same folder as FinishPopup ──────────────────────
+            FileDialog {
+                id: splashImagePicker
+                title:       "Select Splash Image"
+                folder:      "file:///D:/MediaVerse1.0/BehindTheScenes/BehindTheScenes/music-new/Assets/Splash"
+                nameFilters: ["Images (*.jpg *.png *.jpeg)"]
+                onAccepted: {
+                    var fullPath = file.toString().replace("file:///", "")
+                    var parts    = fullPath.split(/[\/\\]/)
+                    var filename = parts[parts.length - 1]
+                    architectController.update_collection_image(galleryRoot.currentCollectionName, filename)
+                }
             }
 
             Row {
                 anchors.centerIn: parent
-                spacing:          16
+                spacing:          14
 
                 // ── Favourite ──────────────────────────────────────────────────
                 Item {
                     id: favBtn
-                    width: 40; height: 40
+                    width: 60; height: 60
                     property bool hovered: false
 
                     ToolTip.visible: hovered
@@ -1045,17 +1066,17 @@ Item {
                     ToolTip.delay:   500
 
                     Rectangle {
-                        anchors.fill: parent; radius: 6
-                        color: favBtn.hovered ? Qt.rgba(1,1,1,0.10) : "transparent"
+                        anchors.fill: parent; radius: 8
+                        color: favBtn.hovered ? Qt.rgba(1,1,1,0.12) : "transparent"
                         Behavior on color { ColorAnimation { duration: 120 } }
                     }
                     Text {
                         anchors.centerIn: parent
                         text:           "♥"
-                        font.pixelSize: 22
+                        font.pixelSize: 33
                         color: galleryRoot.currentFavorite
                             ? "#FFD700"
-                            : (favBtn.hovered ? "white" : Qt.rgba(1,1,1,0.45))
+                            : (favBtn.hovered ? "white" : Qt.rgba(1,1,1,0.55))
                         Behavior on color { ColorAnimation { duration: 150 } }
                     }
                     MouseArea {
@@ -1069,10 +1090,64 @@ Item {
                     }
                 }
 
+                // ── Set image ──────────────────────────────────────────────────
+                Item {
+                    id: imgBtn
+                    width: 60; height: 60
+                    property bool hovered: false
+
+                    ToolTip.visible: hovered
+                    ToolTip.text:    galleryRoot.currentImagePath !== "None"
+                                         ? "Change Collection Image"
+                                         : "Set Collection Image"
+                    ToolTip.delay:   500
+
+                    Rectangle {
+                        anchors.fill: parent; radius: 8
+                        color: imgBtn.hovered ? Qt.rgba(1,1,1,0.12) : "transparent"
+                        Behavior on color { ColorAnimation { duration: 120 } }
+                    }
+
+                    // Tiny thumbnail if image is set, otherwise a placeholder icon
+                    Rectangle {
+                        anchors.centerIn: parent
+                        width: 38; height: 28; radius: 4
+                        color:        "#1a1a2a"
+                        border.color: imgBtn.hovered ? "#2566c2" : Qt.rgba(1,1,1,0.40)
+                        border.width: 1
+                        clip: true
+
+                        Image {
+                            anchors.fill: parent
+                            source: galleryRoot.currentImagePath !== "None"
+                                ? "file:///D:/MediaVerse1.0/BehindTheScenes/BehindTheScenes/music-new/Assets/Splash/"
+                                  + galleryRoot.currentImagePath
+                                : ""
+                            fillMode: Image.PreserveAspectCrop
+                            smooth:   true
+                            visible:  galleryRoot.currentImagePath !== "None"
+                        }
+                        // Placeholder mountain/landscape glyph when no image
+                        Text {
+                            anchors.centerIn: parent
+                            text:    "🖼"
+                            font.pixelSize: 16
+                            visible: galleryRoot.currentImagePath === "None"
+                        }
+                    }
+
+                    MouseArea {
+                        anchors.fill: parent; hoverEnabled: true
+                        onEntered: imgBtn.hovered = true
+                        onExited:  imgBtn.hovered = false
+                        onClicked: splashImagePicker.open()
+                    }
+                }
+
                 // ── Rename ─────────────────────────────────────────────────────
                 Item {
                     id: renBtn
-                    width: 40; height: 40
+                    width: 60; height: 60
                     property bool hovered: false
 
                     ToolTip.visible: hovered
@@ -1080,14 +1155,14 @@ Item {
                     ToolTip.delay:   500
 
                     Rectangle {
-                        anchors.fill: parent; radius: 6
-                        color: renBtn.hovered ? Qt.rgba(1,1,1,0.10) : "transparent"
+                        anchors.fill: parent; radius: 8
+                        color: renBtn.hovered ? Qt.rgba(1,1,1,0.12) : "transparent"
                         Behavior on color { ColorAnimation { duration: 120 } }
                     }
                     Text {
                         anchors.centerIn: parent
                         text:           "✏"
-                        font.pixelSize: 20
+                        font.pixelSize: 30
                         color: renBtn.hovered || galleryRoot.renamingActive
                             ? "#5599ff"
                             : "#2566c2"
@@ -1113,7 +1188,7 @@ Item {
                 // ── Delete ─────────────────────────────────────────────────────
                 Item {
                     id: delBtn
-                    width: 40; height: 40
+                    width: 60; height: 60
                     property bool hovered: false
 
                     ToolTip.visible: hovered
@@ -1121,14 +1196,14 @@ Item {
                     ToolTip.delay:   500
 
                     Rectangle {
-                        anchors.fill: parent; radius: 6
+                        anchors.fill: parent; radius: 8
                         color: delBtn.hovered ? Qt.rgba(0.40, 0.04, 0.04, 0.55) : "transparent"
                         Behavior on color { ColorAnimation { duration: 120 } }
                     }
                     Text {
                         anchors.centerIn: parent
                         text:           "✕"
-                        font.pixelSize: 20
+                        font.pixelSize: 30
                         font.bold:      true
                         color: delBtn.hovered ? "#FF6666" : "#CC2222"
                         Behavior on color { ColorAnimation { duration: 150 } }
@@ -1317,6 +1392,7 @@ Item {
                 galleryRoot.pendingNewName        = ""
                 galleryRoot.currentFavorite       = false
                 galleryRoot.currentCollectionName = ""
+                galleryRoot.currentImagePath      = "None"
                 galleryRoot.filmStripVisible      = false
                 movieGridModel.clear()
                 collectionHero.imageSource = ""
