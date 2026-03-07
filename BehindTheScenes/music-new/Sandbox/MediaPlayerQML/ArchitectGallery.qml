@@ -285,7 +285,11 @@ Item {
         MouseArea {
             anchors.fill: parent
             z: 0
-            onClicked: { gridPane.hoveredMovie = null; theFilmStrip.selectedMovie = null }
+            onClicked: {
+                gridPane.hoveredMovie         = null
+                theFilmStrip.selectedMovie    = null
+                galleryRoot.filmStripVisible  = false
+            }
         }
 
         // Dark stage
