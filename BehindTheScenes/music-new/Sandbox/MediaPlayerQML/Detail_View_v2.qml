@@ -15,6 +15,7 @@ Rectangle {
     property string manifestKey: ""
 
     signal v2PlayMovie(var movie)
+    signal backRequested()
 
     // --- HELPER FUNCTIONS ---
     function getSearchTitle() {
@@ -56,6 +57,29 @@ Rectangle {
                 tabBar.currentIndex = 0
                 xmlController.requestCategoryContent(cats[0])
             }
+        }
+    }
+
+    // ── Back button — top-left, returns to the previous view ─────────────────
+    Item {
+        id: backBtn
+        anchors.top:         parent.top
+        anchors.left:        parent.left
+        anchors.topMargin:   14
+        anchors.leftMargin:  14
+        width: 44; height: 44
+        z: 10
+
+        Rectangle {
+            anchors.fill: parent; radius: 22
+            color: backHov.containsMouse ? Qt.rgba(0.15, 0.40, 0.76, 0.88)
+                                         : Qt.rgba(0.08, 0.08, 0.08, 0.82)
+            border.color: "#2566c2"; border.width: 1
+            Behavior on color { ColorAnimation { duration: 120 } }
+        }
+        Text { anchors.centerIn: parent; text: "‹"; color: "white"; font.pixelSize: 28; font.bold: true }
+        MouseArea { id: backHov; anchors.fill: parent; hoverEnabled: true
+            onClicked: detailViewRoot.backRequested()
         }
     }
 

@@ -20,6 +20,7 @@ ApplicationWindow {
     property bool useCarouselView: false 
     property var xmlController: _xmlController
     property bool isVideoPanelVisible: false
+    property string previousLoaderSource: ""   // remembers what was showing before Detail_View
 
     property alias splashAlias: splash
 
@@ -185,11 +186,13 @@ ApplicationWindow {
     function openMovieDetail(movie) {
         let resolved = _xmlController.resolve_paths(movie.display)
         if (resolved && resolved.xml) {
+            window.previousLoaderSource = contentLoader.source.toString()
             contentLoader.setSource("Detail_View_v2.qml", {
                 "imagePath": resolved.image,
                 "xmlPath": resolved.xml,
                 "moviePath": resolved.video
             })
+            // backRequested is wired in onLoaded below
         }
     }
 
@@ -257,6 +260,12 @@ ApplicationWindow {
                     }
                     if (contentLoader.item.launchVideoRequested !== undefined) {
                         contentLoader.item.launchVideoRequested.connect(playMovieNow)
+                    }
+                    if (contentLoader.item.backRequested !== undefined) {
+                        contentLoader.item.backRequested.connect(function() {
+                            if (window.previousLoaderSource !== "")
+                                contentLoader.source = window.previousLoaderSource
+                        })
                     }
                 } catch(e) { console.log("Connection warning: " + e) }
             }

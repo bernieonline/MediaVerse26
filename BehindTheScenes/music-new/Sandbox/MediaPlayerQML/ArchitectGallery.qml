@@ -285,7 +285,7 @@ Item {
         MouseArea {
             anchors.fill: parent
             z: 0
-            onClicked: gridPane.hoveredMovie = null
+            onClicked: { gridPane.hoveredMovie = null; theFilmStrip.selectedMovie = null }
         }
 
         // Dark stage
@@ -517,13 +517,27 @@ Item {
                                 }
 
                                 // ── Click handler (same pattern as ImageGridView) ──
+                                Timer {
+                                    id: cellClickTimer
+                                    interval: 250; repeat: false
+                                    property bool dblGuard: false
+                                    onTriggered: {
+                                        if (!dblGuard && cellItem.hasData)
+                                            galleryRoot.v2OpenDetail({
+                                                display:  cellItem.movieData.imageUri,
+                                                filePath: cellItem.movieData.imageUri,
+                                                title:    cellItem.movieData.title,
+                                                year:     cellItem.movieData.year
+                                            })
+                                        dblGuard = false
+                                    }
+                                }
+
                                 MouseArea {
                                     id: cellMouse
                                     anchors.fill:   parent
                                     hoverEnabled:   true
                                     acceptedButtons: Qt.LeftButton
-                                    property bool dblActive: false
-                                    property var  singleTimer: null
 
                                     onEntered: {
                                         hideTimer.stop()
@@ -540,29 +554,14 @@ Item {
 
                                     onClicked: {
                                         if (!cellItem.hasData) return
-                                        if (singleTimer) singleTimer.stop()
-                                        singleTimer = Qt.createQmlObject(
-                                            'import QtQuick 2.15; Timer { interval: 250; repeat: false }',
-                                            galleryRoot
-                                        )
-                                        singleTimer.triggered.connect(function() {
-                                            if (!dblActive) {
-                                                galleryRoot.v2OpenDetail({
-                                                    display:  cellItem.movieData.imageUri,
-                                                    filePath: cellItem.movieData.imageUri,
-                                                    title:    cellItem.movieData.title,
-                                                    year:     cellItem.movieData.year
-                                                })
-                                            }
-                                            dblActive = false
-                                        })
-                                        singleTimer.start()
+                                        cellClickTimer.dblGuard = false
+                                        cellClickTimer.restart()
                                     }
 
                                     onDoubleClicked: {
                                         if (!cellItem.hasData) return
-                                        dblActive = true
-                                        if (singleTimer) singleTimer.stop()
+                                        cellClickTimer.dblGuard = true
+                                        cellClickTimer.stop()
                                         let resolved = _xmlController.resolve_paths(cellItem.movieData.display)
                                         if (resolved && resolved.video) {
                                             let cleanPath = resolved.video.toString().replace(/\\/g, "/")
@@ -748,43 +747,41 @@ Item {
                 }
 
                 // ── Click / double-click (mirrors grid cell behaviour) ───────────
+                Timer {
+                    id: previewClickTimer
+                    interval: 250; repeat: false
+                    property bool dblGuard: false
+                    onTriggered: {
+                        if (!dblGuard && gridPane.hoveredMovie)
+                            galleryRoot.v2OpenDetail({
+                                display:  gridPane.hoveredMovie.imageUri,
+                                filePath: gridPane.hoveredMovie.imageUri,
+                                title:    gridPane.hoveredMovie.title,
+                                year:     gridPane.hoveredMovie.year
+                            })
+                        dblGuard = false
+                    }
+                }
+
                 MouseArea {
                     id: previewMouse
                     anchors.fill:    hoverPreview
                     hoverEnabled:    true
                     acceptedButtons: Qt.LeftButton
-                    property bool dblActive: false
-                    property var  singleTimer: null
 
                     onEntered: hideTimer.stop()
                     onExited:  hideTimer.restart()
 
                     onClicked: {
                         if (!gridPane.hoveredMovie) return
-                        if (singleTimer) singleTimer.stop()
-                        var md = gridPane.hoveredMovie
-                        singleTimer = Qt.createQmlObject(
-                            'import QtQuick 2.15; Timer { interval: 250; repeat: false }',
-                            galleryRoot
-                        )
-                        singleTimer.triggered.connect(function() {
-                            if (!dblActive) {
-                                galleryRoot.v2OpenDetail({
-                                    display:  md.imageUri,
-                                    filePath: md.imageUri,
-                                    title:    md.title,
-                                    year:     md.year
-                                })
-                            }
-                            dblActive = false
-                        })
-                        singleTimer.start()
+                        previewClickTimer.dblGuard = false
+                        previewClickTimer.restart()
                     }
 
                     onDoubleClicked: {
                         if (!gridPane.hoveredMovie) return
-                        dblActive = true
-                        if (singleTimer) singleTimer.stop()
+                        previewClickTimer.dblGuard = true
+                        previewClickTimer.stop()
                         var md = gridPane.hoveredMovie
                         let resolved = _xmlController.resolve_paths(md.display)
                         if (resolved && resolved.video) {
@@ -916,14 +913,6 @@ Item {
             visible: opacity > 0
             Behavior on opacity { NumberAnimation { duration: 350; easing.type: Easing.InOutQuad } }
 
-            onOpenDetail: function(movie) {
-                galleryRoot.v2OpenDetail({
-                    display:  movie.imageUri,
-                    filePath: movie.imageUri,
-                    title:    movie.title,
-                    year:     movie.year
-                })
-            }
             onPlayMovie: function(movie) {
                 var resolved = _xmlController.resolve_paths(movie.display)
                 if (resolved && resolved.video) {
@@ -1146,6 +1135,152 @@ Item {
                         onExited:  delBtn.hovered = false
                         onClicked: deleteConfirmPopup.visible = true
                     }
+                }
+            }
+        }
+    }
+
+    // ── FilmStrip dwell preview — galleryRoot level, z:150, not bound by any container ──
+    // Reads hover state from theFilmStrip; positioned using theFilmStrip's coordinate space
+    // which maps 1:1 to galleryRoot (collectionHero + gridPane are both anchors.fill at 0,0).
+    Item {
+        id: stripDwellPreview
+        z: 150
+
+        // 25% bigger than the old in-strip popup (was height * 0.88)
+        readonly property real pvW: Math.round(theFilmStrip.height * 1.10)
+        readonly property real pvH: Math.round(pvW * 1.50)
+
+        width:  pvW
+        height: pvH
+
+        // Positioned above the selected frame; x tracks selectedCenterX.
+        x: Math.max(4, Math.min(galleryRoot.width - pvW - 4,
+               theFilmStrip.x + theFilmStrip.selectedCenterX - pvW / 2))
+        y: Math.max(10, theFilmStrip.y - pvH - 16)
+
+        // Driven purely by click — no hover timers.
+        // enabled flips off immediately when selection clears so the strip below
+        // is never blocked by the fading card.
+        enabled: theFilmStrip.selectedMovie !== null
+
+        opacity: (galleryRoot.showingCollection && galleryRoot.filmStripVisible
+                  && theFilmStrip.selectedMovie !== null) ? 1.0 : 0.0
+        visible: opacity > 0
+        Behavior on opacity { NumberAnimation { duration: 180; easing.type: Easing.InOutQuad } }
+
+        // Single-click → open detail view (no disambiguation timer needed: click is the intent)
+        // Double-click → play movie
+
+        Rectangle {
+            id: sdpCard
+            anchors.fill: parent
+            radius: 10; color: "#111"; clip: true
+
+            layer.enabled: true
+            layer.effect: DropShadow {
+                verticalOffset: 0; horizontalOffset: 0
+                radius: 30; samples: 33
+                color: Qt.rgba(0, 0, 0, 0.94)
+            }
+
+            Image {
+                anchors.fill: parent
+                source:       theFilmStrip.selectedMovie ? theFilmStrip.selectedMovie.imageUri : ""
+                fillMode:     Image.PreserveAspectCrop
+                smooth: true; asynchronous: true
+            }
+
+            // Top sheen
+            Rectangle {
+                anchors.fill: parent; radius: parent.radius
+                gradient: Gradient {
+                    GradientStop { position: 0.0;  color: Qt.rgba(1, 1, 1, 0.08) }
+                    GradientStop { position: 0.35; color: "transparent"           }
+                }
+            }
+
+            // Year badge — top right
+            Rectangle {
+                visible: theFilmStrip.selectedMovie !== null && theFilmStrip.selectedMovie.year !== ""
+                anchors.top:     parent.top
+                anchors.right:   parent.right
+                anchors.margins: 10
+                width: sdpYrTxt.implicitWidth + 16; height: 26; radius: 5
+                color: Qt.rgba(0, 0, 0, 0.76)
+                Text {
+                    id: sdpYrTxt; anchors.centerIn: parent
+                    text:  theFilmStrip.selectedMovie ? theFilmStrip.selectedMovie.year : ""
+                    color: "#e0e0e0"; font.pixelSize: 14; font.bold: true
+                }
+            }
+
+            // "Open detail" hint — small label at top-left
+            Rectangle {
+                anchors.top:    parent.top
+                anchors.left:   parent.left
+                anchors.margins: 10
+                width: hintTxt.implicitWidth + 16; height: 24; radius: 4
+                color: Qt.rgba(0.15, 0.40, 0.76, 0.80)
+                Text {
+                    id: hintTxt; anchors.centerIn: parent
+                    text: "tap for details"
+                    color: "white"; font.pixelSize: 11; font.bold: false
+                }
+            }
+
+            // Title bar — bottom
+            Rectangle {
+                anchors.bottom: parent.bottom
+                anchors.left:   parent.left
+                anchors.right:  parent.right
+                height: 54; color: Qt.rgba(0, 0, 0, 0.80)
+                Text {
+                    anchors.verticalCenter: parent.verticalCenter
+                    anchors.left:   parent.left
+                    anchors.right:  parent.right
+                    anchors.margins: 12
+                    text:  theFilmStrip.selectedMovie ? theFilmStrip.selectedMovie.title : ""
+                    color: "white"; font.pixelSize: 17; font.bold: true
+                    horizontalAlignment: Text.AlignHCenter
+                    elide: Text.ElideRight; maximumLineCount: 1
+                }
+            }
+
+            // Blue accent line
+            Rectangle {
+                anchors.bottom: parent.bottom
+                width: parent.width; height: 3; color: "#2566c2"
+            }
+        }
+
+        // Single click on the popup → open detail view and dismiss popup
+        // Double-click → play movie
+        MouseArea {
+            anchors.fill:    sdpCard
+            acceptedButtons: Qt.LeftButton
+
+            onClicked: {
+                var mv = theFilmStrip.selectedMovie
+                if (!mv) return
+                theFilmStrip.selectedMovie = null
+                galleryRoot.v2OpenDetail({
+                    display:  mv.imageUri,
+                    filePath: mv.imageUri,
+                    title:    mv.title,
+                    year:     mv.year
+                })
+            }
+
+            onDoubleClicked: {
+                var mv = theFilmStrip.selectedMovie
+                if (!mv) return
+                theFilmStrip.selectedMovie = null
+                var resolved = _xmlController.resolve_paths(mv.display)
+                if (resolved && resolved.video) {
+                    var cleanPath = resolved.video.toString().replace(/\\/g, "/")
+                    playbackBridge.playVideo(cleanPath)
+                    galleryRoot.v2PlayMovie(cleanPath)
                 }
             }
         }

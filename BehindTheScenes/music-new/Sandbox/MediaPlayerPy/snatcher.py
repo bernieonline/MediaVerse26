@@ -11,6 +11,16 @@ from PySide6.QtGui import QPixmap, QImage, QColor
 from PIL import ImageGrab, Image, ImageQt
 from PySide6.QtGui import QPixmap, QImage, QColor, QPainter  # <--- Add QPainter here
 
+'''
+The way this works
+run the file search for a topic
+view images in google
+find an image or search more
+right click - copies it to snatcher
+set a new name at top
+click save
+saves it to assets.tempImages'''
+
 class MediaVerseSnatcher4K(QDialog):
     def __init__(self, default_name="New 4K Entry", mode="movie"):
         super().__init__()
@@ -147,32 +157,44 @@ class MediaVerseSnatcher4K(QDialog):
     def save_result(self):
         if not self.img_item or not self.current_pil_image: return
             
+        # Get the current UI view state
         pos = self.img_item.pos()
         scale = self.img_item.scale()
         
-        # Inverse transform to find crop area on original high-res source
-        left, top = -pos.x() / scale, -pos.y() / scale
-        right, bottom = left + (1280 / scale), top + (720 / scale)
+        # 🎯 CRITICAL: We map the UI view back to the ORIGINAL pixels
+        # using integer math to prevent sub-pixel blurring.
+        src_w, src_h = self.current_pil_image.size
         
-        # 1. High Precision Crop
+        # Calculate exactly where the 1280x720 window sits on the BIG image
+        left = int(-pos.x() / scale)
+        top = int(-pos.y() / scale)
+        right = int(left + (1280 / scale))
+        bottom = int(top + (720 / scale))
+
+        # Ensure we don't crop outside the image bounds (prevents black borders)
+        left = max(0, left)
+        top = max(0, top)
+        right = min(src_w, right)
+        bottom = min(src_h, bottom)
+        
+        # 1. THE CROP: Do this on the raw, un-touched data first
         final_img = self.current_pil_image.crop((left, top, right, bottom))
         
-        # 2. UHD Resize (LANCZOS maintains surgical sharpness)
-        final_img = final_img.resize((3840, 2160), Image.Resampling.LANCZOS)
+        # 2. THE RESIZE: Only resize IF the crop isn't already 4K
+        # Using Resampling.LANCZOS is the gold standard for sharpness
+        if final_img.size != (3840, 2160):
+            final_img = final_img.resize((3840, 2160), Image.Resampling.LANCZOS)
         
-        # 3. Clean Name
-        raw_name = self.name_input.text().strip()
-        clean_name = "".join([c for c in raw_name if c.isalnum() or c in (' ', '.', '_', '-')])
-        if not clean_name: clean_name = "uhd_backdrop"
-        
+        # 3. SAVE LOGIC
+        clean_name = "".join([c for c in self.name_input.text() if c.isalnum() or c in (' ', '.', '_', '-')])
         save_path = self.target_dir / f"{clean_name}.jpg"
         
-        # 4. Save with no Chroma Subsampling (Highest Color Fidelity)
-        final_img.save(save_path, "JPEG", quality=95, subsampling=0)
+        # subsampling=0 (4:4:4) keeps the pixel edges surgical
+        # quality=95 is the sweet spot before file sizes get bloated
+        final_img.save(save_path, "JPEG", quality=95, subsampling=0, optimize=True)
         
-        self.status_label.setText(f"SUCCESS: 4K UHD Staged as {clean_name}.jpg")
-        self.status_label.setStyleSheet("color: #00E676; font-weight: bold;")
-        print(f"✅ [4K SNATCHER] Saved to: {save_path}")
+        self.status_label.setText(f"4K UHD SAVED: {clean_name}.jpg")
+        print(f"🎯 [PRECISION SAVE] Source: {src_w}x{src_h} -> Saved: 3840x2160")
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

@@ -6,8 +6,8 @@ Item {
     id: filmRoot
 
     // ── Public interface ─────────────────────────────────────────────────────
-    signal openDetail(var movie)
     signal playMovie(var movie)
+    // openDetail is no longer emitted by FilmStrip — detail view opens from the popup card
 
     property var movieModel   // accepts a ListModel from parent
 
@@ -19,20 +19,11 @@ Item {
     readonly property real holeH:  Math.round(sprocH  * 0.62)   // sprocket hole height
     readonly property real divW:   3                             // dark frame divider
 
-    // ── Hover state ──────────────────────────────────────────────────────────
-    property var  hoveredMovie:   null
-    property real hoveredCenterX: filmRoot.width / 2
-
-    Timer {
-        id: showTimer; interval: 380; repeat: false
-        property var  pendingMd: null
-        property real pendingX:  0
-        onTriggered: {
-            filmRoot.hoveredMovie   = pendingMd
-            filmRoot.hoveredCenterX = pendingX
-        }
-    }
-    Timer { id: hideTimer; interval: 200; repeat: false; onTriggered: filmRoot.hoveredMovie = null }
+    // ── Selection state — driven by click, not hover ─────────────────────────
+    // selectedMovie: the movie the user tapped; drives the external popup in ArchitectGallery.
+    // selectedCenterX: viewport-x of that frame's centre, so the popup tracks it.
+    property var  selectedMovie:   null
+    property real selectedCenterX: filmRoot.width / 2
 
     // ── Film base — upward drop-shadow makes it float ────────────────────────
     Rectangle {
@@ -62,6 +53,7 @@ Item {
         ScrollBar.horizontal: ScrollBar { policy: ScrollBar.AlwaysOff }
 
         model: filmRoot.movieModel
+        onMovementStarted: filmRoot.selectedMovie = null   // dismiss popup when strip is scrolled
 
         delegate: Item {
             id: del
@@ -194,63 +186,52 @@ Item {
                     Behavior on color { ColorAnimation { duration: 120 } }
                 }
 
-                // Blue bottom accent on hover
+                // Selected frame — blue border overlay
                 Rectangle {
-                    anchors.bottom: parent.bottom
-                    width: parent.width; height: 2
-                    color: "#2566c2"
-                    opacity: fMouse.containsMouse ? 1.0 : 0.0
-                    Behavior on opacity { NumberAnimation { duration: 150 } }
+                    anchors.fill: parent
+                    radius: 2
+                    color:        "transparent"
+                    border.color: "#2566c2"
+                    border.width: isSelected ? 3 : 0
+                    property bool isSelected: filmRoot.selectedMovie !== null
+                                           && filmRoot.selectedMovie.imageUri === del.imgUri
+                    Behavior on border.width { NumberAnimation { duration: 120 } }
                 }
 
-                // ── Click / dwell / double-click ──────────────────────────────
+                // ── Click / double-click ───────────────────────────────────────
+                // Single click → select this frame (shows popup in ArchitectGallery).
+                // Double click → play movie immediately.
+                Timer {
+                    id: delClickTimer
+                    interval: 220; repeat: false
+                    property bool dblGuard: false
+                    onTriggered: {
+                        if (!dblGuard && del.imgUri !== "") {
+                            filmRoot.selectedMovie   = { imageUri: del.imgUri, title: del.titleStr,
+                                                         year: del.yearStr,   display: del.dispStr }
+                            filmRoot.selectedCenterX = del.x - frameList.contentX + filmRoot.frameW / 2
+                        }
+                        dblGuard = false
+                    }
+                }
+
                 MouseArea {
                     id: fMouse
                     anchors.fill:    parent
                     hoverEnabled:    true
                     acceptedButtons: Qt.LeftButton
-                    property bool dblActive: false
-                    property var  singleTimer: null
-
-                    onEntered: {
-                        hideTimer.stop()
-                        if (del.imgUri !== "") {
-                            showTimer.pendingMd = {
-                                imageUri: del.imgUri,
-                                title:    del.titleStr,
-                                year:     del.yearStr,
-                                display:  del.dispStr
-                            }
-                            // Centre of this frame in filmRoot viewport coords
-                            showTimer.pendingX = del.x - frameList.contentX + filmRoot.frameW / 2
-                            showTimer.restart()
-                        }
-                    }
-                    onExited: {
-                        showTimer.stop()
-                        showTimer.pendingMd = null
-                        hideTimer.restart()
-                    }
 
                     onClicked: {
                         if (del.imgUri === "") return
-                        if (singleTimer) singleTimer.stop()
-                        var cap = { imageUri: del.imgUri, title: del.titleStr,
-                                    year: del.yearStr, display: del.dispStr }
-                        singleTimer = Qt.createQmlObject(
-                            'import QtQuick 2.15; Timer { interval: 250; repeat: false }',
-                            filmRoot)
-                        singleTimer.triggered.connect(function() {
-                            if (!dblActive) filmRoot.openDetail(cap)
-                            dblActive = false
-                        })
-                        singleTimer.start()
+                        delClickTimer.dblGuard = false
+                        delClickTimer.restart()
                     }
 
                     onDoubleClicked: {
                         if (del.imgUri === "") return
-                        dblActive = true
-                        if (singleTimer) singleTimer.stop()
+                        delClickTimer.dblGuard = true
+                        delClickTimer.stop()
+                        filmRoot.selectedMovie = null   // dismiss popup if open
                         filmRoot.playMovie({ imageUri: del.imgUri, title: del.titleStr,
                                              year: del.yearStr, display: del.dispStr })
                     }
@@ -296,141 +277,6 @@ Item {
         }
     }
 
-    // ── Dwell preview — portrait card floating above the strip ───────────────
-    Item {
-        id: dwellPreview
-        z: 10
-
-        readonly property real pvW: Math.round(filmRoot.height * 0.88)   // ~88% of strip height
-        readonly property real pvH: Math.round(pvW * 1.50)               // 2:3 portrait
-
-        width:  pvW
-        height: pvH + 11   // card + pointer triangle
-
-        // Sits above the strip; slides left/right to track hovered frame
-        y: -(pvH + 11 + 18)
-        x: Math.max(4, Math.min(filmRoot.width - pvW - 4,
-               filmRoot.hoveredCenterX - pvW / 2))
-
-        opacity: filmRoot.hoveredMovie !== null ? 1.0 : 0.0
-        visible: true   // always in render tree; opacity drives show/hide so animation works both ways
-        Behavior on opacity { NumberAnimation { duration: 200; easing.type: Easing.InOutQuad } }
-        Behavior on x       { NumberAnimation { duration: 160; easing.type: Easing.OutCubic  } }
-
-        // ── Card ─────────────────────────────────────────────────────────────
-        Rectangle {
-            id: pvCard
-            width:  parent.pvW
-            height: parent.pvH
-            radius: 9; color: "#111"; clip: true
-
-            layer.enabled: true
-            layer.effect: DropShadow {
-                verticalOffset: 0; horizontalOffset: 0
-                radius: 24; samples: 33
-                color: Qt.rgba(0, 0, 0, 0.92)
-            }
-
-            Image {
-                anchors.fill: parent
-                source:       filmRoot.hoveredMovie ? filmRoot.hoveredMovie.imageUri : ""
-                fillMode:     Image.PreserveAspectCrop
-                smooth: true; asynchronous: true
-            }
-
-            // Top sheen
-            Rectangle {
-                anchors.fill: parent; radius: parent.radius
-                gradient: Gradient {
-                    GradientStop { position: 0.0;  color: Qt.rgba(1,1,1, 0.08) }
-                    GradientStop { position: 0.35; color: "transparent"         }
-                }
-            }
-
-            // Year badge
-            Rectangle {
-                visible: filmRoot.hoveredMovie !== null && filmRoot.hoveredMovie.year !== ""
-                anchors.top:     parent.top
-                anchors.right:   parent.right
-                anchors.margins: 8
-                width: pvYrTxt.implicitWidth + 14; height: 24; radius: 4
-                color: Qt.rgba(0, 0, 0, 0.76)
-                Text {
-                    id: pvYrTxt; anchors.centerIn: parent
-                    text:  filmRoot.hoveredMovie ? filmRoot.hoveredMovie.year : ""
-                    color: "#e0e0e0"; font.pixelSize: 13; font.bold: true
-                }
-            }
-
-            // Title bar
-            Rectangle {
-                anchors.bottom: parent.bottom
-                anchors.left:   parent.left
-                anchors.right:  parent.right
-                height: 50; color: Qt.rgba(0, 0, 0, 0.78)
-                Text {
-                    anchors.verticalCenter: parent.verticalCenter
-                    anchors.left: parent.left; anchors.right: parent.right
-                    anchors.margins: 10
-                    text:  filmRoot.hoveredMovie ? filmRoot.hoveredMovie.title : ""
-                    color: "white"; font.pixelSize: 16; font.bold: true
-                    horizontalAlignment: Text.AlignHCenter
-                    elide: Text.ElideRight; maximumLineCount: 1
-                }
-            }
-
-            // Blue accent line
-            Rectangle {
-                anchors.bottom: parent.bottom
-                width: parent.width; height: 3; color: "#2566c2"
-            }
-        }
-
-        // ── Downward pointer triangle ─────────────────────────────────────────
-        Canvas {
-            anchors.top:              pvCard.bottom
-            anchors.horizontalCenter: pvCard.horizontalCenter
-            width: 18; height: 11
-            onPaint: {
-                var ctx = getContext("2d")
-                ctx.clearRect(0, 0, width, height)
-                ctx.fillStyle = "#2566c2"
-                ctx.beginPath()
-                ctx.moveTo(0, 0); ctx.lineTo(width, 0); ctx.lineTo(width / 2, height)
-                ctx.closePath(); ctx.fill()
-            }
-        }
-
-        // ── Click / double-click on the dwell preview ─────────────────────────
-        MouseArea {
-            anchors.fill:    pvCard
-            hoverEnabled:    true
-            acceptedButtons: Qt.LeftButton
-            property bool dblActive: false
-            property var  singleTimer: null
-
-            onEntered: hideTimer.stop()
-            onExited:  hideTimer.restart()
-
-            onClicked: {
-                if (!filmRoot.hoveredMovie) return
-                if (singleTimer) singleTimer.stop()
-                var cap = filmRoot.hoveredMovie
-                singleTimer = Qt.createQmlObject(
-                    'import QtQuick 2.15; Timer { interval: 250; repeat: false }',
-                    filmRoot)
-                singleTimer.triggered.connect(function() {
-                    if (!dblActive) filmRoot.openDetail(cap)
-                    dblActive = false
-                })
-                singleTimer.start()
-            }
-            onDoubleClicked: {
-                if (!filmRoot.hoveredMovie) return
-                dblActive = true
-                if (singleTimer) singleTimer.stop()
-                filmRoot.playMovie(filmRoot.hoveredMovie)
-            }
-        }
-    }
 }
+// NOTE: The dwell preview popup is owned by ArchitectGallery.qml (id: stripDwellPreview)
+// so it renders at galleryRoot level (z:150), unconstrained by the film strip's bounds.

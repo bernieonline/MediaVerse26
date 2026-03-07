@@ -177,6 +177,11 @@ class ManifestUpdater_v2(QObject):
             self.manifestLoaded.emit(copy.deepcopy(manifest))
             print("[ManifestUpdater_v2] BOOTSTRAP: manifestLoaded emitted")
 
+            # 5. Build server image cache (was missing — update path has this, bootstrap didn't)
+            print("[ManifestUpdater_v2] BOOTSTRAP: triggering cache build...")
+            self.sync_engine.run_server_cache_builder(manifest)
+            self.cacheRebuildFinished.emit()
+
         except Exception as e:
             print(f"[ManifestUpdater_v2] ERROR during bootstrap: {e}")
             import traceback

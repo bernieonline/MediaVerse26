@@ -1,13 +1,4 @@
-# SyncEngine_v2.py
-# MediaVerse V2 Sync Engine
-# Handles:
-#   Check 0: Library folder vs manifest
-#   Check A: Manifest vs server cache
-#   Check B: Server cache vs local cache
-#
-# Produces:
-#   - Neatly formatted sync report in the terminal
-#   - Notifications only when action is taken or errors occur
+
 
 import json
 import shutil
