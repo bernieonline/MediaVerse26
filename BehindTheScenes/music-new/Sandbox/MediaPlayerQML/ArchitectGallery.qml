@@ -385,11 +385,11 @@ Item {
                     width:  galleryRoot.width
                     height: galleryRoot.height
                     source: heroImg
-                    radius: 48
+                    radius: 32
                 }
                 Rectangle {
                     anchors.fill: parent
-                    color: Qt.rgba(0.04, 0.04, 0.07, 0.50)
+                    color: Qt.rgba(0.04, 0.04, 0.07, 0.22)
                 }
             }
 
@@ -460,11 +460,16 @@ Item {
                                 width:  gridPane.posterW
                                 height: gridPane.posterH
                                 radius: 6
-                                color:  "#111"
+                                // Empty cells are fully transparent — the blurred hero shows through
+                                color:  cellItem.hasData ? "#111" : "transparent"
                                 clip:   true
 
-                                // Layer + drop shadow: card floats above the glass surface
-                                layer.enabled: true
+                                // Ghost border for empty cells — maintains grid rhythm without weight
+                                border.color: cellItem.hasData ? "transparent" : Qt.rgba(1, 1, 1, 0.06)
+                                border.width: cellItem.hasData ? 0 : 1
+
+                                // Layer + drop shadow: only on populated cards
+                                layer.enabled: cellItem.hasData
                                 layer.effect: DropShadow {
                                     horizontalOffset: 0
                                     verticalOffset:   10
@@ -482,10 +487,11 @@ Item {
                                     asynchronous: true
                                 }
 
-                                // Top-lit sheen — plain QML gradient, no effect chaining
+                                // Top-lit sheen — only on populated cards
                                 Rectangle {
                                     anchors.fill: parent
                                     radius:       parent.radius
+                                    visible:      cellItem.hasData
                                     gradient: Gradient {
                                         GradientStop { position: 0.0;  color: Qt.rgba(1, 1, 1, 0.09) }
                                         GradientStop { position: 0.42; color: "transparent" }
@@ -510,18 +516,20 @@ Item {
                                     }
                                 }
 
-                                // Hover tint
+                                // Hover tint — only on populated cards
                                 Rectangle {
                                     anchors.fill: parent; radius: parent.radius
+                                    visible: cellItem.hasData
                                     color: Qt.rgba(1,1,1, cellMouse.containsMouse ? 0.09 : 0)
                                     Behavior on color { ColorAnimation { duration: 120 } }
                                 }
 
-                                // Blue bottom accent on hover
+                                // Blue bottom accent on hover — only on populated cards
                                 Rectangle {
                                     anchors.bottom: parent.bottom
                                     width: parent.width; height: 3
                                     color: "#2566c2"
+                                    visible: cellItem.hasData
                                     opacity: cellMouse.containsMouse ? 1.0 : 0.0
                                     Behavior on opacity { NumberAnimation { duration: 150 } }
                                 }
