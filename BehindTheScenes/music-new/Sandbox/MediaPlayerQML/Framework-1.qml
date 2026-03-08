@@ -87,6 +87,7 @@ ApplicationWindow {
             if (result.error || !result.xml) {
                 contentLoader.setSource("NoDetails.qml")
             } else {
+                window.previousLoaderSource = ""
                 contentLoader.setSource("Detail_View_v2.qml", {
                     "imagePath": result.image,
                     "xmlPath": result.xml,
@@ -263,6 +264,7 @@ ApplicationWindow {
                         contentLoader.item.backRequested.connect(function() {
                             if (window.previousLoaderSource !== "")
                                 contentLoader.source = window.previousLoaderSource
+                            splash.activate()
                         })
                     }
                 } catch(e) { console.log("Connection warning: " + e) }

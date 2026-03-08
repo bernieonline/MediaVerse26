@@ -19,6 +19,18 @@ Item {
         fadeOutMain.start()
     }
 
+    function activate() {
+        if (splashData.length === 0) return
+        rotateTimer.stop()
+        crossFadeAnim.stop()
+        fadeOutMain.stop()
+        splashRoot.visible = true
+        splashRoot.opacity = 0.0
+        titleText.opacity = 0.0
+        updateData()
+        fadeInMain.start()
+    }
+
     // --- Component Lifecycle ---
     Component.onCompleted: {
         splashData = splashModel.get_splash_data()
