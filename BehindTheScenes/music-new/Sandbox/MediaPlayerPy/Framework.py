@@ -239,6 +239,9 @@ def main():
 
         QTimer.singleShot(0, start_manifest_work)
 
+        # Replay any notifications that fired before QML was ready
+        QTimer.singleShot(500, notifier.flush_pending)
+
         if not myLibrary:
             notifier.post_notification("Database Connection Failed!", True)
         else:

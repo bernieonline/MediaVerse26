@@ -76,28 +76,28 @@ class XMLCollections(QObject):
             data = safe_json_read(manifest_path)
             items = data if isinstance(data, list) else data.get("items", [])
 
-                # 3. Use enumerate so 'i' is defined for your first-item test
-                for i, item in enumerate(items):
-                    # Extract the video ID and the relative thumbnail path
-                    v_path = item.get("shared", {}).get("video")
-                    #t_rel = item.get("cache", {}).get("relative_thumb")
-                    t_path_raw = item.get("cache", {}).get("thumb", "") # "Cache/thumb/A Hard Days Night (1964).jpg"
-                    t_rel = t_path_raw.replace("Cache/thumb/", "")     # "A Hard Days Night (1964).jpg"
+            # 3. Use enumerate so 'i' is defined for your first-item test
+            for i, item in enumerate(items):
+                # Extract the video ID and the relative thumbnail path
+                v_path = item.get("shared", {}).get("video")
+                #t_rel = item.get("cache", {}).get("relative_thumb")
+                t_path_raw = item.get("cache", {}).get("thumb", "") # "Cache/thumb/A Hard Days Night (1964).jpg"
+                t_rel = t_path_raw.replace("Cache/thumb/", "")     # "A Hard Days Night (1964).jpg"
 
-                    # 4. Only proceed if we have all three components
-                    if v_path and t_rel and local_base:
-                        # Combine: D:/.../thumb/ + folder/image.jpg
-                        thumb_path = Path(local_base) / t_rel
+                # 4. Only proceed if we have all three components
+                if v_path and t_rel and local_base:
+                    # Combine: D:/.../thumb/ + folder/image.jpg
+                    thumb_path = Path(local_base) / t_rel
 
-                        # 5. Link only if the file actually exists on your D: drive
-                        if thumb_path.exists():
-                            self.image_lookup[v_path] = thumb_path.as_uri()
-                        
-                        # Keeping your first-item check for peace of mind
-                        if i == 0:
-                            print(f"\n--- FIRST ITEM VERIFIED ---")
-                            print(f"Target: {thumb_path}")
-                            print(f"Status: {'✅ FOUND' if thumb_path.exists() else '❌ MISSING ON D: DRIVE'}")
+                    # 5. Link only if the file actually exists on your D: drive
+                    if thumb_path.exists():
+                        self.image_lookup[v_path] = thumb_path.as_uri()
+
+                    # Keeping your first-item check for peace of mind
+                    if i == 0:
+                        print(f"\n--- FIRST ITEM VERIFIED ---")
+                        print(f"Target: {thumb_path}")
+                        print(f"Status: {'✅ FOUND' if thumb_path.exists() else '❌ MISSING ON D: DRIVE'}")
 
         print(f"🖼️ Linked {len(self.image_lookup)} videos to local thumbnails.")
 
