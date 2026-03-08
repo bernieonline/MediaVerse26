@@ -127,3 +127,40 @@ Overview
    4. The tiles fade out and the hero image for the collection loads.  The display area will use the left half to display the first 9 images in the collection in an artistic way that looks stylish and interesting, There will be 2 navigation buttons left and right, and on click we will use the page turning graphic style to display the next page.  
    5. The Architect Collection creator uses a virtual bookshelf to display the current list status as its being created. Basically dvd folders with a moseover to show the file name. I want an enhanced version of this bookshelf available at the click of a button to show a floating bookshelf where a user can go staring to the required movie  
    6. My design consistently adopts the principle of a single mouse click on an image provides the detail\_view, a double click plays the movie 
+
+The  Architect\_view is now functioning and the top 10 display is working as desired. The Architect\_view display shows a Catgory Menu as a stack of black tiles on the right of the screen, This is nour next area to focus on. We need to verify that the list is being properly sourced  and we need to make the menu active so thet when a tile is clicked a second menu stack appears on its left, content based on the tile that was clicked, here is more detail.
+
+The key json file for this is "W:\\MediaVerse\\Collections\\Movies\_Collections\_v2.json" as referred to earlier
+
+Here are the instructions to build and test these 2 menu systems
+
+The Architect\_view is designed to take a saved set of rules in json format and generate a list of movie files which will be shown in the display area. It works as follows.
+
+Note \- All paths used in the code pointing to the local drive must be represented as relative paths as defined in project\_paths.py  
+Overview
+
+A Collection is defined as a list or movies curated by the user. The rules for selection are stored in a json file, Each collection record holds selection criteria for querying folders or json data stores. These will be explained in more detail later. Collections ar grouped bt category
+
+**The Categories** 
+
+ Collection records are stored in a json file, Each record represents a rule or set of rules. Some of the records are created by Quick Collection Creator and others by Architect Collection Creator, The Architect Records have a ‘type’ key and its value is ‘Architect’ So when searching for Architect Collections the first rule is to select only records that have that key value pair.
+
+Every Architect Collection has a key named Category, The Architect\_view shows a stack of tiles that lists all categories available. To get this list, read the "W:\\MediaVerse\\Collections\\Movies\_Collections\_v2.json" file and select all categories that are architect type.  Then  generate a list of unique category values in alpha order, These are the labels on the first stack of black tiles in the category menu inside Architect\_view.qml
+
+**The Collections**
+
+The user will select a category, the json file will then be queried again to obtain a list of all of the collection ‘name’ key values. These names will be used for a second stack of black tiles each one showing the collection name listed alphabetically.
+
+The tile buttons should respond to mouseover and click, nicely styled
+
+When a collection is selected the images are displayed on the left oh the screen in 2 rows of 4. on a semi transparent panel When the user clicks a navigation buttton the panel spins revealing its reverse side with a new set of images.
+
+This is great for smaller collections but for larger collections we have a film strip icon, Click the icon and a realistic looking film strip spreads across the screen that you can scroll quickly through, 
+
+Both presentations will generate a larger image when prompted. The usual convention of one click to take you to the display_view and 2 clicks to play the movie is implimented.
+
+The presentation panel includes a toolbar for editing a collection. You can rename, deleteset it as favourite or not and another option denoting an image. The collections all have a background image. You can assign it when you create and save the collection but if you dont then you can assign it later here.
+
+This is where we use the image snatcher panel It helps to find suitable images, crop them and save them to the splash screen folder . By clicking on the image icon in the edit toolbar you camn then assign the image you saved
+
+All of the above code is operational and requires testing and hardening against certain failures such as server connections and json file damage. The creation of the manifest and the xml_collection_data are critical json files. I need to greatly improve the checks and creation processes to protect the user from unexpected failure. This is my next piece of work

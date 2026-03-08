@@ -162,6 +162,79 @@ Column {
                 }
             }
         }
-        // ... [Results Popup logic remains exactly as per your source] ...
+        // --- Results Popup ---
+        Popup {
+            id: resultsPopup
+            y: searchBarContainer.height + 4
+            x: 0
+            width: searchBarContainer.width
+            padding: 0
+            modal: false
+            closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutsideParent
+
+            background: Rectangle {
+                color: "#EE0d0d0d"
+                radius: 10
+                border.color: "#2566c2"
+                border.width: 2
+            }
+
+            contentItem: ListView {
+                id: resultsList
+                implicitHeight: Math.min(contentHeight, 400)
+                clip: true
+                model: []
+
+                delegate: ItemDelegate {
+                    width: resultsList.width
+                    height: 52
+
+                    background: Rectangle {
+                        color: hovered ? "#2566c2" : "transparent"
+                        Behavior on color { ColorAnimation { duration: 120 } }
+                    }
+
+                    contentItem: Row {
+                        spacing: 12
+                        anchors.verticalCenter: parent.verticalCenter
+                        leftPadding: 16
+
+                        Image {
+                            width: 34; height: 34
+                            source: modelData.imageFilename || ""
+                            fillMode: Image.PreserveAspectCrop
+                            visible: modelData.imageFilename !== ""
+                            anchors.verticalCenter: parent.verticalCenter
+                        }
+
+                        Text {
+                            text: modelData.name
+                            color: "white"
+                            font.pixelSize: 20
+                            font.bold: true
+                            elide: Text.ElideRight
+                            width: resultsList.width - 80
+                            anchors.verticalCenter: parent.verticalCenter
+                        }
+                    }
+
+                    onClicked: {
+                        if (typeof splash !== "undefined") splash.deactivate()
+                        searchController.confirm_selection(modelData.filePath)
+                        resultsPopup.close()
+                        searchInput.text = ""
+                    }
+                }
+            }
+        }
+
+        Connections {
+            target: searchController
+            function onResultsUpdated(results) {
+                resultsList.model = results
+                if (results.length > 0) resultsPopup.open()
+                else resultsPopup.close()
+            }
+        }
     }
 }

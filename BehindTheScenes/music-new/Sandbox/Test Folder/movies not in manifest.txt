@@ -1,0 +1,18 @@
+MOVIES ON DISK BUT NOT IN MANIFEST
+Found: 14 missing records
+==================================================
+
+W:\Collection\1960s 70s 80s\Ivanhoe (1982).m4v
+W:\Collection\Hornblower\Hornblower The Even Chance.M2TS
+W:\Collection\Hornblower\Hornblower The Examination for Lieutenant.M2TS
+W:\Collection\Music Concerts\Karine Polwart - Virtual set for Folk on Foot Front Room Festival (April 2020).mp4
+W:\Collection\Music Concerts\Luke Combs Full Band Livestream Replay (On Demand).mp4
+W:\Collection\Music Concerts\Mary Chapin Carpenter at Paste Studio NYC live from The Manhattan Center.mp4
+W:\Collection\Music Concerts\Phil Collins Finally The First Farewell tour.mkv
+W:\Collection\Music Concerts\Take That The Circus Live.mp4
+W:\Collection\Music Concerts\Take That at Abbey Road.mp4
+W:\Collection\Music Concerts\The Unthanks with the Brighouse & Rastrick Brass Band - No Direction Home Festival, 10.06.12_(720p).mp4
+W:\Collection\Music Concerts\Tim McGraw Live_(1080p).mp4
+W:\Collection\War Movies\Battle of the Bulge (1965).m2ts
+W:\Collection\War Movies\The Bridge at Remegen (1969).M2TS
+W:\Collection\X-Men\Avengers Age of Ultron (2015).mp4

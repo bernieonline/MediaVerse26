@@ -10,6 +10,7 @@
 
 from pathlib import Path
 import os
+from PIL import Image, ImageOps
 from NotificationManager import notifier
 import shutil
 import traceback
