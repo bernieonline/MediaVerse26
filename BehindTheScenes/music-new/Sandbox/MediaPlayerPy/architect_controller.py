@@ -11,6 +11,7 @@ from search_results_model import SearchResultsModel
 from Architect_Summary import ArchitectSummary # Add this at the top
 from project_paths import movies_coll_v2 # Ensure this is imported
 from project_paths import paths
+from json_safe import safe_json_write
 
 
 
@@ -655,9 +656,8 @@ class ArchitectController(QObject):
             }
 
             collections_db.append(final_entry)
-            
-            with open(target_path, "w", encoding="utf-8") as f:
-                json.dump(collections_db, f, indent=4)
+
+            safe_json_write(target_path, collections_db)
 
             print(f"✅ [DYNAMIC SAVE]: '{new_name}' recorded in category '{final_entry['category']}'.")
 
@@ -1039,8 +1039,7 @@ class ArchitectController(QObject):
                     changes_made += 1
 
             if changes_made > 0:
-                with open(target_path, "w", encoding="utf-8") as f:
-                    json.dump(data, f, indent=4)
+                safe_json_write(target_path, data)
                 print(f"✅ Backflushed {changes_made} collections to new category: {new_name}")
                 self.categoryModelChanged.emit() # Refresh the UI list
                 return True
@@ -1069,8 +1068,7 @@ class ArchitectController(QObject):
                     item["favorite"] = not bool(item.get("favorite", False))
                     print(f"⭐ [FAVORITE] '{collection_name}' → {item['favorite']}")
                     break
-            with open(target_path, "w", encoding="utf-8") as f:
-                json.dump(data, f, indent=4)
+            safe_json_write(target_path, data)
         except Exception as e:
             print(f"❌ [toggle_favorite_architect] Error: {e}")
 
@@ -1089,8 +1087,7 @@ class ArchitectController(QObject):
                 if not (item.get("type") == "Architect" and item.get("name") == collection_name)
             ]
             if len(data) < before:
-                with open(target_path, "w", encoding="utf-8") as f:
-                    json.dump(data, f, indent=4)
+                safe_json_write(target_path, data)
                 print(f"🗑️  [DELETE] '{collection_name}' removed from collections.")
                 self.categoryModelChanged.emit()
         except Exception as e:
@@ -1110,8 +1107,7 @@ class ArchitectController(QObject):
                     item["name"] = new_name
                     print(f"✏️  [RENAME] '{old_name}' → '{new_name}'")
                     break
-            with open(target_path, "w", encoding="utf-8") as f:
-                json.dump(data, f, indent=4)
+            safe_json_write(target_path, data)
             self.categoryModelChanged.emit()
         except Exception as e:
             print(f"❌ [rename_architect_collection] Error: {e}")
@@ -1130,8 +1126,7 @@ class ArchitectController(QObject):
                     item["imagePath"] = filename
                     print(f"🖼️  [IMAGE] '{collection_name}' → '{filename}'")
                     break
-            with open(target_path, "w", encoding="utf-8") as f:
-                json.dump(data, f, indent=4)
+            safe_json_write(target_path, data)
             self.collectionImagePathReady.emit(filename)
         except Exception as e:
             print(f"❌ [update_collection_image] Error: {e}")

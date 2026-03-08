@@ -11,6 +11,7 @@ import random  # <--- Crucial for the random posters
 from project_paths import paths  # <--- Loads your relative path dictionary
 # Import your centralized path definitions
 import XMLCollectionBuilder
+from json_safe import safe_json_write
 
 class XMLCollections(QObject):
     cacheRebuilt = Signal()
@@ -272,8 +273,7 @@ class XMLCollections(QObject):
                 "created": "2025-12-29"
             })
 
-            with open(file_path, 'w', encoding='utf-8') as f:
-                json.dump(library, f, indent=4)
+            safe_json_write(file_path, library)
             return True
         except Exception as e:
             print(f"❌ Registry Save Error: {e}")
@@ -307,8 +307,7 @@ class XMLCollections(QObject):
 
             # Save clean cache
             self.cache_dir.mkdir(parents=True, exist_ok=True)
-            with open(self.cache_file, 'w', encoding='utf-8') as f:
-                json.dump(self.master_cache, f)
+            safe_json_write(self.cache_file, self.master_cache)
 
             self.cacheRebuilt.emit()
             print(f"✅ Master Cache Rebuilt: {len(self.master_cache)} movies.")
@@ -457,8 +456,7 @@ class XMLCollections(QObject):
                 "created": "2026-01-01" 
             })
 
-            with open(file_path, 'w', encoding='utf-8') as f:
-                json.dump(library, f, indent=4)
+            safe_json_write(file_path, library)
             print(f"✅ Collection '{name}' saved to V2 registry.")
             return True
         except Exception as e:
@@ -489,8 +487,7 @@ class XMLCollections(QObject):
             if not updated:
                 return False
 
-            with open(file_path, "w", encoding="utf-8") as f:
-                json.dump(data, f, indent=4)
+            safe_json_write(file_path, data)
 
             print(f"✏️ Renamed '{old_name}' → '{new_name}'")
             return True
@@ -521,8 +518,7 @@ class XMLCollections(QObject):
             new_library = [item for item in library if item.get("name") != name]
 
             # Save back
-            with open(file_path, 'w', encoding='utf-8') as f:
-                json.dump(new_library, f, indent=4)
+            safe_json_write(file_path, new_library)
 
             print(f"🗑️ Collection '{name}' deleted successfully.")
             return True
@@ -562,8 +558,7 @@ class XMLCollections(QObject):
                 return False
 
             # Save back
-            with open(file_path, 'w', encoding='utf-8') as f:
-                json.dump(library, f, indent=4)
+            safe_json_write(file_path, library)
 
             print(f"⭐ Favorite toggled for '{name}'.")
             return True
@@ -599,8 +594,7 @@ class XMLCollections(QObject):
                 print(f"⚠️ Rename failed: '{old_name}' not found.")
                 return False
 
-            with open(file_path, 'w', encoding='utf-8') as f:
-                json.dump(library, f, indent=4)
+            safe_json_write(file_path, library)
 
             print(f"✏️ Collection renamed to '{new_name}'.")
             return True

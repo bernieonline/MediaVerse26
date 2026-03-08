@@ -1,5 +1,6 @@
 from project_paths import paths
 import json
+from json_safe import safe_json_write
 
 CONFIG_PATH = paths["menu"]  # You can choose menu_json_path or a separate config.json
 
@@ -11,5 +12,4 @@ def load_config():
     return {"PreferredPlayer": 0}  # default to first option
 
 def save_config(config):
-    with open(CONFIG_PATH, "w", encoding="utf-8") as f:
-        json.dump(config, f, indent=2)
+    safe_json_write(CONFIG_PATH, config)
