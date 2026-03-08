@@ -11,7 +11,7 @@ from search_results_model import SearchResultsModel
 from Architect_Summary import ArchitectSummary # Add this at the top
 from project_paths import movies_coll_v2 # Ensure this is imported
 from project_paths import paths
-from json_safe import safe_json_write
+from json_safe import safe_json_write, safe_json_read
 
 
 
@@ -58,8 +58,7 @@ class ArchitectController(QObject):
         self._current_ids = []  # Initialize it here
 
         # Load the full movie collection once
-        with open(coll_data, "r", encoding="utf-8") as f:
-            self.collection = json.load(f)        
+        self.collection = safe_json_read(coll_data, "xml_collection_data")
 
         # Panel state: mode, criteria, and temporary movie list
         self.panels = {
@@ -631,12 +630,7 @@ class ArchitectController(QObject):
             target_path = str(movies_coll_v2) 
 
             # 1. Load existing
-            collections_db = []
-            if os.path.exists(target_path):
-                with open(target_path, "r", encoding="utf-8") as f:
-                    try:
-                        collections_db = json.load(f)
-                    except: collections_db = []
+            collections_db = safe_json_read(target_path, "collections")
 
             new_name = data.get("name", "New Architect Collection")
             
@@ -675,22 +669,12 @@ class ArchitectController(QObject):
         harvested = set(defaults)
 
         try:
-            # Using the path from project_paths.py as per [2026-01-26]
-            target_path = str(movies_coll_v2) 
-            
-            if os.path.exists(target_path):
-                with open(target_path, "r", encoding="utf-8") as f:
-                    collections = json.load(f)
-                    
-                    for item in collections:
-                        # ACTION POINT: Only grab categories from 'Architect' types
-                        if item.get("type") == "Architect":
-                            cat = item.get("category")
-                            
-                            # Guard against 'Keywords', 'unassigned', or empty values
-                            if cat and cat not in ["Keywords", "unassigned", ""]:
-                                harvested.add(cat)
-                                
+            collections = safe_json_read(movies_coll_v2, "collections")
+            for item in collections:
+                if item.get("type") == "Architect":
+                    cat = item.get("category")
+                    if cat and cat not in ["Keywords", "unassigned", ""]:
+                        harvested.add(cat)
         except Exception as e:
             print(f"⚠️ [CATEOGRY HARVEST ERROR]: {e}")
 
@@ -716,24 +700,18 @@ class ArchitectController(QObject):
 
         # 2. THE UNLOCKED HARVEST
         try:
-            # Using movies_coll_v2 path from project_paths.py
-            if os.path.exists(str(movies_coll_v2)):
-                with open(str(movies_coll_v2), "r", encoding="utf-8") as f:
-                    collections = json.load(f)
-                    for item in collections:
-                        # Only grab 'Architect' types
-                        if item.get("type") == "Architect":
-                            cat = item.get("category")
-                            
-                            # If it's a new unique category, add it as UNLOCKED
-                            if cat and cat not in existing_keys and cat != "Keywords":
-                                registry.append({
-                                    "key": cat,
-                                    "label": cat,
-                                    "tooltip": "User-defined Architect category",
-                                    "locked": False
-                                })
-                                existing_keys.add(cat)
+            collections = safe_json_read(movies_coll_v2, "collections")
+            for item in collections:
+                if item.get("type") == "Architect":
+                    cat = item.get("category")
+                    if cat and cat not in existing_keys and cat != "Keywords":
+                        registry.append({
+                            "key": cat,
+                            "label": cat,
+                            "tooltip": "User-defined Architect category",
+                            "locked": False
+                        })
+                        existing_keys.add(cat)
         except Exception as e:
             print(f"❌ [REGISTRY REFRESH ERROR]: {e}")
 
@@ -747,16 +725,14 @@ class ArchitectController(QObject):
     def galleryCategoryModel(self):
         """Unique category values from Architect records only — pure JSON, no defaults."""
         try:
-            if os.path.exists(str(movies_coll_v2)):
-                with open(str(movies_coll_v2), "r", encoding="utf-8") as f:
-                    collections = json.load(f)
-                cats = sorted(set(
-                    item["category"]
-                    for item in collections
-                    if item.get("type") == "Architect" and item.get("category")
-                ))
-                print(f"📋 [galleryCategoryModel] {len(cats)} categories: {cats}")
-                return [{"key": c, "label": c} for c in cats]
+            collections = safe_json_read(movies_coll_v2, "collections")
+            cats = sorted(set(
+                item["category"]
+                for item in collections
+                if item.get("type") == "Architect" and item.get("category")
+            ))
+            print(f"📋 [galleryCategoryModel] {len(cats)} categories: {cats}")
+            return [{"key": c, "label": c} for c in cats]
         except Exception as e:
             print(f"❌ [galleryCategoryModel] Error: {e}")
         return []
@@ -765,19 +741,17 @@ class ArchitectController(QObject):
     def getCollectionsForCategory(self, category):
         """Emits sorted collection names for the selected category tile."""
         try:
-            if os.path.exists(str(movies_coll_v2)):
-                with open(str(movies_coll_v2), "r", encoding="utf-8") as f:
-                    collections = json.load(f)
-                names = sorted(
-                    item["name"]
-                    for item in collections
-                    if item.get("type") == "Architect"
-                    and item.get("category") == category
-                    and item.get("name")
-                )
-                print(f"📋 [getCollectionsForCategory] '{category}' → {len(names)} collections")
-                self.collectionsForCategoryReady.emit([{"name": n} for n in names])
-                return
+            collections = safe_json_read(movies_coll_v2, "collections")
+            names = sorted(
+                item["name"]
+                for item in collections
+                if item.get("type") == "Architect"
+                and item.get("category") == category
+                and item.get("name")
+            )
+            print(f"📋 [getCollectionsForCategory] '{category}' → {len(names)} collections")
+            self.collectionsForCategoryReady.emit([{"name": n} for n in names])
+            return
         except Exception as e:
             print(f"❌ [getCollectionsForCategory] Error: {e}")
         self.collectionsForCategoryReady.emit([])
@@ -866,12 +840,10 @@ class ArchitectController(QObject):
         and prints the final movie list with image cache status.
         """
         try:
-            if not os.path.exists(str(movies_coll_v2)):
-                print("❌ [RESOLVE] Collections file not found")
+            collections = safe_json_read(movies_coll_v2, "collections")
+            if not collections:
+                print("❌ [RESOLVE] Collections file not found or empty")
                 return
-
-            with open(str(movies_coll_v2), "r", encoding="utf-8") as f:
-                collections = json.load(f)
 
             record = next(
                 (c for c in collections
@@ -923,13 +895,11 @@ class ArchitectController(QObject):
         """
         import re
         try:
-            if not os.path.exists(str(movies_coll_v2)):
-                print("❌ [GRID] Collections file not found")
+            collections = safe_json_read(movies_coll_v2, "collections")
+            if not collections:
+                print("❌ [GRID] Collections file not found or empty")
                 self.collectionMoviesReady.emit([])
                 return
-
-            with open(str(movies_coll_v2), "r", encoding="utf-8") as f:
-                collections = json.load(f)
 
             record = next(
                 (c for c in collections
@@ -985,10 +955,8 @@ class ArchitectController(QObject):
         handle that case later (animated scatter from rules).
         """
         try:
-            if os.path.exists(str(movies_coll_v2)):
-                with open(str(movies_coll_v2), "r", encoding="utf-8") as f:
-                    collections = json.load(f)
-
+            collections = safe_json_read(movies_coll_v2, "collections")
+            if collections:
                 record = next(
                     (c for c in collections
                      if c.get("type") == "Architect" and c.get("name") == collection_name),
@@ -1029,8 +997,7 @@ class ArchitectController(QObject):
             target_path = str(movies_coll_v2)
             if not os.path.exists(target_path): return
 
-            with open(target_path, "r", encoding="utf-8") as f:
-                data = json.load(f)
+            data = safe_json_read(target_path, "collections")
 
             changes_made = 0
             for collection in data:
@@ -1061,8 +1028,7 @@ class ArchitectController(QObject):
             target_path = str(movies_coll_v2)
             if not os.path.exists(target_path):
                 return
-            with open(target_path, "r", encoding="utf-8") as f:
-                data = json.load(f)
+            data = safe_json_read(target_path, "collections")
             for item in data:
                 if item.get("type") == "Architect" and item.get("name") == collection_name:
                     item["favorite"] = not bool(item.get("favorite", False))
@@ -1079,8 +1045,7 @@ class ArchitectController(QObject):
             target_path = str(movies_coll_v2)
             if not os.path.exists(target_path):
                 return
-            with open(target_path, "r", encoding="utf-8") as f:
-                data = json.load(f)
+            data = safe_json_read(target_path, "collections")
             before = len(data)
             data = [
                 item for item in data
@@ -1100,8 +1065,7 @@ class ArchitectController(QObject):
             target_path = str(movies_coll_v2)
             if not os.path.exists(target_path):
                 return
-            with open(target_path, "r", encoding="utf-8") as f:
-                data = json.load(f)
+            data = safe_json_read(target_path, "collections")
             for item in data:
                 if item.get("type") == "Architect" and item.get("name") == old_name:
                     item["name"] = new_name
@@ -1119,8 +1083,7 @@ class ArchitectController(QObject):
             target_path = str(movies_coll_v2)
             if not os.path.exists(target_path):
                 return
-            with open(target_path, "r", encoding="utf-8") as f:
-                data = json.load(f)
+            data = safe_json_read(target_path, "collections")
             for item in data:
                 if item.get("type") == "Architect" and item.get("name") == collection_name:
                     item["imagePath"] = filename

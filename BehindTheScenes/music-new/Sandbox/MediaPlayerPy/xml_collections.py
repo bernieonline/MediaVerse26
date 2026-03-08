@@ -11,7 +11,7 @@ import random  # <--- Crucial for the random posters
 from project_paths import paths  # <--- Loads your relative path dictionary
 # Import your centralized path definitions
 import XMLCollectionBuilder
-from json_safe import safe_json_write
+from json_safe import safe_json_write, safe_json_read
 
 class XMLCollections(QObject):
     cacheRebuilt = Signal()
@@ -56,23 +56,14 @@ class XMLCollections(QObject):
     def load_data(self):
         """Loads the master movie data."""
         data_path = paths.get("xmldate")
-        if data_path and Path(data_path).exists():
-            try:
-                with open(data_path, 'r', encoding='utf-8') as f:
-                    self.master_cache = json.load(f)
-                
-                # Check for empty data
-                if not self.master_cache:
-                    print(f"⚠️ [DATA DEBUG] {data_path} loaded, but it is an EMPTY LIST [].")
-                else:
-                    print(f"🛠️ [DATA DEBUG] Successfully loaded {len(self.master_cache)} movies.")
-            
-            except json.JSONDecodeError:
-                print(f"❌ [DATA DEBUG] CORRUPTION ERROR: {data_path} contains invalid JSON.")
-            except Exception as e:
-                print(f"❌ [DATA DEBUG] UNKNOWN ERROR loading {data_path}: {e}")
+        if not data_path:
+            print(f"❌ [DATA DEBUG] Load aborted: 'xmldate' path not configured.")
+            return
+        self.master_cache = safe_json_read(data_path, "xml_collection_data")
+        if self.master_cache:
+            print(f"🛠️ [DATA DEBUG] Successfully loaded {len(self.master_cache)} movies.")
         else:
-            print(f"❌ [DATA DEBUG] Load aborted: {data_path} not found.")
+            print(f"❌ [DATA DEBUG] Load failed or empty: {data_path}")
     # start
     def _load_image_map(self):
         """Links Video Filenames to Thumbnails using relative project paths."""
@@ -82,9 +73,8 @@ class XMLCollections(QObject):
 
         # 2. Safety Check: Ensure the manifest exists
         if manifest_path and Path(manifest_path).exists():
-            with open(manifest_path, 'r', encoding='utf-8') as f:
-                data = json.load(f)
-                items = data if isinstance(data, list) else data.get("items", [])
+            data = safe_json_read(manifest_path)
+            items = data if isinstance(data, list) else data.get("items", [])
 
                 # 3. Use enumerate so 'i' is defined for your first-item test
                 for i, item in enumerate(items):
@@ -257,12 +247,7 @@ class XMLCollections(QObject):
             file_path = Path("W:/MediaVerse/Collections/Movies_Collections.json")
             file_path.parent.mkdir(parents=True, exist_ok=True)
 
-            library = []
-            if file_path.exists():
-                with open(file_path, 'r', encoding='utf-8') as f:
-                    try:
-                        library = json.load(f)
-                    except: library = []
+            library = safe_json_read(file_path, "collections")
 
             # Deduplicate by name
             library = [item for item in library if item.get("name") != name]
@@ -294,9 +279,7 @@ class XMLCollections(QObject):
             return
 
         try:
-            with open(self.manifest_path, 'r', encoding='utf-8') as f:
-                raw_data = json.load(f)
-            
+            raw_data = safe_json_read(self.manifest_path)
             items = raw_data if isinstance(raw_data, list) else raw_data.get("items", [])
             
             # Movies Only Filter
@@ -351,13 +334,7 @@ class XMLCollections(QObject):
         # Use the path we just added to project_paths.py
         json_file = self.paths["movies_coll_v2"] 
         
-        if not json_file.exists():
-            return []
-
-        with open(json_file, 'r') as f:
-            all_data = json.load(f)
-
-        # Return only the ones matching the "primary_category"
+        all_data = safe_json_read(json_file, "collections")
         return [item for item in all_data if item.get("primary_category") == category_key]
     
 
@@ -416,13 +393,8 @@ class XMLCollections(QObject):
         if not file_path.exists():
             return []
             
-        try:
-            with open(file_path, 'r', encoding='utf-8') as f:
-                library = json.load(f)
-                return [str(item.get('name', '')) for item in library]
-        except Exception as e:
-            print(f"❌ Error reading collection names: {e}")
-            return []
+        library = safe_json_read(file_path, "collections")
+        return [str(item.get('name', '')) for item in library]
     
     
     
@@ -438,11 +410,7 @@ class XMLCollections(QObject):
             file_path = Path("W:/MediaVerse/Collections/Movies_Collections_v2.json")
             file_path.parent.mkdir(parents=True, exist_ok=True)
 
-            library = []
-            if file_path.exists():
-                with open(file_path, 'r', encoding='utf-8') as f:
-                    try: library = json.load(f)
-                    except: library = []
+            library = safe_json_read(file_path, "collections")
 
             # Remove existing entry with same name
             library = [item for item in library if item.get("name") != name]
@@ -474,8 +442,7 @@ class XMLCollections(QObject):
             if not file_path.exists():
                 return False
 
-            with open(file_path, "r", encoding="utf-8") as f:
-                data = json.load(f)
+            data = safe_json_read(file_path, "collections")
 
             updated = False
             for item in data:
@@ -507,12 +474,7 @@ class XMLCollections(QObject):
                 print("⚠️ Delete failed: JSON file does not exist.")
                 return False
 
-            # Load existing library
-            with open(file_path, 'r', encoding='utf-8') as f:
-                try:
-                    library = json.load(f)
-                except:
-                    library = []
+            library = safe_json_read(file_path, "collections")
 
             # Remove the entry
             new_library = [item for item in library if item.get("name") != name]
@@ -538,12 +500,7 @@ class XMLCollections(QObject):
                 print("⚠️ Favorite toggle failed: JSON file does not exist.")
                 return False
 
-            # Load existing library
-            with open(file_path, 'r', encoding='utf-8') as f:
-                try:
-                    library = json.load(f)
-                except:
-                    library = []
+            library = safe_json_read(file_path, "collections")
 
             # Modify the matching entry
             updated = False
@@ -577,11 +534,7 @@ class XMLCollections(QObject):
                 print("⚠️ Rename failed: JSON file does not exist.")
                 return False
 
-            with open(file_path, 'r', encoding='utf-8') as f:
-                try:
-                    library = json.load(f)
-                except:
-                    library = []
+            library = safe_json_read(file_path, "collections")
 
             updated = False
             for item in library:
