@@ -15,6 +15,10 @@ safe_json_read(path, schema_type=None)
     validation. Returns a safe empty default if all sources fail.
     schema_type: "collections" | "xml_collection_data" | "config" |
                  "manifest" | None (no validation)
+
+    For "collections": after loading, runs a soft record-level audit that
+    warns about suspect records (e.g. quick collections with empty rules)
+    without rejecting the whole file or restoring from backup.
 """
 
 import json
@@ -69,13 +73,42 @@ def _validate(data, schema_type):
     return True
 
 
+def _audit_collections(data):
+    """
+    Soft record-level audit for the collections list.
+
+    Does NOT reject the whole file — only logs and notifies about individual
+    suspect records. Called after _validate() passes.
+
+    Currently detects:
+      - Quick collection records (have 'primary_category', no 'type') whose
+        'rules' dict is empty — these will always return zero movies.
+    """
+    suspect = []
+    for r in data:
+        if not isinstance(r, dict):
+            continue
+        is_quick = "primary_category" in r and r.get("type") != "Architect"
+        if is_quick and isinstance(r.get("rules"), dict) and len(r["rules"]) == 0:
+            suspect.append(r.get("name", "<unnamed>"))
+
+    if suspect:
+        names = ", ".join(f"'{n}'" for n in suspect)
+        msg = (f"⚠️ Collections with empty rules (will return no movies): {names}. "
+               f"Delete and recreate them to fix.")
+        print(f"[json_safe] {msg}")
+        log.warning("_audit_collections: %s", msg)
+        _notify(msg, urgent=False)
+
+
 def _notify(message, urgent=False):
     """Post a notification — silently skipped if NotificationManager unavailable."""
     try:
         from NotificationManager import notifier
+        print(f"[json_safe] _notify called | qml_ready={notifier._qml_ready} | msg={message}")
         notifier.post_notification(message, urgent)
-    except Exception:
-        pass
+    except Exception as e:
+        print(f"[json_safe] _notify failed: {e}")
 
 
 # ── Backup helpers ────────────────────────────────────────────────────────────
@@ -206,17 +239,23 @@ def safe_json_read(path, schema_type=None):
             if candidate != path:
                 msg = (f"⚠️ '{path.name}' was damaged — "
                        f"data restored from {candidate.name}")
+                print(f"[json_safe] {msg}")
                 log.warning(msg)
                 _notify(msg, urgent=True)
+
+            if schema_type == "collections":
+                _audit_collections(data)
 
             return data
 
         except (json.JSONDecodeError, OSError) as exc:
+            print(f"[json_safe] ❌ Failed to load {candidate.name}: {exc}")
             log.warning("safe_json_read: failed to load %s: %s", candidate.name, exc)
             continue
 
     # All sources exhausted
     msg = f"❌ All sources failed for '{path.name}' — using empty default"
+    print(f"[json_safe] {msg}")
     log.error(msg)
     _notify(msg, urgent=True)
     return default

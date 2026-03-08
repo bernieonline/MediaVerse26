@@ -10,7 +10,7 @@ Item {
 
     // Slide Animation
     Behavior on x { 
-        NumberAnimation { duration: 400; easing.type: Easing.OutPower4 } 
+        NumberAnimation { duration: 400; easing.type: Easing.OutQuart }
     }
 
     // --- 1. THE DATA MODEL ---

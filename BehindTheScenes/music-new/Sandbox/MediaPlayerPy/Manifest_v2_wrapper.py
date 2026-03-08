@@ -57,6 +57,18 @@ class ManifestUpdater_v2(QObject):
         print("[ManifestUpdater_v2] Loading manifest only...")
         self._load_manifest()
 
+    @Slot()
+    def force_rebuild_manifest(self):
+        """
+        Recovery tool: bypass the hash comparison and force a full manifest
+        rebuild from scratch. Runs in a background thread.
+        Use when manifest.json is suspected corrupt or incomplete.
+        """
+        print("[ManifestUpdater_v2] force_rebuild_manifest called — bypassing hash check.")
+        notifier.post_notification("Rebuilding manifest from scratch...", False)
+        thread = threading.Thread(target=self.bootstrap_manifest, daemon=True)
+        thread.start()
+
     # ------------------------------------------------------------
     # INTERNAL WORK
     # ------------------------------------------------------------
@@ -88,13 +100,23 @@ class ManifestUpdater_v2(QObject):
 
             # If Check 0 found a hash mismatch, it returned manifest_b with content_changed = True
             if result and result.get("content_changed"):
-                
-                print("[ManifestUpdater_v2] Swapping files: Candidate is now the Master.")
-                
-                
-                # This physically moves manifest_candidate.json to manifest.json
-                # .replace() is atomic and safe.
-                self.comparison_path.replace(self.manifest_path)
+                # Guard: refuse swap if manifest_b has fewer than 80% of manifest.json items
+                # (protects against a partial/failed library scan silently shrinking the manifest)
+                current_count = self._safe_item_count(self.manifest_path)
+                candidate_count = self._safe_item_count(self.comparison_path)
+
+                if current_count > 0 and candidate_count < current_count * 0.8:
+                    msg = (f"⚠️ Manifest swap refused — candidate has {candidate_count} items "
+                           f"vs {current_count} in current manifest (less than 80%). "
+                           f"Library scan may be incomplete. Restart to retry.")
+                    print(f"[ManifestUpdater_v2] {msg}")
+                    notifier.post_notification(msg, urgent=True)
+                else:
+                    print("[ManifestUpdater_v2] Swapping files: Candidate is now the Master.")
+                    # This physically moves manifest_candidate.json to manifest.json
+                    # .replace() is atomic and safe.
+                    self.comparison_path.replace(self.manifest_path)
+                    self.manifestUpdated.emit()
             # ----------------------------
 
             # Step 4: Load canonical manifest and inject content_changed
@@ -138,6 +160,15 @@ class ManifestUpdater_v2(QObject):
             print("[ManifestUpdater_v2]", msg)
             self.manifestError.emit(msg)
     
+    def _safe_item_count(self, path: Path) -> int:
+        """Return the number of items in a manifest JSON file, or 0 on any failure."""
+        try:
+            with open(path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            return len(data.get("items", []))
+        except Exception:
+            return 0
+
     def bootstrap_manifest(self):
         """
         First‑run manifest builder.

@@ -111,16 +111,14 @@ def main():
         #build local cache on signal conf server cache completed
         manifest_updater.cacheRebuildFinished.connect(manifest_updater.start_local_cache_sync)
 
-        
         todo_manager = ToDoManager()
         xml_logic = XMLCollections()
         xml_controller = XmlController()
         xml_provider = GetXMLDetails()
 
-        if not paths["xmldate"].exists():
-            xml_logic.build_collection_data_json()
-        else:
-            xml_logic.refresh_master_cache()
+        # When the manifest swaps in a new version, rebuild xml_collection_data.json automatically
+        # (XMLCollections.__init__ already handles startup rebuild via mtime check)
+        manifest_updater.manifestUpdated.connect(xml_logic.rebuild_after_manifest_change)
 
         if myLibrary and "path" in myLibrary[0]:
             fileSystem.update_folders(myLibrary[0]["path"])
@@ -231,6 +229,14 @@ def main():
 
         # Background Manifest Work
         def start_manifest_work():
+            # Check server availability before touching W: drive
+            server_root = Path(r"W:\MediaVerse")
+            if not server_root.exists():
+                msg = "⚠️ Server (W:) not accessible — running in local cache mode. Library updates unavailable."
+                print(f"[STARTUP] {msg}")
+                notifier.post_notification(msg, True)
+                return
+
             if not paths["server_manifest_v2"].exists():
                 notifier.post_notification("Building manifest...", False)
                 manifest_updater.bootstrap_manifest()

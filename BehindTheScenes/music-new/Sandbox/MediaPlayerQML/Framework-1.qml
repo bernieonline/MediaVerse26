@@ -78,6 +78,9 @@ ApplicationWindow {
                 console.log("🛠️ Architect: Opening Category_Edit panel")
                 categoryEditPanel.open()
             }
+            else if (label === "Configuration...") {
+                settingsPanel.open()
+            }
         }
     }
 
@@ -293,6 +296,9 @@ ApplicationWindow {
     }
     Category_Edit {
         id: categoryEditPanel
+    }
+    SettingsPanel {
+        id: settingsPanel
     }
     Snatcher2 {
         id: snatcher2Panel

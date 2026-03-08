@@ -11,7 +11,7 @@ import random  # <--- Crucial for the random posters
 from project_paths import paths  # <--- Loads your relative path dictionary
 # Import your centralized path definitions
 import XMLCollectionBuilder
-from json_safe import safe_json_write, safe_json_read
+from json_safe import safe_json_write, safe_json_read, _backup_candidates
 
 class XMLCollections(QObject):
     cacheRebuilt = Signal()
@@ -263,6 +263,82 @@ class XMLCollections(QObject):
         except Exception as e:
             print(f"❌ Registry Save Error: {e}")
             return False
+
+    @Slot()
+    def rebuild_after_manifest_change(self):
+        """
+        Called when the manifest background thread swaps in a new manifest.json.
+        Rebuilds xml_collection_data.json from scratch (reads all sidecar XML files),
+        then reloads master_cache so search/filter results are current without a restart.
+        Runs in a background thread — does not block the UI.
+        """
+        def _run():
+            try:
+                print("[XMLCollections] manifest changed — rebuilding xml_collection_data.json...")
+                import XMLCollectionBuilder
+                XMLCollectionBuilder.build_dna_bank()
+                self.load_data()
+                print(f"[XMLCollections] rebuild complete — {len(self.master_cache)} movies in cache.")
+            except Exception as e:
+                print(f"[XMLCollections] rebuild_after_manifest_change failed: {e}")
+
+        thread = threading.Thread(target=_run, daemon=True)
+        thread.start()
+
+    @Slot()
+    def force_rebuild_xml_collection_data(self):
+        """
+        Recovery tool: force a full rebuild of xml_collection_data.json on demand,
+        regardless of whether the manifest has changed. Useful when the file is
+        suspected corrupt or out of date.
+        """
+        self.rebuild_after_manifest_change()
+
+    @Slot(str, result=bool)
+    def restore_from_backup(self, file_key):
+        """
+        Recovery tool: replace a critical JSON file with its most recent backup.
+
+        file_key options:
+          "collections"        → Movies_Collections_v2.json  (_bak1 or .bak)
+          "xml_collection_data"→ xml_collection_data.json    (.bak)
+          "config"             → Config.json                 (.bak)
+          "manifest"           → manifest.json               (.bak)
+
+        Returns True on success, False on failure.
+        """
+        key_to_path = {
+            "collections":         Path(paths["movies_coll_v2"]),
+            "xml_collection_data": Path(paths["xmldate"]),
+            "config":              Path(paths["config"]),
+            "manifest":            Path(paths["server_manifest_v2"]),
+        }
+
+        target = key_to_path.get(file_key)
+        if target is None:
+            print(f"[XMLCollections] restore_from_backup: unknown key '{file_key}'")
+            return False
+
+        candidates = _backup_candidates(target)
+        for bak in candidates:
+            if bak.exists():
+                try:
+                    import shutil
+                    shutil.copy2(bak, target)
+                    msg = f"✅ '{target.name}' restored from {bak.name}"
+                    print(f"[XMLCollections] {msg}")
+                    from NotificationManager import notifier
+                    notifier.post_notification(msg, False)
+                    return True
+                except Exception as e:
+                    print(f"[XMLCollections] restore_from_backup failed: {e}")
+                    return False
+
+        msg = f"⚠️ No backup found for '{target.name}'"
+        print(f"[XMLCollections] {msg}")
+        from NotificationManager import notifier
+        notifier.post_notification(msg, True)
+        return False
 
     @Slot()
     def refresh_master_cache(self):

@@ -39,7 +39,8 @@
           "label": "Media Player",
           "items": []
         },
-        { "label": "Categories" }
+        { "label": "Categories" },
+        { "label": "Configuration..." }
       ]
     }
   ]
