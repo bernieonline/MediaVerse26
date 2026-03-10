@@ -67,20 +67,8 @@ ApplicationWindow {
         anchors.horizontalCenter: parent.horizontalCenter
         menuData: centralMenuData
 
-        onMenuItemTriggered: function(label) { 
+        onMenuItemTriggered: function(label) {
             console.log("qml: Clicked: " + label)
-            
-            if (label === "Manage Players ...") {
-                playerExeBrowser.open()
-            } 
-            // --- THE NEW HANDLER ---
-            else if (label === "Categories") {
-                console.log("🛠️ Architect: Opening Category_Edit panel")
-                categoryEditPanel.open()
-            }
-            else if (label === "Configuration...") {
-                settingsPanel.open()
-            }
         }
     }
 
@@ -300,10 +288,31 @@ ApplicationWindow {
     SettingsPanel {
         id: settingsPanel
     }
+
+    SettingsFlyout {
+        id: settingsFlyout
+        height: parent.height
+        z: 9999
+    }
+
+    Connections {
+        target: utilitySidebar
+        function onSettingsClicked() { settingsFlyout.open() }
+    }
+
+    Connections {
+        target: settingsFlyout
+        function onMenuItemClicked(item) {
+            if      (item === "Manage Players...") playerExeBrowser.open()
+            else if (item === "Categories")        categoryEditPanel.open()
+            else if (item === "Configuration...")  settingsPanel.open()
+        }
+    }
+
     Snatcher2 {
         id: snatcher2Panel
         anchors.fill: parent
         visible: false
     }
-    
+
 }

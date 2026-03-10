@@ -9,9 +9,11 @@ Item {
     property int sidebarWidth: 225
     property bool isOpen: false
     property int iconSize: 21
-    property color brandColor: "#1E90FF" 
-    property int unreadCount: 0  
-    property bool hasUrgent: false 
+    property color brandColor: "#1E90FF"
+    property int unreadCount: 0
+    property bool hasUrgent: false
+
+    signal settingsClicked() 
 
     // --- Helper Function: Show Collection Creator ---
     function showCollectionCreator() {
@@ -199,44 +201,50 @@ Item {
                     }
                 }
 
-                ToolButton { 
-                    iconCode: "\uf044"; toolName: "To-Do" 
+                ToolButton {
+                    iconCode: "\uf044"; toolName: "To-Do"
                     onClicked: {
                         notificationPanel.isShown = false
-                        collectionCreatorPanel.isShown = false 
+                        collectionCreatorPanel.isShown = false
                         todoPanel.isShown = !todoPanel.isShown
                         if (todoPanel.isShown) todoTextArea.text = todoManager.load_todo()
                     }
                 }
 
-                ToolButton { 
-                    iconCode: "\uf00b" 
-                    toolName: "Collections" 
-                    onClicked: root.showCollectionCreator()
-                }
-
-                ToolButton { 
+                ToolButton {
                     iconCode: "\uf1c0" // FontAwesome Database icon
-                    toolName: "Backup System" 
+                    toolName: "Backup System"
                     onClicked: {
                         // 1. Close all other conflicting panels
                         notificationPanel.isShown = false
                         todoPanel.isShown = false
                         collectionCreatorPanel.isShown = false
-                        
+
                         // 2. Open our new Backup Panel
                         backupSystemPanel.currentTab = "Home" // Always start on the info page
                         backupSystemPanel.visible = true
-                        
+
                         // 3. Close the sidebar body to show the centered panel clearly
-                        root.isOpen = false 
-                        
+                        root.isOpen = false
+
                         console.log("🚀 Backup System Panel Deployed");
                     }
                 }
 
+                ToolButton {
+                    iconCode: "\uf013" // FontAwesome Cog icon
+                    toolName: "Settings"
+                    onClicked: {
+                        // Close all other conflicting panels
+                        notificationPanel.isShown = false
+                        todoPanel.isShown = false
+                        collectionCreatorPanel.isShown = false
+                        backupSystemPanel.visible = false
 
-
+                        root.settingsClicked()
+                        console.log("⚙️ Settings Flyout Triggered");
+                    }
+                }
 
 
 

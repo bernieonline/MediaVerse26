@@ -24,24 +24,6 @@
         { "label": "Rotten Tomatoes" },
         { "label": "FFMPEG" }
       ]
-    },
-    {
-      "label": "Settings",
-      "items": [
-        {
-          "label": "Media Apps",
-          "items": [
-            { "label": "Manage Players ..." }
-          ]
-        },
-        { "label": "MySql" },
-        {
-          "label": "Media Player",
-          "items": []
-        },
-        { "label": "Categories" },
-        { "label": "Configuration..." }
-      ]
     }
   ]
 }

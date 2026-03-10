@@ -107,13 +107,18 @@ class SettingsManager(QObject):
         if hasattr(self.fileSystem, 'normalize_path'):
             video_path = self.fileSystem.normalize_path(video_path)
             
-        preferred_index = self._settings.get("Preferred Player", 0)
+        preferred = self._settings.get("Preferred Player", "MiniPlayer")
         player_paths = self._settings.get("PlayerPaths", {})
-        players = list(player_paths.keys())
 
-        if 0 <= preferred_index < len(players):
-            player_name = players[preferred_index]
-            player_exe = player_paths[player_name]
+        # Support legacy integer value
+        if isinstance(preferred, int):
+            players = list(player_paths.keys())
+            player_name = players[preferred] if 0 <= preferred < len(players) else None
+        else:
+            player_name = str(preferred) if preferred in player_paths else None
+
+        if player_name:
+            player_exe = player_paths.get(player_name, "")
             
             if player_name == "MiniPlayer" or not player_exe:
                 self.videoLaunchRequested.emit(video_path)

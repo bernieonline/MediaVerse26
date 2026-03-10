@@ -43,14 +43,13 @@ class PlaybackRouter(QObject):
         # ----------------------------------------------------
         # PREFERRED PLAYER
         # ----------------------------------------------------
-        pref_index = self.config.get("Preferred Player", 1)
-        player_map = {
-            0: "MiniPlayer",
-            1: "JRiver",
-            2: "PowerDVD",
-            3: "vlc"
-        }
-        self.preferred_player = player_map.get(pref_index, "JRiver")
+        pref = self.config.get("Preferred Player", "JRiver")
+        if isinstance(pref, int):
+            # Legacy integer value — map to name for backward compatibility
+            _legacy_map = {0: "MiniPlayer", 1: "JRiver", 2: "PowerDVD", 3: "vlc"}
+            self.preferred_player = _legacy_map.get(pref, "JRiver")
+        else:
+            self.preferred_player = str(pref)
         print("Preferred player:", self.preferred_player)
 
         # ----------------------------------------------------
@@ -284,9 +283,12 @@ class PlaybackRouter(QObject):
             return
 
         # Update preferred player
-        pref_index = self.config.get("Preferred Player", 1)
-        player_map = {0: "MiniPlayer", 1: "JRiver", 2: "PowerDVD", 3: "vlc"}
-        self.preferred_player = player_map.get(pref_index, "JRiver")
+        pref = self.config.get("Preferred Player", "JRiver")
+        if isinstance(pref, int):
+            _legacy_map = {0: "MiniPlayer", 1: "JRiver", 2: "PowerDVD", 3: "vlc"}
+            self.preferred_player = _legacy_map.get(pref, "JRiver")
+        else:
+            self.preferred_player = str(pref)
         print("Updated preferred player:", self.preferred_player)
 
         # Update player paths
