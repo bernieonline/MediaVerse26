@@ -315,4 +315,37 @@ ApplicationWindow {
         visible: false
     }
 
+    // Cinema return fade — fades from black to transparent when returning from JRiver
+    Rectangle {
+        id: cinemaReturnFade
+        anchors.fill: parent
+        color: "black"
+        opacity: 0.0
+        visible: opacity > 0.0
+        z: 9998
+
+        NumberAnimation {
+            id: fadeFromBlack
+            target: cinemaReturnFade
+            property: "opacity"
+            from: 1.0; to: 0.0
+            duration: 1500
+            easing.type: Easing.InOutQuad
+        }
+    }
+
+    Connections {
+        target: playbackBridge
+        function onPlaybackFinished() {
+            // Toggle visibility Windowed→FullScreen to force a compositor
+            // repaint — this ensures Qt repaints over any residual JRiver pixels
+            window.visibility = Window.Windowed
+            window.visibility = Window.FullScreen
+            window.raise()
+            window.requestActivate()
+            // Cinema fade from black
+            cinemaReturnFade.opacity = 1.0
+            fadeFromBlack.start()
+        }
+    }
 }

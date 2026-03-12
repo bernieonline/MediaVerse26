@@ -75,51 +75,63 @@ class PlaybackRouter(QObject):
     # ------------------------------------------------------------
     # PUBLIC ENTRY POINT (QML → Python)
     # ------------------------------------------------------------
+    
+    def _play_generic_subprocess(self, exe_path, video_path, extra_args=None):
+        """A universal launcher that handles path normalization."""
+        # Convert file:///W:/ to W:\
+        clean_path = video_path.replace("file:///", "").replace("/", "\\")
+        clean_path = os.path.normpath(clean_path)
+        
+        cmd = [exe_path, clean_path]
+        if extra_args:
+            cmd.extend(extra_args)
+            
+        print(f"🚀 Executing: {cmd}")
+        try:
+            subprocess.Popen(cmd)
+        except Exception as e:
+            print(f"❌ Failed to launch: {e}")
+    
+    
+    
     @Slot(str, bool)
     def playVideo(self, video_path, is_master):
-        print("\n==============================")
-        print("Refresh video player")
-        print("==============================")
-
-        # ⭐ Always reload config before routing
+        # 1. Always reload the latest JSON from Stage 1 & 2
         self.refresh_config()
 
-        print("\n==============================")
-        print("PlaybackRouter.playVideo CALLED")
-        print("==============================")
-        print("Incoming video path:", video_path)
-        print("isMaster:", is_master)
-        print("Preferred player:", self.preferred_player)
+        # 2. Get the Player Name and Path dynamically
+        player_name = str(self.preferred_player).strip()
+        player_exe = self.player_paths.get(player_name, "")
+
+        print(f"\n>>> ROUTING REQUEST")
+        print(f"Target Player: {player_name}")
+        print(f"Target Path: {player_exe}")
 
         # --------------------------------------------------------
-        # MINI PLAYER
+        # INTERNAL PLAYER
         # --------------------------------------------------------
-        if self.preferred_player == "MiniPlayer":
+        if player_name == "MiniPlayer":
             self._route_miniplayer(video_path)
             return
 
         # --------------------------------------------------------
-        # JRiver
+        # EXTERNAL PLAYERS (Dynamic Lookup)
         # --------------------------------------------------------
-        if self.preferred_player == "JRiver":
+        if not player_exe or not os.path.exists(player_exe):
+            print(f"❌ ERROR: Player '{player_name}' has no valid EXE path.")
+            return
+
+        # Use specific logic for JRiver (HTTP vs Subprocess)
+        if "JRiver" in player_name:
             self._route_jriver(video_path, is_master)
-            return
-
-        # --------------------------------------------------------
-        # VLC
-        # --------------------------------------------------------
-        if self.preferred_player == "vlc":
-            self._route_vlc(video_path)
-            return
-
-        # --------------------------------------------------------
-        # PowerDVD
-        # --------------------------------------------------------
-        if self.preferred_player == "PowerDVD":
-            self._route_powerdvd(video_path)
-            return
-
-        print("❌ Unknown player selected.")
+            
+        # Use specific logic for MPC (to include /play /close flags)
+        elif "mpc" in player_name.lower():
+            self._play_generic_subprocess(player_exe, video_path, extra_args=["/play", "/close"])
+            
+        # Generic fallback for VLC, PowerDVD, or anything else
+        else:
+            self._play_generic_subprocess(player_exe, video_path)
 
     # ------------------------------------------------------------
     # MiniPlayer Routing

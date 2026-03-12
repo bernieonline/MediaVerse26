@@ -4,9 +4,31 @@ import logging
 import json
 import threading
 import subprocess
+import ctypes
 from pathlib import Path
 from ai_controller import AIController
 from BackupSystem import BackupManager # Add this with your other imports
+
+# ------------------------------------------------------------
+# WIN32 HELPER — find JRiver window regardless of title suffix
+# ------------------------------------------------------------
+def _find_jriver_hwnd(user32):
+    """Return the first top-level HWND whose title contains 'JRiver', or None."""
+    import ctypes.wintypes
+    result = []
+
+    @ctypes.WINFUNCTYPE(ctypes.c_bool, ctypes.wintypes.HWND, ctypes.wintypes.LPARAM)
+    def _cb(hwnd, _):
+        length = user32.GetWindowTextLengthW(hwnd)
+        if length > 0:
+            buf = ctypes.create_unicode_buffer(length + 1)
+            user32.GetWindowTextW(hwnd, buf, length + 1)
+            if "JRiver" in buf.value:
+                result.append(hwnd)
+        return True
+
+    user32.EnumWindows(_cb, 0)
+    return result[0] if result else None
 
 # ------------------------------------------------------------
 # PATHS & CONFIG
@@ -102,7 +124,30 @@ def main():
                     check_tasks = subprocess.check_output('tasklist', shell=True).decode()
                     if "Media Center" not in check_tasks:
                         print("[STARTUP] Launching JRiver...")
-                        subprocess.Popen([jriver_exe], creationflags=subprocess.DETACHED_PROCESS)
+                        subprocess.Popen(
+                            [jriver_exe, "/MediaCenter", "/Min", "/NoSplash"],
+                            creationflags=subprocess.DETACHED_PROCESS
+                        )
+                        # /Min is not always respected — hide JRiver the moment its window
+                        # appears, then keep suppressing it for 5s in case it restores itself.
+                        def _suppress_jriver_on_startup():
+                            import time
+                            _user32 = ctypes.windll.user32
+                            deadline = time.time() + 15     # watch for up to 15s
+                            suppressing = False
+                            suppress_until = 0
+                            while time.time() < deadline:
+                                hwnd = _find_jriver_hwnd(_user32)
+                                if hwnd:
+                                    _user32.ShowWindow(hwnd, 0)  # SW_HIDE
+                                    if not suppressing:
+                                        print("[STARTUP] JRiver hidden.")
+                                        suppressing = True
+                                        suppress_until = time.time() + 5
+                                if suppressing and time.time() > suppress_until:
+                                    return   # done suppressing
+                                time.sleep(0.1)
+                        threading.Thread(target=_suppress_jriver_on_startup, daemon=True).start()
                 except Exception as e:
                     print(f"[STARTUP] JRiver launch error: {e}")
 

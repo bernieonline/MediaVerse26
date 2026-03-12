@@ -104,31 +104,45 @@ class SettingsManager(QObject):
         if not video_path:
             return
         
-        if hasattr(self.fileSystem, 'normalize_path'):
-            video_path = self.fileSystem.normalize_path(video_path)
-            
+        # 1. Force reload to catch Stage 2 selection changes
+        self.load_settings(emit_signal=False)
+        
         preferred = self._settings.get("Preferred Player", "MiniPlayer")
         player_paths = self._settings.get("PlayerPaths", {})
 
-        # Support legacy integer value
+        # --- STAGE 2: RESOLVE THE PLAYER NAME ---
         if isinstance(preferred, int):
-            players = list(player_paths.keys())
-            player_name = players[preferred] if 0 <= preferred < len(players) else None
-        else:
-            player_name = str(preferred) if preferred in player_paths else None
-
-        if player_name:
-            player_exe = player_paths.get(player_name, "")
-            
-            if player_name == "MiniPlayer" or not player_exe:
-                self.videoLaunchRequested.emit(video_path)
+            # Handle Legacy Index (0, 1, 2...)
+            # We grab the keys from the dictionary you built in Stage 1
+            available_players = list(player_paths.keys())
+            if 0 <= preferred < len(available_players):
+                player_name = available_players[preferred]
             else:
-                try:
-                    subprocess.Popen([player_exe, video_path])
-                    print(f"[INFO] Launched with {player_name}")
-                except Exception as e:
-                    print(f"[ERROR] Could not launch {player_name}: {e}")
+                player_name = "MiniPlayer"
+        else:
+            # Handle Modern String ("MPC-BE", "VLC")
+            player_name = str(preferred).strip()
 
+        # --- STAGE 1: RESOLVE THE PATH ---
+        player_exe = player_paths.get(player_name)
+
+        # --- EXECUTION ---
+        if player_name == "MiniPlayer" or not player_exe:
+            print(f"[INFO] Routing to Internal MiniPlayer for: {video_path}")
+            self.videoLaunchRequested.emit(video_path)
+        else:
+            if os.path.exists(player_exe):
+                try:
+                    print(f"[SUCCESS] Launching {player_name} -> {player_exe}")
+                    # For MPC-BE specifically, we can add the auto-play/close flag
+                    if "mpc" in player_name.lower():
+                        subprocess.Popen([player_exe, video_path, "/play", "/close"])
+                    else:
+                        subprocess.Popen([player_exe, video_path])
+                except Exception as e:
+                    print(f"[ERROR] Failed to execute subprocess: {e}")
+            else:
+                print(f"[ERROR] Path does not exist: {player_exe}")
     def sync_menu_players(self):
         """Refreshes the player list inside the menu data and notifies QML via JSON string."""
         if not self.menu_data:

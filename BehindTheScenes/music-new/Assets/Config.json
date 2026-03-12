@@ -1,13 +1,14 @@
 {
   "name": "Bernard Grimshaw",
   "_comment": "This file provides persistence for user settings choices",
-  "Preferred Player": "PowerDVD",
+  "Preferred Player": "mpc-be64",
   "JRiverPort": "52199",
   "LibraryRoot": "W:\\Collection",
   "PlayerPaths": {
     "MiniPlayer": "",
     "JRiver": "C:\\Program Files\\J River\\Media Center 35\\MC35.exe",
     "PowerDVD": "C:\\Program Files\\CyberLink\\PowerDVD20\\PowerDVD.exe",
-    "vlc": "C:\\Program Files (x86)\\VideoLAN\\VLC\\vlc.exe"
+    "vlc": "C:\\Program Files (x86)\\VideoLAN\\VLC\\vlc.exe",
+    "mpc-be64": "C:\\Program Files\\MPC-BE\\mpc-be64.exe"
   }
 }
