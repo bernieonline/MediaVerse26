@@ -583,7 +583,7 @@ Item {
                                         let resolved = _xmlController.resolve_paths(cellItem.movieData.display)
                                         if (resolved && resolved.video) {
                                             let cleanPath = resolved.video.toString().replace(/\\/g, "/")
-                                            playbackBridge.playVideo(cleanPath)
+                                            playbackRouter.playVideo(cleanPath, false)
                                             galleryRoot.v2PlayMovie(cleanPath)
                                         } else {
                                             console.log("❌ No video path for: " + cellItem.movieData.title)
@@ -804,7 +804,7 @@ Item {
                         let resolved = _xmlController.resolve_paths(md.display)
                         if (resolved && resolved.video) {
                             let cleanPath = resolved.video.toString().replace(/\\/g, "/")
-                            playbackBridge.playVideo(cleanPath)
+                            playbackRouter.playVideo(cleanPath, false)
                             galleryRoot.v2PlayMovie(cleanPath)
                         } else {
                             console.log("❌ No video path for: " + md.title)
@@ -935,7 +935,7 @@ Item {
                 var resolved = _xmlController.resolve_paths(movie.display)
                 if (resolved && resolved.video) {
                     var cleanPath = resolved.video.toString().replace(/\\/g, "/")
-                    playbackBridge.playVideo(cleanPath)
+                    playbackRouter.playVideo(cleanPath, false)
                     galleryRoot.v2PlayMovie(cleanPath)
                 } else {
                     console.log("❌ [FilmStrip] No video path for: " + movie.title)
@@ -1366,7 +1366,7 @@ Item {
                 var resolved = _xmlController.resolve_paths(mv.display)
                 if (resolved && resolved.video) {
                     var cleanPath = resolved.video.toString().replace(/\\/g, "/")
-                    playbackBridge.playVideo(cleanPath)
+                    playbackRouter.playVideo(cleanPath, false)
                     galleryRoot.v2PlayMovie(cleanPath)
                 }
             }
