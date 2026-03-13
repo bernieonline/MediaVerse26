@@ -4,6 +4,7 @@
 
 import os
 from pathlib import Path
+import json
 
 # ---------------------------------------------------------
 # DYNAMIC PROJECT ROOT (The "music-new" Anchor)
@@ -22,6 +23,40 @@ def find_music_new_root():
 
 project_root = find_music_new_root()
 print(f"🚀 [PATHS] Project Root Anchored at: {project_root}")
+
+# 1. Convert the root to a Path object (if it's a string) to ensure / works for use setting library server path
+project_root = Path(project_root)
+
+# 2. Locate the config file inside Assets to look up library path
+config_path = project_root / "Assets" / "Config.json"
+try:
+    with open(config_path, 'r') as f:
+        config_data = json.load(f)
+    
+    # 3. Pull the LibraryRoot (e.g., "W:\\Collection")
+    lib_root_str = config_data.get("LibraryRoot", "W:\\Collection")
+    
+    # 4. Extract the drive letter (e.g., "W:")
+    server_drive = Path(lib_root_str).drive 
+except Exception as e:
+    # If config fails, we fall back to W: so the app doesn't crash
+    server_drive = "W:"
+
+
+
+#---------set relative paths to server ------------------------------------------------
+# SERVER PATHS (MediaVerse V2)
+# ---------------------------------------------------------
+# This builds the path dynamically using the drive letter from your Config
+server_base = Path(f"{server_drive}\\MediaVerse")
+
+movies_coll_v2 = server_base / "Collections" / "Movies_Collections_v2.json"
+server_manifest_v2 = server_base / "manifest" / "manifest.json"
+server_cache_root_v2 = server_base / "cache" / "images"
+
+
+
+
 
 # ---------------------------------------------------------
 # COMMON PROJECT PATHS
@@ -62,13 +97,16 @@ category_json = project_root / "Assets" / "Category.json"
 
 # Collections paths
 collection_bg = project_root / "Assets" / "Collections.jpg"
-movies_coll_v2 = Path(r"W:\MediaVerse\Collections\Movies_Collections_v2.json")
+
+
+#these next 3 rows replaced by earlier code for relative server path
+#movies_coll_v2 = Path(r"W:\MediaVerse\Collections\Movies_Collections_v2.json")
 
 # ---------------------------------------------------------
 # SERVER PATHS (MediaVerse V2)
 # ---------------------------------------------------------
-server_manifest_v2 = Path(r"W:\MediaVerse\manifest\manifest.json")
-server_cache_root_v2 = Path(r"W:\MediaVerse\cache\images")
+#server_manifest_v2 = Path(r"W:\MediaVerse\manifest\manifest.json")
+#server_cache_root_v2 = Path(r"W:\MediaVerse\cache\images")
 server_cache_thumb_v2 = server_cache_root_v2 / "thumb"
 server_cache_display_v2 = server_cache_root_v2 / "display"
 server_cache_carousel_v2 = server_cache_root_v2 / "carousel"
