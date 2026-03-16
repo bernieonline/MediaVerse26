@@ -11,6 +11,7 @@ Column {
     z: 9999
     signal architectClicked()
     signal snatcherClicked()
+    signal tvSeriesClicked()
 
 
     Row {
@@ -38,7 +39,7 @@ Column {
                 Text {
                     anchors.horizontalCenter: parent.horizontalCenter
                     text: "Freestyle"
-                    color: "gold"; font.pixelSize: 11; font.bold: true; font.letterSpacing: 1
+                    color: "gold"; font.pixelSize: 18; font.bold: true; font.letterSpacing: 1
                 }
             }
             MouseArea {
@@ -70,12 +71,12 @@ Column {
                 Text {
                     anchors.horizontalCenter: parent.horizontalCenter
                     text: "Architect"
-                    color: "#00F2FF"; font.pixelSize: 11; font.bold: true; font.letterSpacing: 1
+                    color: "#00F2FF"; font.pixelSize: 18; font.bold: true; font.letterSpacing: 1
                 }
                 Text {
                     anchors.horizontalCenter: parent.horizontalCenter
                     text: "Creator"
-                    color: "#cccccc"; font.pixelSize: 13
+                    color: "#cccccc"; font.pixelSize: 18
                 }
             }
             MouseArea {
@@ -107,12 +108,12 @@ Column {
                 Text {
                     anchors.horizontalCenter: parent.horizontalCenter
                     text: "Architect"
-                    color: "gold"; font.pixelSize: 11; font.bold: true; font.letterSpacing: 1
+                    color: "gold"; font.pixelSize: 18; font.bold: true; font.letterSpacing: 1
                 }
                 Text {
                     anchors.horizontalCenter: parent.horizontalCenter
                     text: "Collections"
-                    color: "#cccccc"; font.pixelSize: 13
+                    color: "#cccccc"; font.pixelSize: 18
                 }
             }
             MouseArea {
@@ -152,7 +153,7 @@ Column {
                 Text {
                     anchors.horizontalCenter: parent.horizontalCenter
                     text: "Snatcher"
-                    color: "#FF9800"; font.pixelSize: 11; font.bold: true; font.letterSpacing: 1
+                    color: "#FF9800"; font.pixelSize: 18; font.bold: true; font.letterSpacing: 1
                 }
             }
             MouseArea {
@@ -181,12 +182,12 @@ Column {
                 Text {
                     anchors.horizontalCenter: parent.horizontalCenter
                     text: "Quick"
-                    color: "#ffffff"; font.pixelSize: 11; font.bold: true; font.letterSpacing: 1
+                    color: "#ffffff"; font.pixelSize: 18; font.bold: true; font.letterSpacing: 1
                 }
                 Text {
                     anchors.horizontalCenter: parent.horizontalCenter
                     text: "Gallery"
-                    color: "#cccccc"; font.pixelSize: 13
+                    color: "#cccccc"; font.pixelSize: 18
                 }
             }
             MouseArea {
@@ -202,7 +203,41 @@ Column {
             }
         }
 
-        // --- 6. CREATE ---
+        // --- 6. TV SERIES ---
+        Rectangle {
+            id: tvSeriesBtn
+            width: 130; height: 56
+            radius: height / 2
+            gradient: Gradient {
+                GradientStop { position: 0.0; color: "#2a2a2a" }
+                GradientStop { position: 1.0; color: "#1a1a1a" }
+            }
+            border.width: 1; border.color: "#39FF14"
+
+            Column {
+                anchors.centerIn: parent; spacing: 2
+                Text {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    text: "TV"
+                    color: "#39FF14"; font.pixelSize: 18; font.bold: true; font.letterSpacing: 1
+                }
+                Text {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    text: "Series"
+                    color: "#cccccc"; font.pixelSize: 18
+                }
+            }
+            MouseArea {
+                anchors.fill: parent; hoverEnabled: true
+                onEntered:  tvSeriesBtn.opacity = 1.0
+                onExited:   tvSeriesBtn.opacity = 0.85
+                onPressed:  tvSeriesBtn.opacity = 0.7
+                onReleased: tvSeriesBtn.opacity = 1.0
+                onClicked:  buttonColumn.tvSeriesClicked()
+            }
+        }
+
+        // --- 7. CREATE ---
         Rectangle {
             id: createBtn
             width: 110; height: 56
@@ -218,7 +253,7 @@ Column {
                 Text {
                     anchors.horizontalCenter: parent.horizontalCenter
                     text: "Create"
-                    color: "#ffffff"; font.pixelSize: 11; font.bold: true; font.letterSpacing: 1
+                    color: "#ffffff"; font.pixelSize: 18; font.bold: true; font.letterSpacing: 1
                 }
             }
             MouseArea {
@@ -234,7 +269,7 @@ Column {
             }
         }
 
-        // --- 7. CLOSE ---
+        // --- 8. CLOSE ---
         Rectangle {
             id: closeBtn
             width: 90; height: 56
@@ -250,7 +285,7 @@ Column {
                 Text {
                     anchors.horizontalCenter: parent.horizontalCenter
                     text: "Close"
-                    color: "#ffffff"; font.pixelSize: 11; font.bold: true; font.letterSpacing: 1
+                    color: "#ffffff"; font.pixelSize: 18; font.bold: true; font.letterSpacing: 1
                 }
             }
             MouseArea {

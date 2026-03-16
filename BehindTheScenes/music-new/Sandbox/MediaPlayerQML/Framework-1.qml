@@ -92,6 +92,12 @@ ApplicationWindow {
         function onSnatcherClicked() {
             snatcher2Panel.visible = true
         }
+
+        function onTvSeriesClicked() {
+            console.log("📺 Switching to TV Series view")
+            if (splash) splash.deactivate()
+            contentLoader.setSource("TV_view.qml")
+        }
     }
 
 

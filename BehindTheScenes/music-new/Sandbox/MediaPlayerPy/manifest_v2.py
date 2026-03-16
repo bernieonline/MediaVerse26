@@ -141,7 +141,7 @@ def build_manifest_for_folder(folder: Path):
         # v1 title / year / type logic
         title = stem
         year = extract_year_from_title(stem)
-        media_type = "tv" if ("S" in stem and "E" in stem) else "movie"
+        media_type = "tv" if re.search(r'(?:^|[\s.])S\d{1,2}E\d{2,3}(?:$|[\s.,\-])', stem, re.IGNORECASE) else "movie"
 
         cache_paths = build_cache_paths_for_title(title)
 

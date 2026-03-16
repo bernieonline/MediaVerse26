@@ -69,6 +69,7 @@ from Architect_view import ArchitectView
 from splash_layout import generate_splash_layout
 from snatcher2_backend import Snatcher2Backend
 from landing_view import LandingViewModel
+from TV_view import TVViewModel
 
 from dotenv import load_dotenv
 
@@ -104,6 +105,7 @@ def main():
         arch_view_instance = ArchitectView()
         snatcher2_backend  = Snatcher2Backend()
         landing_vm         = LandingViewModel()
+        tv_vm              = TVViewModel()
 
              # SURGICAL ADDITION: Connect the backup signal to the existing notifier
         # msg is the text, success is the boolean. We use 'not success' because 
@@ -229,6 +231,7 @@ def main():
         ctx.setContextProperty("backupManager", backup_manager)
         ctx.setContextProperty("aiController", ai_controller)
         ctx.setContextProperty("landingViewModel", landing_vm)
+        ctx.setContextProperty("tvViewModel",     tv_vm)
         ctx.setContextProperty("startupMode", _startup_mode)
 
         # --------------------------------------------------------
