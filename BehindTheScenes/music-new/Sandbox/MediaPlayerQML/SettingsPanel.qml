@@ -122,7 +122,7 @@ Popup {
             }
         }
 
-        // Tab bar
+        // Tab bar (Updated to 5 items)
         TabBar {
             id: tabBar
             Layout.fillWidth: true
@@ -130,12 +130,12 @@ Popup {
             background: Rectangle { color: "#111" }
 
             Repeater {
-                model: ["Profile", "Player", "Library", "Recovery"]
+                model: ["Profile", "Player", "Library", "Startup", "Recovery"]
                 TabButton {
                     text: modelData
                     font.pixelSize: 18
                     font.bold: tabBar.currentIndex === index
-                    width: root.width / 4
+                    width: root.width / 5
 
                     background: Rectangle {
                         color: tabBar.currentIndex === index ? "#2566c2" : "#1a1a1a"
@@ -427,7 +427,61 @@ Popup {
                 }
             }
 
-            // ── Tab 4: Recovery ────────────────────────────────────
+            // ── Tab 4: Startup (The Addition) ───────────────────────
+            Item {
+                ColumnLayout {
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.top: parent.top
+                    anchors.margins: 32
+                    spacing: 30
+
+                    Text {
+                        text: "STARTUP BEHAVIOR"
+                        color: "#aaaaaa"
+                        font.pixelSize: 13
+                        font.letterSpacing: 2
+                    }
+
+                    Rectangle { Layout.fillWidth: true; height: 1; color: "#333" }
+
+                    // Splash Toggle
+                    RowLayout {
+                        spacing: 20
+                        Switch {
+                            checked: root.settings["StartUp"] ? root.settings["StartUp"]["Splash"] : true
+                            onToggled: {
+                                var current = root.settings["StartUp"] || {}
+                                current["Splash"] = checked
+                                SettingsManager.update_setting("StartUp", current)
+                            }
+                        }
+                        Column {
+                            Text { text: "Show Splash Screen"; color: "white"; font.pixelSize: 18 }
+                            Text { text: "Enable the intro animation on launch"; color: "#666"; font.pixelSize: 14 }
+                        }
+                    }
+
+                    // Tiles Toggle
+                    RowLayout {
+                        spacing: 20
+                        Switch {
+                            checked: root.settings["StartUp"] ? root.settings["StartUp"]["Tiles"] : false
+                            onToggled: {
+                                var current = root.settings["StartUp"] || {}
+                                current["Tiles"] = checked
+                                SettingsManager.update_setting("StartUp", current)
+                            }
+                        }
+                        Column {
+                            Text { text: "Start in Grid Mode"; color: "white"; font.pixelSize: 18 }
+                            Text { text: "Launch directly into the movie wall"; color: "#666"; font.pixelSize: 14 }
+                        }
+                    }
+                }
+            }
+
+            // ── Tab 5: Recovery (RESTORED FULL LOGIC) ────────────────
             Item {
                 ColumnLayout {
                     anchors.left: parent.left
@@ -447,7 +501,7 @@ Popup {
 
                     Repeater {
                         model: [
-                            { label: "Restore Collections Backup",    sub: "Replaces Movies_Collections_v2.json from backup",  action: "collections_bak"  },
+                            { label: "Restore Collections Backup",  sub: "Replaces Movies_Collections_v2.json from backup",  action: "collections_bak"  },
                             { label: "Restore XML Data Backup",        sub: "Replaces xml_collection_data.json from backup",    action: "xml_bak"          },
                             { label: "Restore Config Backup",          sub: "Replaces Config.json from backup",                 action: "config_bak"       },
                             { label: "Rebuild XML Collection Data",    sub: "Re-scans all JRiver XML sidecar files",            action: "rebuild_xml"      },
@@ -460,7 +514,7 @@ Popup {
                             color: btnHover ? "#2a2a2a" : "#1e1e1e"
                             radius: 6
                             border.color: btnHover ? "#FFD700" : "#333"
-                            border.width: btnHover ? 1 : 1
+                            border.width: 1
                             property bool btnHover: false
 
                             Column {
@@ -498,7 +552,6 @@ Popup {
                         }
                     }
 
-                    // Status line
                     Text {
                         text: root.recoveryStatus
                         color: "#FFD700"
@@ -510,7 +563,7 @@ Popup {
             }
         }
 
-        // Footer close button
+        // Footer
         Rectangle {
             Layout.fillWidth: true
             height: 60

@@ -7,8 +7,8 @@ import QtQuick.Layouts 1.15
 Column {
     id: buttonColumn
     width: parent.width
-    spacing: 12
-    z: 9999 
+    spacing: 0
+    z: 9999
     signal architectClicked()
     signal snatcherClicked()
 
@@ -16,225 +16,253 @@ Column {
     Row {
         id: buttonRow
         anchors.horizontalCenter: parent.horizontalCenter
-        
-        // Slightly wider buttons to accommodate the longer "Architect" titles
-        property int buttonWidth: 160
-        property int buttonHeight: 40 
-        spacing: 15 
+        spacing: 12
 
         // --- 1. FREESTYLE ---
-        StyledButton {
+        Rectangle {
             id: freestyleBtn
-            text: "Freestyle"
-            fixedWidth: buttonRow.buttonWidth; fixedHeight: buttonRow.buttonHeight
-            contentItem: Item {
-                anchors.fill: parent
+            width: 130; height: 56
+            radius: height / 2
+            gradient: Gradient {
+                GradientStop { position: 0.0; color: "#2a2a2a" }
+                GradientStop { position: 1.0; color: "#1a1a1a" }
+            }
+            border.width: 1; border.color: "#B8956A"
+
+            Text {
+                anchors.centerIn: parent
+                text: "🦅"; font.pixelSize: 24; opacity: 0.25; z: 1
+            }
+            Column {
+                anchors.centerIn: parent; spacing: 2; z: 2
                 Text {
+                    anchors.horizontalCenter: parent.horizontalCenter
                     text: "Freestyle"
-                    anchors.centerIn: parent
-                    color: "gold"; font.bold: true; font.letterSpacing: 1; z: 2
-                }
-                Text {
-                    text: "🦅"; anchors.centerIn: parent
-                    opacity: 0.3; font.pixelSize: 24; z: 1
+                    color: "gold"; font.pixelSize: 11; font.bold: true; font.letterSpacing: 1
                 }
             }
-            onClicked: {
-                if (typeof splash !== "undefined") splash.deactivate()
-                contentLoader.setSource("Freestyle.qml")
+            MouseArea {
+                anchors.fill: parent; hoverEnabled: true
+                onEntered: freestyleBtn.opacity = 1.0
+                onExited:  freestyleBtn.opacity = 0.85
+                onPressed: freestyleBtn.opacity = 0.7
+                onReleased: freestyleBtn.opacity = 1.0
+                onClicked: {
+                    if (typeof splash !== "undefined") splash.deactivate()
+                    contentLoader.setSource("Freestyle.qml")
+                }
             }
         }
 
-        // --- 2. ARCHITECT CREATOR (Renamed) ---
-        StyledButton {
+        // --- 2. ARCHITECT CREATOR ---
+        Rectangle {
             id: builderBtn
-            fixedWidth: buttonRow.buttonWidth; fixedHeight: buttonRow.buttonHeight
-            contentItem: Item {
-                anchors.fill: parent
+            width: 130; height: 56
+            radius: height / 2
+            gradient: Gradient {
+                GradientStop { position: 0.0; color: "#2a2a2a" }
+                GradientStop { position: 1.0; color: "#1a1a1a" }
+            }
+            border.width: 1; border.color: "#B8956A"
+
+            Column {
+                anchors.centerIn: parent; spacing: 2
                 Text {
-                    text: "Architect Creator"
-                    anchors.centerIn: parent
-                    color: "#00F2FF" // Your High-tech Cyan
-                    font.bold: true; font.letterSpacing: 1
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    text: "Architect"
+                    color: "#00F2FF"; font.pixelSize: 11; font.bold: true; font.letterSpacing: 1
+                }
+                Text {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    text: "Creator"
+                    color: "#cccccc"; font.pixelSize: 13
                 }
             }
-            onClicked: {
-                if (typeof splash !== "undefined") splash.deactivate()
-                architectHUD.visible = true 
+            MouseArea {
+                anchors.fill: parent; hoverEnabled: true
+                onEntered: builderBtn.opacity = 1.0
+                onExited:  builderBtn.opacity = 0.85
+                onPressed: builderBtn.opacity = 0.7
+                onReleased: builderBtn.opacity = 1.0
+                onClicked: {
+                    if (typeof splash !== "undefined") splash.deactivate()
+                    architectHUD.visible = true
+                }
             }
         }
 
-        // --- 3. ARCHITECT COLLECTIONS (New Button) ---
-        StyledButton {
+        // --- 3. ARCHITECT COLLECTIONS ---
+        Rectangle {
             id: archCollBtn
-            fixedWidth: buttonRow.buttonWidth; fixedHeight: buttonRow.buttonHeight
-            contentItem: Item {
-                anchors.fill: parent
+            width: 130; height: 56
+            radius: height / 2
+            gradient: Gradient {
+                GradientStop { position: 0.0; color: "#2a2a2a" }
+                GradientStop { position: 1.0; color: "#1a1a1a" }
+            }
+            border.width: 1; border.color: "#B8956A"
+
+            Column {
+                anchors.centerIn: parent; spacing: 2
                 Text {
-                    text: "Architect Collections"
-                    anchors.centerIn: parent
-                    color: "gold" // Setting to Gold to distinguish from the Creator
-                    font.bold: true; font.letterSpacing: 1
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    text: "Architect"
+                    color: "gold"; font.pixelSize: 11; font.bold: true; font.letterSpacing: 1
+                }
+                Text {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    text: "Collections"
+                    color: "#cccccc"; font.pixelSize: 13
                 }
             }
-            onClicked: {
-                if (typeof splash !== "undefined") splash.deactivate()
-                console.log("📚 Launching Architect Gallery...")
-
-                buttonColumn.architectClicked()
-                
-                // 1. Swap the main view to our new Gallery
-                contentLoader.setSource("ArchitectGallery.qml")
-                
-                // 2. Ensure sidebar/HUD are tucked away for the "cinematic" look
-                if (typeof utilitySidebar !== "undefined") utilitySidebar.isOpen = false
-                if (typeof architectHUD !== "undefined") architectHUD.visible = false
-
-                //end click
+            MouseArea {
+                anchors.fill: parent; hoverEnabled: true
+                onEntered: archCollBtn.opacity = 1.0
+                onExited:  archCollBtn.opacity = 0.85
+                onPressed: archCollBtn.opacity = 0.7
+                onReleased: archCollBtn.opacity = 1.0
+                onClicked: {
+                    if (typeof splash !== "undefined") splash.deactivate()
+                    console.log("📚 Launching Architect Gallery...")
+                    buttonColumn.architectClicked()
+                    contentLoader.setSource("ArchitectGallery.qml")
+                    if (typeof utilitySidebar !== "undefined") utilitySidebar.isOpen = false
+                    if (typeof architectHUD !== "undefined") architectHUD.visible = false
+                }
             }
         }
 
-        // --- 4. QUICK GALLERY ---
-        StyledButton {
-            text: "Quick Gallery"
-            fixedWidth: buttonRow.buttonWidth; fixedHeight: buttonRow.buttonHeight
-            onClicked: {
-                if (typeof splash !== "undefined") splash.deactivate()
-                contentLoader.setSource("CategoryMenu.qml")
+        // --- 4. SNATCHER ---
+        Rectangle {
+            id: snatcherBtn
+            width: 130; height: 56
+            radius: height / 2
+            gradient: Gradient {
+                GradientStop { position: 0.0; color: "#2a2a2a" }
+                GradientStop { position: 1.0; color: "#1a1a1a" }
             }
-        }
+            border.width: 1; border.color: "#B8956A"
 
-        // --- 5. SNATCHER ---
-        StyledButton {
-            fixedWidth: buttonRow.buttonWidth; fixedHeight: buttonRow.buttonHeight
-            contentItem: Item {
-                anchors.fill: parent
+            Text {
+                anchors.centerIn: parent
+                text: "📷"; font.pixelSize: 22; opacity: 0.25; z: 1
+            }
+            Column {
+                anchors.centerIn: parent; spacing: 2; z: 2
                 Text {
+                    anchors.horizontalCenter: parent.horizontalCenter
                     text: "Snatcher"
-                    anchors.centerIn: parent
-                    color: "#FF9800"; font.bold: true; font.letterSpacing: 1; z: 2
+                    color: "#FF9800"; font.pixelSize: 11; font.bold: true; font.letterSpacing: 1
+                }
+            }
+            MouseArea {
+                anchors.fill: parent; hoverEnabled: true
+                onEntered: snatcherBtn.opacity = 1.0
+                onExited:  snatcherBtn.opacity = 0.85
+                onPressed: snatcherBtn.opacity = 0.7
+                onReleased: snatcherBtn.opacity = 1.0
+                onClicked: buttonColumn.snatcherClicked()
+            }
+        }
+
+        // --- 5. QUICK GALLERY ---
+        Rectangle {
+            id: quickGalleryBtn
+            width: 130; height: 56
+            radius: height / 2
+            gradient: Gradient {
+                GradientStop { position: 0.0; color: "#2a2a2a" }
+                GradientStop { position: 1.0; color: "#1a1a1a" }
+            }
+            border.width: 1; border.color: "#B8956A"
+
+            Column {
+                anchors.centerIn: parent; spacing: 2
+                Text {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    text: "Quick"
+                    color: "#ffffff"; font.pixelSize: 11; font.bold: true; font.letterSpacing: 1
                 }
                 Text {
-                    text: "📷"; anchors.centerIn: parent
-                    opacity: 0.3; font.pixelSize: 22; z: 1
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    text: "Gallery"
+                    color: "#cccccc"; font.pixelSize: 13
                 }
             }
-            onClicked: buttonColumn.snatcherClicked()
-        }
-
-        // --- 7. CREATE ---
-        StyledButton {
-            text: "Create"
-            fixedWidth: 120; fixedHeight: buttonRow.buttonHeight
-            onClicked: {
-                if (typeof splash !== "undefined") splash.deactivate()
-                utilitySidebar.showCollectionCreator()
+            MouseArea {
+                anchors.fill: parent; hoverEnabled: true
+                onEntered: quickGalleryBtn.opacity = 1.0
+                onExited:  quickGalleryBtn.opacity = 0.85
+                onPressed: quickGalleryBtn.opacity = 0.7
+                onReleased: quickGalleryBtn.opacity = 1.0
+                onClicked: {
+                    if (typeof splash !== "undefined") splash.deactivate()
+                    contentLoader.setSource("CategoryMenu.qml")
+                }
             }
         }
 
-        // --- 8. CLOSE ---
-        StyledButton {
-            text: "Close"
-            fixedWidth: 80; fixedHeight: buttonRow.buttonHeight
-            onClicked: Qt.quit()
+        // --- 6. CREATE ---
+        Rectangle {
+            id: createBtn
+            width: 110; height: 56
+            radius: height / 2
+            gradient: Gradient {
+                GradientStop { position: 0.0; color: "#2a2a2a" }
+                GradientStop { position: 1.0; color: "#1a1a1a" }
+            }
+            border.width: 1; border.color: "#B8956A"
+
+            Column {
+                anchors.centerIn: parent; spacing: 2
+                Text {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    text: "Create"
+                    color: "#ffffff"; font.pixelSize: 11; font.bold: true; font.letterSpacing: 1
+                }
+            }
+            MouseArea {
+                anchors.fill: parent; hoverEnabled: true
+                onEntered: createBtn.opacity = 1.0
+                onExited:  createBtn.opacity = 0.85
+                onPressed: createBtn.opacity = 0.7
+                onReleased: createBtn.opacity = 1.0
+                onClicked: {
+                    if (typeof splash !== "undefined") splash.deactivate()
+                    utilitySidebar.showCollectionCreator()
+                }
+            }
+        }
+
+        // --- 7. CLOSE ---
+        Rectangle {
+            id: closeBtn
+            width: 90; height: 56
+            radius: height / 2
+            gradient: Gradient {
+                GradientStop { position: 0.0; color: "#2a2a2a" }
+                GradientStop { position: 1.0; color: "#1a1a1a" }
+            }
+            border.width: 1; border.color: "#B8956A"
+
+            Column {
+                anchors.centerIn: parent; spacing: 2
+                Text {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    text: "Close"
+                    color: "#ffffff"; font.pixelSize: 11; font.bold: true; font.letterSpacing: 1
+                }
+            }
+            MouseArea {
+                anchors.fill: parent; hoverEnabled: true
+                onEntered: closeBtn.opacity = 1.0
+                onExited:  closeBtn.opacity = 0.85
+                onPressed: closeBtn.opacity = 0.7
+                onReleased: closeBtn.opacity = 1.0
+                onClicked: Qt.quit()
+            }
         }
     }
 
-    // --- ROW 2: SEARCH BAR (Untouched) ---
-    Rectangle {
-        id: searchBarContainer
-        width: parent.width * 0.7; height: 45 
-        anchors.horizontalCenter: parent.horizontalCenter
-        radius: 22.5; color: "#E6000000" 
-        border.color: searchInput.activeFocus ? "yellow" : "#44FFFFFF"; border.width: 2
-
-        RowLayout {
-            anchors.fill: parent; anchors.leftMargin: 20; anchors.rightMargin: 20
-            Text { text: "🔍"; font.pixelSize: 20; color: "white" }
-            TextField {
-                id: searchInput
-                Layout.fillWidth: true; placeholderText: "Search W:/Collection..."
-                color: "white"; font.pixelSize: 20; verticalAlignment: TextInput.AlignVCenter
-                background: null 
-                onTextChanged: {
-                    if (text.length >= 3) searchController.perform_search(text)
-                    else resultsPopup.close()
-                }
-            }
-        }
-        // --- Results Popup ---
-        Popup {
-            id: resultsPopup
-            y: searchBarContainer.height + 4
-            x: 0
-            width: searchBarContainer.width
-            padding: 0
-            modal: false
-            closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutsideParent
-
-            background: Rectangle {
-                color: "#EE0d0d0d"
-                radius: 10
-                border.color: "#2566c2"
-                border.width: 2
-            }
-
-            contentItem: ListView {
-                id: resultsList
-                implicitHeight: Math.min(contentHeight, 400)
-                clip: true
-                model: []
-
-                delegate: ItemDelegate {
-                    width: resultsList.width
-                    height: 52
-
-                    background: Rectangle {
-                        color: hovered ? "#2566c2" : "transparent"
-                        Behavior on color { ColorAnimation { duration: 120 } }
-                    }
-
-                    contentItem: Row {
-                        spacing: 12
-                        anchors.verticalCenter: parent.verticalCenter
-                        leftPadding: 16
-
-                        Image {
-                            width: 34; height: 34
-                            source: modelData.imageFilename || ""
-                            fillMode: Image.PreserveAspectCrop
-                            visible: modelData.imageFilename !== ""
-                            anchors.verticalCenter: parent.verticalCenter
-                        }
-
-                        Text {
-                            text: modelData.name
-                            color: "white"
-                            font.pixelSize: 20
-                            font.bold: true
-                            elide: Text.ElideRight
-                            width: resultsList.width - 80
-                            anchors.verticalCenter: parent.verticalCenter
-                        }
-                    }
-
-                    onClicked: {
-                        if (typeof splash !== "undefined") splash.deactivate()
-                        searchController.confirm_selection(modelData.filePath)
-                        resultsPopup.close()
-                        searchInput.text = ""
-                    }
-                }
-            }
-        }
-
-        Connections {
-            target: searchController
-            function onResultsUpdated(results) {
-                resultsList.model = results
-                if (results.length > 0) resultsPopup.open()
-                else resultsPopup.close()
-            }
-        }
-    }
+    // Search bar moved to Framework-1.qml for independent vertical positioning
 }

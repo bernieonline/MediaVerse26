@@ -68,6 +68,7 @@ from architect_controller import ArchitectController
 from Architect_view import ArchitectView
 from splash_layout import generate_splash_layout
 from snatcher2_backend import Snatcher2Backend
+from landing_view import LandingViewModel
 
 from dotenv import load_dotenv
 
@@ -102,6 +103,7 @@ def main():
 
         arch_view_instance = ArchitectView()
         snatcher2_backend  = Snatcher2Backend()
+        landing_vm         = LandingViewModel()
 
              # SURGICAL ADDITION: Connect the backup signal to the existing notifier
         # msg is the text, success is the boolean. We use 'not success' because 
@@ -208,11 +210,26 @@ def main():
 
         ai_controller = AIController(api_key=gemini_key)
         
+        # Determine startup mode from Config.json → "Tiles" or "Splash"
+        _startup_mode = "Tiles"
+        try:
+            with open(paths["config"], "r", encoding="utf-8") as _f:
+                _su = json.load(_f).get("StartUp", {})
+            if _su.get("Splash") is True:
+                _startup_mode = "Splash"
+            elif _su.get("Tiles") is True:
+                _startup_mode = "Tiles"
+        except Exception:
+            pass
+        print(f"[STARTUP] Landing mode: {_startup_mode}")
+
         ctx.setContextProperty("playbackRouter", router)
         ctx.setContextProperty("splashLayout", generate_splash_layout())
         ctx.setContextProperty("architectView", arch_view_instance)
         ctx.setContextProperty("backupManager", backup_manager)
         ctx.setContextProperty("aiController", ai_controller)
+        ctx.setContextProperty("landingViewModel", landing_vm)
+        ctx.setContextProperty("startupMode", _startup_mode)
 
         # --------------------------------------------------------
         # Menu Data Handling (The Source of Truth)

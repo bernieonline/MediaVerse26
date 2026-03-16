@@ -2,6 +2,7 @@ import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Controls.Material 2.15
 import Qt5Compat.GraphicalEffects
+import QtQuick.Layouts 1.15
 import QtQuick.Dialogs
 
 ApplicationWindow {
@@ -60,17 +61,7 @@ ApplicationWindow {
         }
     }
 
-    StyledMenu {
-        id: centralMenu
-        anchors.top: parent.top
-        anchors.topMargin: 20
-        anchors.horizontalCenter: parent.horizontalCenter
-        menuData: centralMenuData
-
-        onMenuItemTriggered: function(label) {
-            console.log("qml: Clicked: " + label)
-        }
-    }
+    // StyledMenu removed — navigation consolidated into RowButton bar
 
     Connections {
         target: searchController
@@ -194,19 +185,128 @@ ApplicationWindow {
         id: buttonRows
         width: parent.width * 0.75
         anchors.horizontalCenter: parent.horizontalCenter
-        anchors.top: centralMenu.bottom
-        anchors.topMargin: 30
+        anchors.top: parent.top
+        anchors.topMargin: 18
         spacing: 20
         RowButton { id: rowButtons; width: parent.width - 100 }
     }
 
-    Rectangle {
-        id: contentContainer
+    // --- SEARCH BAR — floats midway between button row and display area ---
+    Item {
+        id: searchGap
         anchors.top: buttonRows.bottom
-        anchors.bottom: parent.bottom
+        anchors.bottom: contentContainer.top
         anchors.left: parent.left
         anchors.right: parent.right
-        anchors.margins: 50
+
+        Rectangle {
+            id: searchBarContainer
+            width: parent.width * 0.5
+            height: 45
+            anchors.centerIn: parent
+            radius: 22.5
+            color: "#E6000000"
+            border.color: searchInput.activeFocus ? "yellow" : "#99B8956A"
+            border.width: 2
+
+            RowLayout {
+                anchors.fill: parent; anchors.leftMargin: 20; anchors.rightMargin: 20
+                Text { text: "🔍"; font.pixelSize: 20; color: "white" }
+                TextField {
+                    id: searchInput
+                    Layout.fillWidth: true
+                    placeholderText: "Search W:/Collection..."
+                    color: "white"; font.pixelSize: 20; verticalAlignment: TextInput.AlignVCenter
+                    background: null
+                    onTextChanged: {
+                        if (text.length >= 3) searchController.perform_search(text)
+                        else resultsPopup.close()
+                    }
+                }
+            }
+
+            Popup {
+                id: resultsPopup
+                y: searchBarContainer.height + 4
+                x: 0
+                width: searchBarContainer.width
+                padding: 0
+                modal: false
+                closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutsideParent
+
+                background: Rectangle {
+                    color: "#EE0d0d0d"; radius: 10
+                    border.color: "#2566c2"; border.width: 2
+                }
+
+                contentItem: ListView {
+                    id: resultsList
+                    implicitHeight: Math.min(contentHeight, 400)
+                    clip: true
+                    model: []
+
+                    delegate: ItemDelegate {
+                        width: resultsList.width
+                        height: 52
+
+                        background: Rectangle {
+                            color: hovered ? "#2566c2" : "transparent"
+                            Behavior on color { ColorAnimation { duration: 120 } }
+                        }
+
+                        contentItem: Row {
+                            spacing: 12
+                            anchors.verticalCenter: parent.verticalCenter
+                            leftPadding: 16
+
+                            Image {
+                                width: 34; height: 34
+                                source: modelData.imageFilename || ""
+                                fillMode: Image.PreserveAspectCrop
+                                visible: modelData.imageFilename !== ""
+                                anchors.verticalCenter: parent.verticalCenter
+                            }
+
+                            Text {
+                                text: modelData.name
+                                color: "white"; font.pixelSize: 20; font.bold: true
+                                elide: Text.ElideRight
+                                width: resultsList.width - 80
+                                anchors.verticalCenter: parent.verticalCenter
+                            }
+                        }
+
+                        onClicked: {
+                            if (typeof splash !== "undefined") splash.deactivate()
+                            searchController.confirm_selection(modelData.filePath)
+                            resultsPopup.close()
+                            searchInput.text = ""
+                        }
+                    }
+                }
+            }
+
+            Connections {
+                target: searchController
+                function onResultsUpdated(results) {
+                    resultsList.model = results
+                    if (results.length > 0) resultsPopup.open()
+                    else resultsPopup.close()
+                }
+            }
+        }
+    }
+
+    Rectangle {
+        id: contentContainer
+        anchors.top: parent.top
+        anchors.topMargin: parent.height * 0.14
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: 50
+        anchors.left: parent.left
+        anchors.leftMargin: 50
+        anchors.right: parent.right
+        anchors.rightMargin: 50
         radius: 25
         color: "transparent"
         border.color: "#2566c2"
@@ -217,13 +317,15 @@ ApplicationWindow {
             id: splash
             anchors.fill: parent
             z: 9999
-            visible: true
+            visible: (typeof startupMode === "undefined" || startupMode !== "Tiles")
         }
 
         Loader {
             id: contentLoader
             anchors.fill: parent
-            source: "ImageGridView_v2.qml"
+            source: (typeof startupMode !== "undefined" && startupMode === "Tiles")
+                    ? "landing_view.qml"
+                    : "ImageGridView_v2.qml"
 
             onLoaded: {
                 if (!contentLoader.item) return;
@@ -253,9 +355,16 @@ ApplicationWindow {
                     }
                     if (contentLoader.item.backRequested !== undefined) {
                         contentLoader.item.backRequested.connect(function() {
-                            if (window.previousLoaderSource !== "")
-                                contentLoader.source = window.previousLoaderSource
-                            splash.activate()
+                            var dest = window.previousLoaderSource
+                            if (dest === "landing_view.qml") {
+                                // Return to landing view paused, fresh 20 s timer
+                                contentLoader.setSource("landing_view.qml", { "startPaused": true })
+                            } else if (dest !== "") {
+                                contentLoader.source = dest
+                                splash.activate()
+                            } else {
+                                splash.activate()
+                            }
                         })
                     }
                 } catch(e) { console.log("Connection warning: " + e) }
