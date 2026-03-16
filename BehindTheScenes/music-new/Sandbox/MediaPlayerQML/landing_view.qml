@@ -37,6 +37,13 @@ Item {
 
     // ── Initialise ────────────────────────────────────────────────────────────
     Component.onCompleted: {
+        // Defer one event-loop tick so the Loader has finished propagating its
+        // geometry to this item.  Without this, root.width/height can be 0 at
+        // onCompleted time, producing invisible zero-size tiles and a ~20 s blank.
+        Qt.callLater(_startView)
+    }
+
+    function _startView() {
         _loadModel()
         if (root.startPaused) {
             scrollAnim.stop()
@@ -50,6 +57,11 @@ Item {
     }
 
     function _loadModel() {
+        // Guard: if geometry still isn't ready, defer again
+        if (root.width <= 0 || root.height <= 0) {
+            Qt.callLater(_startView)
+            return
+        }
         var raw        = landingViewModel.build_tile_model(root.width, root.height)
         root.tileModel = JSON.parse(raw)
         root.canvasW   = _computeCanvasWidth(root.tileModel)

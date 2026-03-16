@@ -357,8 +357,8 @@ ApplicationWindow {
                         contentLoader.item.backRequested.connect(function() {
                             var dest = window.previousLoaderSource
                             if (dest === "landing_view.qml") {
-                                // Return to landing view paused, fresh 20 s timer
-                                contentLoader.setSource("landing_view.qml", { "startPaused": true })
+                                // Return to landing view — scroll starts immediately
+                                contentLoader.setSource("landing_view.qml")
                             } else if (dest !== "") {
                                 contentLoader.source = dest
                                 splash.activate()
