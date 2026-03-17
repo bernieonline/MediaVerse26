@@ -476,6 +476,21 @@ ApplicationWindow {
                 } catch(e) { console.log("Connection warning: " + e) }
             }
         }
+
+    }
+
+    // ── Quick-access slide panel — top-left, aligned with button row ─────────
+    SlidePanel {
+        id: slidePanel
+        anchors.top:        parent.top
+        anchors.topMargin:  26          // matches buttonRows.topMargin
+        anchors.left:       parent.left
+        anchors.leftMargin: 20
+        z: 200
+        // Wire signals here when modules are ready:
+        // onQobuzMusicClicked:        { ... }
+        // onMediaEditClicked:         { ... }
+        // onCollectionCuratorClicked: { ... }
     }
 
     // --- THE MINI VIDEO PLAYER PANEL ---
