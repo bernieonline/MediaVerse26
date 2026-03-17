@@ -89,8 +89,8 @@ ApplicationWindow {
             contentLoader.setSource("ArchitectGallery.qml")
         }
 
-        function onSnatcherClicked() {
-            snatcher2Panel.visible = true
+        function onQuickCreatorClicked() {
+            if (typeof utilitySidebar !== "undefined") utilitySidebar.showCollectionCreator()
         }
 
         function onTvSeriesClicked() {
@@ -204,6 +204,106 @@ ApplicationWindow {
         anchors.bottom: contentContainer.top
         anchors.left: parent.left
         anchors.right: parent.right
+
+        // ── Snatcher icon button — image + scissors, left of search bar ──────
+        Rectangle {
+            id: snatcherIconBtn
+            width:  50
+            height: 50
+            anchors.right:          searchBarContainer.left
+            anchors.rightMargin:    14
+            anchors.verticalCenter: searchBarContainer.verticalCenter
+            radius: 8
+
+            // bevel frame
+            Rectangle {
+                anchors.fill:    snatcherFace
+                anchors.margins: -1
+                radius:          snatcherFace.radius + 1
+                gradient: Gradient {
+                    GradientStop { position: 0.0; color: snatcherMa.pressed ? "#0e0e0e" : "#585858" }
+                    GradientStop { position: 1.0; color: snatcherMa.pressed ? "#505050" : "#0a0a0a" }
+                }
+            }
+
+            // face
+            Rectangle {
+                id: snatcherFace
+                anchors.fill:    parent
+                anchors.margins: 1
+                radius: 8
+                gradient: Gradient {
+                    GradientStop {
+                        position: 0.0
+                        color: snatcherMa.pressed ? "#1e1e1e"
+                             : (snatcherMa.containsMouse ? "#424242" : "#373737")
+                    }
+                    GradientStop { position: 0.50; color: snatcherMa.pressed ? "#232323" : "#272727" }
+                    GradientStop { position: 1.0;  color: snatcherMa.pressed ? "#2d2d2d" : "#141414" }
+                }
+
+                // gloss
+                Rectangle {
+                    anchors.fill: parent; radius: parent.radius
+                    gradient: Gradient {
+                        GradientStop { position: 0.0;  color: snatcherMa.pressed ? Qt.rgba(1,1,1,0.03) : Qt.rgba(1,1,1,0.18) }
+                        GradientStop { position: 0.42; color: snatcherMa.pressed ? Qt.rgba(1,1,1,0.0)  : Qt.rgba(1,1,1,0.05) }
+                        GradientStop { position: 0.43; color: Qt.rgba(1,1,1,0.0) }
+                        GradientStop { position: 1.0;  color: Qt.rgba(1,1,1,0.0) }
+                    }
+                }
+
+                // accent border
+                Rectangle {
+                    anchors.fill: parent; radius: parent.radius; color: "transparent"
+                    border.color: "#FF9800"; border.width: 1
+                    opacity: snatcherMa.containsMouse ? (snatcherMa.pressed ? 0.30 : 0.75) : 0.20
+                    Behavior on opacity { NumberAnimation { duration: 200 } }
+                }
+
+                // 🖼 main icon
+                Text {
+                    anchors.centerIn: parent
+                    text:            "🖼"
+                    font.pixelSize:  22
+                    opacity:         snatcherMa.containsMouse ? 1.0 : 0.80
+                    Behavior on opacity { NumberAnimation { duration: 160 } }
+                }
+
+                // ✂ scissors badge — bottom-right corner
+                Text {
+                    anchors.right:        parent.right
+                    anchors.bottom:       parent.bottom
+                    anchors.rightMargin:  4
+                    anchors.bottomMargin: 2
+                    text:            "✂"
+                    font.pixelSize:  13
+                    color:           "#FF9800"
+                    opacity:         snatcherMa.containsMouse ? 1.0 : 0.65
+                    Behavior on opacity { NumberAnimation { duration: 160 } }
+                }
+            }
+
+            // drop shadow
+            Rectangle {
+                x: 3; y: snatcherMa.pressed ? 2 : 4
+                width: parent.width - 2; height: parent.height
+                radius: parent.radius; color: "#000000"
+                opacity: snatcherMa.pressed ? 0.0 : 0.65
+                z: -1
+                Behavior on opacity { NumberAnimation { duration: 80 } }
+            }
+
+            MouseArea {
+                id: snatcherMa
+                anchors.fill: parent
+                hoverEnabled: true
+                onClicked:    snatcher2Panel.visible = true
+                ToolTip.visible: containsMouse
+                ToolTip.text:    "Snatcher — grab & crop an image"
+                ToolTip.delay:   600
+            }
+        }
 
         Rectangle {
             id: searchBarContainer
