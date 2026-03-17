@@ -31,8 +31,9 @@ Item {
     property var seasonsModel: []
     property var episodesModel:[]
 
-    property string heroImageUri: ""
     property string episodeDesc:  ""
+    property bool   showActors:   false
+    property var    currentActors: []
 
     // ── Initialise ───────────────────────────────────────────────────────────
     Component.onCompleted: {
@@ -52,12 +53,6 @@ Item {
     function selectSeason(seasonNum) {
         root.currentSeason = seasonNum
         root.episodeDesc   = ""
-        for (var i = 0; i < root.seasonsModel.length; i++) {
-            if (root.seasonsModel[i].season_num === seasonNum) {
-                root.heroImageUri = root.seasonsModel[i].image_uri
-                break
-            }
-        }
         root.episodesModel = JSON.parse(tvViewModel.get_episodes(root.currentSeries, seasonNum))
     }
 
@@ -67,9 +62,6 @@ Item {
     Item {
         id: matrixView
         anchors.fill: parent
-        opacity: root.viewState === "matrix" ? 1.0 : 0.0
-        visible: opacity > 0
-        Behavior on opacity { NumberAnimation { duration: 400; easing.type: Easing.InOutQuad } }
 
         // ── Grid pane ────────────────────────────────────────────────────────
         Item {
@@ -296,344 +288,357 @@ Item {
     }
 
     // ════════════════════════════════════════════════════════════════════════
-    // STATE 2 — SERIES VIEW
+    // STATE 2 — SERIES VIEW  (overlay on top of the always-visible matrix)
     // ════════════════════════════════════════════════════════════════════════
     Item {
         id: seriesView
         anchors.fill: parent
         opacity: root.viewState === "series" ? 1.0 : 0.0
         visible: opacity > 0
-        Behavior on opacity { NumberAnimation { duration: 400; easing.type: Easing.InOutQuad } }
+        Behavior on opacity { NumberAnimation { duration: 300; easing.type: Easing.InOutQuad } }
 
-        // ── Back button ──────────────────────────────────────────────────────
+        // Dark glass panel — covers only the area to the right of the nav buttons
         Rectangle {
-            id: backBtn
-            x: 20; y: 10
-            width: 110; height: 36; radius: 18
-            color: "#1a1a2e"
-            border.color: "#2566c2"; border.width: 1
-            z: 10
+            x:      navButtons.x + 90
+            y:      0
+            width:  parent.width - x
+            height: parent.height
+            color:  Qt.rgba(0.03, 0.03, 0.08, 0.94)
+        }
 
+        // Overlay content panel
+        Item {
+            id: overlayPanel
+            x:      navButtons.x + 90
+            y:      0
+            width:  parent.width - x
+            height: parent.height
+
+            // ── Back button ──────────────────────────────────────────────────
+            Rectangle {
+                id: backBtn
+                x: 16; y: 12
+                width: 110; height: 36; radius: 18
+                color: "#1a1a2e"
+                border.color: "#2566c2"; border.width: 1
+                z: 10
+                Text {
+                    anchors.centerIn: parent
+                    text: "← Back"
+                    color: "#2566c2"; font.pixelSize: 20; font.bold: true
+                }
+                MouseArea {
+                    anchors.fill: parent
+                    onClicked: root.viewState = "matrix"
+                }
+            }
+
+            // ── Series title ─────────────────────────────────────────────────
             Text {
-                anchors.centerIn: parent
-                text: "← Back"
-                color: "#2566c2"; font.pixelSize: 20; font.bold: true
+                id: seriesTitle
+                anchors.top:              parent.top
+                anchors.topMargin:        14
+                anchors.horizontalCenter: parent.horizontalCenter
+                text:  root.currentSeries
+                color: "white"; font.pixelSize: 26; font.bold: true
             }
-            MouseArea {
-                anchors.fill: parent
-                onClicked: root.viewState = "matrix"
-            }
-        }
 
-        // ── Series title ─────────────────────────────────────────────────────
-        Text {
-            id: seriesTitle
-            anchors.top:              parent.top
-            anchors.topMargin:        12
-            anchors.horizontalCenter: parent.horizontalCenter
-            text:  root.currentSeries
-            color: "white"; font.pixelSize: 26; font.bold: true
-        }
-
-        // ── Three-column layout ──────────────────────────────────────────────
-        Row {
-            id: contentRow
-            anchors.top:         seriesTitle.bottom
-            anchors.topMargin:   16
-            anchors.bottom:      parent.bottom
-            anchors.bottomMargin:20
-            anchors.left:        parent.left
-            anchors.leftMargin:  30
-            anchors.right:       parent.right
-            anchors.rightMargin: 30
-            spacing: 24
-
-            // ── LEFT: Season fan — pivot at column centre, cards radiate upward ─
+            // ── Content area ─────────────────────────────────────────────────
             Item {
-                id: seasonColumn
-                width:  contentRow.width * 0.50
-                height: parent.height
+                id: contentRow
+                anchors.top:          seriesTitle.bottom
+                anchors.topMargin:    14
+                anchors.bottom:       parent.bottom
+                anchors.bottomMargin: 16
+                anchors.left:         parent.left
+                anchors.leftMargin:   16
+                anchors.right:        parent.right
+                anchors.rightMargin:  16
 
-                // Cards — portrait 2:3
-                property real cardW: Math.min(210, width * 0.38)
-                property real cardH: cardW * 1.5
-
-                // Pivot at vertical centre — fan radiates symmetrically upward
+                // ── RIGHT: Episode tiles ──────────────────────────────────────
                 Item {
-                    id: fanPivot
-                    anchors.horizontalCenter:       parent.horizontalCenter
-                    anchors.verticalCenter:         parent.verticalCenter
-                    anchors.verticalCenterOffset:   100
+                    id: episodesColumn
+                    anchors.right:  parent.right
+                    anchors.top:    parent.top
+                    anchors.bottom: parent.bottom
+                    width: parent.width * 0.26
 
-                    Repeater {
-                        model: root.seasonsModel
+                    ListView {
+                        id: episodeList
+                        anchors.fill: parent
+                        clip:    true
+                        spacing: 6
+                        model:   root.episodesModel
 
-                        delegate: Item {
-                            id: fanCard
-                            property int  sNum:     modelData.season_num
-                            property bool selected: root.currentSeason === sNum
-                            property bool hovered:  false
-                            property int  idx:      index
-                            property int  total:    root.seasonsModel.length
+                        ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
 
-                            // Spread widens with more seasons (30°–80° total)
-                            property real spread: Math.min(80, Math.max(30, total * 12))
-                            property real angle:  total > 1
-                                ? -spread / 2 + idx * (spread / (total - 1))
-                                : 0
+                        delegate: Rectangle {
+                            id: episodeTile
+                            width:  episodeList.width
+                            height: 88
+                            radius: 8
+                            color:  epMouse.containsMouse ? "#182030" : "#0d0d18"
+                            border.color: "#2566c2"; border.width: 1
 
-                            width:  seasonColumn.cardW
-                            height: seasonColumn.cardH
+                            Behavior on color { ColorAnimation { duration: 120 } }
 
-                            // All cards share pivot at their bottom-centre
-                            x: -seasonColumn.cardW / 2
-                            // Hover slides card outward (upward in its own axis)
-                            y: -seasonColumn.cardH - (hovered ? seasonColumn.cardH * 0.08 : 0)
+                            Column {
+                                anchors.left:           parent.left
+                                anchors.leftMargin:     14
+                                anchors.right:          progressBar.left
+                                anchors.rightMargin:    10
+                                anchors.verticalCenter: parent.verticalCenter
+                                spacing: 5
 
-                            transformOrigin: Item.Bottom
-                            rotation: angle
-                            z: hovered ? total + 5 : (total - 1 - idx)
-                            scale: selected ? 1.10 : 1.0
-
-                            Behavior on scale { ScaleAnimator   { duration: 200 } }
-                            Behavior on y     { NumberAnimation { duration: 200; easing.type: Easing.OutQuad } }
-
-                            // Poster with rounded clip
-                            Rectangle {
-                                anchors.fill: parent
-                                radius: 8
-                                color: "#000"
-                                border.color: fanCard.selected ? "#39FF14"
-                                            : fanCard.hovered  ? "white"
-                                            : Qt.rgba(1,1,1,0.4)
-                                border.width: fanCard.selected ? 3 : 1
-                                clip: true
-
-                                Image {
-                                    id: fanImg
-                                    anchors.fill: parent
-                                    anchors.margins: 2
-                                    source: modelData.image_uri || ""
-                                    fillMode: Image.PreserveAspectCrop
-                                    asynchronous: true
-                                    smooth: true
-                                    visible: false
-                                }
-                                Rectangle { id: fanMask; anchors.fill: parent; radius: 6; visible: false }
-                                OpacityMask {
-                                    anchors.fill: parent
-                                    source:     fanImg
-                                    maskSource: fanMask
-                                }
-
-                                // Fallback
                                 Text {
-                                    anchors.centerIn: parent
-                                    text: "S" + String(fanCard.sNum).padStart(2, "0")
-                                    color: "#555"; font.pixelSize: 28; font.bold: true
-                                    visible: fanImg.status !== Image.Ready
+                                    text: {
+                                        var label = modelData.ep_end
+                                            ? ("Ep " + modelData.ep_num + "–" + modelData.ep_end)
+                                            : ("Ep " + modelData.ep_num)
+                                        return modelData.ep_name
+                                            ? label + " · " + modelData.ep_name
+                                            : label
+                                    }
+                                    color: "white"
+                                    font.pixelSize: 18; font.bold: true
+                                    elide: Text.ElideRight
+                                    width: parent.width
+                                }
+
+                                Text {
+                                    text: modelData.last_played
+                                        ? "Watched: " + modelData.last_played
+                                        : "Never watched"
+                                    color: modelData.last_played ? "#999" : "#555"
+                                    font.pixelSize: 15
                                 }
                             }
 
-                            // Season label tag — top-right corner
-                            Rectangle {
-                                anchors.top:         parent.top
-                                anchors.right:       parent.right
-                                anchors.topMargin:   8
-                                anchors.rightMargin: 8
-                                width: 64; height: 28; radius: 14
-                                color:        fanCard.selected ? "#39FF14" : "#1a1a2e"
-                                border.color: fanCard.selected ? "#39FF14" : "#2566c2"
-                                border.width: 1
+                            Item {
+                                id: progressBar
+                                anchors.right:          parent.right
+                                anchors.rightMargin:    14
+                                anchors.verticalCenter: parent.verticalCenter
+                                width: 76; height: 26
+
+                                Rectangle {
+                                    anchors.fill: parent; radius: 4
+                                    color: "#1a1a1a"
+                                    border.color: "#333"; border.width: 1
+                                }
+                                Rectangle {
+                                    anchors.left:    parent.left
+                                    anchors.top:     parent.top
+                                    anchors.bottom:  parent.bottom
+                                    anchors.margins: 2
+                                    radius: 3
+                                    width: Math.max(0, (parent.width - 4) * modelData.progress_pct / 100)
+                                    color: modelData.progress_pct >= 100 ? "#39FF14"
+                                         : modelData.progress_pct >  0   ? "#FFC107"
+                                         : "transparent"
+                                    Behavior on width { NumberAnimation { duration: 300 } }
+                                }
                                 Text {
                                     anchors.centerIn: parent
-                                    text: "S" + String(fanCard.sNum).padStart(2, "0")
-                                    color: fanCard.selected ? "black" : "white"
-                                    font.pixelSize: 16; font.bold: true
+                                    text: modelData.progress_pct + "%"
+                                    color: "#777"; font.pixelSize: 13
                                 }
                             }
 
                             MouseArea {
+                                id: epMouse
                                 anchors.fill: parent
                                 hoverEnabled: true
-                                onEntered:  fanCard.hovered = true
-                                onExited:   fanCard.hovered = false
-                                onClicked:  root.selectSeason(fanCard.sNum)
-                            }
-                        }
-                    }
-                }
-            }
 
-            // ── CENTRE: Hero poster + description ────────────────────────────
-            Column {
-                width:   contentRow.width * 0.27
-                height:  parent.height
-                spacing: 14
-
-                Image {
-                    id: heroPoster
-                    width:  parent.width
-                    height: Math.min(width * 1.5, parent.height * 0.65)
-                    source: root.heroImageUri
-                    fillMode: Image.PreserveAspectFit
-                    asynchronous: true
-                    smooth: true
-
-                    Behavior on source { PropertyAnimation { duration: 0 } }
-
-                    Rectangle {
-                        anchors.fill: parent
-                        color: "#12121e"
-                        visible: heroPoster.status !== Image.Ready
-                        Text {
-                            anchors.centerIn: parent
-                            text: root.currentSeries
-                            color: "#444"; font.pixelSize: 20
-                            wrapMode: Text.WordWrap
-                            width: parent.width - 20
-                            horizontalAlignment: Text.AlignHCenter
-                        }
-                    }
-                }
-
-                // Episode / series description
-                Rectangle {
-                    width:  parent.width
-                    height: parent.height - heroPoster.height - parent.spacing
-                    color:  "#CC0d0d18"
-                    radius: 10
-                    border.color: "#2566c2"; border.width: 1
-                    clip: true
-
-                    Text {
-                        anchors.fill:    parent
-                        anchors.margins: 14
-                        text: root.episodeDesc.length > 0
-                              ? root.episodeDesc
-                              : (root.currentSeries + "\nSeason " + root.currentSeason)
-                        color: "#cccccc"; font.pixelSize: 18
-                        wrapMode: Text.WordWrap
-                        verticalAlignment: Text.AlignTop
-                    }
-                }
-            }
-
-            // ── RIGHT: Episode tiles — narrower, anchored right ──────────────
-            Item {
-                width:  contentRow.width * 0.20
-                height: parent.height
-
-                ListView {
-                    id: episodeList
-                    anchors.fill: parent
-                    clip:    true
-                    spacing: 6
-                    model:   root.episodesModel
-
-                    ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
-
-                    delegate: Rectangle {
-                        id: episodeTile
-                        width:  episodeList.width
-                        height: 88
-                        radius: 8
-                        color:  epMouse.containsMouse ? "#182030" : "#0d0d18"
-                        border.color: "#2566c2"; border.width: 1
-
-                        Behavior on color { ColorAnimation { duration: 120 } }
-
-                        // Episode label + last-played
-                        Column {
-                            anchors.left:           parent.left
-                            anchors.leftMargin:     14
-                            anchors.right:          progressBar.left
-                            anchors.rightMargin:    10
-                            anchors.verticalCenter: parent.verticalCenter
-                            spacing: 5
-
-                            Text {
-                                text: {
-                                    var label = modelData.ep_end
-                                        ? ("Ep " + modelData.ep_num + "–" + modelData.ep_end)
-                                        : ("Ep " + modelData.ep_num)
-                                    return modelData.ep_name
-                                        ? label + " · " + modelData.ep_name
-                                        : label
+                                onClicked: {
+                                    var detail = JSON.parse(
+                                        tvViewModel.get_episode_detail(modelData.xml_path))
+                                    root.episodeDesc   = detail.description || ""
+                                    root.currentActors = detail.actors      || []
                                 }
-                                color: "white"
-                                font.pixelSize: 18; font.bold: true
-                                elide: Text.ElideRight
-                                width: parent.width
-                            }
 
-                            Text {
-                                text: modelData.last_played
-                                    ? "Watched: " + modelData.last_played
-                                    : "Never watched"
-                                color: modelData.last_played ? "#999" : "#555"
-                                font.pixelSize: 15
+                                onDoubleClicked: {
+                                    if (modelData.video_path) {
+                                        var cleanPath = modelData.video_path.toString().replace(/\\/g, "/")
+                                        playbackRouter.playVideo(cleanPath, false)
+                                    }
+                                }
                             }
                         }
+                    }
+                }
 
-                        // Gold progress bar
-                        Item {
-                            id: progressBar
-                            anchors.right:          parent.right
-                            anchors.rightMargin:    14
-                            anchors.verticalCenter: parent.verticalCenter
-                            width: 76; height: 26
+                // ── CENTRE: Season posters (top) + Text area (bottom) ─────────
+                Item {
+                    id: centreColumn
+                    anchors.left:        parent.left
+                    anchors.right:       episodesColumn.left
+                    anchors.rightMargin: 16
+                    anchors.top:         parent.top
+                    anchors.bottom:      parent.bottom
+
+                    // ── Season poster row ─────────────────────────────────────
+                    Item {
+                        id: seasonPosterZone
+                        anchors.top:   parent.top
+                        anchors.left:  parent.left
+                        anchors.right: parent.right
+                        height: parent.height * 0.55
+
+                        // Layout calculations
+                        property int   count:    root.seasonsModel.length
+                        property real  availW:   width - 24
+                        property real  maxPostH: Math.min(height * 0.88, 320)
+                        property real  maxPostW: maxPostH * 2 / 3
+                        property real  minStep:  68   // min exposed pixels for badge visibility
+
+                        property real  step: {
+                            if (count <= 1) return 0
+                            var natural = (availW - maxPostW) / (count - 1)
+                            return Math.max(minStep, natural)
+                        }
+                        property real  postW: {
+                            if (count <= 0) return maxPostW
+                            if (count === 1) return Math.min(maxPostW, availW * 0.5)
+                            return Math.min(maxPostW, availW - step * (count - 1))
+                        }
+                        property real  postH:   postW * 1.5
+                        property real  totalW:  count <= 1 ? postW : (count - 1) * step + postW
+                        property real  startX:  Math.max(12, (availW - totalW) / 2 + 12)
+
+                        Repeater {
+                            model: root.seasonsModel
+
+                            delegate: Item {
+                                id: posterCard
+                                property int  sNum: modelData.season_num
+                                property bool sel:  root.currentSeason === sNum
+                                property int  idx:  index
+
+                                x: seasonPosterZone.startX + idx * seasonPosterZone.step
+                                y: (seasonPosterZone.height - seasonPosterZone.postH) / 2
+                                width:  seasonPosterZone.postW
+                                height: seasonPosterZone.postH
+                                // Season 1 on top — each subsequent season peeks out to the right,
+                                // keeping its top-right badge in the exposed area
+                                z: sel ? 99 : (seasonPosterZone.count - 1 - idx)
+
+                                Rectangle {
+                                    anchors.fill: parent
+                                    radius: 8
+                                    color: "#111"
+                                    border.color: posterCard.sel ? "#39FF14" : Qt.rgba(1,1,1,0.25)
+                                    border.width: posterCard.sel ? 3 : 1
+                                    clip: true
+
+                                    Image {
+                                        anchors.fill: parent
+                                        source:       modelData.image_uri || ""
+                                        fillMode:     Image.PreserveAspectCrop
+                                        asynchronous: true
+                                        smooth:       true
+                                    }
+
+                                    // Top-right season badge (right edge always exposed)
+                                    Rectangle {
+                                        anchors.top:         parent.top
+                                        anchors.right:       parent.right
+                                        anchors.topMargin:   8
+                                        anchors.rightMargin: 8
+                                        width: 48; height: 26; radius: 13
+                                        color:        posterCard.sel ? "#39FF14" : Qt.rgba(0.05,0.05,0.15,0.88)
+                                        border.color: posterCard.sel ? "#39FF14" : "#2566c2"
+                                        border.width: 1
+                                        Text {
+                                            anchors.centerIn: parent
+                                            text: "S" + modelData.season_num
+                                            color: posterCard.sel ? "black" : "white"
+                                            font.pixelSize: 15; font.bold: true
+                                        }
+                                    }
+
+                                    // Hover tint
+                                    Rectangle {
+                                        anchors.fill: parent; radius: parent.radius
+                                        color: Qt.rgba(1,1,1, cardMouse.containsMouse && !posterCard.sel ? 0.08 : 0)
+                                        Behavior on color { ColorAnimation { duration: 120 } }
+                                    }
+                                }
+
+                                MouseArea {
+                                    id: cardMouse
+                                    anchors.fill: parent
+                                    hoverEnabled: true
+                                    onClicked: root.selectSeason(posterCard.sNum)
+                                }
+                            }
+                        }
+                    }
+
+                    // ── Text area (description / actors) ─────────────────────
+                    Item {
+                        id: textZone
+                        anchors.top:         seasonPosterZone.bottom
+                        anchors.topMargin:   10
+                        anchors.left:        parent.left
+                        anchors.right:       parent.right
+                        anchors.bottom:      parent.bottom
+
+                        Row {
+                            id: toggleBar
+                            anchors.top:              parent.top
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            spacing: 0
 
                             Rectangle {
-                                anchors.fill: parent; radius: 4
-                                color: "#1a1a1a"
-                                border.color: "#333"; border.width: 1
+                                width: 150; height: 34; radius: 17
+                                color:  !root.showActors ? "#2566c2" : Qt.rgba(0.06,0.06,0.14,0.9)
+                                border.color: "#2566c2"; border.width: 1
+                                Text {
+                                    anchors.centerIn: parent
+                                    text: "Description"; color: "white"
+                                    font.pixelSize: 17; font.bold: !root.showActors
+                                }
+                                MouseArea { anchors.fill: parent; onClicked: root.showActors = false }
                             }
+
                             Rectangle {
-                                anchors.left:   parent.left
-                                anchors.top:    parent.top
-                                anchors.bottom: parent.bottom
-                                anchors.margins: 2
-                                radius: 3
-                                width: Math.max(0, (parent.width - 4) * modelData.progress_pct / 100)
-                                color: modelData.progress_pct >= 100 ? "#39FF14"
-                                     : modelData.progress_pct >  0   ? "#FFC107"
-                                     : "transparent"
-                                Behavior on width { NumberAnimation { duration: 300 } }
-                            }
-                            Text {
-                                anchors.centerIn: parent
-                                text: modelData.progress_pct + "%"
-                                color: "#777"; font.pixelSize: 13
+                                width: 110; height: 34; radius: 17
+                                color:  root.showActors ? "#2566c2" : Qt.rgba(0.06,0.06,0.14,0.9)
+                                border.color: "#2566c2"; border.width: 1
+                                Text {
+                                    anchors.centerIn: parent
+                                    text: "Actors"; color: "white"
+                                    font.pixelSize: 17; font.bold: root.showActors
+                                }
+                                MouseArea { anchors.fill: parent; onClicked: root.showActors = true }
                             }
                         }
 
-                        MouseArea {
-                            id: epMouse
-                            anchors.fill: parent
-                            hoverEnabled: true
+                        Rectangle {
+                            anchors.top:         toggleBar.bottom
+                            anchors.topMargin:   8
+                            anchors.left:        parent.left
+                            anchors.right:       parent.right
+                            anchors.bottom:      parent.bottom
+                            color:  "#CC0d0d18"
+                            radius: 10
+                            border.color: "#2566c2"; border.width: 1
+                            clip: true
 
-                            // Single click — fetch and show episode description
-                            onClicked: {
-                                var detail = JSON.parse(
-                                    tvViewModel.get_episode_detail(modelData.xml_path))
-                                var desc = detail.description || ""
-                                if (!desc && detail.genre)
-                                    desc = detail.genre
-                                        + (detail.year ? " · " + detail.year : "")
-                                if (!desc)
-                                    desc = root.currentSeries
-                                        + " — S" + String(root.currentSeason).padStart(2,"0")
-                                        + "E" + String(modelData.ep_num).padStart(2,"0")
-                                root.episodeDesc = desc
-                            }
-
-                            // Double click — play via playback router
-                            onDoubleClicked: {
-                                if (modelData.video_path) {
-                                    var cleanPath = modelData.video_path.toString().replace(/\\/g, "/")
-                                    playbackRouter.playVideo(cleanPath, false)
-                                }
+                            Text {
+                                anchors.fill:    parent
+                                anchors.margins: 14
+                                text: root.showActors
+                                      ? (root.currentActors.length > 0
+                                         ? root.currentActors.join(",  ")
+                                         : "No cast information available")
+                                      : (root.episodeDesc.length > 0
+                                         ? root.episodeDesc
+                                         : root.currentSeries + "  —  Season " + root.currentSeason)
+                                color: "#cccccc"; font.pixelSize: 18
+                                wrapMode: Text.WordWrap
+                                verticalAlignment: Text.AlignTop
                             }
                         }
                     }
