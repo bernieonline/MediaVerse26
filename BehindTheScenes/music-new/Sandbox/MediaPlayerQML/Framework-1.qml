@@ -192,7 +192,7 @@ ApplicationWindow {
         width: parent.width * 0.75
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: parent.top
-        anchors.topMargin: 18
+        anchors.topMargin: 26
         spacing: 20
         RowButton { id: rowButtons; width: parent.width - 100 }
     }
@@ -406,7 +406,7 @@ ApplicationWindow {
     Rectangle {
         id: contentContainer
         anchors.top: parent.top
-        anchors.topMargin: parent.height * 0.14
+        anchors.topMargin: parent.height * 0.18
         anchors.bottom: parent.bottom
         anchors.bottomMargin: 50
         anchors.left: parent.left
