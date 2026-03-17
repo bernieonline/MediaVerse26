@@ -146,6 +146,8 @@ class TVViewModel(QObject):
         self._hierarchy: dict[str, dict[int, list[dict]]] = {}
         # xml_collection_data keyed by video-path stem for fast lookup
         self._xml_coll: dict[str, dict] = {}
+        # preloaded XML cache: series_name → { xml_path: {description, actors} }
+        self._series_xml_cache: dict[str, dict] = {}
         self._load()
 
     # ── Startup loading ──────────────────────────────────────────────────────
@@ -307,29 +309,9 @@ class TVViewModel(QObject):
     @Slot(str, result=str)
     def get_episode_detail(self, xml_path: str) -> str:
         """Returns JSON: {description, actors, director, genre, year, keywords}
-        Checks xml_collection_data first (fast), falls back to XML sidecar."""
+        Reads XML sidecar directly — xml_collection_data does not hold Description."""
         if not xml_path:
             return json.dumps({})
-
-        # Normalise stem — strip sidecar suffixes JRiver appends
-        stem = Path(xml_path).stem
-        for suffix in ("_JRSidecar", "_mkv", "_mp4", "_avi", "_m4v"):
-            if stem.endswith(suffix):
-                stem = stem[: -len(suffix)]
-
-        # Fast path — xml_collection_data
-        item = self._xml_coll.get(stem)
-        if item:
-            return json.dumps({
-                "description": "",
-                "actors":      item.get("Actors", []),
-                "director":    item.get("Director", ""),
-                "genre":       item.get("Genre", ""),
-                "year":        item.get("Year", ""),
-                "keywords":    item.get("Keywords", ""),
-            })
-
-        # Slow path — parse XML sidecar directly
         try:
             tree   = ET.parse(xml_path)
             fields = {
@@ -346,3 +328,37 @@ class TVViewModel(QObject):
             })
         except Exception:
             return json.dumps({})
+
+    @Slot(str, result=str)
+    def preload_series_xml(self, series_name: str) -> str:
+        """Pre-read all XML sidecars for every episode in a series.
+        Returns JSON: { xml_path: { description: str, actors: [str, ...] }, ... }
+        Result is cached so repeated calls for the same series are instant."""
+        if series_name in self._series_xml_cache:
+            return json.dumps(self._series_xml_cache[series_name])
+
+        seasons = self._hierarchy.get(series_name, {})
+        cache: dict[str, dict] = {}
+
+        for eps in seasons.values():
+            for ep in eps:
+                xml_path = ep.get("xml_path", "")
+                if not xml_path or xml_path in cache:
+                    continue
+                try:
+                    tree = ET.parse(xml_path)
+                    fields = {
+                        f.get("Name", ""): (f.text or "")
+                        for f in tree.getroot().iter("Field")
+                    }
+                    actors_raw = fields.get("Actors", "")
+                    cache[xml_path] = {
+                        "description": fields.get("Description", "") or fields.get("Plot", ""),
+                        "actors": [a.strip() for a in actors_raw.split(";") if a.strip()],
+                    }
+                except Exception:
+                    cache[xml_path] = {"description": "", "actors": []}
+
+        self._series_xml_cache[series_name] = cache
+        print(f"✅ [TV] XML preloaded: {len(cache)} episodes for '{series_name}'")
+        return json.dumps(cache)

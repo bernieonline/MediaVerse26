@@ -31,9 +31,10 @@ Item {
     property var seasonsModel: []
     property var episodesModel:[]
 
-    property string episodeDesc:  ""
-    property bool   showActors:   false
+    property string episodeDesc:   ""
+    property bool   showActors:    false
     property var    currentActors: []
+    property var    xmlCache:      ({})
 
     // ── Initialise ───────────────────────────────────────────────────────────
     Component.onCompleted: {
@@ -43,8 +44,11 @@ Item {
     // ── Helpers ──────────────────────────────────────────────────────────────
     function showSeries(name) {
         root.currentSeries = name
+        root.showActors    = false
+        // Preload all XML data for this series (cached after first call)
+        root.xmlCache = JSON.parse(tvViewModel.preload_series_xml(name))
         var seasons = JSON.parse(tvViewModel.get_seasons(name))
-        root.seasonsModel  = seasons
+        root.seasonsModel = seasons
         if (seasons.length > 0)
             selectSeason(seasons[0].season_num)
         root.viewState = "series"
@@ -52,8 +56,17 @@ Item {
 
     function selectSeason(seasonNum) {
         root.currentSeason = seasonNum
-        root.episodeDesc   = ""
         root.episodesModel = JSON.parse(tvViewModel.get_episodes(root.currentSeries, seasonNum))
+        // Show first episode data immediately
+        if (root.episodesModel.length > 0) {
+            var ep0  = root.episodesModel[0]
+            var data = root.xmlCache[ep0.xml_path] || {}
+            root.episodeDesc   = data.description || ""
+            root.currentActors = data.actors      || []
+        } else {
+            root.episodeDesc   = ""
+            root.currentActors = []
+        }
     }
 
     // ════════════════════════════════════════════════════════════════════════
@@ -300,9 +313,9 @@ Item {
         // Dark glass panel — covers only the area to the right of the nav buttons
         Rectangle {
             x:      navButtons.x + 90
-            y:      0
-            width:  parent.width - x
-            height: parent.height
+            y:      gridPane.edgeMargin
+            width:  parent.width - x - gridPane.edgeMargin
+            height: parent.height - gridPane.edgeMargin * 2
             color:  Qt.rgba(0.03, 0.03, 0.08, 0.94)
         }
 
@@ -310,9 +323,9 @@ Item {
         Item {
             id: overlayPanel
             x:      navButtons.x + 90
-            y:      0
-            width:  parent.width - x
-            height: parent.height
+            y:      gridPane.edgeMargin
+            width:  parent.width - x - gridPane.edgeMargin
+            height: parent.height - gridPane.edgeMargin * 2
 
             // ── Back button ──────────────────────────────────────────────────
             Rectangle {
@@ -451,10 +464,9 @@ Item {
                                 hoverEnabled: true
 
                                 onClicked: {
-                                    var detail = JSON.parse(
-                                        tvViewModel.get_episode_detail(modelData.xml_path))
-                                    root.episodeDesc   = detail.description || ""
-                                    root.currentActors = detail.actors      || []
+                                    var data = root.xmlCache[modelData.xml_path] || {}
+                                    root.episodeDesc   = data.description || ""
+                                    root.currentActors = data.actors      || []
                                 }
 
                                 onDoubleClicked: {
@@ -626,19 +638,29 @@ Item {
                             border.color: "#2566c2"; border.width: 1
                             clip: true
 
-                            Text {
+                            Flickable {
                                 anchors.fill:    parent
                                 anchors.margins: 14
-                                text: root.showActors
-                                      ? (root.currentActors.length > 0
-                                         ? root.currentActors.join(",  ")
-                                         : "No cast information available")
-                                      : (root.episodeDesc.length > 0
-                                         ? root.episodeDesc
-                                         : root.currentSeries + "  —  Season " + root.currentSeason)
-                                color: "#cccccc"; font.pixelSize: 18
-                                wrapMode: Text.WordWrap
-                                verticalAlignment: Text.AlignTop
+                                contentWidth:    width
+                                contentHeight:   textContent.implicitHeight
+                                clip:            true
+                                flickableDirection: Flickable.VerticalFlick
+                                ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
+
+                                Text {
+                                    id: textContent
+                                    width: parent.width
+                                    text: root.showActors
+                                          ? (root.currentActors.length > 0
+                                             ? root.currentActors.join(",  ")
+                                             : "No cast information available")
+                                          : (root.episodeDesc.length > 0
+                                             ? root.episodeDesc
+                                             : root.currentSeries + "  —  Season " + root.currentSeason)
+                                    color: "#cccccc"; font.pixelSize: 18
+                                    wrapMode: Text.WordWrap
+                                    verticalAlignment: Text.AlignTop
+                                }
                             }
                         }
                     }
