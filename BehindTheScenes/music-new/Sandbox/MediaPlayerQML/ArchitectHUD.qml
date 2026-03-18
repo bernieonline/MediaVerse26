@@ -329,14 +329,20 @@ Rectangle {
         }
 
 
-        Row {
-            anchors.centerIn: parent; spacing: 60
+        // Counter — centred independently
+        Column {
+            anchors.centerIn: parent
+            spacing: 2
+            Text { text: "CUMULATIVE MATCHES"; color: "#CCFFFFFF"; font.pixelSize: 11; font.letterSpacing: 1 }
+            Text { text: architectRoot.totalMatches; color: "#00F2FF"; font.pixelSize: 36; font.bold: true }
+        }
 
-            Column {
-                spacing: 2
-                Text { text: "CUMULATIVE MATCHES"; color: "#88FFFFFF"; font.pixelSize: 11; font.letterSpacing: 1 }
-                Text { text: architectRoot.totalMatches; color: "#00F2FF"; font.pixelSize: 36; font.bold: true }
-            }
+        // Reset + Exit — pinned to right edge
+        Row {
+            anchors.right: parent.right
+            anchors.rightMargin: 24
+            anchors.verticalCenter: parent.verticalCenter
+            spacing: 12
 
             Button {
                 text: "RESET SCHEME"
@@ -409,7 +415,6 @@ Rectangle {
             //end button
         }
     }
-
     // --- FINISH LOGIC ---
     function buildFullRuleSet() {
         var rules = [];
