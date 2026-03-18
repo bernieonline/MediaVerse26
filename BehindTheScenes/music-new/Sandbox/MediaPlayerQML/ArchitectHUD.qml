@@ -3,21 +3,68 @@ import QtQuick.Controls 2.15
 import Qt5Compat.GraphicalEffects
 
 Rectangle {
-    id: architectRoot 
+    id: architectRoot
     anchors.fill: parent
-    color: "#F2050505"
+    color: "#050505"
     visible: false
     z: 5000
     clip: true
 
     // --- DIMENSIONS ---
-    readonly property int cardWidth: 360    
-    readonly property int cardHeight: 600   
-    readonly property int joinGap: 60 
-    
+    readonly property int cardWidth: 360
+    readonly property int cardHeight: 600
+    readonly property int joinGap: 60
+
     property int totalMatches: 0
     property bool filterEnabled: false
 
+    // --- BACKGROUND IMAGE ---
+    Image {
+        id: architectBg
+        anchors.fill: parent
+        source: "../../Assets/Splash/architect.jpg"
+        fillMode: Image.PreserveAspectCrop
+        opacity: 0.60
+        z: 0
+    }
+
+    // --- VIGNETTE OVERLAY ---
+    RadialGradient {
+        anchors.fill: parent
+        z: 0
+        horizontalRadius: parent.width * 0.55
+        verticalRadius: parent.height * 0.55
+        gradient: Gradient {
+            GradientStop { position: 0.0;  color: "transparent" }
+            GradientStop { position: 0.70; color: Qt.rgba(0,0,0,0.20) }
+            GradientStop { position: 1.0;  color: Qt.rgba(0,0,0,0.78) }
+        }
+    }
+
+    // --- TITLE ---
+    Column {
+        anchors.top:    parent.top
+        anchors.left:   parent.left
+        anchors.margins: 36
+        spacing: 8
+        z: 2
+
+        Text {
+            text: "ARCHITECT"
+            color: "white"
+            font.pixelSize:     46
+            font.bold:          true
+            font.letterSpacing: 7
+        }
+        Text {
+            text: "CREATOR"
+            color: "white"
+            font.pixelSize:     46
+            font.bold:          true
+            font.letterSpacing: 7
+        }
+        Rectangle { width: 64; height: 3; color: "#2566c2" }
+    }
 
     // --- POPUP INSTANCES ---
     ArchitectMoviePopup { id: moviePopup }

@@ -83,6 +83,13 @@ Item {
             font.bold:          true
             font.letterSpacing: 7
         }
+        Text {
+            text: "COLLECTION"
+            color: "white"
+            font.pixelSize:     46
+            font.bold:          true
+            font.letterSpacing: 7
+        }
         Rectangle { width: 64; height: 3; color: "#2566c2" }
     }
 
