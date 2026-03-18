@@ -11,9 +11,9 @@ Rectangle {
     clip: true
 
     // --- DIMENSIONS ---
-    readonly property int cardWidth: 360
-    readonly property int cardHeight: 600
-    readonly property int joinGap: 60
+    readonly property int cardWidth: 288
+    readonly property int cardHeight: 480
+    readonly property int joinGap: 48
 
     property int totalMatches: 0
     property bool filterEnabled: false
@@ -182,8 +182,10 @@ Rectangle {
 
         Row {
             id: cardRow
-            anchors.centerIn: parent
-            spacing: 0 
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.bottom: parent.bottom
+            anchors.bottomMargin: 80
+            spacing: 0
 
             Repeater {
                 id: cardRepeater
