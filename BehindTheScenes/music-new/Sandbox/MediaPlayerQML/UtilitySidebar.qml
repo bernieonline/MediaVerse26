@@ -147,14 +147,15 @@ Item {
         }
     }
 
-    // --- 5. THE COLLECTION CREATOR PANEL ---
+    // --- 5. THE COLLECTION CREATOR PANEL (centered floating overlay) ---
     CollectionCreator {
         id: collectionCreatorPanel
         property bool isShown: false
-        z: 1100 
-        x: isShown ? (parent.width - width) : parent.width
-        width: 600 
-        Behavior on x { NumberAnimation { duration: 350; easing.type: Easing.OutCubic } }
+        z: 1100
+        anchors.fill: parent
+        opacity: isShown ? 1.0 : 0.0
+        enabled: isShown
+        Behavior on opacity { NumberAnimation { duration: 280; easing.type: Easing.OutCubic } }
     }
 
     // --- 5.5 BACKUP SYSTEM OVERLAY ---
