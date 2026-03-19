@@ -682,6 +682,10 @@ class XMLCollections(QObject):
         filtered_items = []
         print("============  inside row 613   ============")
         for item in self.master_cache:
+            # Skip any TV records that may exist in the current on-disk file
+            if item.get("Media Sub Type", "").lower() == "tv show" or item.get("Season", ""):
+                continue
+
             match = True
             for key, value in criteria.items():
 

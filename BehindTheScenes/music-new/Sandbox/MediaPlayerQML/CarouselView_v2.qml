@@ -17,13 +17,19 @@ Rectangle {
     // --- Metadata Tools ---
     MetadataTools { id: metadata }
 
-    property var sortedList: externalImageList
+    property var sortedList: {
+        if (!externalImageList || externalImageList.length === 0) return [];
+        let copy = externalImageList.slice();
+        copy.sort(function(a, b) { return (a.year || 0) - (b.year || 0); });
+        return copy;
+    }
 
     // --- Geometry & Scaling ---
     readonly property real posterAreaHeight: height * 0.8
     property real posterHeight: posterAreaHeight * 0.75
     property real posterWidth: posterHeight * (2/3)
 
+    // Scale factor by distance from centre
     property var scaleForIndex: function(i) {
         let dist = Math.abs(carouselView.currentIndex - i)
         if (dist === 0) return 1.1
@@ -35,7 +41,7 @@ Rectangle {
     property real totalPosterWidth: posterWidth * 3.5
     property real spacingValue: ((carouselCenter.width - totalPosterWidth) / 4) * 0.25
 
-    // --- Derived Properties for Center Item ---
+    // --- Derived Properties for Centre Item ---
     property string currentFilePath: {
         if (!sortedList || sortedList.length === 0) return ""
         let idx = carouselView.currentIndex
@@ -74,25 +80,66 @@ Rectangle {
                 highlightRangeMode: ListView.StrictlyEnforceRange
 
                 delegate: Item {
-                    width: carouselRoot.posterWidth * carouselRoot.scaleForIndex(index)
-                    height: carouselRoot.posterHeight * carouselRoot.scaleForIndex(index)
-                    anchors.verticalCenter: parent.verticalCenter
+                    id: delegateRoot
 
+                    // Delegate occupies the full ListView height so we can
+                    // reliably centre the poster card with anchors.centerIn
+                    width: carouselRoot.posterWidth * carouselRoot.scaleForIndex(index)
+                    height: carouselView.height
+
+                    // Distance from the current centre card — drives depth effects
+                    property int distFromCentre: Math.abs(carouselView.currentIndex - index)
+                    property real sc: carouselRoot.scaleForIndex(index)
+                    property bool isVisible: delegateRoot.sc > 0
+
+                    // Drop shadow (depth cue) — rendered behind the poster card
                     Rectangle {
-                        anchors.fill: parent
+                        visible: delegateRoot.isVisible
+                        width: posterCard.width * 0.82
+                        height: posterCard.height
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        anchors.verticalCenter: parent.verticalCenter
+                        anchors.verticalCenterOffset: 16
+                        color: "#000"
+                        opacity: 0.5 * delegateRoot.sc
+                        radius: 16
+                        z: 0
+                    }
+
+                    // Poster card — always centred on the horizontal centreline
+                    Rectangle {
+                        id: posterCard
+                        visible: delegateRoot.isVisible
+                        width: parent.width
+                        height: parent.width > 0 ? parent.width * 1.5 : 0
+                        anchors.centerIn: parent
                         color: "#222"
-                        border.color: "white"
-                        border.width: 1
+                        border.color: delegateRoot.distFromCentre === 0 ? "#FFD700" : "#777"
+                        border.width: delegateRoot.distFromCentre === 0 ? 2 : 1
                         radius: 12
                         clip: true
+                        // Opacity fades with distance — reinforces depth
+                        opacity: delegateRoot.distFromCentre === 0 ? 1.0
+                               : delegateRoot.distFromCentre === 1 ? 0.80
+                               : 0.60
+                        z: 1
 
                         Image {
                             anchors.fill: parent
                             source: modelData.filePath || ""
-                            fillMode: Image.PreserveAspectFit
+                            fillMode: Image.PreserveAspectCrop
                         }
 
-                        // --- FINAL PLAYBACK CLICK HANDLER ---
+                        // Darkening veil — stronger on outer cards for a spotlight feel
+                        Rectangle {
+                            anchors.fill: parent
+                            color: "black"
+                            opacity: delegateRoot.distFromCentre === 0 ? 0.0
+                                   : delegateRoot.distFromCentre === 1 ? 0.18
+                                   : 0.35
+                        }
+
+                        // --- Click Handler (unchanged logic) ---
                         MouseArea {
                             anchors.fill: parent
                             acceptedButtons: Qt.LeftButton
@@ -101,12 +148,12 @@ Rectangle {
 
                             onClicked: {
                                 if (singleClickTimer) singleClickTimer.stop()
-                                
+
                                 singleClickTimer = Qt.createQmlObject(
                                     'import QtQuick 2.15; Timer { interval: 250; repeat: false }',
                                     carouselRoot
                                 )
-                                
+
                                 singleClickTimer.triggered.connect(function() {
                                     if (!doubleClickActive) {
                                         carouselRoot.v2OpenDetail({
@@ -125,23 +172,15 @@ Rectangle {
                                 doubleClickActive = true
                                 if (singleClickTimer) singleClickTimer.stop()
 
-                                // 1. Resolve full V2 paths
                                 let resolved = _xmlController.resolve_paths(modelData.filePath)
-                                
+
                                 if (resolved && resolved.video) {
-                                    // 2. Clean slashes for the Python Bridge
                                     let cleanPath = resolved.video.toString().replace(/\\/g, "/")
-                                    
+
                                     console.log("!!! CAROUSEL PLAYBACK TRIGGERED !!!")
                                     console.log("Target: " + cleanPath)
 
-                                    // 3. EXECUTE PLAYBACK
-                                    //playbackBridge.playVideo(cleanPath)
                                     playbackRouter.playVideo(cleanPath, false)
-                                    
-                                    
-                                    
-                                    // 4. Signal UI (optional)
                                     carouselRoot.v2PlayMovie(cleanPath)
                                 } else {
                                     console.log("CAROUSEL ERROR: No video found for " + modelData.filePath)
@@ -152,7 +191,7 @@ Rectangle {
                 }
             }
 
-            // Labels
+            // Title / Year labels
             Column {
                 anchors.bottom: parent.bottom
                 anchors.bottomMargin: 40

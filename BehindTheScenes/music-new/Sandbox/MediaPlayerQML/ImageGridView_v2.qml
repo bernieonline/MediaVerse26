@@ -42,8 +42,10 @@ Rectangle {
     property string sortMode: "oldest"
 
     property var sortedList: {
-        if (!externalImageList) return [];
-        return externalImageList;
+        if (!externalImageList || externalImageList.length === 0) return [];
+        let copy = externalImageList.slice();
+        copy.sort(function(a, b) { return (a.year || 0) - (b.year || 0); });
+        return copy;
     }
 
     readonly property real labelHeight: showLabels ? 45 : 0

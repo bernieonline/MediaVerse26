@@ -21,6 +21,10 @@ def build_dna_bank():
         enriched_data = []
 
         for item in raw_items:
+            # Skip TV episodes — only movies belong in xml_collection_data.json
+            if item.get("metadata", {}).get("type") != "movie":
+                continue
+
             shared = item.get("shared", {})
             v_str, x_str = shared.get("video"), shared.get("xml")
             

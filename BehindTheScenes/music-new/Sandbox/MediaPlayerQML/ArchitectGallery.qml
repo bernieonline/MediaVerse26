@@ -42,8 +42,12 @@ Item {
         function onCollectionMoviesReady(data) {
             movieGridModel.clear()
             gridPane.currentPage = 0
-            for (var i = 0; i < data.length; i++)
-                movieGridModel.append(data[i])
+            // Sort oldest-first before populating so grid and filmstrip share the same order
+            let sorted = data.slice().sort(function(a, b) {
+                return (parseInt(a.year) || 0) - (parseInt(b.year) || 0)
+            })
+            for (var i = 0; i < sorted.length; i++)
+                movieGridModel.append(sorted[i])
             if (data.length > 0)
                 galleryRoot.showingCollection = true
         }

@@ -8,6 +8,20 @@ Item {
     // Signal to send the category back to the main framework
     signal categorySelected(string categoryKey)
 
+    // Full-panel background image — dimmed so category cards remain primary focus
+    Image {
+        anchors.fill: parent
+        source: "file:///" + _paths["splash"] + "/dvds.jpg"
+        fillMode: Image.PreserveAspectCrop
+    }
+
+    // Dark veil to subdue the background without hiding it
+    Rectangle {
+        anchors.fill: parent
+        color: "black"
+        opacity: 0.45
+    }
+
     // The Grid Container (Occupies 2/3 width of a 4k screen)
     GridView {
         id: grid
