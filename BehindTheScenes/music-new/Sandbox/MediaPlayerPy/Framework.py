@@ -143,9 +143,9 @@ def main():
                             while time.time() < deadline:
                                 hwnd = _find_jriver_hwnd(_user32)
                                 if hwnd:
-                                    _user32.ShowWindow(hwnd, 0)  # SW_HIDE
+                                    _user32.ShowWindow(hwnd, 7)  # SW_SHOWMINNOACTIVE — taskbar, no focus steal
                                     if not suppressing:
-                                        print("[STARTUP] JRiver hidden.")
+                                        print("[STARTUP] JRiver minimised to taskbar.")
                                         suppressing = True
                                         suppress_until = time.time() + 5
                                 if suppressing and time.time() > suppress_until:
@@ -256,6 +256,9 @@ def main():
 
         #playback_bridge = PlaybackQmlBridge()
         playback_bridge = router.http_bridge
+        app.aboutToQuit.connect(
+            lambda: threading.Thread(target=playback_bridge.shutdown, daemon=True).start()
+        )
 
         search_controller = SearchController()
         ctx.setContextProperty("playbackBridge", playback_bridge)
@@ -318,7 +321,20 @@ def main():
         else:
             notifier.post_notification("Database Connected: MediaVerse is Online", False)
 
-        return app.exec()
+        exit_code = app.exec()
+
+        # Safety timer — if non-daemon background threads (e.g. MySQL pool) stall
+        # Python's normal exit, os._exit() fires after 2 s to force termination.
+        # Being daemon, it is killed silently if Python exits normally first.
+        _t = threading.Timer(2.0, lambda: os._exit(exit_code))
+        _t.daemon = True
+        _t.start()
+
+        # JRiver is already minimised on the taskbar (SW_SHOWMINNOACTIVE was used
+        # at startup instead of SW_HIDE), so no restore step is needed.
+        # Calling GetWindowTextW here would risk blocking the main thread;
+        # skipping it entirely removes that risk and the egg-timer delay.
+        sys.exit(exit_code)
 
     except Exception:
         logging.exception("An unhandled exception occurred:")

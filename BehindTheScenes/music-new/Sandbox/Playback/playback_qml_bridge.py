@@ -22,6 +22,11 @@ class PlaybackQmlBridge(QObject):
         self.controller.play_threaded(absolute_path)
 
     @Slot()
+    def shutdown(self):
+        """Called on app exit — stops the watchdog and tells JRiver to stop."""
+        self.controller.shutdown()
+
+    @Slot()
     def stopPlayback(self):
         """Stop JRiver via HTTP and immediately reclaim the screen."""
         try:

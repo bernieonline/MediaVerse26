@@ -136,11 +136,29 @@ class PlaybackController:
         self.bridge = bridge
         self.url    = MCWS_BASE
         self._is_processing = False
+        self._stop_event    = threading.Event()
+        self._watchdog_thread: threading.Thread | None = None
+
+    def shutdown(self):
+        """Signal the watchdog to stop. Only contacts JRiver if it was active."""
+        logger.info("PlaybackController shutdown requested.")
+        self._stop_event.set()
+        # Only send a stop if the watchdog is running (JRiver was playing something).
+        # When MPC-BE or another player is in use, skip this entirely so shutdown
+        # is instant and we don't block on a 1-second HTTP timeout unnecessarily.
+        if self._watchdog_thread and self._watchdog_thread.is_alive():
+            try:
+                requests.get(f"{self.url}/Playback/Stop", timeout=(1, 1))
+                logger.info("Stop command sent to JRiver.")
+            except Exception:
+                pass
+        logger.info("PlaybackController shutdown complete.")
 
     def play_threaded(self, path):
         if self._is_processing:
             logger.warning("Playback request ignored: already processing.")
             return
+        self._stop_event.clear()
         threading.Thread(target=self._execute_sequence, args=(path,), daemon=True).start()
 
     def _get_file_key(self, absolute_path):
@@ -172,7 +190,8 @@ class PlaybackController:
             logger.info(f"FORCING EXCLUSIVE PLAYBACK: Key {file_key}")
             requests.get(play_url, timeout=10)
 
-            threading.Thread(target=self._run_watchdog, daemon=True).start()
+            self._watchdog_thread = threading.Thread(target=self._run_watchdog, daemon=True)
+            self._watchdog_thread.start()
         except Exception as e:
             logger.error(f"Playback execution failed: {e}")
         finally:
@@ -189,7 +208,7 @@ class PlaybackController:
         start_time       = time.time()
         logger.info("Watchdog active.")
 
-        while True:
+        while not self._stop_event.is_set():
             try:
                 elapsed       = time.time() - start_time
                 poll_interval = 0.5 if elapsed < 10 else 1.0
@@ -211,9 +230,9 @@ class PlaybackController:
                         self.bridge.playbackFinished.emit()
                         break
 
-                time.sleep(poll_interval)
+                self._stop_event.wait(poll_interval)
 
             except requests.exceptions.RequestException:
                 logger.debug("JRiver busy... retrying.")
-                time.sleep(0.5)
+                self._stop_event.wait(0.5)
                 continue
