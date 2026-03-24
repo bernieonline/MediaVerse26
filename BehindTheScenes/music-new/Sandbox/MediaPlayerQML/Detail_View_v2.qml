@@ -27,7 +27,7 @@ Rectangle {
 
     // --- LOGIC & CONNECTIONS ---
     Connections {
-        target: xmlController
+        target: _xmlController
         function onCategoryContentUpdated(category, lines) {
             if (tabBar.currentIndex !== (tabBar.count - 1)) {
                 xmlTextArea.text = lines.join("\n\n")
@@ -51,11 +51,12 @@ Rectangle {
         manifestKey = keyPath
 
         if (xmlPath && xmlPath.length > 0) {
-            xmlController.loadXML(xmlPath)
-            var cats = xmlController.getCategories()
+            _xmlController.loadXML(xmlPath)
+            var cats = _xmlController.getCategories()
+            tabRepeater.model = cats
             if (cats.length > 0) {
                 tabBar.currentIndex = 0
-                xmlController.requestCategoryContent(cats[0])
+                _xmlController.requestCategoryContent(cats[0])
             }
         }
     }
@@ -114,7 +115,7 @@ Rectangle {
                         if (clickPending) {
                             doubleClickTimer.stop()
                             clickPending = false
-                            let resolved = xmlController.resolve_paths(imagePath)
+                            let resolved = _xmlController.resolve_paths(imagePath)
                             if (resolved && resolved.video) {
                                 let cleanPath = resolved.video.toString().replace(/\\/g, "/")
                                 playbackRouter.playVideo(cleanPath, false)
@@ -146,10 +147,11 @@ Rectangle {
                 Layout.fillWidth: true
                 background: Rectangle { color: "transparent" }
                 Repeater {
-                    model: xmlController.getCategories()
+                    id: tabRepeater
+                    model: []
                     TabButton {
                         text: modelData
-                        onClicked: xmlController.requestCategoryContent(modelData)
+                        onClicked: _xmlController.requestCategoryContent(modelData)
                     }
                 }
                 TabButton { 

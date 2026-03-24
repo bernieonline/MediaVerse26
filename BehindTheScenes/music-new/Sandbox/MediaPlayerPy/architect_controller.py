@@ -108,7 +108,7 @@ class ArchitectController(QObject):
                         "locked": True 
                     })
                     # Auto-sync the disk if we had to inject the safety net
-                    self._save_to_disk()
+                    safe_json_write(paths["categories"], self._categories)
 
                 print(f"🚀 [ARCHITECT] Registry Loaded: {len(self._categories)} items")
                 # PySide6 uses .emit() just like PyQt5

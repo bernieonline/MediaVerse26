@@ -160,7 +160,7 @@ Popup {
                                 width: 32; height: 32; flat: true
                                 contentItem: Text { 
                                     text: "❌"; font.pixelSize: 14
-                                    color: hovered ? "#ff0000" : "#ff4444"
+                                    color: parent.hovered ? "#ff0000" : "#ff4444"
                                     horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter 
                                 }
                                 onClicked: {

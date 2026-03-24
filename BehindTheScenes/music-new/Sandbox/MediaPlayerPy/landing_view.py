@@ -96,6 +96,7 @@ class LandingViewModel(QObject):
     """
 
     tileModelChanged = Signal()
+    scrollDurationChanged = Signal()
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -333,6 +334,7 @@ class LandingViewModel(QObject):
         if self._next_model_json:
             result = self._next_model_json
             self._scroll_duration_ms = self._next_scroll_ms
+            self.scrollDurationChanged.emit()
             self._next_model_json = ""
             self._next_scroll_ms  = 0
             # Restore _current_tiles for hit_test
@@ -341,6 +343,7 @@ class LandingViewModel(QObject):
 
         json_str, dur = self._do_build(viewport_width, viewport_height)
         self._scroll_duration_ms = dur
+        self.scrollDurationChanged.emit()
         return json_str
 
     @Slot(float, float)
@@ -380,6 +383,6 @@ class LandingViewModel(QObject):
 
     # ── QML property ───────────────────────────────────────────────────────────
 
-    @Property(int)
+    @Property(int, notify=scrollDurationChanged)
     def scroll_duration_ms(self) -> int:
         return self._scroll_duration_ms

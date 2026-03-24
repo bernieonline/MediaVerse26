@@ -115,7 +115,7 @@ ApplicationWindow {
         Image {
             anchors.fill: parent
             anchors.margins: 10
-            source: imagesPath + "/mediaverse2.png"
+            source: imagesPath + "/mediaverse2.jpg"
             fillMode: Image.PreserveAspectFit
         }
     }

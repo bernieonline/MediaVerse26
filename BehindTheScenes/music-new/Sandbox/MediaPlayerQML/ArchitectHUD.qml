@@ -489,19 +489,17 @@ Rectangle {
         target: (typeof architectController !== "undefined") ? architectController : null
         ignoreUnknownSignals: true
 
-        // Use the signal name directly as a property (no 'function' keyword)
-        onCountChanged: (total) => { 
+        function onCountChanged(total) {
             console.log("🎯 [QML HUD] Signal Received! Value: " + total);
-            architectRoot.totalMatches = total; 
+            architectRoot.totalMatches = total;
         }
 
-        // Fixes the "Duplicate method name" crash
-        onBookshelfListChanged: {
+        function onBookshelfListChanged() {
             console.log("📖 HUD: Refreshing bookshelf spines...");
             shelfRepeater.model = architectController.get_bookshelf_list();
         }
 
-        onResultsCounted: (pIndex, pCount) => {
+        function onResultsCounted(pIndex, pCount) {
             if (pIndex >= 0 && pIndex < criteriaModel.count) {
                 criteriaModel.setProperty(pIndex, "panelHits", pCount);
             }

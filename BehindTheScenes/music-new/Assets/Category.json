@@ -1,9 +1,49 @@
 [
-    { "key": "Actors", "label": "ACTORS", "locked": true, "tooltip": "Primary cast members from MySQL" },
-    { "key": "Decade", "label": "DECADES", "locked": true, "tooltip": "Release periods (e.g., 1980s)" },
-    { "key": "Director", "label": "DIRECTORS", "locked": true, "tooltip": "Film directors from MySQL" },
-    { "key": "Series", "label": "SERIES", "locked": true, "tooltip": "Movie franchises and collections" },
-    { "key": "Genre", "label": "GENRE", "locked": true, "tooltip": "Film categories (e.g., Sci-Fi, Western)" },
-    { "key": "Keywords", "label": "CURATIONS", "locked": true, "tooltip": "Custom architect-defined groupings" },
-    { "key": "TopTen", "label": "TOP TEN", "locked": false, "tooltip": "Your personal premier selections" }
+    {
+        "key": "Actors",
+        "label": "ACTORS",
+        "locked": true,
+        "tooltip": "Primary cast members from MySQL"
+    },
+    {
+        "key": "Decade",
+        "label": "DECADES",
+        "locked": true,
+        "tooltip": "Release periods (e.g., 1980s)"
+    },
+    {
+        "key": "Director",
+        "label": "DIRECTORS",
+        "locked": true,
+        "tooltip": "Film directors from MySQL"
+    },
+    {
+        "key": "Series",
+        "label": "SERIES",
+        "locked": true,
+        "tooltip": "Movie franchises and collections"
+    },
+    {
+        "key": "Genre",
+        "label": "GENRE",
+        "locked": true,
+        "tooltip": "Film categories (e.g., Sci-Fi, Western)"
+    },
+    {
+        "key": "Keywords",
+        "label": "CURATIONS",
+        "locked": true,
+        "tooltip": "Custom architect-defined groupings"
+    },
+    {
+        "key": "TopTen",
+        "label": "TOP TEN",
+        "locked": false,
+        "tooltip": "Your personal premier selections"
+    },
+    {
+        "key": "unassigned",
+        "label": "UNASSIGNED",
+        "locked": true
+    }
 ]

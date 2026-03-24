@@ -56,7 +56,7 @@ Item {
     }
     // --- BACKUP SIGNAL BRIDGE ---
     Connections {
-        target: architectController // Matches your Python BackupManager
+        target: backupManager
         
         function onBackupFinished(message, success) {
             // 1. Update the sidebar badge counts
