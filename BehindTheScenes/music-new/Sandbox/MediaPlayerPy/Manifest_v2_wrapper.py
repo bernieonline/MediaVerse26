@@ -12,6 +12,7 @@ from SyncEngine_v2 import SyncEngine_v2
 from project_paths import paths
 from PySide6.QtCore import QThread
 from NotificationManager import notifier
+from json_safe import safe_json_read, safe_json_write
 
 import shutil
 from project_paths import (
@@ -36,7 +37,7 @@ class ManifestUpdater_v2(QObject):
         self.manifest_path = paths["server_manifest_v2"]
 
         #the manifest newly created from library data for comparison with current manifest
-        self.comparison_path = Path(r"W:\MediaVerse\manifest\manifest_b.json")
+        self.comparison_path = paths["server_manifest_v2"].parent / "manifest_b.json"
         #sync engine has a check 0 method that compares the two manifests and decides if there is an update needed to the cache
         self.sync_engine = SyncEngine_v2()
 
@@ -83,11 +84,11 @@ class ManifestUpdater_v2(QObject):
             #write_manifest_to_disk(self.manifest_path)
             #notifier.post_notification("Wrapper - Manifest Written to server.", False)
 
-            # Step 2: Build comparison manifest_b.json445tgb
+            # Step 2: Build comparison manifest_b.json
             print(f"[ManifestUpdater_v2] Building comparison manifest at {self.comparison_path}...")
-            #comparison_path=w:/mediaverse/manifest.json
-            #create manifest_b using comparison_path
-            write_manifest_to_disk(self.comparison_path)
+            processed, stats = write_manifest_to_disk(self.comparison_path)
+            self._save_build_log(stats)
+            self._notify_build_result(stats)
 
             # Step 3: Run Check 0
             print("[ManifestUpdater_v2] Running Check 0...")
@@ -123,8 +124,20 @@ class ManifestUpdater_v2(QObject):
             if not self.manifest_path.exists():
                 raise FileNotFoundError("Manifest file not found after build.")
 
-            with open(self.manifest_path, "r", encoding="utf-8") as f:
-                manifest = json.load(f)
+            manifest = safe_json_read(self.manifest_path, "manifest")
+            if not manifest.get("items"):
+                raise ValueError("Manifest loaded but items list is empty — aborting.")
+
+            if not manifest.get("scan_complete"):
+                notifier.post_notification(
+                    "Manifest scan_complete flag missing — scan may have been interrupted. Restart recommended.",
+                    urgent=True
+                )
+            if not manifest.get("manifest_hash"):
+                notifier.post_notification(
+                    "Manifest hash missing — hash step failed. Cache comparison unreliable.",
+                    urgent=True
+                )
 
             manifest["content_changed"] = bool(result.get("content_changed", True)) if result else True
             manifest["_source"] = "update_and_check"
@@ -163,8 +176,7 @@ class ManifestUpdater_v2(QObject):
     def _safe_item_count(self, path: Path) -> int:
         """Return the number of items in a manifest JSON file, or 0 on any failure."""
         try:
-            with open(path, "r", encoding="utf-8") as f:
-                data = json.load(f)
+            data = safe_json_read(path, "manifest")
             return len(data.get("items", []))
         except Exception:
             return 0
@@ -185,14 +197,17 @@ class ManifestUpdater_v2(QObject):
             print("[ManifestUpdater_v2] BOOTSTRAP: Building full manifest via write_manifest_to_disk...")
 
             # 1. Build manifest.json at self.manifest_path using existing logic
-            write_manifest_to_disk(self.manifest_path)
+            processed, stats = write_manifest_to_disk(self.manifest_path)
+            self._save_build_log(stats)
+            self._notify_build_result(stats)
 
             if not self.manifest_path.exists():
                 raise FileNotFoundError(f"Manifest file not found after bootstrap build: {self.manifest_path}")
 
             # 2. Load manifest from disk
-            with open(self.manifest_path, "r", encoding="utf-8") as f:
-                manifest = json.load(f)
+            manifest = safe_json_read(self.manifest_path, "manifest")
+            if not manifest.get("items"):
+                raise ValueError("Bootstrap manifest loaded but items list is empty — aborting.")
 
             # 3. Inject V2 flags/metadata
             manifest["content_changed"] = True          # bootstrap always forces cache rebuild
@@ -225,14 +240,43 @@ class ManifestUpdater_v2(QObject):
             self.manifestError.emit("Manifest file not found.")
             return
 
-        with open(self.manifest_path, "r", encoding="utf-8") as f:
-            manifest = json.load(f)
+        manifest = safe_json_read(self.manifest_path, "manifest")
 
         manifest["content_changed"] = False
         manifest["_source"] = "load_manifest"
 
         print("[ManifestUpdater_v2] Loaded manifest from disk (no rebuild).")
         self.manifestLoaded.emit(copy.deepcopy(manifest))
+
+    def _save_build_log(self, stats: dict) -> None:
+        """Write build stats to Assets/manifest_build_log.json. Non-fatal on failure."""
+        log_path = paths["manifest_build_log"]
+        try:
+            safe_json_write(log_path, stats)
+            print(f"[ManifestUpdater_v2] Build log written: {stats['accepted']} accepted, "
+                  f"{stats['rejected']} rejected.")
+        except Exception as e:
+            print(f"[ManifestUpdater_v2] Build log write failed (non-fatal): {e}")
+
+    def _notify_build_result(self, stats: dict) -> None:
+        """Post a user-visible notification summarising the build."""
+        accepted = stats.get("accepted", 0)
+        rejected = stats.get("rejected", 0)
+        no_xml   = stats.get("no_xml", 0)
+        total    = stats.get("total_videos", 0)
+
+        high_rejection = total > 0 and (rejected / total) > 0.10
+
+        parts = [f"Manifest built: {accepted} items"]
+        if rejected:
+            parts.append(f"{rejected} rejected")
+        if no_xml:
+            parts.append(f"{no_xml} without XML")
+        if rejected:
+            parts.append("See Assets/manifest_build_log.json for details")
+
+        msg = " | ".join(parts) + "."
+        notifier.post_notification(msg, urgent=high_rejection)
 
     def build_comparison_manifest(self, comparison_path: Path):
         """Build a comparison manifest (e.g. Manifest_B.json) without loading it into QML."""

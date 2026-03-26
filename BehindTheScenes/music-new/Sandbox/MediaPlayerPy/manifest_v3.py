@@ -7,18 +7,21 @@ from manifest_hash_processor import process_and_save
 
 print("loading manifest_v3.py")
 
+from project_paths import paths
+
 # --- Root location ---
-ROOT_PATH = Path(r"W:\Collection")
-MANIFEST_OUTPUT = Path(r"W:\MediaVerse\manifest\manifest.json")
+ROOT_PATH       = paths["library_root"]
+MANIFEST_OUTPUT = paths["server_manifest_v2"]
 
 # --- Folders to exclude ---
-EXCLUDE_FOLDERS = [
-    r"W:\Collection\TV Shows\Slow Horses",
-    r"W:\Collection\Movies\The Accountant (2016)",
-    r"W:\Collection\Clips",
-    r"W:\Collection\Extras",
-    r"W:\Collection\Temp",
+EXCLUDE_FOLDER_NAMES = [
+    "TV Shows/Slow Horses",
+    "Movies/The Accountant (2016)",
+    "Clips",
+    "Extras",
+    "Temp",
 ]
+EXCLUDE_FOLDERS = [str(ROOT_PATH / rel) for rel in EXCLUDE_FOLDER_NAMES]
 
 IMAGE_EXTS = (".jpg", ".jpeg", ".png")
 VIDEO_EXTS = (".mp4", ".mkv", ".avi", ".m2ts", ".ts", ".webm")
@@ -42,7 +45,7 @@ def build_cache_paths_for_title(title: str):
         "carousel": f"Cache/carousel/{base}",
     }
 
-def build_manifest_for_folder(folder: Path):
+def build_manifest_for_folder(folder: Path, stats: dict) -> list:
     manifest_entries = []
 
     # --- DVD detection: VIDEO_TS folder ---
@@ -97,10 +100,14 @@ def build_manifest_for_folder(folder: Path):
 
     for video in videos:
         stem = video.stem
-        img = next((i for i in images if i.stem == stem), None)
-        xml = next((x for x in xmls if x.stem.startswith(stem)), None)
+        stem_lower = stem.lower()
+        img = next((i for i in images if i.stem.lower() == stem_lower), None)
+        xml = next((x for x in xmls if x.stem.lower().startswith(stem_lower)), None)
 
+        stats["total_videos"] += 1
         if not img:
+            stats["rejected"] += 1
+            stats["rejected_files"].append({"path": str(video), "reason": "no_image"})
             continue
 
         title = stem
@@ -130,10 +137,21 @@ def build_manifest_for_folder(folder: Path):
             },
         }
         manifest_entries.append(entry)
+        stats["accepted"] += 1
+        if not xml:
+            stats["no_xml"] += 1
 
     return manifest_entries
 
-def build_manifest() -> dict:
+def build_manifest() -> tuple:
+    stats = {
+        "run_timestamp":  datetime.now().isoformat(),
+        "total_videos":   0,
+        "accepted":       0,
+        "rejected":       0,
+        "no_xml":         0,
+        "rejected_files": [],
+    }
     manifest_items = []
     print(f"[{datetime.now()}] Scanning root: {ROOT_PATH}")
 
@@ -143,30 +161,31 @@ def build_manifest() -> dict:
         if is_excluded(folder):
             continue
 
-        entries = build_manifest_for_folder(folder)
+        entries = build_manifest_for_folder(folder, stats)
         if entries:
             manifest_items.extend(entries)
 
     print(f"[{datetime.now()}] Scan complete. {len(manifest_items)} items collected.\n")
     manifest = {
-        "version": 3,
-        "generated": datetime.now().isoformat(),
-        "items": manifest_items
+        "version":       3,
+        "generated":     datetime.now().isoformat(),
+        "scan_complete": True,
+        "items":         manifest_items,
     }
-    return manifest
+    return manifest, stats
 
-def write_manifest_to_disk(output_path: Path = None) -> dict:
-    manifest = build_manifest()
+def write_manifest_to_disk(output_path: Path = None) -> tuple:
+    manifest, stats = build_manifest()
 
     if output_path is None:
         output_path = MANIFEST_OUTPUT
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
-    with output_path.open("w", encoding="utf-8") as f:
-        json.dump(manifest, f, indent=2)
+    from json_safe import safe_json_write
+    safe_json_write(output_path, manifest)
     print(f"Raw manifest written to {output_path}")
 
     processed = process_and_save(output_path)
     print(f"Processed + hashed manifest saved to {output_path}")
-    return processed
+    return processed, stats

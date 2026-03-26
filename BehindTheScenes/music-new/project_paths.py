@@ -35,12 +35,14 @@ try:
     
     # 3. Pull the LibraryRoot (e.g., "W:\\Collection")
     lib_root_str = config_data.get("LibraryRoot", "W:\\Collection")
-    
+    library_root = Path(lib_root_str)
+
     # 4. Extract the drive letter (e.g., "W:")
-    server_drive = Path(lib_root_str).drive 
+    server_drive = Path(lib_root_str).drive
 except Exception as e:
     # If config fails, we fall back to W: so the app doesn't crash
     server_drive = "W:"
+    library_root = Path("W:\\Collection")
 
 
 
@@ -94,7 +96,8 @@ coll_data = project_root / "Assets" / "xml_collection_data.json"
 coll_json = project_root / "Assets" / "xml_collection.json"
 splash_json = project_root / "Assets" / "Splash.json"
 category_json = project_root / "Assets" / "Category.json"
-tv_watch_progress = project_root / "Assets" / "tv_watch_progress.json"
+tv_watch_progress  = project_root / "Assets" / "tv_watch_progress.json"
+manifest_build_log = project_root / "Assets" / "manifest_build_log.json"
 
 # Collections paths
 collection_bg = project_root / "Assets" / "Collections.jpg"
@@ -167,7 +170,9 @@ paths = {
     "svg_solid": svg_solid_path,
     "fallback_image": fallback_image,
     "splash_json": splash_json,
-    "tv_watch_progress": tv_watch_progress,
+    "tv_watch_progress":  tv_watch_progress,
+    "manifest_build_log": manifest_build_log,
+    "library_root":       library_root,
 
     # --- QML SPECIFIC STRING OVERRIDES ---
     "font_url": font_path.resolve().as_uri(),

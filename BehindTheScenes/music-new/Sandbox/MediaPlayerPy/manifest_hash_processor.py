@@ -7,6 +7,7 @@ Optionally writes the updated manifest back to disk.
 import hashlib
 import json
 from pathlib import Path
+from json_safe import safe_json_write
 
 def process_manifest(manifest: dict) -> dict:
     """
@@ -52,8 +53,7 @@ def process_and_save(path: Path) -> dict:
 
     manifest = process_manifest(manifest)
 
-    with path.open("w", encoding="utf-8") as f:
-        json.dump(manifest, f, indent=2)
+    safe_json_write(path, manifest)
 
     #print(f"{path.name}: {len(manifest.get('items', []))} items, hash={manifest['manifest_hash']}")
     return manifest
