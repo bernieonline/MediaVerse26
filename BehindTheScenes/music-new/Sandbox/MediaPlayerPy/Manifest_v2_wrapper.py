@@ -111,7 +111,7 @@ class ManifestUpdater_v2(QObject):
                            f"vs {current_count} in current manifest (less than 80%). "
                            f"Library scan may be incomplete. Restart to retry.")
                     print(f"[ManifestUpdater_v2] {msg}")
-                    notifier.post_notification(msg, urgent=True)
+                    notifier.post_notification(msg, is_urgent=True)
                 else:
                     print("[ManifestUpdater_v2] Swapping files: Candidate is now the Master.")
                     # This physically moves manifest_candidate.json to manifest.json
@@ -131,12 +131,12 @@ class ManifestUpdater_v2(QObject):
             if not manifest.get("scan_complete"):
                 notifier.post_notification(
                     "Manifest scan_complete flag missing — scan may have been interrupted. Restart recommended.",
-                    urgent=True
+                    is_urgent=True
                 )
             if not manifest.get("manifest_hash"):
                 notifier.post_notification(
                     "Manifest hash missing — hash step failed. Cache comparison unreliable.",
-                    urgent=True
+                    is_urgent=True
                 )
 
             manifest["content_changed"] = bool(result.get("content_changed", True)) if result else True
@@ -276,7 +276,7 @@ class ManifestUpdater_v2(QObject):
             parts.append("See Assets/manifest_build_log.json for details")
 
         msg = " | ".join(parts) + "."
-        notifier.post_notification(msg, urgent=high_rejection)
+        notifier.post_notification(msg, high_rejection)
 
     def build_comparison_manifest(self, comparison_path: Path):
         """Build a comparison manifest (e.g. Manifest_B.json) without loading it into QML."""
