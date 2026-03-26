@@ -590,6 +590,12 @@ ApplicationWindow {
         }
         function onServerCheckPassed() {
             serverDownPopup.close()
+            // Reload the initial view so it initialises cleanly with fresh data
+            if (startupMode === "Tiles") {
+                contentLoader.setSource("landing_view.qml")
+            } else {
+                contentLoader.setSource("ImageGridView_v2.qml")
+            }
         }
     }
 
