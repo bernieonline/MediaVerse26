@@ -12,18 +12,22 @@ Each episode dict:
 
 from __future__ import annotations
 
+import datetime
 import json
 import re
+import threading
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
-from PySide6.QtCore import QObject, Slot
+from PySide6.QtCore import QObject, Signal, Slot
 
 from project_paths import (
     server_manifest_v2,
     local_display_v2,
     coll_data as xml_collection_data,
+    tv_watch_progress as _tv_progress_path,
 )
+from json_safe import safe_json_write, safe_json_read
 
 # ── Title parsing ────────────────────────────────────────────────────────────
 
@@ -128,6 +132,100 @@ def _read_sidecar(xml_path: str) -> dict:
         return {}
 
 
+# ── Watch Progress Store ──────────────────────────────────────────────────────
+
+class TVWatchProgressStore:
+    """
+    Maintains tv_watch_progress.json in the Assets folder.
+
+    Schema (keyed by full video path, backslashes normalised):
+        {
+          "W:\\...\\Show.S01E01.mkv": {
+              "last_played":   "25 Mar 2026",
+              "position_sec":  1423,
+              "duration_sec":  2700,
+              "progress_pct":  52
+          },
+          ...
+        }
+
+    Hard rules:
+      - All writes go through safe_json_write (atomic swap + .bak copy).
+      - Writes happen under a threading.Lock() — safe to call from the
+        watchdog background thread.
+      - Progress >= 95 % is promoted to 100 % (natural-end rounding).
+    """
+
+    _PCT_COMPLETE_THRESHOLD = 95   # treat as fully watched above this
+
+    def __init__(self) -> None:
+        self._path = Path(_tv_progress_path)
+        self._lock = threading.Lock()
+        self._data: dict = self._load()
+        print(f"✅ [TVProgress] Store loaded — {len(self._data)} episodes tracked")
+
+    # ── Internal ─────────────────────────────────────────────────────────────
+
+    def _load(self) -> dict:
+        if not self._path.exists():
+            return {}
+        data = safe_json_read(self._path, schema_type="tv_watch_progress")
+        return data if isinstance(data, dict) else {}
+
+    def _save(self) -> None:
+        """Must be called with self._lock held."""
+        try:
+            safe_json_write(self._path, self._data)
+        except Exception as exc:
+            print(f"⚠️  [TVProgress] save failed: {exc}")
+
+    @staticmethod
+    def _normalise_key(path: str) -> str:
+        return path.replace("/", "\\").strip()
+
+    # ── Public API ────────────────────────────────────────────────────────────
+
+    def get(self, video_path: str) -> dict:
+        """Return the progress record for video_path, or {} if not tracked."""
+        return self._data.get(self._normalise_key(video_path), {})
+
+    def record(self, video_path: str, position_sec: float, duration_sec: float) -> None:
+        """
+        Record playback progress and persist immediately.
+        Safe to call from any thread.
+
+        JRiver resets PositionMS to 0 after natural completion, so the
+        last captured position (from the final non-zero poll) will be
+        very close to the end — promoted to 100 % at >= 95 %.
+        """
+        if not video_path or duration_sec <= 0:
+            return
+
+        pct = min(100, round(position_sec / duration_sec * 100))
+        if pct >= self._PCT_COMPLETE_THRESHOLD:
+            pct = 100
+
+        today = datetime.date.today().strftime("%d %b %Y")
+        entry = {
+            "last_played":  today,
+            "position_sec": round(position_sec),
+            "duration_sec": round(duration_sec),
+            "progress_pct": pct,
+        }
+        key = self._normalise_key(video_path)
+        with self._lock:
+            self._data[key] = entry
+            self._save()
+        print(
+            f"✅ [TVProgress] Recorded {pct}% "
+            f"({position_sec:.0f}s/{duration_sec:.0f}s) → {Path(video_path).name}"
+        )
+
+
+# Module-level singleton — imported by playback_controller for injection
+progress_store = TVWatchProgressStore()
+
+
 # ── ViewModel ────────────────────────────────────────────────────────────────
 
 class TVViewModel(QObject):
@@ -140,6 +238,9 @@ class TVViewModel(QObject):
         var eps     = JSON.parse(tvViewModel.get_episodes("Yellowstone", 1))
     """
 
+    # Emitted after progress_store records new progress (watchdog thread → QML thread)
+    progressUpdated = Signal()
+
     def __init__(self, parent=None):
         super().__init__(parent)
         # _hierarchy[series_name][season_num] = [episode_dict, ...]
@@ -148,6 +249,9 @@ class TVViewModel(QObject):
         self._xml_coll: dict[str, dict] = {}
         # preloaded XML cache: series_name → { xml_path: {description, actors} }
         self._series_xml_cache: dict[str, dict] = {}
+        # Shared progress store (also held by module-level singleton for
+        # injection into PlaybackController)
+        self.progress_store = progress_store
         self._load()
 
     # ── Startup loading ──────────────────────────────────────────────────────
@@ -289,11 +393,22 @@ class TVViewModel(QObject):
         """Returns JSON array sorted by ep_num:
         [{ep_num, ep_end, ep_name, image_uri, video_path,
           xml_path, last_played, progress_pct}, ...]
-        Reads XML sidecar live for up-to-date playback data."""
+
+        Progress data priority:
+          1. tv_watch_progress.json  (MediaVerse-owned, always current)
+          2. JRiver XML sidecar      (historical fallback, best-effort)
+        """
         eps = self._hierarchy.get(series_name, {}).get(season, [])
         result = []
         for ep in eps:
-            sidecar = _read_sidecar(ep["xml_path"])
+            stored  = self.progress_store.get(ep["video_path"])
+            sidecar = _read_sidecar(ep["xml_path"]) if not stored else {}
+
+            last_played  = (stored.get("last_played")
+                            or sidecar.get("last_played", ""))
+            progress_pct = (stored.get("progress_pct")
+                            if stored else sidecar.get("progress_pct", 0))
+
             result.append({
                 "ep_num":       ep["ep_num"],
                 "ep_end":       ep["ep_end"],
@@ -301,8 +416,8 @@ class TVViewModel(QObject):
                 "image_uri":    ep["image_uri"],
                 "video_path":   ep["video_path"],
                 "xml_path":     ep["xml_path"],
-                "last_played":  sidecar.get("last_played", ""),
-                "progress_pct": sidecar.get("progress_pct", 0),
+                "last_played":  last_played,
+                "progress_pct": progress_pct,
             })
         return json.dumps(result)
 

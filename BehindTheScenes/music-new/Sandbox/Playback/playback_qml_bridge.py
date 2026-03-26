@@ -2,7 +2,7 @@
 from PySide6.QtCore import QObject, Slot, Signal
 import logging
 import requests
-from Sandbox.Playback.playback_controller import PlaybackController, _handback_windows
+from Sandbox.Playback.playback_controller import PlaybackController, MpcBeWatchdog, _handback_windows
 
 logger = logging.getLogger(__name__)
 
@@ -13,7 +13,8 @@ class PlaybackQmlBridge(QObject):
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.controller = PlaybackController(self)
+        self.controller      = PlaybackController(self)
+        self.mpcbe_watchdog  = MpcBeWatchdog(self)
         print("Mediaverse Playback Bridge Initialized")
 
     @Slot(str)
@@ -23,8 +24,9 @@ class PlaybackQmlBridge(QObject):
 
     @Slot()
     def shutdown(self):
-        """Called on app exit — stops the watchdog and tells JRiver to stop."""
+        """Called on app exit — stops all watchdogs."""
         self.controller.shutdown()
+        self.mpcbe_watchdog.shutdown()
 
     @Slot()
     def stopPlayback(self):

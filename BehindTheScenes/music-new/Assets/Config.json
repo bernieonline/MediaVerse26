@@ -1,9 +1,14 @@
 {
-  "name": "Bernard Grimshaw",
+  "name": "Bernard",
   "_comment": "This file provides persistence for user settings choices",
   "Preferred Player": "mpc-be64",
   "JRiverPort": "52199",
+  "MpcBePort": "13579",
   "LibraryRoot": "W:\\Collection",
+  "StartUp": {
+    "Splash": false,
+    "Tiles": true
+  },
   "PlayerPaths": {
     "MiniPlayer": "",
     "JRiver": "C:\\Program Files\\J River\\Media Center 35\\MC35.exe",

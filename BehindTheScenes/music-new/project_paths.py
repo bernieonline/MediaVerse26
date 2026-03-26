@@ -94,6 +94,7 @@ coll_data = project_root / "Assets" / "xml_collection_data.json"
 coll_json = project_root / "Assets" / "xml_collection.json"
 splash_json = project_root / "Assets" / "Splash.json"
 category_json = project_root / "Assets" / "Category.json"
+tv_watch_progress = project_root / "Assets" / "tv_watch_progress.json"
 
 # Collections paths
 collection_bg = project_root / "Assets" / "Collections.jpg"
@@ -166,6 +167,7 @@ paths = {
     "svg_solid": svg_solid_path,
     "fallback_image": fallback_image,
     "splash_json": splash_json,
+    "tv_watch_progress": tv_watch_progress,
 
     # --- QML SPECIFIC STRING OVERRIDES ---
     "font_url": font_path.resolve().as_uri(),

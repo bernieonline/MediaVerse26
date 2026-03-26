@@ -40,6 +40,7 @@ _DEFAULTS = {
     "xml_collection_data": [],
     "config":             {"PreferredPlayer": 0},
     "manifest":           {"items": []},
+    "tv_watch_progress":  {},
 }
 
 
@@ -69,6 +70,15 @@ def _validate(data, schema_type):
 
     if schema_type == "manifest":
         return isinstance(data, dict) and "items" in data
+
+    if schema_type == "tv_watch_progress":
+        if not isinstance(data, dict):
+            return False
+        # Each entry value must be a dict (video_path → progress record)
+        for v in list(data.values())[:5]:
+            if not isinstance(v, dict):
+                return False
+        return True
 
     return True
 

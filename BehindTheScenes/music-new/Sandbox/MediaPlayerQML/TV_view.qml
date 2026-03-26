@@ -398,8 +398,8 @@ Item {
                             Column {
                                 anchors.left:           parent.left
                                 anchors.leftMargin:     14
-                                anchors.right:          progressBar.left
-                                anchors.rightMargin:    10
+                                anchors.right:          parent.right
+                                anchors.rightMargin:    14
                                 anchors.verticalCenter: parent.verticalCenter
                                 spacing: 5
 
@@ -427,34 +427,21 @@ Item {
                                 }
                             }
 
-                            Item {
-                                id: progressBar
-                                anchors.right:          parent.right
-                                anchors.rightMargin:    14
-                                anchors.verticalCenter: parent.verticalCenter
-                                width: 76; height: 26
+                            // Progress badge — top-right corner, only shown when tracked
+                            Rectangle {
+                                anchors.top:         parent.top
+                                anchors.right:       parent.right
+                                anchors.topMargin:   8
+                                anchors.rightMargin: 8
+                                visible: modelData.progress_pct > 0
+                                width:  54; height: 24; radius: 12
+                                color: "#2566c2"
 
-                                Rectangle {
-                                    anchors.fill: parent; radius: 4
-                                    color: "#1a1a1a"
-                                    border.color: "#333"; border.width: 1
-                                }
-                                Rectangle {
-                                    anchors.left:    parent.left
-                                    anchors.top:     parent.top
-                                    anchors.bottom:  parent.bottom
-                                    anchors.margins: 2
-                                    radius: 3
-                                    width: Math.max(0, (parent.width - 4) * modelData.progress_pct / 100)
-                                    color: modelData.progress_pct >= 100 ? "#39FF14"
-                                         : modelData.progress_pct >  0   ? "#FFC107"
-                                         : "transparent"
-                                    Behavior on width { NumberAnimation { duration: 300 } }
-                                }
                                 Text {
                                     anchors.centerIn: parent
                                     text: modelData.progress_pct + "%"
-                                    color: "#777"; font.pixelSize: 13
+                                    color: "white"
+                                    font.pixelSize: 14; font.bold: true
                                 }
                             }
 
@@ -472,7 +459,7 @@ Item {
                                 onDoubleClicked: {
                                     if (modelData.video_path) {
                                         var cleanPath = modelData.video_path.toString().replace(/\\/g, "/")
-                                        playbackRouter.playVideo(cleanPath, false)
+                                        playbackRouter.playVideo(cleanPath, true)
                                     }
                                 }
                             }

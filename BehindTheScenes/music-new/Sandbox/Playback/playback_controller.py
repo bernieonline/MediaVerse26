@@ -1,3 +1,4 @@
+import re
 import threading
 import requests
 import xml.etree.ElementTree as ET
@@ -138,6 +139,8 @@ class PlaybackController:
         self._is_processing = False
         self._stop_event    = threading.Event()
         self._watchdog_thread: threading.Thread | None = None
+        self._current_path: str = ""          # path passed to play_threaded
+        self.progress_store = None            # injected by Framework.py
 
     def shutdown(self):
         """Signal the watchdog to stop. Only contacts JRiver if it was active."""
@@ -180,6 +183,7 @@ class PlaybackController:
     def _execute_sequence(self, path):
         try:
             self._is_processing = True
+            self._current_path = path
             file_key = self._get_file_key(path)
             if not file_key:
                 logger.error(f"Could not find ID for path: {path}")
@@ -200,12 +204,16 @@ class PlaybackController:
     def _run_watchdog(self):
         """
         Polls JRiver.  On stop:
-          1. _handback_windows() — MCC 10014 cooperative minimize, then
+          1. _record_progress() — writes position/duration to tv_watch_progress.json
+             if a TVWatchProgressStore has been injected.
+          2. _handback_windows() — MCC 10014 cooperative minimize, then
              AttachThreadInput + Alt-key to raise MediaVerse.
-          2. playbackFinished.emit() — QML triggers the cinema fade.
+          3. playbackFinished.emit() — QML triggers the cinema fade.
         """
-        playback_started = False
-        start_time       = time.time()
+        playback_started  = False
+        start_time        = time.time()
+        last_position_ms  = 0    # last non-zero PositionMS seen
+        last_duration_ms  = 0    # last non-zero DurationMS seen
         logger.info("Watchdog active.")
 
         while not self._stop_event.is_set():
@@ -217,15 +225,34 @@ class PlaybackController:
                 if r.status_code == 200:
                     root  = ET.fromstring(r.text)
                     state = "0"
+                    pos_ms = 0
+                    dur_ms = 0
                     for item in root.findall(".//Item"):
-                        if item.get("Name") == "State":
-                            state = item.text
-                            break
+                        name = item.get("Name", "")
+                        if name == "State":
+                            state = item.text or "0"
+                        elif name == "PositionMS":
+                            try:
+                                pos_ms = int(item.text or 0)
+                            except (ValueError, TypeError):
+                                pass
+                        elif name == "DurationMS":
+                            try:
+                                dur_ms = int(item.text or 0)
+                            except (ValueError, TypeError):
+                                pass
+
+                    # Track last known non-zero position/duration
+                    if pos_ms > 0:
+                        last_position_ms = pos_ms
+                    if dur_ms > 0:
+                        last_duration_ms = dur_ms
 
                     if state != "0":
                         playback_started = True
                     elif playback_started:
-                        logger.info("Stop detected — executing window handback.")
+                        logger.info("Stop detected — recording progress then handback.")
+                        self._record_progress(last_position_ms, last_duration_ms)
                         _handback_windows()
                         self.bridge.playbackFinished.emit()
                         break
@@ -236,3 +263,163 @@ class PlaybackController:
                 logger.debug("JRiver busy... retrying.")
                 self._stop_event.wait(0.5)
                 continue
+
+    def _record_progress(self, position_ms: int, duration_ms: int) -> None:
+        """Write watch progress to TVWatchProgressStore if one is injected."""
+        if self.progress_store is None or not self._current_path:
+            return
+        if duration_ms <= 0:
+            logger.debug("_record_progress: duration unknown — skipping.")
+            return
+        try:
+            self.progress_store.record(
+                self._current_path,
+                position_ms / 1000.0,
+                duration_ms / 1000.0,
+            )
+        except Exception as exc:
+            logger.warning(f"_record_progress failed: {exc}")
+
+
+# ---------------------------------------------------------------------------
+# MpcBeWatchdog
+# ---------------------------------------------------------------------------
+
+class MpcBeWatchdog:
+    """
+    Monitors MPC-BE via its built-in HTTP web interface.
+
+    Prerequisite: Options → Player → Web Interface must be enabled in MPC-BE,
+    listening on the port stored in Config.json as "MpcBePort" (default 13579).
+
+    Strategy:
+      - Process exit is the PRIMARY stop trigger (reliable with /close flag).
+      - state == 0 from the web API is a SECONDARY fallback.
+      - Position/duration are captured on every poll tick; the last non-zero
+        values are what gets written to TVWatchProgressStore on stop.
+    """
+
+    def __init__(self, bridge):
+        self.bridge         = bridge
+        self.progress_store = None   # injected by Framework.py
+        self._stop_event    = threading.Event()
+        self._thread: threading.Thread | None = None
+
+    # ── Lifecycle ────────────────────────────────────────────────────────────
+
+    def start(self, path: str, process, port: int = 13579) -> None:
+        """Begin monitoring a freshly launched MPC-BE process."""
+        self._stop_event.clear()
+        self._thread = threading.Thread(
+            target=self._run,
+            args=(path, process, port),
+            daemon=True,
+        )
+        self._thread.start()
+
+    def shutdown(self) -> None:
+        self._stop_event.set()
+
+    # ── Web API helpers ──────────────────────────────────────────────────────
+
+    @staticmethod
+    def _parse(html: str) -> dict:
+        """Extract state / position_ms / duration_ms from variables.html."""
+        def _get(key):
+            m = re.search(rf'id="{key}"[^>]*>([^<]*)<', html)
+            return m.group(1).strip() if m else ""
+
+        def _int(s):
+            try:
+                return int(s)
+            except (ValueError, TypeError):
+                return 0
+
+        state_raw = _get("state")
+        return {
+            "state":       _int(state_raw) if state_raw else -1,
+            "position_ms": _int(_get("position")),
+            "duration_ms": _int(_get("duration")),
+        }
+
+    def _poll(self, port: int) -> dict:
+        try:
+            r = requests.get(f"http://localhost:{port}/variables.html", timeout=2)
+            if r.status_code == 200:
+                return self._parse(r.text)
+        except Exception:
+            pass
+        return {}
+
+    # ── Main loop ────────────────────────────────────────────────────────────
+
+    def _run(self, path: str, process, port: int) -> None:
+        logger.info(f"MpcBeWatchdog active on port {port} for: {path}")
+
+        # Wait up to 15 s for MPC-BE's web server to come up
+        deadline = time.time() + 15
+        while time.time() < deadline:
+            if self._stop_event.is_set():
+                return
+            if process.poll() is not None:
+                logger.info("MPC-BE exited before web API responded — nothing to record.")
+                return
+            if self._poll(port):
+                logger.info("MPC-BE web API is responding.")
+                break
+            self._stop_event.wait(0.5)
+
+        last_position_ms = 0
+        last_duration_ms = 0
+        playback_started = False
+        recorded         = False
+
+        while not self._stop_event.is_set():
+
+            # ── Primary: process has exited ───────────────────────────────
+            if process.poll() is not None:
+                logger.info("MPC-BE process exited — recording progress.")
+                if not recorded:
+                    recorded = True
+                    self._record(path, last_position_ms, last_duration_ms)
+                    self.bridge.playbackFinished.emit()
+                break
+
+            # ── Poll web API for current position/state ───────────────────
+            info = self._poll(port)
+            if info:
+                pos = info.get("position_ms", 0)
+                dur = info.get("duration_ms", 0)
+                if pos > 0:
+                    last_position_ms = pos
+                if dur > 0:
+                    last_duration_ms = dur
+
+                state = info.get("state", -1)
+                if state == 2:   # playing
+                    playback_started = True
+                elif state == 0 and playback_started and not recorded:
+                    # ── Secondary: stopped while process still alive ───────
+                    logger.info("MPC-BE state → stopped — recording progress.")
+                    recorded = True
+                    self._record(path, last_position_ms, last_duration_ms)
+                    self.bridge.playbackFinished.emit()
+                    break
+
+            self._stop_event.wait(1.0)
+
+        logger.info("MpcBeWatchdog finished.")
+
+    # ── Progress recording ───────────────────────────────────────────────────
+
+    def _record(self, path: str, position_ms: int, duration_ms: int) -> None:
+        if self.progress_store is None:
+            logger.debug("MpcBeWatchdog: no progress_store injected — skipping.")
+            return
+        if not path or duration_ms <= 0:
+            logger.debug("MpcBeWatchdog: missing path or duration — skipping.")
+            return
+        try:
+            self.progress_store.record(path, position_ms / 1000.0, duration_ms / 1000.0)
+        except Exception as exc:
+            logger.warning(f"MpcBeWatchdog._record failed: {exc}")

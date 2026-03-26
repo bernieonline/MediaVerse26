@@ -195,6 +195,10 @@ def main():
         #playbackManager
 
         router = PlaybackRouter()
+        # Wire the TV watch-progress store into both playback watchdogs so
+        # position/duration are recorded when an episode stops, regardless of player.
+        router.http_bridge.controller.progress_store     = tv_vm.progress_store
+        router.http_bridge.mpcbe_watchdog.progress_store = tv_vm.progress_store
         print("1..........................................")
 
         #Architect

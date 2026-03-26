@@ -125,9 +125,9 @@ class PlaybackRouter(QObject):
         if "JRiver" in player_name:
             self._route_jriver(video_path, is_master)
             
-        # Use specific logic for MPC (to include /play /close flags)
+        # MPC-BE: launch with watchdog for progress tracking
         elif "mpc" in player_name.lower():
-            self._play_generic_subprocess(player_exe, video_path, extra_args=["/play", "/close"])
+            self._route_mpcbe(video_path, player_exe)
             
         # Generic fallback for VLC, PowerDVD, or anything else
         else:
@@ -153,6 +153,27 @@ class PlaybackRouter(QObject):
         else:
             print("\n>>> ROUTING: JRiver Subprocess (Freestyle Item)")
             self.play_jriver_subprocess(video_path)
+
+    # ------------------------------------------------------------
+    # MPC-BE Routing (with progress watchdog)
+    # ------------------------------------------------------------
+    def _route_mpcbe(self, video_path, exe_path):
+        """Launch MPC-BE and start the HTTP watchdog for position tracking."""
+        print("\n>>> ROUTING: MPC-BE with progress watchdog")
+
+        clean_path = video_path.replace("file:///", "").replace("/", "\\")
+        clean_path = os.path.normpath(clean_path)
+
+        if not os.path.exists(clean_path):
+            print(f"❌ ERROR: File does NOT exist: {clean_path}")
+            return
+        if not os.path.exists(exe_path):
+            print(f"❌ ERROR: MPC-BE EXE not found: {exe_path}")
+            return
+
+        port    = int(self.config.get("MpcBePort", "13579"))
+        process = subprocess.Popen([exe_path, clean_path, "/play", "/close"])
+        self.http_bridge.mpcbe_watchdog.start(clean_path, process, port=port)
 
     # ------------------------------------------------------------
     # VLC Routing
