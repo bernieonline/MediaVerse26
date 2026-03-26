@@ -23,11 +23,12 @@ from project_paths import (
 
 class ManifestUpdater_v2(QObject):
     print("loading Manifest_v2_wrapper")
-    #send out 3 signals
     manifestLoaded = Signal(dict)
     manifestError = Signal(str)
     manifestUpdated = Signal()
     cacheRebuildFinished = Signal()
+    serverCheckFailed = Signal()
+    serverCheckPassed = Signal()
 
 
     def __init__(self, parent=None):
@@ -247,6 +248,31 @@ class ManifestUpdater_v2(QObject):
 
         print("[ManifestUpdater_v2] Loaded manifest from disk (no rebuild).")
         self.manifestLoaded.emit(copy.deepcopy(manifest))
+
+    def _do_server_check_and_start(self):
+        """
+        Check server accessibility. Emits serverCheckFailed if unreachable (QML shows popup),
+        or serverCheckPassed then kicks off manifest work. Safe to call from any thread.
+        """
+        server_root = paths["server_manifest_v2"].parent.parent
+        if not server_root.exists():
+            print(f"[ManifestUpdater_v2] Server unreachable: {server_root}")
+            self.serverCheckFailed.emit()
+            return
+
+        print(f"[ManifestUpdater_v2] Server confirmed accessible: {server_root}")
+        self.serverCheckPassed.emit()
+
+        if not self.manifest_path.exists():
+            notifier.post_notification("Building manifest...", False)
+            self.bootstrap_manifest()
+        else:
+            self.update_manifest_background()
+
+    @Slot()
+    def retry_server_check(self):
+        """Called by QML Retry button. Runs server check in a background thread."""
+        threading.Thread(target=self._do_server_check_and_start, daemon=True).start()
 
     def _save_build_log(self, stats: dict) -> None:
         """Write build stats to Assets/manifest_build_log.json. Non-fatal on failure."""

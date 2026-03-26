@@ -299,21 +299,9 @@ def main():
         root = engine.rootObjects()[0]
         router.launchMiniPlayer.connect(root.openMiniPlayer)
 
-        # Background Manifest Work
+        # Background Manifest Work — server check + startup delegated to ManifestUpdater_v2
         def start_manifest_work():
-            # Check server availability before touching W: drive
-            server_root = Path(r"W:\MediaVerse")
-            if not server_root.exists():
-                msg = "⚠️ Server (W:) not accessible — running in local cache mode. Library updates unavailable."
-                print(f"[STARTUP] {msg}")
-                notifier.post_notification(msg, True)
-                return
-
-            if not paths["server_manifest_v2"].exists():
-                notifier.post_notification("Building manifest...", False)
-                manifest_updater.bootstrap_manifest()
-            else:
-                manifest_updater.update_manifest_background()
+            manifest_updater.retry_server_check()
 
         QTimer.singleShot(0, start_manifest_work)
 

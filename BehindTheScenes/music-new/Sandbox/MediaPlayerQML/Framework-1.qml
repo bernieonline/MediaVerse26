@@ -578,4 +578,90 @@ ApplicationWindow {
             fadeFromBlack.start()
         }
     }
+
+    // --------------------------------------------------------
+    // Server Connectivity — Blocking Popup
+    // --------------------------------------------------------
+    Connections {
+        target: manifestUpdater
+        function onServerCheckFailed() {
+            serverDownPopup.checking = false
+            serverDownPopup.open()
+        }
+        function onServerCheckPassed() {
+            serverDownPopup.close()
+        }
+    }
+
+    Popup {
+        id: serverDownPopup
+        property bool checking: false
+
+        anchors.centerIn: parent
+        width: 560
+        height: 300
+        modal: true
+        closePolicy: Popup.NoAutoClose
+        z: 9999
+
+        background: Rectangle {
+            color: "#E8101010"
+            radius: 16
+            border.color: "#2566c2"
+            border.width: 2
+        }
+
+        Column {
+            anchors.centerIn: parent
+            spacing: 24
+            width: parent.width - 64
+
+            Text {
+                width: parent.width
+                text: "No Server Connection"
+                color: "white"
+                font.pixelSize: 28
+                font.bold: true
+                horizontalAlignment: Text.AlignHCenter
+            }
+
+            Text {
+                width: parent.width
+                text: serverDownPopup.checking
+                      ? "Checking server\u2026"
+                      : "MediaVerse requires the media server (W:) to start.\nCheck your network connection and try again."
+                color: "#AAAAAA"
+                font.pixelSize: 20
+                horizontalAlignment: Text.AlignHCenter
+                wrapMode: Text.WordWrap
+            }
+
+            BusyIndicator {
+                anchors.horizontalCenter: parent.horizontalCenter
+                visible: serverDownPopup.checking
+                running: serverDownPopup.checking
+            }
+
+            Row {
+                anchors.horizontalCenter: parent.horizontalCenter
+                spacing: 20
+                visible: !serverDownPopup.checking
+
+                Button {
+                    text: "Retry"
+                    font.pixelSize: 22
+                    onClicked: {
+                        serverDownPopup.checking = true
+                        manifestUpdater.retry_server_check()
+                    }
+                }
+
+                Button {
+                    text: "Exit"
+                    font.pixelSize: 22
+                    onClicked: Qt.quit()
+                }
+            }
+        }
+    }
 }
