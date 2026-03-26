@@ -92,7 +92,8 @@ svg_solid_path = font_base / "svgs" / "solid"
 json_path = project_root / "Assets" / "XMLCategories.json"
 menu_json_path = project_root / "Assets" / "MainMenu.json"
 config_json = project_root / "Assets" / "Config.json"
-coll_data = project_root / "Assets" / "xml_collection_data.json"
+coll_data   = project_root / "Assets" / "xml_collection_data.json"
+coll_data_b = project_root / "Assets" / "xml_collection_data_b.json"
 coll_json = project_root / "Assets" / "xml_collection.json"
 splash_json = project_root / "Assets" / "Splash.json"
 category_json = project_root / "Assets" / "Category.json"
@@ -148,7 +149,8 @@ paths = {
     "display": display_dir,
     "config": config_json,
     "fonts": font_path,
-    "xmldate": coll_data,
+    "xmldate":   coll_data,
+    "xmldate_b": coll_data_b,
     "jsoncoll": coll_json,
 
     # Server V2

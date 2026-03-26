@@ -25,8 +25,8 @@ class XMLCollections(QObject):
         # 1. SETUP PATHS
         self.manifest_path = Path(paths.get("xmldate")) if paths.get("xmldate") else None
         self.source_manifest = Path(paths.get("server_manifest_v2")) if paths.get("server_manifest_v2") else None
-        self.cache_dir = Path("W:/MediaVerse/cache")
-        self.cache_file = self.cache_dir / "collections_cache.json"
+        self.cache_dir = paths.get("server_cache_root_v2")
+        self.cache_file = Path(self.cache_dir) / "collections_cache.json" if self.cache_dir else None
 
         # 2. SURGICAL SYNC LOGIC
         if not self.manifest_path:
@@ -45,7 +45,9 @@ class XMLCollections(QObject):
         if rebuild_reason:
             print(f"🔄 [INIT xml_collection_data] {rebuild_reason}. Triggering XMLCollectionBuilder...")
             import XMLCollectionBuilder
-            XMLCollectionBuilder.build_dna_bank()
+            build_result = XMLCollectionBuilder.build_dna_bank()
+            if not build_result.get("success"):
+                print(f"⚠️ [INIT xml_collection_data] Build failed: {build_result.get('error')} — loading previous data.")
         else:
             print(f"✅ [INIT] DNA Bank is up to date: {self.manifest_path}")
 
@@ -137,18 +139,13 @@ class XMLCollections(QObject):
         
         # This is the EXACT path from your "First Item Verified" log
         # Note: Using forward slashes for QML compatibility
-        thumb_base = "D:/MediaVerse1.0/BehindTheScenes/BehindTheScenes/music-new/cacheV2/images/thumb/"
-        
+        thumb_base = paths.get("local_thumb_v2")
+
         final_fan_paths = []
         for path in raw_paths[:3]:
-            # Get just the filename without extension (e.g., "Water (1985)")
             file_name = os.path.splitext(os.path.basename(path))[0]
-            
-            # Construct the path to the thumbnail
-            full_thumb_path = f"{thumb_base}{file_name}.jpg"
-            
-            # Convert to QML-friendly file URL
-            final_fan_paths.append("file:///" + full_thumb_path)
+            full_thumb_path = Path(thumb_base) / f"{file_name}.jpg"
+            final_fan_paths.append(full_thumb_path.as_uri())
             
         return final_fan_paths
     #start
@@ -244,7 +241,7 @@ class XMLCollections(QObject):
             if hasattr(criteria, "toVariant"):
                 criteria = criteria.toVariant()
 
-            file_path = Path("W:/MediaVerse/Collections/Movies_Collections.json")
+            file_path = paths.get("movies_coll_v2")
             file_path.parent.mkdir(parents=True, exist_ok=True)
 
             library = safe_json_read(file_path, "collections")
@@ -274,11 +271,23 @@ class XMLCollections(QObject):
         """
         def _run():
             try:
+                from NotificationManager import notifier
                 print("[XMLCollections] manifest changed — rebuilding xml_collection_data.json...")
                 import XMLCollectionBuilder
-                XMLCollectionBuilder.build_dna_bank()
-                self.load_data()
-                print(f"[XMLCollections] rebuild complete — {len(self.master_cache)} movies in cache.")
+                build_result = XMLCollectionBuilder.build_dna_bank()
+                if build_result.get("success"):
+                    self.load_data()
+                    msg = (
+                        f"Collection data rebuilt: {build_result['accepted']} movies"
+                        + (f" | {build_result['xml_parse_errors']} XML errors" if build_result.get('xml_parse_errors') else "")
+                        + (f" | {build_result['blank_metadata_count']} blank metadata" if build_result.get('blank_metadata_count') else "")
+                    )
+                    notifier.post_notification(msg, False)
+                    print(f"[XMLCollections] rebuild complete — {len(self.master_cache)} movies in cache.")
+                else:
+                    err = build_result.get("error", "Unknown error")
+                    notifier.post_notification(f"Collection data rebuild failed: {err}", True)
+                    print(f"[XMLCollections] rebuild failed — keeping previous data. Reason: {err}")
             except Exception as e:
                 print(f"[XMLCollections] rebuild_after_manifest_change failed: {e}")
 
