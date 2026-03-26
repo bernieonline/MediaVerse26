@@ -53,7 +53,12 @@ def build_dna_bank() -> dict:
         print(f"❌ [XMLCollectionBuilder] {result['error']}")
         return result
 
-    movie_items = [i for i in raw_items if i.get("metadata", {}).get("type") == "movie"]
+    # DVD items have type=="movie" but video==null — excluded from DNA bank by design
+    movie_items = [
+        i for i in raw_items
+        if i.get("metadata", {}).get("type") == "movie"
+        and i.get("shared", {}).get("video")
+    ]
     result["manifest_movie_count"] = len(movie_items)
 
     # --- 2. Record previous live file count (for 80% guard) ---------------
