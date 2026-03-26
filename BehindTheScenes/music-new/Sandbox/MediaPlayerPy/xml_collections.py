@@ -136,18 +136,8 @@ class XMLCollections(QObject):
             return []
 
         random.shuffle(raw_paths)
-        
-        # This is the EXACT path from your "First Item Verified" log
-        # Note: Using forward slashes for QML compatibility
-        thumb_base = paths.get("local_thumb_v2")
-
-        final_fan_paths = []
-        for path in raw_paths[:3]:
-            file_name = os.path.splitext(os.path.basename(path))[0]
-            full_thumb_path = Path(thumb_base) / f"{file_name}.jpg"
-            final_fan_paths.append(full_thumb_path.as_uri())
-            
-        return final_fan_paths
+        # raw_paths are already correct thumb URIs from image_lookup — return directly
+        return raw_paths[:3]
     #start
     @Slot('QVariant', result=list)
     def get_collection_results(self, criteria):
