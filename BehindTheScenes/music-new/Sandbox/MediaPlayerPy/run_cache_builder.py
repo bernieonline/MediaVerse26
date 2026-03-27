@@ -46,7 +46,7 @@ def main():
     # Optional: connect signals to print progress
     builder.cacheStarted.connect(lambda: print(">>> Cache build started"))
     builder.cacheProgress.connect(lambda d, t: print(f">>> Progress: {d}/{t}"))
-    builder.cacheFinished.connect(lambda: print(">>> Cache build finished"))
+    builder.cacheFinished.connect(lambda result: print(f">>> Cache build finished — {result}"))
 
     # Run builder
     builder.run()

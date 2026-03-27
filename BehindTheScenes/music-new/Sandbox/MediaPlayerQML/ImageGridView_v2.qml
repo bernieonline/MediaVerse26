@@ -34,6 +34,35 @@ Rectangle {
 
     signal v2OpenDetail(var movie)
     signal v2PlayMovie(string videoPath)
+    signal backRequested
+
+    // Back button — top-left corner
+    Rectangle {
+        id: backBtn
+        width: 46; height: 46
+        anchors.top: parent.top
+        anchors.left: parent.left
+        anchors.margins: 16
+        z: 200
+        color: backMa.containsMouse ? "#2a2a2a" : "transparent"
+        radius: 8
+        Behavior on color { ColorAnimation { duration: 120 } }
+
+        Text {
+            anchors.centerIn: parent
+            text: "❮"
+            font.pixelSize: 26
+            color: backMa.containsMouse ? "white" : "#888888"
+            Behavior on color { ColorAnimation { duration: 120 } }
+        }
+
+        MouseArea {
+            id: backMa
+            anchors.fill: parent
+            hoverEnabled: true
+            onClicked: gridRoot.backRequested()
+        }
+    }
 
     property var externalImageList: []
     property int currentPage: 0

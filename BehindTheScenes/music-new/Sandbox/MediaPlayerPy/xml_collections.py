@@ -285,6 +285,44 @@ class XMLCollections(QObject):
         thread.start()
 
     @Slot()
+    def check_and_rebuild_if_stale(self):
+        """
+        Re-runs the mtime check that __init__ performs at startup.
+
+        __init__ runs before the server check, so if W: was not yet accessible
+        when XMLCollections() was instantiated the mtime comparison was skipped.
+        This slot is connected to ManifestUpdater_v2.serverCheckPassed so that,
+        once the server is confirmed reachable, we catch any case where the local
+        xml_collection_data.json is missing or older than the live manifest.
+
+        Safe to call even when __init__ already built the file — the mtime guard
+        ensures no duplicate work is done.
+        """
+        if not self.manifest_path or not self.source_manifest:
+            return
+        if not self.source_manifest.exists():
+            print("[XMLCollections] check_and_rebuild_if_stale: manifest not accessible — skipping.")
+            return
+
+        if not self.manifest_path.exists():
+            print("[XMLCollections] check_and_rebuild_if_stale: xml file missing — rebuilding.")
+            self.rebuild_after_manifest_change()
+            return
+
+        try:
+            manifest_mtime = self.source_manifest.stat().st_mtime
+            xml_mtime      = self.manifest_path.stat().st_mtime
+        except OSError as e:
+            print(f"[XMLCollections] check_and_rebuild_if_stale: mtime check failed ({e}) — skipping.")
+            return
+
+        if manifest_mtime > xml_mtime:
+            print("[XMLCollections] check_and_rebuild_if_stale: manifest is newer — rebuilding.")
+            self.rebuild_after_manifest_change()
+        else:
+            print("[XMLCollections] check_and_rebuild_if_stale: xml_collection_data is current — no action needed.")
+
+    @Slot()
     def force_rebuild_xml_collection_data(self):
         """
         Recovery tool: force a full rebuild of xml_collection_data.json on demand,

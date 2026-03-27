@@ -18,10 +18,15 @@ ApplicationWindow {
     property string selectedFolderPath: ""
     property string selectedImageFile: ""
     property var currentCollectionItems: []
-    property bool useCarouselView: false 
+    property bool useCarouselView: false
     property var xmlController: _xmlController
     property bool isVideoPanelVisible: false
     property string previousLoaderSource: ""   // remembers what was showing before Detail_View
+
+    // Navigation history for the Quick Collection flow
+    // Each entry: { source: string, props: object }
+    property var navHistory: []
+    property var lastCollectionsModel: []     // restored when going back to CollectionsGallery
 
     property alias splashAlias: splash
 
@@ -438,15 +443,21 @@ ApplicationWindow {
 
                 // Handle category/collection signals from loaded items
                 if (contentLoader.source.toString().includes("CategoryMenu.qml")) {
+                    // Fresh entry into collection flow — reset history
+                    window.navHistory = []
                     contentLoader.item.categorySelected.connect(function(categoryKey) {
-                        let filteredData = collectionLogic.get_collections_by_category(categoryKey)
-                        contentLoader.setSource("CollectionsGallery.qml", { "collectionsModel": filteredData })
+                        // Push CategoryMenu as the back destination
+                        window.navHistory.push({ source: "CategoryMenu.qml", props: {} })
+                        window.lastCollectionsModel = collectionLogic.get_collections_by_category(categoryKey)
+                        contentLoader.setSource("CollectionsGallery.qml", { "collectionsModel": window.lastCollectionsModel })
                     })
                 }
 
                 if (contentLoader.source.toString().includes("CollectionsGallery.qml")) {
                     contentLoader.item.collectionSelected.connect(function(collectionItems) {
                         window.currentCollectionItems = collectionItems
+                        // Push CollectionsGallery as the back destination
+                        window.navHistory.push({ source: "CollectionsGallery.qml", props: { "collectionsModel": window.lastCollectionsModel } })
                         let targetFile = (collectionItems.length <= 14) ? "CarouselView_v2.qml" : "ImageGridView_v2.qml"
                         contentLoader.setSource(targetFile, { "externalImageList": collectionItems })
                     })
@@ -461,14 +472,24 @@ ApplicationWindow {
                     }
                     if (contentLoader.item.backRequested !== undefined) {
                         contentLoader.item.backRequested.connect(function() {
-                            var dest = window.previousLoaderSource
-                            if (dest === "landing_view.qml") {
-                                // Return to landing view — scroll starts immediately
-                                contentLoader.setSource("landing_view.qml")
-                            } else if (dest !== "") {
-                                contentLoader.source = dest
-                                splash.activate()
+                            var currentSrc = contentLoader.source.toString()
+                            if (currentSrc.includes("Detail_View_v2")) {
+                                // Detail_View back — return to where we came from
+                                var dest = window.previousLoaderSource
+                                if (dest === "landing_view.qml") {
+                                    contentLoader.setSource("landing_view.qml")
+                                } else if (dest !== "") {
+                                    contentLoader.source = dest
+                                    splash.activate()
+                                } else {
+                                    splash.activate()
+                                }
+                            } else if (window.navHistory.length > 0) {
+                                // Collection flow back — pop the history stack
+                                var entry = window.navHistory.pop()
+                                contentLoader.setSource(entry.source, entry.props || {})
                             } else {
+                                // Nothing left — go home
                                 splash.activate()
                             }
                         })

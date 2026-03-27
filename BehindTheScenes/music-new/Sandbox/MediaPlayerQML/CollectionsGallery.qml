@@ -17,6 +17,34 @@ Item {
     property var logic: (typeof collectionLogic !== "undefined") ? collectionLogic : null
 
     signal collectionSelected(var items)
+    signal backRequested
+
+    // Back button — top-left corner
+    Rectangle {
+        id: backBtn
+        width: 46; height: 46
+        anchors.top: parent.top
+        anchors.left: parent.left
+        z: 200
+        color: backMa.containsMouse ? "#2a2a2a" : "transparent"
+        radius: 8
+        Behavior on color { ColorAnimation { duration: 120 } }
+
+        Text {
+            anchors.centerIn: parent
+            text: "❮"
+            font.pixelSize: 26
+            color: backMa.containsMouse ? "white" : "#888888"
+            Behavior on color { ColorAnimation { duration: 120 } }
+        }
+
+        MouseArea {
+            id: backMa
+            anchors.fill: parent
+            hoverEnabled: true
+            onClicked: collectionsCarousel.backRequested()
+        }
+    }
 
     // Max starting index so we never show a partial row at the end
     property int maxIndex: Math.max(0, (collectionsModel.length || 0) - visibleCount)
@@ -131,17 +159,15 @@ Item {
                 color: "#1A1A1A"
                 radius: 20
 
-                border.color: (topMouse.containsMouse || actionRow.anyHover) ? "#1E90FF" : "#333333"
-                border.width: (topMouse.containsMouse || actionRow.anyHover) ? 3 : 1
+                border.color: (cardHover.hovered || actionRow.anyHover) ? "#2566c2" : "#333333"
+                border.width: (cardHover.hovered || actionRow.anyHover) ? 3 : 1
 
-                MouseArea {
-                    id: topMouse
-                    width: parent.width
-                    height: parent.height - 70
-                    anchors.top: parent.top
-                    hoverEnabled: true
+                HoverHandler {
+                    id: cardHover
+                }
 
-                    onClicked: {
+                TapHandler {
+                    onTapped: {
                         console.log(">>>> CAROUSEL CLICK TRIGGERED 3 <<<<")
                         console.log("Target Collection:", modelData.name)
                         console.log("Rules Object:", JSON.stringify(modelData.rules))
@@ -249,13 +275,13 @@ Item {
                             focus: renameBlock.editing
 
                             color: "white"
-                            selectionColor: "#1E90FF"
+                            selectionColor: "#2566c2"
                             selectedTextColor: "white"
 
                             background: Rectangle {
                                 color: "#000000"
                                 radius: 6
-                                border.color: "#1E90FF"
+                                border.color: "#2566c2"
                                 border.width: 2
                             }
 
@@ -295,7 +321,7 @@ Item {
 
                     property bool anyHover: favM.containsMouse || renM.containsMouse || delM.containsMouse
 
-                    opacity: (topMouse.containsMouse || anyHover) ? 1.0 : 0.0
+                    opacity: (cardHover.hovered || anyHover) ? 1.0 : 0.0
                     Behavior on opacity { NumberAnimation { duration: 250 } }
 
                     // FAV
@@ -332,11 +358,11 @@ Item {
                             anchors.centerIn: parent; spacing: 6
                             Icon {
                                 name: "pen-to-square"
-                                iconColor: renM.containsMouse ? "#1E90FF" : "#888888"
+                                iconColor: renM.containsMouse ? "#2566c2" : "#888888"
                             }
                             Text {
                                 text: "EDIT"; font.pixelSize: 14; font.bold: true
-                                color: renM.containsMouse ? "#1E90FF" : "#888888"
+                                color: renM.containsMouse ? "#2566c2" : "#888888"
                             }
                         }
                         MouseArea {
@@ -386,7 +412,7 @@ Item {
                 anchors.fill: cardRect
                 radius: 15
                 samples: 20
-                color: (topMouse.containsMouse || actionRow.anyHover) ? "#801E90FF" : "#99000000"
+                color: (cardHover.hovered || actionRow.anyHover) ? "#802566c2" : "#99000000"
                 source: cardRect
             }
         }

@@ -420,34 +420,56 @@ class SyncEngine_v2(QObject):
     def run_server_cache_builder(self, manifest: dict):
         """
         Run CacheBuilder_v2 on the server using the given manifest.
-        This runs in a worker thread to avoid blocking the UI.
+        Skips images that already exist (incremental).
+        Posts a user notification with the result summary on completion.
         """
         try:
-            print("Framework,py")
-
             print("[CacheBuilder_v2] Initializing server cache builder...")
             builder = CacheBuilder_v2(manifest, self.server_cache_root)
-            # Optional: simple console logging for progress
+
             builder.cacheStarted.connect(
-                lambda: print("[CacheBuilder_v2] Cache build started")
+                lambda: notifier.post_notification("Image cache build started…", False)
             )
-            #builder.cacheProgress.connect(
-                #lambda done, total: print(f"[CacheBuilder_v2] Progress: {done}/{total}")   
-                #)
-            builder.cacheProgress.connect(
-                lambda done, total: None
-            )
-            builder.cacheFinished.connect(
-                lambda: print("[CacheBuilder_v2] Cache build finished")
-            )
+
+            # Progress: notify every 100 items so the user sees activity
+            def _on_progress(done, total):
+                if total > 0 and done % 100 == 0:
+                    notifier.post_notification(
+                        f"Building image cache: {done} of {total}…", False
+                    )
+            builder.cacheProgress.connect(_on_progress)
+
+            def _on_finished(result):
+                written  = result.get("written", 0)
+                skipped  = result.get("skipped", 0)
+                errors   = result.get("errors", 0)
+                exp_t    = result.get("expected_thumb", 0)
+                exp_d    = result.get("expected_display", 0)
+                found_t  = result.get("found_thumb", 0)
+                found_d  = result.get("found_display", 0)
+
+                thumb_ok   = found_t   >= exp_t   * 0.95
+                display_ok = found_d   >= exp_d   * 0.95
+                has_gaps   = not thumb_ok or not display_ok or errors > 0
+
+                parts = [f"Cache build complete — {written} new, {skipped} unchanged"]
+                if errors:
+                    parts.append(f"{errors} errors")
+                if not thumb_ok:
+                    parts.append(f"⚠ thumb: {found_t}/{exp_t}")
+                if not display_ok:
+                    parts.append(f"⚠ display: {found_d}/{exp_d}")
+
+                notifier.post_notification(" | ".join(parts), has_gaps)
+                print(f"[CacheBuilder_v2] {' | '.join(parts)}")
+
+            builder.cacheFinished.connect(_on_finished)
 
             builder.run()
 
-                # After a successful run, record the manifest timestamp
-                #update_cache_info(manifest)
-
         except Exception as e:
             print(f"[CacheBuilder_v2] ERROR during cache build: {e}")
+            notifier.post_notification(f"Cache build failed: {e}", True)
              
 
 
