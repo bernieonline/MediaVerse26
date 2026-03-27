@@ -169,6 +169,12 @@ def main():
         # (XMLCollections.__init__ already handles startup rebuild via mtime check)
         manifest_updater.manifestUpdated.connect(xml_logic.rebuild_after_manifest_change)
 
+        # If W: was not yet accessible when XMLCollections() was instantiated, the mtime
+        # check in __init__ was skipped. Re-run it once the server is confirmed reachable
+        # so a stale or missing xml_collection_data.json is caught even when the manifest
+        # hash hasn't changed (no new movies added).
+        manifest_updater.serverCheckPassed.connect(xml_logic.check_and_rebuild_if_stale)
+
         if myLibrary and "path" in myLibrary[0]:
             fileSystem.update_folders(myLibrary[0]["path"])
 

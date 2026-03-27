@@ -6,8 +6,9 @@ from types import SimpleNamespace
 
 class CacheSyncWorker(QObject):
     """
-    Standalone worker that mirrors the server cache to the local cache
-    using Robocopy for maximum speed. Designed to run in a QThread.
+    Mirrors the server image cache to the local device using Robocopy.
+    Only syncs the two tiers that views actually use: thumb and display.
+    Carousel is excluded — no view currently requests it.
 
     Usage:
         worker = CacheSyncWorker(paths)
@@ -18,39 +19,22 @@ class CacheSyncWorker(QObject):
         thread.start()
     """
 
-    finished = Signal()
-    progress = Signal(str)   # emits "Thumb", "Display", etc.
+    finished = Signal(dict)   # emits a result dict: {label: {server, local, ok}}
+    progress = Signal(str)    # emits "Thumb", "Display" as each tier starts
 
     def __init__(self, paths):
-        """
-        paths: a dict containing:
-            - server_cache_thumb_v2
-            - server_cache_display_v2
-            - server_cache_carousel_v2
-            - local_thumb_v2
-            - local_display_v2
-            - local_carousel_v2
-        """
         super().__init__()
-
-        # Convert dict → object with attribute access
         self.paths = SimpleNamespace(**paths)
 
-        # Build sync map in correct order
+        # carousel removed — not used by any view
         self.sync_map = [
-            ("Thumb",    self.paths.server_cache_thumb_v2,    self.paths.local_thumb_v2),
-            ("Display",  self.paths.server_cache_display_v2,  self.paths.local_display_v2),
-            ("Carousel", self.paths.server_cache_carousel_v2, self.paths.local_carousel_v2),
-
-            # ------------------------------------------------------------
-            # Full resolution (currently unused — intentionally commented)
-            # ------------------------------------------------------------
-            # ("Full", self.paths.server_cache_full_v2, self.paths.local_full_v2),
+            ("Thumb",   self.paths.server_cache_thumb_v2,   self.paths.local_thumb_v2),
+            ("Display", self.paths.server_cache_display_v2, self.paths.local_display_v2),
         ]
 
-    # ------------------------------------------------------------
-    # Internal helper: run robocopy
-    # ------------------------------------------------------------
+    # ----------------------------------------------------------------
+    # Internal helper: robocopy mirror
+    # ----------------------------------------------------------------
     def _mirror(self, src, dst):
         src = Path(src)
         dst = Path(dst)
@@ -65,33 +49,53 @@ class CacheSyncWorker(QObject):
             "robocopy",
             str(src),
             str(dst),
-            "/MIR",        # mirror source → destination
-            "/MT:16",      # 16 threads (fast + safe)
-            "/R:1",        # retry once
-            "/W:1",        # wait 1 second
-            "/NFL", "/NDL", "/NJH", "/NJS",  # quiet output
+            "/MIR",         # mirror source → destination (incremental)
+            "/MT:16",       # 16 threads
+            "/R:1",         # retry once on failure
+            "/W:1",         # wait 1 second between retries
+            "/NFL", "/NDL", "/NJH", "/NJS",
             "/NC", "/NS", "/NP"
         ]
 
         subprocess.run(cmd, shell=True)
 
-    # ------------------------------------------------------------
+    # ----------------------------------------------------------------
     # Main entry point (runs inside QThread)
-    # ------------------------------------------------------------
+    # ----------------------------------------------------------------
     @Slot()
     def run(self):
         print("\n==============================")
         print(" CacheSyncWorker: START")
         print("==============================")
 
+        tier_results = {}
+
         for label, src, dst in self.sync_map:
             print(f"\n>>> Syncing {label}...")
             self.progress.emit(label)
             self._mirror(src, dst)
-            print(f"    ✔ {label} complete")
+            print(f"    ✔ {label} robocopy complete")
+
+            # Verification: count files on server vs local
+            src_path = Path(src)
+            dst_path = Path(dst)
+            server_count = sum(1 for f in src_path.iterdir() if f.is_file()) if src_path.exists() else 0
+            local_count  = sum(1 for f in dst_path.iterdir() if f.is_file()) if dst_path.exists() else 0
+            ok = local_count >= server_count * 0.95
+
+            tier_results[label] = {
+                "server": server_count,
+                "local":  local_count,
+                "ok":     ok,
+            }
+
+            if ok:
+                print(f"    ✅ {label} verified: local {local_count} / server {server_count}")
+            else:
+                print(f"    ⚠️ {label} gap: local {local_count} / server {server_count}")
 
         print("\n==============================")
         print(" CacheSyncWorker: FINISHED")
         print("==============================")
 
-        self.finished.emit()
+        self.finished.emit(tier_results)

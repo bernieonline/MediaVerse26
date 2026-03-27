@@ -342,23 +342,38 @@ class ManifestUpdater_v2(QObject):
 
     def start_local_cache_sync(self):
         print("Starting async local cache sync…")
+        notifier.post_notification("Syncing image cache to local device…", False)
 
-        # Create thread + worker
         self.sync_thread = QThread()
-        #self.sync_worker = CacheSyncWorker(self.paths)
         self.sync_worker = CacheSyncWorker(paths)
 
-        # Move worker into thread
         self.sync_worker.moveToThread(self.sync_thread)
 
-        # Connect lifecycle
+        # Lifecycle
         self.sync_thread.started.connect(self.sync_worker.run)
         self.sync_worker.finished.connect(self.sync_thread.quit)
         self.sync_worker.finished.connect(self.sync_worker.deleteLater)
         self.sync_thread.finished.connect(self.sync_thread.deleteLater)
 
-        # Optional: progress to QML
-        # self.sync_worker.progress.connect(self.qml_root.onSyncProgress)
+        # Progress label → discreet notification
+        self.sync_worker.progress.connect(
+            lambda label: notifier.post_notification(f"Syncing {label} cache…", False)
+        )
 
-        # Start thread
+        # Result summary notification
+        def _on_sync_finished(tier_results):
+            parts = []
+            has_gaps = False
+            for label, info in tier_results.items():
+                if info["ok"]:
+                    parts.append(f"{label}: {info['local']}/{info['server']} ✓")
+                else:
+                    parts.append(f"{label}: {info['local']}/{info['server']} ⚠")
+                    has_gaps = True
+            msg = "Local cache sync complete — " + ", ".join(parts)
+            notifier.post_notification(msg, has_gaps)
+            print(f"[CacheSyncWorker] {msg}")
+
+        self.sync_worker.finished.connect(_on_sync_finished)
+
         self.sync_thread.start()        
