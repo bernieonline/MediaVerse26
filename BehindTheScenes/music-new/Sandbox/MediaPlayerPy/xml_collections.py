@@ -147,7 +147,11 @@ class XMLCollections(QObject):
         results = []
         print(f"\n📂 --- DEEP DATA TRACE ---")
         
+        series_mode = "Series" in criteria
         for item in self.master_cache:
+            if series_mode and self._is_football(item):
+                continue
+
             match = True
             for key, value in criteria.items():
                 # --- LEAST DISRUPTIVE BRANCHING START ---
@@ -190,6 +194,13 @@ class XMLCollections(QObject):
                     #print(f"MATCH {len(results)}: {display_name} | Path: {v_path}")
 
         return results
+    @staticmethod
+    def _is_football(item):
+        """Return True if the item is football-related (Genre or Keywords)."""
+        kw = str(item.get("Keywords", "")).lower()
+        genre = str(item.get("Genre", "")).lower()
+        return "football" in kw or "football" in genre
+
     @Slot(str, result=list)
     def get_filter_options(self, category):
         """Calculates Top 10 for the Sidebar buttons."""
@@ -201,15 +212,18 @@ class XMLCollections(QObject):
         print("============  inside row 179   ============")
 
         for item in self.master_cache:
+            if category == "Series" and self._is_football(item):
+                continue
+
             if category == "Actors":
                 val = item.get("Actors")
                 if isinstance(val, list): counts.update(val)
-            
+
             elif category == "Decade":
                 val = item.get("Year")
                 if val and str(val).isdigit() and len(str(val)) >= 4:
                     counts.update([str(val)[:3] + "0s"])
-            
+
             elif category in ["Genre", "Keywords"]:
                 val = item.get(category)
                 if val and isinstance(val, str):
@@ -220,7 +234,15 @@ class XMLCollections(QObject):
                 if val and isinstance(val, str):
                     counts.update([val.strip()])
 
-        top_10 = [name for name, count in counts.most_common(10) 
+        if category == "Series":
+            # Return all unique series names alphabetically (not just top 10)
+            all_series = sorted(
+                name for name in counts
+                if name and str(name).lower() != "unknown"
+            )
+            return all_series
+
+        top_10 = [name for name, count in counts.most_common(10)
                   if name and str(name).lower() != "unknown"]
         return top_10
 
@@ -465,9 +487,12 @@ class XMLCollections(QObject):
         print("============  inside row 330   ============")
 
         for item in self.master_cache:
+            if category == "Series" and self._is_football(item):
+                continue
+
             # 1. Get the value safely
             val = item.get(category)
-            
+
             # 2. Handle Decade specifically
             if category == "Decade":
                 year = str(item.get("Year") or item.get("year") or "")
@@ -717,10 +742,14 @@ class XMLCollections(QObject):
         # 3. FILTERING LOGIC (copied from V1)
         # ------------------------------------------------------------
         filtered_items = []
+        series_mode_v2 = "Series" in criteria
         print("============  inside row 613   ============")
         for item in self.master_cache:
             # Skip any TV records that may exist in the current on-disk file
             if item.get("Media Sub Type", "").lower() == "tv show" or item.get("Season", ""):
+                continue
+
+            if series_mode_v2 and self._is_football(item):
                 continue
 
             match = True

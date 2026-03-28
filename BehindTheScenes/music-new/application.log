@@ -7131,3 +7131,787 @@
 2026-03-25 22:52:32,611 - INFO - PlaybackController shutdown complete.
 2026-03-26 16:22:51,909 - INFO - PlaybackController shutdown requested.
 2026-03-26 16:22:51,924 - INFO - PlaybackController shutdown complete.
+2026-03-26 17:19:02,952 - DEBUG - _make_backup: wrote manifest_b.json.bak
+2026-03-26 17:19:03,062 - DEBUG - safe_json_write: wrote 4 items to manifest_b.json
+2026-03-26 17:19:03,150 - DEBUG - _make_backup: wrote manifest_b.json.bak
+2026-03-26 17:19:03,260 - DEBUG - safe_json_write: wrote 4 items to manifest_b.json
+2026-03-26 17:19:03,260 - DEBUG - safe_json_write: wrote 6 items to manifest_build_log.json
+2026-03-26 17:21:52,340 - INFO - PlaybackController shutdown requested.
+2026-03-26 17:21:52,340 - INFO - PlaybackController shutdown complete.
+2026-03-26 17:26:09,911 - DEBUG - _make_backup: wrote manifest_b.json.bak
+2026-03-26 17:26:10,037 - DEBUG - safe_json_write: wrote 4 items to manifest_b.json
+2026-03-26 17:26:10,122 - DEBUG - _make_backup: wrote manifest_b.json.bak
+2026-03-26 17:26:10,217 - DEBUG - safe_json_write: wrote 4 items to manifest_b.json
+2026-03-26 17:26:10,239 - DEBUG - _make_backup: wrote manifest_build_log.json.bak
+2026-03-26 17:26:10,239 - DEBUG - safe_json_write: wrote 6 items to manifest_build_log.json
+2026-03-26 17:27:00,692 - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\x00\x00\x00\x1a'
+2026-03-26 17:27:24,813 - DEBUG - tag: Orientation (274) - type: short (3) - value: b'\x01\x00'
+2026-03-26 17:27:24,813 - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 34 - Data Location: 110 - value: b'd\x00\x00\x00\x01\x00\x00\x00'
+2026-03-26 17:27:24,813 - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 46 - Data Location: 118 - value: b'd\x00\x00\x00\x01\x00\x00\x00'
+2026-03-26 17:27:24,813 - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x02\x00'
+2026-03-26 17:27:24,813 - DEBUG - tag: Software (305) - type: string (2) Tag Location: 70 - Data Location: 126 - value: b'ACD Systems Digital Imaging\x00'
+2026-03-26 17:27:24,813 - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 82 - Data Location: 154 - value: b'2011:08:02 12:56:09\x00'
+2026-03-26 17:27:24,813 - DEBUG - tag: YCbCrPositioning (531) - type: short (3) - value: b'\x01\x00'
+2026-03-26 17:27:24,813 - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\xae\x00\x00\x00'
+2026-03-26 17:27:24,846 - DEBUG - tag: Orientation (274) - type: short (3) - value: b'\x01\x00'
+2026-03-26 17:27:24,846 - DEBUG - tag: XResolution (282) - type: rational (5) Tag Location: 34 - Data Location: 110 - value: b'd\x00\x00\x00\x01\x00\x00\x00'
+2026-03-26 17:27:24,846 - DEBUG - tag: YResolution (283) - type: rational (5) Tag Location: 46 - Data Location: 118 - value: b'd\x00\x00\x00\x01\x00\x00\x00'
+2026-03-26 17:27:24,846 - DEBUG - tag: ResolutionUnit (296) - type: short (3) - value: b'\x02\x00'
+2026-03-26 17:27:24,846 - DEBUG - tag: Software (305) - type: string (2) Tag Location: 70 - Data Location: 126 - value: b'ACD Systems Digital Imaging\x00'
+2026-03-26 17:27:24,846 - DEBUG - tag: DateTime (306) - type: string (2) Tag Location: 82 - Data Location: 154 - value: b'2011:08:02 12:56:09\x00'
+2026-03-26 17:27:24,846 - DEBUG - tag: YCbCrPositioning (531) - type: short (3) - value: b'\x01\x00'
+2026-03-26 17:27:24,846 - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\xae\x00\x00\x00'
+2026-03-26 17:28:14,543 - DEBUG - tag: Copyright (33432) - type: string (2)
+2026-03-26 17:28:14,543 - DEBUG - tag: Artist (315) - type: string (2) - value: b'\x00'
+2026-03-26 17:28:14,543 - DEBUG - tag: ImageDescription (270) - type: string (2) Tag Location: 46 - Data Location: 62 - value: b'3.10 to Yuma (2007)\x00'
+2026-03-26 17:28:14,543 - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'R\x00\x00\x00'
+2026-03-26 17:28:14,670 - DEBUG - tag: Copyright (33432) - type: string (2)
+2026-03-26 17:28:14,670 - DEBUG - tag: Artist (315) - type: string (2) - value: b'\x00'
+2026-03-26 17:28:14,670 - DEBUG - tag: ImageDescription (270) - type: string (2) Tag Location: 46 - Data Location: 62 - value: b'7th Cavalry (1956)\x00'
+2026-03-26 17:28:14,670 - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'R\x00\x00\x00'
+2026-03-26 17:28:14,782 - DEBUG - tag: Copyright (33432) - type: string (2)
+2026-03-26 17:28:14,798 - DEBUG - tag: Artist (315) - type: string (2) - value: b'\x00'
+2026-03-26 17:28:14,798 - DEBUG - tag: ImageDescription (270) - type: string (2) Tag Location: 46 - Data Location: 62 - value: b'All The Pretty Horses (2000)\x00'
+2026-03-26 17:28:14,798 - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\\\x00\x00\x00'
+2026-03-26 17:28:14,940 - DEBUG - tag: Copyright (33432) - type: string (2)
+2026-03-26 17:28:14,940 - DEBUG - tag: Artist (315) - type: string (2) - value: b'\x00'
+2026-03-26 17:28:14,940 - DEBUG - tag: ImageDescription (270) - type: string (2) Tag Location: 46 - Data Location: 62 - value: b'Apache (1954)\x00'
+2026-03-26 17:28:14,940 - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'L\x00\x00\x00'
+2026-03-26 17:28:15,115 - DEBUG - tag: Copyright (33432) - type: string (2)
+2026-03-26 17:28:15,115 - DEBUG - tag: Artist (315) - type: string (2) - value: b'\x00'
+2026-03-26 17:28:15,115 - DEBUG - tag: ImageDescription (270) - type: string (2) Tag Location: 46 - Data Location: 62 - value: b'apache territory (1958)\x00'
+2026-03-26 17:28:15,115 - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'V\x00\x00\x00'
+2026-03-26 17:28:15,448 - DEBUG - tag: Copyright (33432) - type: string (2)
+2026-03-26 17:28:15,448 - DEBUG - tag: Artist (315) - type: string (2) - value: b'\x00'
+2026-03-26 17:28:15,448 - DEBUG - tag: ImageDescription (270) - type: string (2) Tag Location: 46 - Data Location: 62 - value: b'Appaloosa (2008)\x00'
+2026-03-26 17:28:15,448 - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'P\x00\x00\x00'
+2026-03-26 17:28:15,750 - DEBUG - tag: Copyright (33432) - type: string (2)
+2026-03-26 17:28:15,750 - DEBUG - tag: Artist (315) - type: string (2) - value: b'\x00'
+2026-03-26 17:28:15,750 - DEBUG - tag: ImageDescription (270) - type: string (2) Tag Location: 46 - Data Location: 62 - value: b'arrowhead (1953)\x00'
+2026-03-26 17:28:15,750 - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'P\x00\x00\x00'
+2026-03-26 17:28:15,813 - DEBUG - tag: Copyright (33432) - type: string (2)
+2026-03-26 17:28:15,813 - DEBUG - tag: Artist (315) - type: string (2) - value: b'\x00'
+2026-03-26 17:28:15,813 - DEBUG - tag: ImageDescription (270) - type: string (2) Tag Location: 46 - Data Location: 62 - value: b'Bad Company (1972)\x00'
+2026-03-26 17:28:15,813 - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'R\x00\x00\x00'
+2026-03-26 17:28:15,892 - DEBUG - tag: Copyright (33432) - type: string (2)
+2026-03-26 17:28:15,892 - DEBUG - tag: Artist (315) - type: string (2) - value: b'\x00'
+2026-03-26 17:28:15,894 - DEBUG - tag: ImageDescription (270) - type: string (2) Tag Location: 46 - Data Location: 62 - value: b'Bad Girls (1994)\x00'
+2026-03-26 17:28:15,894 - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'P\x00\x00\x00'
+2026-03-26 17:28:15,956 - DEBUG - tag: Copyright (33432) - type: string (2)
+2026-03-26 17:28:15,956 - DEBUG - tag: Artist (315) - type: string (2) - value: b'\x00'
+2026-03-26 17:28:15,956 - DEBUG - tag: ImageDescription (270) - type: string (2) Tag Location: 46 - Data Location: 62 - value: b'Barquero (1970)\x00'
+2026-03-26 17:28:15,956 - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'N\x00\x00\x00'
+2026-03-26 17:28:16,036 - DEBUG - tag: Copyright (33432) - type: string (2)
+2026-03-26 17:28:16,036 - DEBUG - tag: Artist (315) - type: string (2) - value: b'\x00'
+2026-03-26 17:28:16,036 - DEBUG - tag: ImageDescription (270) - type: string (2) Tag Location: 46 - Data Location: 62 - value: b'Big Jake (1971)\x00'
+2026-03-26 17:28:16,036 - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'N\x00\x00\x00'
+2026-03-26 17:28:16,132 - DEBUG - tag: Copyright (33432) - type: string (2)
+2026-03-26 17:28:16,132 - DEBUG - tag: Artist (315) - type: string (2) - value: b'\x00'
+2026-03-26 17:28:16,132 - DEBUG - tag: ImageDescription (270) - type: string (2) Tag Location: 46 - Data Location: 62 - value: b'Blackthorne (2011)\x00'
+2026-03-26 17:28:16,132 - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'R\x00\x00\x00'
+2026-03-26 17:28:16,196 - DEBUG - tag: Copyright (33432) - type: string (2)
+2026-03-26 17:28:16,196 - DEBUG - tag: Artist (315) - type: string (2) - value: b'\x00'
+2026-03-26 17:28:16,196 - DEBUG - tag: ImageDescription (270) - type: string (2) Tag Location: 46 - Data Location: 62 - value: b'Breakheart Pass (1975)\x00'
+2026-03-26 17:28:16,196 - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'V\x00\x00\x00'
+2026-03-26 17:28:16,339 - DEBUG - tag: Copyright (33432) - type: string (2)
+2026-03-26 17:28:16,339 - DEBUG - tag: Artist (315) - type: string (2) - value: b'\x00'
+2026-03-26 17:28:16,339 - DEBUG - tag: ImageDescription (270) - type: string (2) Tag Location: 46 - Data Location: 62 - value: b'Brimstone (2016)\x00'
+2026-03-26 17:28:16,339 - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'P\x00\x00\x00'
+2026-03-26 17:28:16,451 - DEBUG - tag: Copyright (33432) - type: string (2)
+2026-03-26 17:28:16,451 - DEBUG - tag: Artist (315) - type: string (2) - value: b'\x00'
+2026-03-26 17:28:16,451 - DEBUG - tag: ImageDescription (270) - type: string (2) Tag Location: 46 - Data Location: 62 - value: b'Broken Trail (2006)\x00'
+2026-03-26 17:28:16,451 - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'R\x00\x00\x00'
+2026-03-26 17:28:16,548 - DEBUG - tag: Copyright (33432) - type: string (2)
+2026-03-26 17:28:16,548 - DEBUG - tag: Artist (315) - type: string (2) - value: b'\x00'
+2026-03-26 17:28:16,548 - DEBUG - tag: ImageDescription (270) - type: string (2) Tag Location: 46 - Data Location: 62 - value: <table: 42 bytes>
+2026-03-26 17:28:16,548 - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'h\x00\x00\x00'
+2026-03-26 17:28:16,640 - DEBUG - tag: Copyright (33432) - type: string (2)
+2026-03-26 17:28:16,640 - DEBUG - tag: Artist (315) - type: string (2) - value: b'\x00'
+2026-03-26 17:28:16,640 - DEBUG - tag: ImageDescription (270) - type: string (2) Tag Location: 46 - Data Location: 62 - value: b'Cahill U.S. Marshall (1973)\x00'
+2026-03-26 17:28:16,640 - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'Z\x00\x00\x00'
+2026-03-26 17:28:16,814 - DEBUG - tag: Copyright (33432) - type: string (2)
+2026-03-26 17:28:16,814 - DEBUG - tag: Artist (315) - type: string (2) - value: b'\x00'
+2026-03-26 17:28:16,830 - DEBUG - tag: ImageDescription (270) - type: string (2) Tag Location: 46 - Data Location: 62 - value: b'Cat Ballou (1965)\x00'
+2026-03-26 17:28:16,830 - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'P\x00\x00\x00'
+2026-03-26 17:28:16,862 - DEBUG - tag: Copyright (33432) - type: string (2)
+2026-03-26 17:28:16,862 - DEBUG - tag: Artist (315) - type: string (2) - value: b'\x00'
+2026-03-26 17:28:16,862 - DEBUG - tag: ImageDescription (270) - type: string (2) Tag Location: 46 - Data Location: 62 - value: b'Catlow (1971)\x00'
+2026-03-26 17:28:16,862 - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'L\x00\x00\x00'
+2026-03-26 17:28:16,943 - DEBUG - tag: Copyright (33432) - type: string (2)
+2026-03-26 17:28:16,943 - DEBUG - tag: Artist (315) - type: string (2) - value: b'\x00'
+2026-03-26 17:28:16,943 - DEBUG - tag: ImageDescription (270) - type: string (2) Tag Location: 46 - Data Location: 62 - value: b"Chato's Land (1972)\x00"
+2026-03-26 17:28:16,943 - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'R\x00\x00\x00'
+2026-03-26 17:28:17,052 - DEBUG - tag: Copyright (33432) - type: string (2)
+2026-03-26 17:28:17,052 - DEBUG - tag: Artist (315) - type: string (2) - value: b'\x00'
+2026-03-26 17:28:17,052 - DEBUG - tag: ImageDescription (270) - type: string (2) Tag Location: 46 - Data Location: 62 - value: b'Cheyenne Autumn (1964)\x00'
+2026-03-26 17:28:17,052 - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'V\x00\x00\x00'
+2026-03-26 17:28:17,163 - DEBUG - tag: Copyright (33432) - type: string (2)
+2026-03-26 17:28:17,163 - DEBUG - tag: Artist (315) - type: string (2) - value: b'\x00'
+2026-03-26 17:28:17,163 - DEBUG - tag: ImageDescription (270) - type: string (2) Tag Location: 46 - Data Location: 62 - value: b'Chisum (1970)\x00'
+2026-03-26 17:28:17,163 - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'L\x00\x00\x00'
+2026-03-26 17:28:17,352 - DEBUG - tag: Copyright (33432) - type: string (2)
+2026-03-26 17:28:17,352 - DEBUG - tag: Artist (315) - type: string (2) - value: b'\x00'
+2026-03-26 17:28:17,352 - DEBUG - tag: ImageDescription (270) - type: string (2) Tag Location: 46 - Data Location: 62 - value: b'Conagher (1991)\x00'
+2026-03-26 17:28:17,352 - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'N\x00\x00\x00'
+2026-03-26 17:28:17,512 - DEBUG - tag: Copyright (33432) - type: string (2)
+2026-03-26 17:28:17,512 - DEBUG - tag: Artist (315) - type: string (2) - value: b'\x00'
+2026-03-26 17:28:17,512 - DEBUG - tag: ImageDescription (270) - type: string (2) Tag Location: 46 - Data Location: 62 - value: b"Coogan's Bluff (1968)\x00"
+2026-03-26 17:28:17,512 - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'T\x00\x00\x00'
+2026-03-26 17:28:17,639 - DEBUG - tag: Copyright (33432) - type: string (2)
+2026-03-26 17:28:17,639 - DEBUG - tag: Artist (315) - type: string (2) - value: b'\x00'
+2026-03-26 17:28:17,639 - DEBUG - tag: ImageDescription (270) - type: string (2) Tag Location: 46 - Data Location: 62 - value: b'Crossfire trail (2001)\x00'
+2026-03-26 17:28:17,639 - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'V\x00\x00\x00'
+2026-03-26 17:28:17,718 - DEBUG - tag: Copyright (33432) - type: string (2)
+2026-03-26 17:28:17,718 - DEBUG - tag: Artist (315) - type: string (2) - value: b'\x00'
+2026-03-26 17:28:17,718 - DEBUG - tag: ImageDescription (270) - type: string (2) Tag Location: 46 - Data Location: 62 - value: b'custer of the west (1967)\x00'
+2026-03-26 17:28:17,718 - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'X\x00\x00\x00'
+2026-03-26 17:28:17,830 - DEBUG - tag: Copyright (33432) - type: string (2)
+2026-03-26 17:28:17,830 - DEBUG - tag: Artist (315) - type: string (2) - value: b'\x00'
+2026-03-26 17:28:17,830 - DEBUG - tag: ImageDescription (270) - type: string (2) Tag Location: 46 - Data Location: 62 - value: b'Dances with Wolves (1990)\x00'
+2026-03-26 17:28:17,830 - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'X\x00\x00\x00'
+2026-03-26 17:28:17,861 - DEBUG - tag: Copyright (33432) - type: string (2)
+2026-03-26 17:28:17,861 - DEBUG - tag: Artist (315) - type: string (2) - value: b'\x00'
+2026-03-26 17:28:17,861 - DEBUG - tag: ImageDescription (270) - type: string (2) Tag Location: 46 - Data Location: 62 - value: <table: 47 bytes>
+2026-03-26 17:28:17,861 - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'n\x00\x00\x00'
+2026-03-26 17:28:19,043 - DEBUG - tag: Copyright (33432) - type: string (2)
+2026-03-26 17:28:19,043 - DEBUG - tag: Artist (315) - type: string (2) - value: b'\x00'
+2026-03-26 17:28:19,043 - DEBUG - tag: ImageDescription (270) - type: string (2) Tag Location: 46 - Data Location: 62 - value: b'Death Rides a Horse (1967)\x00'
+2026-03-26 17:28:19,043 - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'Z\x00\x00\x00'
+2026-03-26 17:28:19,266 - DEBUG - tag: Copyright (33432) - type: string (2)
+2026-03-26 17:28:19,266 - DEBUG - tag: Artist (315) - type: string (2) - value: b'\x00'
+2026-03-26 17:28:19,266 - DEBUG - tag: ImageDescription (270) - type: string (2) Tag Location: 46 - Data Location: 62 - value: b'Dual at Diablo (1966)\x00'
+2026-03-26 17:28:19,266 - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'T\x00\x00\x00'
+2026-03-26 17:28:19,394 - DEBUG - tag: Copyright (33432) - type: string (2)
+2026-03-26 17:28:19,394 - DEBUG - tag: Artist (315) - type: string (2) - value: b'\x00'
+2026-03-26 17:28:19,394 - DEBUG - tag: ImageDescription (270) - type: string (2) Tag Location: 46 - Data Location: 62 - value: b'El Dorado (1967)\x00'
+2026-03-26 17:28:19,394 - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'P\x00\x00\x00'
+2026-03-26 17:28:19,536 - DEBUG - tag: Copyright (33432) - type: string (2)
+2026-03-26 17:28:19,536 - DEBUG - tag: Artist (315) - type: string (2) - value: b'\x00'
+2026-03-26 17:28:19,536 - DEBUG - tag: ImageDescription (270) - type: string (2) Tag Location: 46 - Data Location: 62 - value: b'For a Few Dollars More (1965)\x00'
+2026-03-26 17:28:19,536 - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\\\x00\x00\x00'
+2026-03-26 17:28:19,584 - DEBUG - tag: Copyright (33432) - type: string (2)
+2026-03-26 17:28:19,584 - DEBUG - tag: Artist (315) - type: string (2) - value: b'\x00'
+2026-03-26 17:28:19,584 - DEBUG - tag: ImageDescription (270) - type: string (2) Tag Location: 46 - Data Location: 62 - value: b'For a Fistful of Dollars (1964)\x00'
+2026-03-26 17:28:19,584 - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'^\x00\x00\x00'
+2026-03-26 17:28:19,663 - DEBUG - tag: Copyright (33432) - type: string (2)
+2026-03-26 17:28:19,663 - DEBUG - tag: Artist (315) - type: string (2) - value: b'\x00'
+2026-03-26 17:28:19,663 - DEBUG - tag: ImageDescription (270) - type: string (2) Tag Location: 46 - Data Location: 62 - value: b'Fort Apache (1948)\x00'
+2026-03-26 17:28:19,663 - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'R\x00\x00\x00'
+2026-03-26 17:28:19,823 - DEBUG - tag: Copyright (33432) - type: string (2)
+2026-03-26 17:28:19,823 - DEBUG - tag: Artist (315) - type: string (2) - value: b'\x00'
+2026-03-26 17:28:19,823 - DEBUG - tag: ImageDescription (270) - type: string (2) Tag Location: 46 - Data Location: 62 - value: <table: 35 bytes>
+2026-03-26 17:28:19,823 - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'b\x00\x00\x00'
+2026-03-26 17:28:19,886 - DEBUG - tag: Copyright (33432) - type: string (2)
+2026-03-26 17:28:19,886 - DEBUG - tag: Artist (315) - type: string (2) - value: b'\x00'
+2026-03-26 17:28:19,886 - DEBUG - tag: ImageDescription (270) - type: string (2) Tag Location: 46 - Data Location: 62 - value: b'Goin South (1978)\x00'
+2026-03-26 17:28:19,886 - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'P\x00\x00\x00'
+2026-03-26 17:28:19,965 - DEBUG - tag: Copyright (33432) - type: string (2)
+2026-03-26 17:28:19,965 - DEBUG - tag: Artist (315) - type: string (2) - value: b'\x00'
+2026-03-26 17:28:19,965 - DEBUG - tag: ImageDescription (270) - type: string (2) Tag Location: 46 - Data Location: 62 - value: b"Hang 'Em High (1968)\x00"
+2026-03-26 17:28:19,965 - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'T\x00\x00\x00'
+2026-03-26 17:28:20,441 - DEBUG - tag: Copyright (33432) - type: string (2)
+2026-03-26 17:28:20,441 - DEBUG - tag: Artist (315) - type: string (2) - value: b'\x00'
+2026-03-26 17:28:20,441 - DEBUG - tag: ImageDescription (270) - type: string (2) Tag Location: 46 - Data Location: 62 - value: b'Hidalgo (2004)\x00'
+2026-03-26 17:28:20,441 - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'N\x00\x00\x00'
+2026-03-26 17:28:20,583 - DEBUG - tag: Copyright (33432) - type: string (2)
+2026-03-26 17:28:20,583 - DEBUG - tag: Artist (315) - type: string (2) - value: b'\x00'
+2026-03-26 17:28:20,583 - DEBUG - tag: ImageDescription (270) - type: string (2) Tag Location: 46 - Data Location: 62 - value: b'High Plains Drifter (1973)\x00'
+2026-03-26 17:28:20,583 - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'Z\x00\x00\x00'
+2026-03-26 17:28:20,647 - DEBUG - tag: Copyright (33432) - type: string (2)
+2026-03-26 17:28:20,647 - DEBUG - tag: Artist (315) - type: string (2) - value: b'\x00'
+2026-03-26 17:28:20,647 - DEBUG - tag: ImageDescription (270) - type: string (2) Tag Location: 46 - Data Location: 62 - value: b'Hondo (1953)\x00'
+2026-03-26 17:28:20,647 - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'L\x00\x00\x00'
+2026-03-26 17:28:20,726 - DEBUG - tag: Copyright (33432) - type: string (2)
+2026-03-26 17:28:20,726 - DEBUG - tag: Artist (315) - type: string (2) - value: b'\x00'
+2026-03-26 17:28:20,726 - DEBUG - tag: ImageDescription (270) - type: string (2) Tag Location: 46 - Data Location: 62 - value: b'Jane Got A Gun (2015)\x00'
+2026-03-26 17:28:20,726 - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'T\x00\x00\x00'
+2026-03-26 17:28:20,884 - DEBUG - tag: Copyright (33432) - type: string (2)
+2026-03-26 17:28:20,884 - DEBUG - tag: Artist (315) - type: string (2) - value: b'\x00'
+2026-03-26 17:28:20,884 - DEBUG - tag: ImageDescription (270) - type: string (2) Tag Location: 46 - Data Location: 62 - value: b'Jubal (1956)\x00'
+2026-03-26 17:28:20,884 - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'L\x00\x00\x00'
+2026-03-26 17:28:20,996 - DEBUG - tag: Copyright (33432) - type: string (2)
+2026-03-26 17:28:20,996 - DEBUG - tag: Artist (315) - type: string (2) - value: b'\x00'
+2026-03-26 17:28:20,996 - DEBUG - tag: ImageDescription (270) - type: string (2) Tag Location: 46 - Data Location: 62 - value: b'Legend of the Lost (1957)\x00'
+2026-03-26 17:28:20,996 - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'X\x00\x00\x00'
+2026-03-26 17:28:21,089 - DEBUG - tag: Copyright (33432) - type: string (2)
+2026-03-26 17:28:21,089 - DEBUG - tag: Artist (315) - type: string (2) - value: b'\x00'
+2026-03-26 17:28:21,089 - DEBUG - tag: ImageDescription (270) - type: string (2) Tag Location: 46 - Data Location: 62 - value: b'Little Big Man (1970)\x00'
+2026-03-26 17:28:21,089 - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'T\x00\x00\x00'
+2026-03-26 17:28:21,169 - DEBUG - tag: Copyright (33432) - type: string (2)
+2026-03-26 17:28:21,169 - DEBUG - tag: Artist (315) - type: string (2) - value: b'\x00'
+2026-03-26 17:28:21,169 - DEBUG - tag: ImageDescription (270) - type: string (2) Tag Location: 46 - Data Location: 62 - value: b'LONE STAR (1996)\x00'
+2026-03-26 17:28:21,169 - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'P\x00\x00\x00'
+2026-03-26 17:28:21,343 - DEBUG - tag: Copyright (33432) - type: string (2)
+2026-03-26 17:28:21,343 - DEBUG - tag: Artist (315) - type: string (2) - value: b'\x00'
+2026-03-26 17:28:21,343 - DEBUG - tag: ImageDescription (270) - type: string (2) Tag Location: 46 - Data Location: 62 - value: b'Major Dundee (1965)\x00'
+2026-03-26 17:28:21,343 - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'R\x00\x00\x00'
+2026-03-26 17:28:21,470 - DEBUG - tag: Copyright (33432) - type: string (2)
+2026-03-26 17:28:21,470 - DEBUG - tag: Artist (315) - type: string (2) - value: b'\x00'
+2026-03-26 17:28:21,470 - DEBUG - tag: ImageDescription (270) - type: string (2) Tag Location: 46 - Data Location: 62 - value: b'maverick (1994)\x00'
+2026-03-26 17:28:21,470 - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'N\x00\x00\x00'
+2026-03-26 17:28:21,708 - DEBUG - tag: Copyright (33432) - type: string (2)
+2026-03-26 17:28:21,708 - DEBUG - tag: Artist (315) - type: string (2) - value: b'\x00'
+2026-03-26 17:28:21,708 - DEBUG - tag: ImageDescription (270) - type: string (2) Tag Location: 46 - Data Location: 62 - value: b'McLintock (1963)\x00'
+2026-03-26 17:28:21,708 - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'P\x00\x00\x00'
+2026-03-26 17:28:21,882 - DEBUG - tag: Copyright (33432) - type: string (2)
+2026-03-26 17:28:21,882 - DEBUG - tag: Artist (315) - type: string (2) - value: b'\x00'
+2026-03-26 17:28:21,882 - DEBUG - tag: ImageDescription (270) - type: string (2) Tag Location: 46 - Data Location: 62 - value: b'Navajo Joe (1966)\x00'
+2026-03-26 17:28:21,882 - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'P\x00\x00\x00'
+2026-03-26 17:28:21,962 - DEBUG - tag: Copyright (33432) - type: string (2)
+2026-03-26 17:28:21,962 - DEBUG - tag: Artist (315) - type: string (2) - value: b'\x00'
+2026-03-26 17:28:21,962 - DEBUG - tag: ImageDescription (270) - type: string (2) Tag Location: 46 - Data Location: 62 - value: b'Open range (2003)\x00'
+2026-03-26 17:28:21,962 - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'P\x00\x00\x00'
+2026-03-26 17:28:22,009 - DEBUG - tag: Copyright (33432) - type: string (2)
+2026-03-26 17:28:22,009 - DEBUG - tag: Artist (315) - type: string (2) - value: b'\x00'
+2026-03-26 17:28:22,009 - DEBUG - tag: ImageDescription (270) - type: string (2) Tag Location: 46 - Data Location: 62 - value: b'Posse (1993)\x00'
+2026-03-26 17:28:22,009 - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'L\x00\x00\x00'
+2026-03-26 17:28:22,040 - DEBUG - tag: Copyright (33432) - type: string (2)
+2026-03-26 17:28:22,040 - DEBUG - tag: Artist (315) - type: string (2) - value: b'\x00'
+2026-03-26 17:28:22,040 - DEBUG - tag: ImageDescription (270) - type: string (2) Tag Location: 46 - Data Location: 62 - value: <table: 36 bytes>
+2026-03-26 17:28:22,040 - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'b\x00\x00\x00'
+2026-03-26 17:28:22,123 - DEBUG - tag: Copyright (33432) - type: string (2)
+2026-03-26 17:28:22,123 - DEBUG - tag: Artist (315) - type: string (2) - value: b'\x00'
+2026-03-26 17:28:22,123 - DEBUG - tag: ImageDescription (270) - type: string (2) Tag Location: 46 - Data Location: 62 - value: b'Rio Bravo (1959)\x00'
+2026-03-26 17:28:22,123 - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'P\x00\x00\x00'
+2026-03-26 17:28:22,166 - DEBUG - tag: Copyright (33432) - type: string (2)
+2026-03-26 17:28:22,166 - DEBUG - tag: Artist (315) - type: string (2) - value: b'\x00'
+2026-03-26 17:28:22,166 - DEBUG - tag: ImageDescription (270) - type: string (2) Tag Location: 46 - Data Location: 62 - value: b'Rio Conchos (1964)\x00'
+2026-03-26 17:28:22,166 - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'R\x00\x00\x00'
+2026-03-26 17:28:22,293 - DEBUG - tag: Copyright (33432) - type: string (2)
+2026-03-26 17:28:22,293 - DEBUG - tag: Artist (315) - type: string (2) - value: b'\x00'
+2026-03-26 17:28:22,293 - DEBUG - tag: ImageDescription (270) - type: string (2) Tag Location: 46 - Data Location: 62 - value: b'Rio Grande (1950)\x00'
+2026-03-26 17:28:22,293 - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'P\x00\x00\x00'
+2026-03-26 17:28:22,468 - DEBUG - tag: Copyright (33432) - type: string (2)
+2026-03-26 17:28:22,468 - DEBUG - tag: Artist (315) - type: string (2) - value: b'\x00'
+2026-03-26 17:28:22,468 - DEBUG - tag: ImageDescription (270) - type: string (2) Tag Location: 46 - Data Location: 62 - value: b'Rio Lobo (1970)\x00'
+2026-03-26 17:28:22,468 - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'N\x00\x00\x00'
+2026-03-26 17:28:22,610 - DEBUG - tag: Copyright (33432) - type: string (2)
+2026-03-26 17:28:22,610 - DEBUG - tag: Artist (315) - type: string (2) - value: b'\x00'
+2026-03-26 17:28:22,610 - DEBUG - tag: ImageDescription (270) - type: string (2) Tag Location: 46 - Data Location: 62 - value: b'Rooster Cogburn (1975)\x00'
+2026-03-26 17:28:22,610 - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'V\x00\x00\x00'
+2026-03-26 17:28:22,706 - DEBUG - tag: Copyright (33432) - type: string (2)
+2026-03-26 17:28:22,706 - DEBUG - tag: Artist (315) - type: string (2) - value: b'\x00'
+2026-03-26 17:28:22,706 - DEBUG - tag: ImageDescription (270) - type: string (2) Tag Location: 46 - Data Location: 62 - value: b'Shane (1953)\x00'
+2026-03-26 17:28:22,706 - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'L\x00\x00\x00'
+2026-03-26 17:28:22,816 - DEBUG - tag: Copyright (33432) - type: string (2)
+2026-03-26 17:28:22,816 - DEBUG - tag: Artist (315) - type: string (2) - value: b'\x00'
+2026-03-26 17:28:22,816 - DEBUG - tag: ImageDescription (270) - type: string (2) Tag Location: 46 - Data Location: 62 - value: b'She Wore A Yellow Ribbon (1949)\x00'
+2026-03-26 17:28:22,816 - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'^\x00\x00\x00'
+2026-03-26 17:28:22,927 - DEBUG - tag: Copyright (33432) - type: string (2)
+2026-03-26 17:28:22,927 - DEBUG - tag: Artist (315) - type: string (2) - value: b'\x00'
+2026-03-26 17:28:22,927 - DEBUG - tag: ImageDescription (270) - type: string (2) Tag Location: 46 - Data Location: 62 - value: b'Silverado (1985)\x00'
+2026-03-26 17:28:22,927 - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'P\x00\x00\x00'
+2026-03-26 17:28:22,980 - DEBUG - tag: Copyright (33432) - type: string (2)
+2026-03-26 17:28:22,980 - DEBUG - tag: Artist (315) - type: string (2) - value: b'\x00'
+2026-03-26 17:28:22,980 - DEBUG - tag: ImageDescription (270) - type: string (2) Tag Location: 46 - Data Location: 62 - value: b'Soldier Blue (1970)\x00'
+2026-03-26 17:28:22,980 - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'R\x00\x00\x00'
+2026-03-26 17:28:23,039 - DEBUG - tag: Copyright (33432) - type: string (2)
+2026-03-26 17:28:23,039 - DEBUG - tag: Artist (315) - type: string (2) - value: b'\x00'
+2026-03-26 17:28:23,039 - DEBUG - tag: ImageDescription (270) - type: string (2) Tag Location: 46 - Data Location: 62 - value: <table: 34 bytes>
+2026-03-26 17:28:23,039 - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'`\x00\x00\x00'
+2026-03-26 17:28:23,086 - DEBUG - tag: Copyright (33432) - type: string (2)
+2026-03-26 17:28:23,086 - DEBUG - tag: Artist (315) - type: string (2) - value: b'\x00'
+2026-03-26 17:28:23,086 - DEBUG - tag: ImageDescription (270) - type: string (2) Tag Location: 46 - Data Location: 62 - value: b'The Alamo (1960)\x00'
+2026-03-26 17:28:23,101 - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'P\x00\x00\x00'
+2026-03-26 17:28:23,181 - DEBUG - tag: Copyright (33432) - type: string (2)
+2026-03-26 17:28:23,181 - DEBUG - tag: Artist (315) - type: string (2) - value: b'\x00'
+2026-03-26 17:28:23,181 - DEBUG - tag: ImageDescription (270) - type: string (2) Tag Location: 46 - Data Location: 62 - value: b'The Comancheros (1961)\x00'
+2026-03-26 17:28:23,181 - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'V\x00\x00\x00'
+2026-03-26 17:28:23,371 - DEBUG - tag: Copyright (33432) - type: string (2)
+2026-03-26 17:28:23,371 - DEBUG - tag: Artist (315) - type: string (2) - value: b'\x00'
+2026-03-26 17:28:23,371 - DEBUG - tag: ImageDescription (270) - type: string (2) Tag Location: 46 - Data Location: 62 - value: <table: 37 bytes>
+2026-03-26 17:28:23,371 - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'd\x00\x00\x00'
+2026-03-26 17:28:23,545 - DEBUG - tag: Copyright (33432) - type: string (2)
+2026-03-26 17:28:23,545 - DEBUG - tag: Artist (315) - type: string (2) - value: b'\x00'
+2026-03-26 17:28:23,545 - DEBUG - tag: ImageDescription (270) - type: string (2) Tag Location: 46 - Data Location: 62 - value: b'The Gunfighter (1950)\x00'
+2026-03-26 17:28:23,545 - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'T\x00\x00\x00'
+2026-03-26 17:28:23,609 - DEBUG - tag: Copyright (33432) - type: string (2)
+2026-03-26 17:28:23,609 - DEBUG - tag: Artist (315) - type: string (2) - value: b'\x00'
+2026-03-26 17:28:23,609 - DEBUG - tag: ImageDescription (270) - type: string (2) Tag Location: 46 - Data Location: 62 - value: b'The Horse Soldiers (1959)\x00'
+2026-03-26 17:28:23,609 - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'X\x00\x00\x00'
+2026-03-26 17:28:23,671 - DEBUG - tag: Copyright (33432) - type: string (2)
+2026-03-26 17:28:23,671 - DEBUG - tag: Artist (315) - type: string (2) - value: b'\x00'
+2026-03-26 17:28:23,671 - DEBUG - tag: ImageDescription (270) - type: string (2) Tag Location: 46 - Data Location: 62 - value: b'The Indian Fighter (1955)\x00'
+2026-03-26 17:28:23,671 - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'X\x00\x00\x00'
+2026-03-26 17:28:23,814 - DEBUG - tag: Copyright (33432) - type: string (2)
+2026-03-26 17:28:23,814 - DEBUG - tag: Artist (315) - type: string (2) - value: b'\x00'
+2026-03-26 17:28:23,814 - DEBUG - tag: ImageDescription (270) - type: string (2) Tag Location: 46 - Data Location: 62 - value: b'The Last Wagon (1956)\x00'
+2026-03-26 17:28:23,814 - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'T\x00\x00\x00'
+2026-03-26 17:28:23,973 - DEBUG - tag: Copyright (33432) - type: string (2)
+2026-03-26 17:28:23,973 - DEBUG - tag: Artist (315) - type: string (2) - value: b'\x00'
+2026-03-26 17:28:23,973 - DEBUG - tag: ImageDescription (270) - type: string (2) Tag Location: 46 - Data Location: 62 - value: b'The Long Riders (1980)\x00'
+2026-03-26 17:28:23,973 - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'V\x00\x00\x00'
+2026-03-26 17:28:24,100 - DEBUG - tag: Copyright (33432) - type: string (2)
+2026-03-26 17:28:24,100 - DEBUG - tag: Artist (315) - type: string (2) - value: b'\x00'
+2026-03-26 17:28:24,100 - DEBUG - tag: ImageDescription (270) - type: string (2) Tag Location: 46 - Data Location: 62 - value: b'The Magnificent Seven (1960)\x00'
+2026-03-26 17:28:24,100 - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\\\x00\x00\x00'
+2026-03-26 17:28:24,147 - DEBUG - tag: Copyright (33432) - type: string (2)
+2026-03-26 17:28:24,147 - DEBUG - tag: Artist (315) - type: string (2) - value: b'\x00'
+2026-03-26 17:28:24,147 - DEBUG - tag: ImageDescription (270) - type: string (2) Tag Location: 46 - Data Location: 62 - value: b'The Man from Snowy River (1982)\x00'
+2026-03-26 17:28:24,147 - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'^\x00\x00\x00'
+2026-03-26 17:28:24,179 - DEBUG - tag: Copyright (33432) - type: string (2)
+2026-03-26 17:28:24,179 - DEBUG - tag: Artist (315) - type: string (2) - value: b'\x00'
+2026-03-26 17:28:24,179 - DEBUG - tag: ImageDescription (270) - type: string (2) Tag Location: 46 - Data Location: 62 - value: <table: 40 bytes>
+2026-03-26 17:28:24,179 - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'f\x00\x00\x00'
+2026-03-26 17:28:24,337 - DEBUG - tag: Copyright (33432) - type: string (2)
+2026-03-26 17:28:24,337 - DEBUG - tag: Artist (315) - type: string (2) - value: b'\x00'
+2026-03-26 17:28:24,337 - DEBUG - tag: ImageDescription (270) - type: string (2) Tag Location: 46 - Data Location: 62 - value: b'The Missing (2003)\x00'
+2026-03-26 17:28:24,337 - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'R\x00\x00\x00'
+2026-03-26 17:28:24,482 - DEBUG - tag: Copyright (33432) - type: string (2)
+2026-03-26 17:28:24,482 - DEBUG - tag: Artist (315) - type: string (2) - value: b'\x00'
+2026-03-26 17:28:24,482 - DEBUG - tag: ImageDescription (270) - type: string (2) Tag Location: 46 - Data Location: 62 - value: b'The Missouri Breaks (1976)\x00'
+2026-03-26 17:28:24,482 - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'Z\x00\x00\x00'
+2026-03-26 17:28:24,685 - DEBUG - tag: Copyright (33432) - type: string (2)
+2026-03-26 17:28:24,685 - DEBUG - tag: Artist (315) - type: string (2) - value: b'\x00'
+2026-03-26 17:28:24,685 - DEBUG - tag: ImageDescription (270) - type: string (2) Tag Location: 46 - Data Location: 62 - value: b'The Outlaw Josey Wales (1976)\x00'
+2026-03-26 17:28:24,685 - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'\\\x00\x00\x00'
+2026-03-26 17:28:24,846 - DEBUG - tag: Copyright (33432) - type: string (2)
+2026-03-26 17:28:24,846 - DEBUG - tag: Artist (315) - type: string (2) - value: b'\x00'
+2026-03-26 17:28:24,846 - DEBUG - tag: ImageDescription (270) - type: string (2) Tag Location: 46 - Data Location: 62 - value: b'The Sackets 1 (1979)\x00'
+2026-03-26 17:28:24,846 - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'T\x00\x00\x00'
+2026-03-26 17:28:24,923 - DEBUG - tag: Copyright (33432) - type: string (2)
+2026-03-26 17:28:24,923 - DEBUG - tag: Artist (315) - type: string (2) - value: b'\x00'
+2026-03-26 17:28:24,923 - DEBUG - tag: ImageDescription (270) - type: string (2) Tag Location: 46 - Data Location: 62 - value: b'The Shootist (1976)\x00'
+2026-03-26 17:28:24,923 - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'R\x00\x00\x00'
+2026-03-26 17:28:24,986 - DEBUG - tag: Copyright (33432) - type: string (2)
+2026-03-26 17:28:24,986 - DEBUG - tag: Artist (315) - type: string (2) - value: b'\x00'
+2026-03-26 17:28:24,986 - DEBUG - tag: ImageDescription (270) - type: string (2) Tag Location: 46 - Data Location: 62 - value: b'The Sons of Katie Elder (1965)\x00'
+2026-03-26 17:28:24,986 - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'^\x00\x00\x00'
+2026-03-26 17:28:25,033 - DEBUG - tag: Copyright (33432) - type: string (2)
+2026-03-26 17:28:25,033 - DEBUG - tag: Artist (315) - type: string (2) - value: b'\x00'
+2026-03-26 17:28:25,033 - DEBUG - tag: ImageDescription (270) - type: string (2) Tag Location: 46 - Data Location: 62 - value: b'The Spoilers (1942)\x00'
+2026-03-26 17:28:25,033 - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'R\x00\x00\x00'
+2026-03-26 17:28:25,494 - DEBUG - tag: Copyright (33432) - type: string (2)
+2026-03-26 17:28:25,494 - DEBUG - tag: Artist (315) - type: string (2) - value: b'\x00'
+2026-03-26 17:28:25,494 - DEBUG - tag: ImageDescription (270) - type: string (2) Tag Location: 46 - Data Location: 62 - value: <table: 47 bytes>
+2026-03-26 17:28:25,494 - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'n\x00\x00\x00'
+2026-03-26 17:28:25,606 - DEBUG - tag: Copyright (33432) - type: string (2)
+2026-03-26 17:28:25,606 - DEBUG - tag: Artist (315) - type: string (2) - value: b'\x00'
+2026-03-26 17:28:25,606 - DEBUG - tag: ImageDescription (270) - type: string (2) Tag Location: 46 - Data Location: 62 - value: b'The Undefeated (1969)\x00'
+2026-03-26 17:28:25,606 - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'T\x00\x00\x00'
+2026-03-26 17:28:25,669 - DEBUG - tag: Copyright (33432) - type: string (2)
+2026-03-26 17:28:25,669 - DEBUG - tag: Artist (315) - type: string (2) - value: b'\x00'
+2026-03-26 17:28:25,669 - DEBUG - tag: ImageDescription (270) - type: string (2) Tag Location: 46 - Data Location: 62 - value: b'The Unforgiven (1960)\x00'
+2026-03-26 17:28:25,669 - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'T\x00\x00\x00'
+2026-03-26 17:28:25,733 - DEBUG - tag: Copyright (33432) - type: string (2)
+2026-03-26 17:28:25,733 - DEBUG - tag: Artist (315) - type: string (2) - value: b'\x00'
+2026-03-26 17:28:25,733 - DEBUG - tag: ImageDescription (270) - type: string (2) Tag Location: 46 - Data Location: 62 - value: b'The War Wagon (1967)\x00'
+2026-03-26 17:28:25,733 - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'T\x00\x00\x00'
+2026-03-26 17:28:25,908 - DEBUG - tag: Copyright (33432) - type: string (2)
+2026-03-26 17:28:25,908 - DEBUG - tag: Artist (315) - type: string (2) - value: b'\x00'
+2026-03-26 17:28:25,908 - DEBUG - tag: ImageDescription (270) - type: string (2) Tag Location: 46 - Data Location: 62 - value: b'the white buffalo (1977)\x00'
+2026-03-26 17:28:25,908 - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'X\x00\x00\x00'
+2026-03-26 17:28:26,004 - DEBUG - tag: Copyright (33432) - type: string (2)
+2026-03-26 17:28:26,004 - DEBUG - tag: Artist (315) - type: string (2) - value: b'\x00'
+2026-03-26 17:28:26,004 - DEBUG - tag: ImageDescription (270) - type: string (2) Tag Location: 46 - Data Location: 62 - value: b'The wild bunch (1969)\x00'
+2026-03-26 17:28:26,004 - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'T\x00\x00\x00'
+2026-03-26 17:28:26,134 - DEBUG - tag: Copyright (33432) - type: string (2)
+2026-03-26 17:28:26,134 - DEBUG - tag: Artist (315) - type: string (2) - value: b'\x00'
+2026-03-26 17:28:26,134 - DEBUG - tag: ImageDescription (270) - type: string (2) Tag Location: 46 - Data Location: 62 - value: b'True Grit (1969)\x00'
+2026-03-26 17:28:26,134 - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'P\x00\x00\x00'
+2026-03-26 17:28:26,226 - DEBUG - tag: Copyright (33432) - type: string (2)
+2026-03-26 17:28:26,226 - DEBUG - tag: Artist (315) - type: string (2) - value: b'\x00'
+2026-03-26 17:28:26,226 - DEBUG - tag: ImageDescription (270) - type: string (2) Tag Location: 46 - Data Location: 62 - value: b'True Grit (2010)\x00'
+2026-03-26 17:28:26,226 - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'P\x00\x00\x00'
+2026-03-26 17:28:26,322 - DEBUG - tag: Copyright (33432) - type: string (2)
+2026-03-26 17:28:26,322 - DEBUG - tag: Artist (315) - type: string (2) - value: b'\x00'
+2026-03-26 17:28:26,322 - DEBUG - tag: ImageDescription (270) - type: string (2) Tag Location: 46 - Data Location: 62 - value: <table: 33 bytes>
+2026-03-26 17:28:26,322 - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'`\x00\x00\x00'
+2026-03-26 17:28:26,654 - DEBUG - tag: Copyright (33432) - type: string (2)
+2026-03-26 17:28:26,654 - DEBUG - tag: Artist (315) - type: string (2) - value: b'\x00'
+2026-03-26 17:28:26,654 - DEBUG - tag: ImageDescription (270) - type: string (2) Tag Location: 46 - Data Location: 62 - value: b'Villa Rides (1968)\x00'
+2026-03-26 17:28:26,654 - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'R\x00\x00\x00'
+2026-03-26 17:28:26,813 - DEBUG - tag: Copyright (33432) - type: string (2)
+2026-03-26 17:28:26,813 - DEBUG - tag: Artist (315) - type: string (2) - value: b'\x00'
+2026-03-26 17:28:26,813 - DEBUG - tag: ImageDescription (270) - type: string (2) Tag Location: 46 - Data Location: 62 - value: b'Wild Horses (2015)\x00'
+2026-03-26 17:28:26,813 - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'R\x00\x00\x00'
+2026-03-26 17:28:27,003 - DEBUG - tag: Copyright (33432) - type: string (2)
+2026-03-26 17:28:27,003 - DEBUG - tag: Artist (315) - type: string (2) - value: b'\x00'
+2026-03-26 17:28:27,003 - DEBUG - tag: ImageDescription (270) - type: string (2) Tag Location: 46 - Data Location: 62 - value: b'Will Penny (1967)\x00'
+2026-03-26 17:28:27,003 - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'P\x00\x00\x00'
+2026-03-26 17:28:27,067 - DEBUG - tag: Copyright (33432) - type: string (2)
+2026-03-26 17:28:27,067 - DEBUG - tag: Artist (315) - type: string (2) - value: b'\x00'
+2026-03-26 17:28:27,067 - DEBUG - tag: ImageDescription (270) - type: string (2) Tag Location: 46 - Data Location: 62 - value: b'Young Billy Young (1969)\x00'
+2026-03-26 17:28:27,067 - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'X\x00\x00\x00'
+2026-03-26 17:28:27,129 - DEBUG - tag: Copyright (33432) - type: string (2)
+2026-03-26 17:28:27,129 - DEBUG - tag: Artist (315) - type: string (2) - value: b'\x00'
+2026-03-26 17:28:27,129 - DEBUG - tag: ImageDescription (270) - type: string (2) Tag Location: 46 - Data Location: 62 - value: b'iron road part 1 (2009)\x00'
+2026-03-26 17:28:27,129 - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'V\x00\x00\x00'
+2026-03-26 17:28:27,145 - DEBUG - tag: Copyright (33432) - type: string (2)
+2026-03-26 17:28:27,145 - DEBUG - tag: Artist (315) - type: string (2) - value: b'\x00'
+2026-03-26 17:28:27,145 - DEBUG - tag: ImageDescription (270) - type: string (2) Tag Location: 46 - Data Location: 62 - value: b'iron road part 2 (2009)\x00'
+2026-03-26 17:28:27,145 - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'V\x00\x00\x00'
+2026-03-26 17:28:27,192 - DEBUG - tag: Copyright (33432) - type: string (2)
+2026-03-26 17:28:27,192 - DEBUG - tag: Artist (315) - type: string (2) - value: b'\x00'
+2026-03-26 17:28:27,192 - DEBUG - tag: ImageDescription (270) - type: string (2) Tag Location: 46 - Data Location: 62 - value: <table: 36 bytes>
+2026-03-26 17:28:27,192 - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'b\x00\x00\x00'
+2026-03-26 17:28:27,271 - DEBUG - tag: Copyright (33432) - type: string (2)
+2026-03-26 17:28:27,271 - DEBUG - tag: Artist (315) - type: string (2) - value: b'\x00'
+2026-03-26 17:28:27,271 - DEBUG - tag: ImageDescription (270) - type: string (2) Tag Location: 46 - Data Location: 62 - value: b'the Sacketts 2 (1979)\x00'
+2026-03-26 17:28:27,271 - DEBUG - tag: ExifIFD (34665) - type: long (4) - value: b'T\x00\x00\x00'
+2026-03-26 17:35:32,025 - INFO - PlaybackController shutdown requested.
+2026-03-26 17:35:32,025 - INFO - PlaybackController shutdown complete.
+2026-03-26 17:49:12,886 - ERROR - \u274c All sources failed for 'Movies_Collections_v2.json' — using empty default
+2026-03-26 17:49:36,381 - INFO - PlaybackController shutdown requested.
+2026-03-26 17:49:36,381 - INFO - PlaybackController shutdown complete.
+2026-03-26 17:49:51,909 - ERROR - \u274c All sources failed for 'Movies_Collections_v2.json' — using empty default
+2026-03-26 17:55:46,466 - DEBUG - safe_json_write: wrote 4 items to manifest_b.json
+2026-03-26 17:55:46,561 - DEBUG - _make_backup: wrote manifest_b.json.bak
+2026-03-26 17:55:46,688 - DEBUG - safe_json_write: wrote 4 items to manifest_b.json
+2026-03-26 17:55:46,688 - DEBUG - _make_backup: wrote manifest_build_log.json.bak
+2026-03-26 17:55:46,708 - DEBUG - safe_json_write: wrote 6 items to manifest_build_log.json
+2026-03-26 17:55:47,578 - INFO - PlaybackController shutdown requested.
+2026-03-26 17:55:47,578 - INFO - PlaybackController shutdown complete.
+2026-03-26 18:12:54,972 - DEBUG - safe_json_write: wrote 738 items to xml_collection_data_b.json
+2026-03-26 18:12:58,319 - DEBUG - _make_backup: wrote manifest_b.json.bak
+2026-03-26 18:12:58,404 - DEBUG - safe_json_write: wrote 4 items to manifest_b.json
+2026-03-26 18:12:58,487 - DEBUG - _make_backup: wrote manifest_b.json.bak
+2026-03-26 18:12:58,582 - DEBUG - safe_json_write: wrote 4 items to manifest_b.json
+2026-03-26 18:12:58,598 - DEBUG - _make_backup: wrote manifest_build_log.json.bak
+2026-03-26 18:12:58,598 - DEBUG - safe_json_write: wrote 6 items to manifest_build_log.json
+2026-03-26 18:13:00,923 - INFO - PlaybackController shutdown requested.
+2026-03-26 18:13:00,923 - INFO - PlaybackController shutdown complete.
+2026-03-26 18:15:44,146 - DEBUG - _make_backup: wrote xml_collection_data_b.json.bak
+2026-03-26 18:15:44,241 - DEBUG - safe_json_write: wrote 738 items to xml_collection_data_b.json
+2026-03-26 18:15:44,336 - DEBUG - _make_backup: wrote xml_collection_data.json.bak
+2026-03-26 18:15:44,431 - DEBUG - safe_json_write: wrote 738 items to xml_collection_data.json
+2026-03-26 18:15:47,724 - DEBUG - _make_backup: wrote manifest_b.json.bak
+2026-03-26 18:15:47,838 - DEBUG - safe_json_write: wrote 4 items to manifest_b.json
+2026-03-26 18:15:47,907 - DEBUG - _make_backup: wrote manifest_b.json.bak
+2026-03-26 18:15:48,034 - DEBUG - safe_json_write: wrote 4 items to manifest_b.json
+2026-03-26 18:15:48,034 - DEBUG - _make_backup: wrote manifest_build_log.json.bak
+2026-03-26 18:15:48,051 - DEBUG - safe_json_write: wrote 6 items to manifest_build_log.json
+2026-03-26 18:15:50,616 - INFO - PlaybackController shutdown requested.
+2026-03-26 18:15:50,616 - INFO - PlaybackController shutdown complete.
+2026-03-26 18:20:12,329 - DEBUG - _make_backup: wrote manifest_b.json.bak
+2026-03-26 18:20:12,425 - DEBUG - safe_json_write: wrote 4 items to manifest_b.json
+2026-03-26 18:20:12,511 - DEBUG - _make_backup: wrote manifest_b.json.bak
+2026-03-26 18:20:12,605 - DEBUG - safe_json_write: wrote 4 items to manifest_b.json
+2026-03-26 18:20:12,605 - DEBUG - _make_backup: wrote manifest_build_log.json.bak
+2026-03-26 18:20:12,627 - DEBUG - safe_json_write: wrote 6 items to manifest_build_log.json
+2026-03-26 18:20:24,726 - INFO - PlaybackController shutdown requested.
+2026-03-26 18:20:24,726 - INFO - PlaybackController shutdown complete.
+2026-03-26 18:24:37,405 - DEBUG - _make_backup: wrote manifest_b.json.bak
+2026-03-26 18:24:37,501 - DEBUG - safe_json_write: wrote 4 items to manifest_b.json
+2026-03-26 18:24:37,570 - DEBUG - _make_backup: wrote manifest_b.json.bak
+2026-03-26 18:24:37,665 - DEBUG - safe_json_write: wrote 4 items to manifest_b.json
+2026-03-26 18:24:37,681 - DEBUG - _make_backup: wrote manifest_build_log.json.bak
+2026-03-26 18:24:37,687 - DEBUG - safe_json_write: wrote 6 items to manifest_build_log.json
+2026-03-26 18:25:03,283 - INFO - PlaybackController shutdown requested.
+2026-03-26 18:25:03,283 - INFO - PlaybackController shutdown complete.
+2026-03-27 17:30:48,461 - DEBUG - _make_backup: wrote manifest_b.json.bak
+2026-03-27 17:30:48,610 - DEBUG - safe_json_write: wrote 4 items to manifest_b.json
+2026-03-27 17:30:48,692 - DEBUG - _make_backup: wrote manifest_b.json.bak
+2026-03-27 17:30:48,816 - DEBUG - safe_json_write: wrote 4 items to manifest_b.json
+2026-03-27 17:30:48,952 - DEBUG - _make_backup: wrote manifest_build_log.json.bak
+2026-03-27 17:30:48,958 - DEBUG - safe_json_write: wrote 6 items to manifest_build_log.json
+2026-03-27 17:31:09,214 - INFO - PlaybackController shutdown requested.
+2026-03-27 17:31:09,214 - INFO - PlaybackController shutdown complete.
+2026-03-27 17:42:53,714 - DEBUG - _make_backup: wrote manifest_b.json.bak
+2026-03-27 17:42:53,826 - DEBUG - safe_json_write: wrote 4 items to manifest_b.json
+2026-03-27 17:42:53,910 - DEBUG - _make_backup: wrote manifest_b.json.bak
+2026-03-27 17:42:54,024 - DEBUG - safe_json_write: wrote 4 items to manifest_b.json
+2026-03-27 17:42:54,035 - DEBUG - _make_backup: wrote manifest_build_log.json.bak
+2026-03-27 17:42:54,042 - DEBUG - safe_json_write: wrote 6 items to manifest_build_log.json
+2026-03-27 17:43:33,156 - INFO - PlaybackController shutdown requested.
+2026-03-27 17:43:33,156 - INFO - PlaybackController shutdown complete.
+2026-03-27 18:03:23,048 - DEBUG - _make_backup: wrote manifest_b.json.bak
+2026-03-27 18:03:23,150 - DEBUG - safe_json_write: wrote 4 items to manifest_b.json
+2026-03-27 18:03:23,231 - DEBUG - _make_backup: wrote manifest_b.json.bak
+2026-03-27 18:03:23,337 - DEBUG - safe_json_write: wrote 4 items to manifest_b.json
+2026-03-27 18:03:23,347 - DEBUG - _make_backup: wrote manifest_build_log.json.bak
+2026-03-27 18:03:23,354 - DEBUG - safe_json_write: wrote 6 items to manifest_build_log.json
+2026-03-27 18:05:12,233 - INFO - PlaybackController shutdown requested.
+2026-03-27 18:05:12,233 - INFO - PlaybackController shutdown complete.
+2026-03-27 18:07:57,613 - DEBUG - _make_backup: wrote manifest_b.json.bak
+2026-03-27 18:07:57,722 - DEBUG - safe_json_write: wrote 4 items to manifest_b.json
+2026-03-27 18:07:57,808 - DEBUG - _make_backup: wrote manifest_b.json.bak
+2026-03-27 18:07:57,911 - DEBUG - safe_json_write: wrote 4 items to manifest_b.json
+2026-03-27 18:07:57,923 - DEBUG - _make_backup: wrote manifest_build_log.json.bak
+2026-03-27 18:07:57,928 - DEBUG - safe_json_write: wrote 6 items to manifest_build_log.json
+2026-03-27 18:08:03,506 - DEBUG - safe_json_write: wrote 731 items to collections_cache.json
+2026-03-27 18:09:14,222 - DEBUG - _make_backup: rotated 5 backups for Movies_Collections_v2.json
+2026-03-27 18:09:14,231 - DEBUG - safe_json_write: wrote 48 items to Movies_Collections_v2.json
+2026-03-27 18:10:10,154 - INFO - PlaybackController shutdown requested.
+2026-03-27 18:10:10,154 - INFO - PlaybackController shutdown complete.
+2026-03-27 18:10:23,210 - DEBUG - _make_backup: wrote manifest_b.json.bak
+2026-03-27 18:10:23,314 - DEBUG - safe_json_write: wrote 4 items to manifest_b.json
+2026-03-27 18:10:23,399 - DEBUG - _make_backup: wrote manifest_b.json.bak
+2026-03-27 18:10:23,501 - DEBUG - safe_json_write: wrote 4 items to manifest_b.json
+2026-03-27 18:10:23,511 - DEBUG - _make_backup: wrote manifest_build_log.json.bak
+2026-03-27 18:10:23,517 - DEBUG - safe_json_write: wrote 6 items to manifest_build_log.json
+2026-03-27 18:10:52,659 - DEBUG - _make_backup: wrote collections_cache.json.bak
+2026-03-27 18:10:52,707 - DEBUG - safe_json_write: wrote 731 items to collections_cache.json
+2026-03-27 18:11:21,721 - DEBUG - _make_backup: rotated 5 backups for Movies_Collections_v2.json
+2026-03-27 18:11:21,729 - DEBUG - safe_json_write: wrote 49 items to Movies_Collections_v2.json
+2026-03-27 18:11:53,881 - INFO - PlaybackController shutdown requested.
+2026-03-27 18:11:53,881 - INFO - PlaybackController shutdown complete.
+2026-03-27 18:12:04,839 - DEBUG - _make_backup: wrote manifest_b.json.bak
+2026-03-27 18:12:04,948 - DEBUG - safe_json_write: wrote 4 items to manifest_b.json
+2026-03-27 18:12:05,033 - DEBUG - _make_backup: wrote manifest_b.json.bak
+2026-03-27 18:12:05,133 - DEBUG - safe_json_write: wrote 4 items to manifest_b.json
+2026-03-27 18:12:05,144 - DEBUG - _make_backup: wrote manifest_build_log.json.bak
+2026-03-27 18:12:05,149 - DEBUG - safe_json_write: wrote 6 items to manifest_build_log.json
+2026-03-27 18:12:07,526 - DEBUG - _make_backup: wrote collections_cache.json.bak
+2026-03-27 18:12:07,574 - DEBUG - safe_json_write: wrote 731 items to collections_cache.json
+2026-03-27 18:12:43,436 - DEBUG - _make_backup: rotated 5 backups for Movies_Collections_v2.json
+2026-03-27 18:12:43,445 - DEBUG - safe_json_write: wrote 49 items to Movies_Collections_v2.json
+2026-03-27 18:13:01,067 - DEBUG - _make_backup: wrote collections_cache.json.bak
+2026-03-27 18:13:01,113 - DEBUG - safe_json_write: wrote 731 items to collections_cache.json
+2026-03-27 18:13:14,324 - DEBUG - _make_backup: wrote collections_cache.json.bak
+2026-03-27 18:13:14,369 - DEBUG - safe_json_write: wrote 731 items to collections_cache.json
+2026-03-27 18:19:39,823 - DEBUG - _make_backup: wrote collections_cache.json.bak
+2026-03-27 18:19:39,869 - DEBUG - safe_json_write: wrote 731 items to collections_cache.json
+2026-03-27 18:19:40,857 - DEBUG - _make_backup: wrote collections_cache.json.bak
+2026-03-27 18:19:40,905 - DEBUG - safe_json_write: wrote 731 items to collections_cache.json
+2026-03-27 18:19:41,905 - DEBUG - _make_backup: wrote collections_cache.json.bak
+2026-03-27 18:19:41,948 - DEBUG - safe_json_write: wrote 731 items to collections_cache.json
+2026-03-27 18:19:42,941 - DEBUG - _make_backup: wrote collections_cache.json.bak
+2026-03-27 18:19:42,990 - DEBUG - safe_json_write: wrote 731 items to collections_cache.json
+2026-03-27 18:19:50,609 - INFO - PlaybackController shutdown requested.
+2026-03-27 18:19:50,610 - INFO - PlaybackController shutdown complete.
+2026-03-27 18:20:03,015 - DEBUG - _make_backup: wrote manifest_b.json.bak
+2026-03-27 18:20:03,117 - DEBUG - safe_json_write: wrote 4 items to manifest_b.json
+2026-03-27 18:20:03,200 - DEBUG - _make_backup: wrote manifest_b.json.bak
+2026-03-27 18:20:03,297 - DEBUG - safe_json_write: wrote 4 items to manifest_b.json
+2026-03-27 18:20:03,308 - DEBUG - _make_backup: wrote manifest_build_log.json.bak
+2026-03-27 18:20:03,314 - DEBUG - safe_json_write: wrote 6 items to manifest_build_log.json
+2026-03-27 18:20:06,498 - DEBUG - _make_backup: wrote collections_cache.json.bak
+2026-03-27 18:20:06,546 - DEBUG - safe_json_write: wrote 731 items to collections_cache.json
+2026-03-27 18:23:58,453 - INFO - PlaybackController shutdown requested.
+2026-03-27 18:23:58,453 - INFO - PlaybackController shutdown complete.
+2026-03-27 18:28:20,308 - DEBUG - _make_backup: wrote manifest_b.json.bak
+2026-03-27 18:28:20,402 - DEBUG - safe_json_write: wrote 4 items to manifest_b.json
+2026-03-27 18:28:20,480 - DEBUG - _make_backup: wrote manifest_b.json.bak
+2026-03-27 18:28:20,576 - DEBUG - safe_json_write: wrote 4 items to manifest_b.json
+2026-03-27 18:28:20,586 - DEBUG - _make_backup: wrote manifest_build_log.json.bak
+2026-03-27 18:28:20,593 - DEBUG - safe_json_write: wrote 6 items to manifest_build_log.json
+2026-03-27 18:28:21,779 - DEBUG - _make_backup: wrote collections_cache.json.bak
+2026-03-27 18:28:21,823 - DEBUG - safe_json_write: wrote 731 items to collections_cache.json
+2026-03-27 18:49:44,658 - INFO - PlaybackController shutdown requested.
+2026-03-27 18:49:44,658 - INFO - PlaybackController shutdown complete.
+2026-03-27 19:21:37,201 - DEBUG - _make_backup: wrote manifest_b.json.bak
+2026-03-27 19:21:37,293 - DEBUG - safe_json_write: wrote 4 items to manifest_b.json
+2026-03-27 19:21:37,394 - DEBUG - _make_backup: wrote manifest_b.json.bak
+2026-03-27 19:21:37,488 - DEBUG - safe_json_write: wrote 4 items to manifest_b.json
+2026-03-27 19:21:37,488 - DEBUG - _make_backup: wrote manifest_build_log.json.bak
+2026-03-27 19:21:37,510 - DEBUG - safe_json_write: wrote 6 items to manifest_build_log.json
+2026-03-27 19:22:41,802 - INFO - PlaybackController shutdown requested.
+2026-03-27 19:22:41,802 - INFO - PlaybackController shutdown complete.
+2026-03-27 20:50:25,252 - DEBUG - _make_backup: wrote manifest_b.json.bak
+2026-03-27 20:50:25,348 - DEBUG - safe_json_write: wrote 4 items to manifest_b.json
+2026-03-27 20:50:25,414 - DEBUG - _make_backup: wrote manifest_b.json.bak
+2026-03-27 20:50:25,509 - DEBUG - safe_json_write: wrote 4 items to manifest_b.json
+2026-03-27 20:50:25,546 - DEBUG - _make_backup: wrote manifest_build_log.json.bak
+2026-03-27 20:50:25,562 - DEBUG - safe_json_write: wrote 6 items to manifest_build_log.json
+2026-03-27 20:51:21,545 - INFO - PlaybackController shutdown requested.
+2026-03-27 20:51:21,545 - INFO - PlaybackController shutdown complete.
+2026-03-28 10:59:06,485 - ERROR - \u274c All sources failed for 'Movies_Collections_v2.json' — using empty default
+2026-03-28 10:59:23,323 - INFO - PlaybackController shutdown requested.
+2026-03-28 10:59:23,323 - INFO - PlaybackController shutdown complete.
+2026-03-28 11:05:54,588 - ERROR - \u274c All sources failed for 'Movies_Collections_v2.json' — using empty default
+2026-03-28 11:09:33,192 - DEBUG - _make_backup: wrote manifest_b.json.bak
+2026-03-28 11:09:33,378 - DEBUG - safe_json_write: wrote 4 items to manifest_b.json
+2026-03-28 11:09:33,467 - DEBUG - _make_backup: wrote manifest_b.json.bak
+2026-03-28 11:09:33,584 - DEBUG - safe_json_write: wrote 4 items to manifest_b.json
+2026-03-28 11:09:33,614 - DEBUG - _make_backup: wrote manifest_build_log.json.bak
+2026-03-28 11:09:33,630 - DEBUG - safe_json_write: wrote 6 items to manifest_build_log.json
+2026-03-28 11:09:50,363 - INFO - PlaybackController shutdown requested.
+2026-03-28 11:09:50,363 - INFO - PlaybackController shutdown complete.
+2026-03-28 11:19:28,678 - DEBUG - _make_backup: wrote manifest_b.json.bak
+2026-03-28 11:19:28,771 - DEBUG - safe_json_write: wrote 4 items to manifest_b.json
+2026-03-28 11:19:28,849 - DEBUG - _make_backup: wrote manifest_b.json.bak
+2026-03-28 11:19:28,985 - DEBUG - safe_json_write: wrote 4 items to manifest_b.json
+2026-03-28 11:19:28,991 - DEBUG - _make_backup: wrote manifest_build_log.json.bak
+2026-03-28 11:19:28,995 - DEBUG - safe_json_write: wrote 6 items to manifest_build_log.json
+2026-03-28 11:20:08,661 - INFO - MpcBeWatchdog active on port 13579 for: W:\Collection\2020\Cry Macho.mkv
+2026-03-28 11:20:08,755 - DEBUG - Starting new HTTP connection (1): localhost:13579
+2026-03-28 11:20:10,798 - DEBUG - http://localhost:13579 "GET /variables.html HTTP/1.1" 200 452
+2026-03-28 11:20:10,801 - INFO - MPC-BE web API is responding.
+2026-03-28 11:20:10,802 - DEBUG - Starting new HTTP connection (1): localhost:13579
+2026-03-28 11:20:12,820 - DEBUG - http://localhost:13579 "GET /variables.html HTTP/1.1" 200 479
+2026-03-28 11:20:13,832 - DEBUG - Starting new HTTP connection (1): localhost:13579
+2026-03-28 11:20:15,848 - DEBUG - http://localhost:13579 "GET /variables.html HTTP/1.1" 200 479
+2026-03-28 11:20:16,858 - DEBUG - Starting new HTTP connection (1): localhost:13579
+2026-03-28 11:20:18,866 - DEBUG - http://localhost:13579 "GET /variables.html HTTP/1.1" 200 452
+2026-03-28 11:20:19,879 - INFO - MPC-BE process exited — recording progress.
+2026-03-28 11:20:19,879 - DEBUG - _make_backup: wrote tv_watch_progress.json.bak
+2026-03-28 11:20:19,879 - DEBUG - safe_json_write: wrote 6 items to tv_watch_progress.json
+2026-03-28 11:20:19,879 - INFO - MpcBeWatchdog finished.
+2026-03-28 11:20:34,034 - INFO - PlaybackController shutdown requested.
+2026-03-28 11:20:34,034 - INFO - PlaybackController shutdown complete.
+2026-03-28 11:25:19,388 - DEBUG - _make_backup: wrote manifest_b.json.bak
+2026-03-28 11:25:19,474 - DEBUG - safe_json_write: wrote 4 items to manifest_b.json
+2026-03-28 11:25:19,570 - DEBUG - _make_backup: wrote manifest_b.json.bak
+2026-03-28 11:25:19,676 - DEBUG - safe_json_write: wrote 4 items to manifest_b.json
+2026-03-28 11:25:19,676 - DEBUG - _make_backup: wrote manifest_build_log.json.bak
+2026-03-28 11:25:19,676 - DEBUG - safe_json_write: wrote 6 items to manifest_build_log.json
+2026-03-28 11:25:35,160 - DEBUG - _make_backup: wrote xml_collection_data_b.json.bak
+2026-03-28 11:25:35,270 - DEBUG - safe_json_write: wrote 738 items to xml_collection_data_b.json
+2026-03-28 11:25:35,350 - DEBUG - _make_backup: wrote xml_collection_data.json.bak
+2026-03-28 11:25:35,444 - DEBUG - safe_json_write: wrote 738 items to xml_collection_data.json
+2026-03-28 11:25:58,645 - DEBUG - _make_backup: wrote collections_cache.json.bak
+2026-03-28 11:25:58,692 - DEBUG - safe_json_write: wrote 731 items to collections_cache.json
+2026-03-28 11:27:05,413 - INFO - PlaybackController shutdown requested.
+2026-03-28 11:27:05,413 - INFO - PlaybackController shutdown complete.
+2026-03-28 11:29:00,645 - DEBUG - _make_backup: wrote xml_collection_data_b.json.bak
+2026-03-28 11:29:00,739 - DEBUG - safe_json_write: wrote 738 items to xml_collection_data_b.json
+2026-03-28 11:29:00,836 - DEBUG - _make_backup: wrote xml_collection_data.json.bak
+2026-03-28 11:29:00,927 - DEBUG - safe_json_write: wrote 738 items to xml_collection_data.json
+2026-03-28 11:29:03,707 - DEBUG - safe_json_write: wrote 4 items to manifest_b.json
+2026-03-28 11:29:03,802 - DEBUG - _make_backup: wrote manifest_b.json.bak
+2026-03-28 11:29:03,910 - DEBUG - safe_json_write: wrote 4 items to manifest_b.json
+2026-03-28 11:29:03,910 - DEBUG - _make_backup: wrote manifest_build_log.json.bak
+2026-03-28 11:29:03,910 - DEBUG - safe_json_write: wrote 6 items to manifest_build_log.json
+2026-03-28 11:29:07,939 - DEBUG - _make_backup: wrote collections_cache.json.bak
+2026-03-28 11:29:07,974 - DEBUG - safe_json_write: wrote 731 items to collections_cache.json
+2026-03-28 11:29:18,112 - INFO - PlaybackController shutdown requested.
+2026-03-28 11:29:18,112 - INFO - PlaybackController shutdown complete.
+2026-03-28 11:40:01,233 - DEBUG - _make_backup: wrote manifest_b.json.bak
+2026-03-28 11:40:01,329 - DEBUG - safe_json_write: wrote 4 items to manifest_b.json
+2026-03-28 11:40:01,395 - DEBUG - _make_backup: wrote manifest_b.json.bak
+2026-03-28 11:40:01,505 - DEBUG - safe_json_write: wrote 4 items to manifest_b.json
+2026-03-28 11:40:01,527 - DEBUG - _make_backup: wrote manifest_build_log.json.bak
+2026-03-28 11:40:01,543 - DEBUG - safe_json_write: wrote 6 items to manifest_build_log.json
+2026-03-28 11:40:06,880 - DEBUG - _make_backup: wrote collections_cache.json.bak
+2026-03-28 11:40:06,942 - DEBUG - safe_json_write: wrote 731 items to collections_cache.json
+2026-03-28 11:40:41,776 - INFO - PlaybackController shutdown requested.
+2026-03-28 11:40:41,776 - INFO - PlaybackController shutdown complete.
+2026-03-28 11:49:30,051 - DEBUG - _make_backup: wrote manifest_b.json.bak
+2026-03-28 11:49:30,145 - DEBUG - safe_json_write: wrote 4 items to manifest_b.json
+2026-03-28 11:49:30,239 - DEBUG - _make_backup: wrote manifest_b.json.bak
+2026-03-28 11:49:30,332 - DEBUG - safe_json_write: wrote 4 items to manifest_b.json
+2026-03-28 11:49:30,332 - DEBUG - _make_backup: wrote manifest_build_log.json.bak
+2026-03-28 11:49:30,348 - DEBUG - safe_json_write: wrote 6 items to manifest_build_log.json
+2026-03-28 11:49:36,643 - DEBUG - _make_backup: wrote collections_cache.json.bak
+2026-03-28 11:49:36,693 - DEBUG - safe_json_write: wrote 731 items to collections_cache.json
+2026-03-28 11:50:01,007 - INFO - PlaybackController shutdown requested.
+2026-03-28 11:50:01,007 - INFO - PlaybackController shutdown complete.
+2026-03-28 11:55:08,426 - DEBUG - _make_backup: wrote manifest_b.json.bak
+2026-03-28 11:55:08,536 - DEBUG - safe_json_write: wrote 4 items to manifest_b.json
+2026-03-28 11:55:08,618 - DEBUG - _make_backup: wrote manifest_b.json.bak
+2026-03-28 11:55:08,709 - DEBUG - safe_json_write: wrote 4 items to manifest_b.json
+2026-03-28 11:55:08,709 - DEBUG - _make_backup: wrote manifest_build_log.json.bak
+2026-03-28 11:55:08,729 - DEBUG - safe_json_write: wrote 6 items to manifest_build_log.json
+2026-03-28 11:55:15,004 - DEBUG - _make_backup: wrote collections_cache.json.bak
+2026-03-28 11:55:15,036 - DEBUG - safe_json_write: wrote 731 items to collections_cache.json
+2026-03-28 11:55:32,910 - INFO - PlaybackController shutdown requested.
+2026-03-28 11:55:32,910 - INFO - PlaybackController shutdown complete.
+2026-03-28 12:01:57,354 - DEBUG - _make_backup: wrote manifest_b.json.bak
+2026-03-28 12:01:57,441 - DEBUG - safe_json_write: wrote 4 items to manifest_b.json
+2026-03-28 12:01:57,530 - DEBUG - _make_backup: wrote manifest_b.json.bak
+2026-03-28 12:01:57,614 - DEBUG - safe_json_write: wrote 4 items to manifest_b.json
+2026-03-28 12:01:57,631 - DEBUG - _make_backup: wrote manifest_build_log.json.bak
+2026-03-28 12:01:57,636 - DEBUG - safe_json_write: wrote 6 items to manifest_build_log.json
+2026-03-28 12:02:00,318 - DEBUG - _make_backup: wrote collections_cache.json.bak
+2026-03-28 12:02:00,370 - DEBUG - safe_json_write: wrote 731 items to collections_cache.json
+2026-03-28 12:02:14,114 - INFO - PlaybackController shutdown requested.
+2026-03-28 12:02:14,114 - INFO - PlaybackController shutdown complete.
+2026-03-28 12:13:12,420 - DEBUG - _make_backup: wrote manifest_b.json.bak
+2026-03-28 12:13:12,515 - DEBUG - safe_json_write: wrote 4 items to manifest_b.json
+2026-03-28 12:13:12,595 - DEBUG - _make_backup: wrote manifest_b.json.bak
+2026-03-28 12:13:12,690 - DEBUG - safe_json_write: wrote 4 items to manifest_b.json
+2026-03-28 12:13:12,705 - DEBUG - _make_backup: wrote manifest_build_log.json.bak
+2026-03-28 12:13:12,705 - DEBUG - safe_json_write: wrote 6 items to manifest_build_log.json
+2026-03-28 12:13:14,503 - DEBUG - _make_backup: wrote collections_cache.json.bak
+2026-03-28 12:13:14,551 - DEBUG - safe_json_write: wrote 731 items to collections_cache.json
+2026-03-28 12:13:26,689 - DEBUG - _make_backup: rotated 5 backups for Movies_Collections_v2.json
+2026-03-28 12:13:26,689 - DEBUG - safe_json_write: wrote 50 items to Movies_Collections_v2.json
+2026-03-28 12:15:17,140 - DEBUG - _make_backup: wrote collections_cache.json.bak
+2026-03-28 12:15:17,188 - DEBUG - safe_json_write: wrote 731 items to collections_cache.json
+2026-03-28 12:15:26,514 - DEBUG - _make_backup: rotated 5 backups for Movies_Collections_v2.json
+2026-03-28 12:15:26,530 - DEBUG - safe_json_write: wrote 51 items to Movies_Collections_v2.json
+2026-03-28 12:16:16,768 - DEBUG - _make_backup: wrote collections_cache.json.bak
+2026-03-28 12:16:16,816 - DEBUG - safe_json_write: wrote 731 items to collections_cache.json
+2026-03-28 12:16:21,364 - DEBUG - _make_backup: wrote collections_cache.json.bak
+2026-03-28 12:16:21,411 - DEBUG - safe_json_write: wrote 731 items to collections_cache.json
+2026-03-28 12:16:31,606 - DEBUG - _make_backup: rotated 5 backups for Movies_Collections_v2.json
+2026-03-28 12:16:31,606 - DEBUG - safe_json_write: wrote 51 items to Movies_Collections_v2.json
+2026-03-28 12:16:54,385 - DEBUG - _make_backup: wrote collections_cache.json.bak
+2026-03-28 12:16:54,433 - DEBUG - safe_json_write: wrote 731 items to collections_cache.json
+2026-03-28 12:17:00,552 - DEBUG - _make_backup: rotated 5 backups for Movies_Collections_v2.json
+2026-03-28 12:17:00,567 - DEBUG - safe_json_write: wrote 51 items to Movies_Collections_v2.json
+2026-03-28 12:17:08,246 - DEBUG - _make_backup: wrote collections_cache.json.bak
+2026-03-28 12:17:08,324 - DEBUG - safe_json_write: wrote 731 items to collections_cache.json
+2026-03-28 12:17:33,269 - DEBUG - _make_backup: wrote collections_cache.json.bak
+2026-03-28 12:17:33,316 - DEBUG - safe_json_write: wrote 731 items to collections_cache.json
+2026-03-28 12:19:19,875 - DEBUG - _make_backup: rotated 5 backups for Movies_Collections_v2.json
+2026-03-28 12:19:19,875 - DEBUG - safe_json_write: wrote 50 items to Movies_Collections_v2.json
+2026-03-28 12:19:21,769 - DEBUG - _make_backup: rotated 5 backups for Movies_Collections_v2.json
+2026-03-28 12:19:21,785 - DEBUG - safe_json_write: wrote 50 items to Movies_Collections_v2.json
+2026-03-28 12:19:24,722 - DEBUG - _make_backup: rotated 5 backups for Movies_Collections_v2.json
+2026-03-28 12:19:24,722 - DEBUG - safe_json_write: wrote 49 items to Movies_Collections_v2.json
+2026-03-28 12:19:31,549 - DEBUG - _make_backup: wrote collections_cache.json.bak
+2026-03-28 12:19:31,596 - DEBUG - safe_json_write: wrote 731 items to collections_cache.json
+2026-03-28 12:19:37,176 - DEBUG - _make_backup: rotated 5 backups for Movies_Collections_v2.json
+2026-03-28 12:19:37,192 - DEBUG - safe_json_write: wrote 50 items to Movies_Collections_v2.json
+2026-03-28 12:21:05,276 - DEBUG - _make_backup: wrote collections_cache.json.bak
+2026-03-28 12:21:05,323 - DEBUG - safe_json_write: wrote 731 items to collections_cache.json
+2026-03-28 12:21:11,308 - DEBUG - _make_backup: rotated 5 backups for Movies_Collections_v2.json
+2026-03-28 12:21:11,324 - DEBUG - safe_json_write: wrote 51 items to Movies_Collections_v2.json
+2026-03-28 12:21:17,119 - DEBUG - _make_backup: wrote collections_cache.json.bak
+2026-03-28 12:21:17,151 - DEBUG - safe_json_write: wrote 731 items to collections_cache.json
+2026-03-28 12:21:40,781 - DEBUG - _make_backup: rotated 5 backups for Movies_Collections_v2.json
+2026-03-28 12:21:40,796 - DEBUG - safe_json_write: wrote 50 items to Movies_Collections_v2.json
+2026-03-28 12:22:41,590 - DEBUG - _make_backup: wrote collections_cache.json.bak
+2026-03-28 12:22:41,637 - DEBUG - safe_json_write: wrote 731 items to collections_cache.json
+2026-03-28 12:22:48,819 - DEBUG - _make_backup: rotated 5 backups for Movies_Collections_v2.json
+2026-03-28 12:22:48,835 - DEBUG - safe_json_write: wrote 51 items to Movies_Collections_v2.json
+2026-03-28 12:23:14,381 - DEBUG - _make_backup: rotated 5 backups for Movies_Collections_v2.json
+2026-03-28 12:23:14,381 - DEBUG - safe_json_write: wrote 50 items to Movies_Collections_v2.json
+2026-03-28 12:23:19,117 - DEBUG - _make_backup: rotated 5 backups for Movies_Collections_v2.json
+2026-03-28 12:23:19,133 - DEBUG - safe_json_write: wrote 49 items to Movies_Collections_v2.json
+2026-03-28 12:24:08,128 - DEBUG - _make_backup: wrote collections_cache.json.bak
+2026-03-28 12:24:08,176 - DEBUG - safe_json_write: wrote 731 items to collections_cache.json
+2026-03-28 12:24:13,481 - DEBUG - _make_backup: rotated 5 backups for Movies_Collections_v2.json
+2026-03-28 12:24:13,481 - DEBUG - safe_json_write: wrote 50 items to Movies_Collections_v2.json
+2026-03-28 12:26:32,572 - INFO - PlaybackController shutdown requested.
+2026-03-28 12:26:32,572 - INFO - PlaybackController shutdown complete.
+2026-03-28 12:27:01,339 - DEBUG - _make_backup: wrote manifest_b.json.bak
+2026-03-28 12:27:01,422 - DEBUG - safe_json_write: wrote 4 items to manifest_b.json
+2026-03-28 12:27:01,507 - DEBUG - _make_backup: wrote manifest_b.json.bak
+2026-03-28 12:27:01,602 - DEBUG - safe_json_write: wrote 4 items to manifest_b.json
+2026-03-28 12:27:01,618 - DEBUG - _make_backup: wrote manifest_build_log.json.bak
+2026-03-28 12:27:01,618 - DEBUG - safe_json_write: wrote 6 items to manifest_build_log.json
+2026-03-28 12:29:21,104 - DEBUG - _make_backup: wrote collections_cache.json.bak
+2026-03-28 12:29:21,152 - DEBUG - safe_json_write: wrote 731 items to collections_cache.json
+2026-03-28 12:29:34,256 - INFO - PlaybackController shutdown requested.
+2026-03-28 12:29:34,256 - INFO - PlaybackController shutdown complete.
+2026-03-28 12:32:33,739 - DEBUG - _make_backup: wrote manifest_b.json.bak
+2026-03-28 12:32:33,834 - DEBUG - safe_json_write: wrote 4 items to manifest_b.json
+2026-03-28 12:32:33,913 - DEBUG - _make_backup: wrote manifest_b.json.bak
+2026-03-28 12:32:34,008 - DEBUG - safe_json_write: wrote 4 items to manifest_b.json
+2026-03-28 12:32:34,024 - DEBUG - _make_backup: wrote manifest_build_log.json.bak
+2026-03-28 12:32:34,024 - DEBUG - safe_json_write: wrote 6 items to manifest_build_log.json
+2026-03-28 12:33:04,137 - DEBUG - _make_backup: wrote xml_collection_data_b.json.bak
+2026-03-28 12:33:04,232 - DEBUG - safe_json_write: wrote 738 items to xml_collection_data_b.json
+2026-03-28 12:33:04,327 - DEBUG - _make_backup: wrote xml_collection_data.json.bak
+2026-03-28 12:33:04,422 - DEBUG - safe_json_write: wrote 738 items to xml_collection_data.json
+2026-03-28 12:33:35,555 - DEBUG - _make_backup: wrote collections_cache.json.bak
+2026-03-28 12:33:35,603 - DEBUG - safe_json_write: wrote 731 items to collections_cache.json
+2026-03-28 12:42:38,120 - INFO - PlaybackController shutdown requested.
+2026-03-28 12:42:38,120 - INFO - PlaybackController shutdown complete.
+2026-03-28 12:58:48,052 - DEBUG - _make_backup: wrote manifest_b.json.bak
+2026-03-28 12:58:48,145 - DEBUG - safe_json_write: wrote 4 items to manifest_b.json
+2026-03-28 12:58:48,231 - DEBUG - _make_backup: wrote manifest_b.json.bak
+2026-03-28 12:58:48,326 - DEBUG - safe_json_write: wrote 4 items to manifest_b.json
+2026-03-28 12:58:48,349 - DEBUG - _make_backup: wrote manifest_build_log.json.bak
+2026-03-28 12:58:48,365 - DEBUG - safe_json_write: wrote 6 items to manifest_build_log.json
+2026-03-28 12:59:07,341 - INFO - PlaybackController shutdown requested.
+2026-03-28 12:59:07,341 - INFO - PlaybackController shutdown complete.
+2026-03-28 13:19:14,416 - DEBUG - _make_backup: wrote manifest_b.json.bak
+2026-03-28 13:19:14,527 - DEBUG - safe_json_write: wrote 4 items to manifest_b.json
+2026-03-28 13:19:14,596 - DEBUG - _make_backup: wrote manifest_b.json.bak
+2026-03-28 13:19:14,707 - DEBUG - safe_json_write: wrote 4 items to manifest_b.json
+2026-03-28 13:19:14,722 - DEBUG - _make_backup: wrote manifest_build_log.json.bak
+2026-03-28 13:19:14,722 - DEBUG - safe_json_write: wrote 6 items to manifest_build_log.json
+2026-03-28 13:19:25,266 - INFO - PlaybackController shutdown requested.
+2026-03-28 13:19:25,266 - INFO - PlaybackController shutdown complete.
+2026-03-28 13:37:10,112 - DEBUG - _make_backup: wrote manifest_b.json.bak
+2026-03-28 13:37:10,228 - DEBUG - safe_json_write: wrote 4 items to manifest_b.json
+2026-03-28 13:37:10,297 - DEBUG - _make_backup: wrote manifest_b.json.bak
+2026-03-28 13:37:10,392 - DEBUG - safe_json_write: wrote 4 items to manifest_b.json
+2026-03-28 13:37:10,430 - DEBUG - _make_backup: wrote manifest_build_log.json.bak
+2026-03-28 13:37:10,430 - DEBUG - safe_json_write: wrote 6 items to manifest_build_log.json
+2026-03-28 13:37:53,399 - INFO - PlaybackController shutdown requested.
+2026-03-28 13:37:53,399 - INFO - PlaybackController shutdown complete.
