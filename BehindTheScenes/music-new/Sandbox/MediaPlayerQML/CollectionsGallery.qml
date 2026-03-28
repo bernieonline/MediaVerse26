@@ -5,13 +5,6 @@ import Qt5Compat.GraphicalEffects
 Item {
     id: collectionsCarousel
     anchors.fill: parent
-    anchors.margins: 40
-
-    // --- Layout parameters ---
-    property int cardWidth: 300
-    property int cardHeight: 420
-    property int cardSpacing: 40
-    property int visibleCount: 4
 
     property var collectionsModel: []
     property var logic: (typeof collectionLogic !== "undefined") ? collectionLogic : null
@@ -19,12 +12,39 @@ Item {
     signal collectionSelected(var items)
     signal backRequested
 
-    // Back button — top-left corner
+    // ── Paging ────────────────────────────────────────────────────────────────
+    property int pageSize:    10
+    property int currentPage: 0
+    property int totalPages:  Math.max(1, Math.ceil((collectionsModel.length || 0) / pageSize))
+
+    property var pageItems: {
+        var start = currentPage * pageSize
+        return collectionsModel.slice(start, start + pageSize)
+    }
+
+    onCollectionsModelChanged: {
+        currentPage = 0
+    }
+
+    // ── Background: dvds.jpg + dark veil (CategoryMenu style) ────────────────
+    Image {
+        anchors.fill: parent
+        source: "file:///" + _paths["splash"] + "/dvds.jpg"
+        fillMode: Image.PreserveAspectCrop
+    }
+    Rectangle {
+        anchors.fill: parent
+        color: "black"
+        opacity: 0.45
+    }
+
+    // ── Back button — top-left ────────────────────────────────────────────────
     Rectangle {
         id: backBtn
         width: 46; height: 46
         anchors.top: parent.top
         anchors.left: parent.left
+        anchors.margins: 16
         z: 200
         color: backMa.containsMouse ? "#2a2a2a" : "transparent"
         radius: 8
@@ -46,168 +66,108 @@ Item {
         }
     }
 
-    // Max starting index so we never show a partial row at the end
-    property int maxIndex: Math.max(0, (collectionsModel.length || 0) - visibleCount)
+    // ── Card grid — 5 cols × 2 rows, centred ─────────────────────────────────
+    Item {
+        id: cardArea
 
-    function updatePosition() {
-        carousel.contentX = carousel.currentIndex * (cardWidth + cardSpacing)
-    }
+        property int cols:   5
+        property int rows:   2
+        property int gap:    64
+        // Leave room for back button (top) and page indicator (bottom)
+        property int availH: collectionsCarousel.height - 120
+        property int cardH:  Math.max(1, Math.floor((availH - gap) / rows))
+        property int cardW:  Math.max(1, Math.floor(cardH * 300 / 380))
 
-    // --- LEFT NAV BUTTON ---
-    Rectangle {
-        id: leftBtn
-        width: 60
-        height: 200
-        anchors.left: parent.left
-        anchors.verticalCenter: parent.verticalCenter
-        color: "transparent"
+        width:  cols * (cardW + gap) - gap
+        height: rows * (cardH + gap) - gap
 
-        Text {
-            anchors.centerIn: parent
-            text: "❮"
-            font.pixelSize: 70
-            color: leftBtnMouse.containsMouse ? "#FFFFFF" : "#666666"
-        }
+        anchors.centerIn: parent
 
-        MouseArea {
-            id: leftBtnMouse
-            anchors.fill: parent
-            hoverEnabled: true
-            onClicked: {
-                console.log(">>>> CAROUSEL CLICK TRIGGERED 1 <<<<")
+        Repeater {
+            model: collectionsCarousel.pageItems
 
-                carousel.currentIndex = Math.max(0, carousel.currentIndex - 1)
-                collectionsCarousel.updatePosition()
-            }
-        }
-    }
+            delegate: Item {
+                id: cardDelegate
+                property int ci: index
+                width:  cardArea.cardW
+                height: cardArea.cardH
+                x: (ci % cardArea.cols) * (cardArea.cardW + cardArea.gap)
+                y: Math.floor(ci / cardArea.cols) * (cardArea.cardH + cardArea.gap)
 
-    // --- RIGHT NAV BUTTON ---
-    Rectangle {
-        id: rightBtn
-        width: 60
-        height: 200
-        anchors.right: parent.right
-        anchors.verticalCenter: parent.verticalCenter
-        color: "transparent"
-
-        Text {
-            anchors.centerIn: parent
-            text: "❯"
-            font.pixelSize: 70
-            color: rightBtnMouse.containsMouse ? "#FFFFFF" : "#666666"
-        }
-
-        MouseArea {
-            id: rightBtnMouse
-            anchors.fill: parent
-            hoverEnabled: true
-            onClicked: {
-                console.log(">>>> CAROUSEL CLICK TRIGGERED 2 <<<<")
-
-                carousel.currentIndex = Math.min(collectionsCarousel.maxIndex, carousel.currentIndex + 1)
-                collectionsCarousel.updatePosition()
-            }
-        }
-    }
-
-    // --- SINGLE‑ROW, 4‑CARD WINDOW, CENTRED ---
-    ListView {
-        id: carousel
-
-        width: collectionsCarousel.cardWidth * collectionsCarousel.visibleCount
-               + collectionsCarousel.cardSpacing * (collectionsCarousel.visibleCount - 1)
-        height: collectionsCarousel.cardHeight
-
-        anchors.verticalCenter: parent.verticalCenter
-        anchors.horizontalCenter: parent.horizontalCenter
-
-        orientation: ListView.Horizontal
-        spacing: collectionsCarousel.cardSpacing
-        clip: true
-
-        interactive: false
-        boundsBehavior: Flickable.StopAtBounds
-        snapMode: ListView.NoSnap
-
-        model: collectionsModel
-
-        onModelChanged: {
-            carousel.currentIndex = 0
-            collectionsCarousel.updatePosition()
-        }
-
-        delegate: Item {
-            width: collectionsCarousel.cardWidth
-            height: collectionsCarousel.cardHeight
-            z: 101
-
-            property var fanImages: {
-                try {
-                    if (modelData && modelData.rules && collectionsCarousel.logic) {
-                        return collectionsCarousel.logic.get_collection_images_by_rules(modelData.rules)
-                    }
-                } catch(e) { return [] }
-                return []
-            }
-
-            Rectangle {
-                id: cardRect
-                width: 260
-                height: 380
-                anchors.centerIn: parent
-                color: "#1A1A1A"
-                radius: 20
-
-                border.color: (cardHover.hovered || actionRow.anyHover) ? "#2566c2" : "#333333"
-                border.width: (cardHover.hovered || actionRow.anyHover) ? 3 : 1
-
-                HoverHandler {
-                    id: cardHover
+                property var fanImages: {
+                    try {
+                        if (modelData && modelData.rules && collectionsCarousel.logic) {
+                            return collectionsCarousel.logic.get_collection_images_by_rules(modelData.rules)
+                        }
+                    } catch(e) { return [] }
+                    return []
                 }
 
-                TapHandler {
-                    onTapped: {
-                        console.log(">>>> CAROUSEL CLICK TRIGGERED 3 <<<<")
-                        console.log("Target Collection:", modelData.name)
-                        console.log("Rules Object:", JSON.stringify(modelData.rules))
-
-                        if (!collectionsCarousel.logic)
-                            return
-
-                        const rules = modelData.rules
-                        const tempResults = collectionsCarousel.logic.get_collection_results_v2(rules, "thumb")
-                        const count = tempResults.length
-                        const resolution = (count <= 14) ? "display" : "thumb"
-
-                        var filteredMovies = collectionsCarousel.logic.get_collection_results_v2(
-                            rules,
-                            resolution
-                        )
-
-                        collectionsCarousel.collectionSelected(filteredMovies)
-                    }
+                // ── DropShadow — gold glow on hover (declared before source) ──
+                DropShadow {
+                    anchors.fill: cardRect
+                    radius: 18
+                    samples: 24
+                    color: (cardHover.hovered || actionRow.anyHover) ? "#CCFFD700" : "#55000000"
+                    source: cardRect
+                    Behavior on color { ColorAnimation { duration: 200 } }
                 }
 
-                Column {
+                // ── Card panel ────────────────────────────────────────────────
+                Rectangle {
+                    id: cardRect
                     anchors.fill: parent
-                    anchors.margins: 15
-                    spacing: 12
+                    color: "#1A1A1A"
+                    radius: 20
 
-                    // FAN IMAGE CONTAINER
+                    border.color: (cardHover.hovered || actionRow.anyHover) ? "#FFD700" : "#7A5C00"
+                    border.width: (cardHover.hovered || actionRow.anyHover) ? 2 : 1
+                    Behavior on border.color { ColorAnimation { duration: 150 } }
+                    Behavior on border.width { NumberAnimation { duration: 150 } }
+
+                    HoverHandler { id: cardHover }
+
+                    TapHandler {
+                        onTapped: {
+                            if (!collectionsCarousel.logic) return
+
+                            const rules = modelData.rules
+                            const tempResults = collectionsCarousel.logic.get_collection_results_v2(rules, "thumb")
+                            const count = tempResults.length
+                            const resolution = (count <= 14) ? "display" : "thumb"
+
+                            var filteredMovies = collectionsCarousel.logic.get_collection_results_v2(rules, resolution)
+                            collectionsCarousel.collectionSelected(filteredMovies)
+                        }
+                    }
+
+                    // ── Fan image area ────────────────────────────────────────
                     Item {
                         id: fanContainer
-                        width: parent.width
-                        height: 260
+                        anchors.top: parent.top
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.topMargin: 15
+                        anchors.leftMargin: 15
+                        anchors.rightMargin: 15
+                        height: Math.floor(parent.height * 0.68)
+                        clip: true
 
                         Repeater {
-                            model: fanImages.length
+                            model: Math.min(fanImages.length, 4)
                             delegate: Item {
-                                width: 150
-                                height: 220
+                                property int fi: index
+                                property int pw: Math.floor(cardArea.cardW * 0.52)
+                                property int ph: Math.floor(pw * 1.48)
+                                width: pw; height: ph
                                 anchors.centerIn: parent
-                                rotation: index === 0 ? -25 : (index === 1 ? 0 : 25)
-                                x: index === 0 ? -50 : (index === 1 ? 0 : 50)
+                                rotation: fi === 0 ? -30 : (fi === 1 ? -10 : (fi === 2 ? 10 : 30))
+                                x: fi === 0 ? -Math.floor(pw * 0.46)
+                                   : (fi === 1 ? -Math.floor(pw * 0.15)
+                                   : (fi === 2 ?  Math.floor(pw * 0.15)
+                                   :              Math.floor(pw * 0.46)))
+                                z: (fi === 1 || fi === 2) ? 2 : 1
+                                opacity: (fi === 0 || fi === 3) ? 0.85 : 1.0
 
                                 Rectangle {
                                     anchors.fill: parent
@@ -218,16 +178,16 @@ Item {
                                     clip: true
 
                                     Image {
-                                        id: collectionImg
+                                        id: fanImg
                                         anchors.fill: parent
                                         anchors.margins: 2
-                                        source: fanImages[index] || ""
+                                        source: fanImages[fi] || ""
                                         fillMode: Image.PreserveAspectCrop
                                         visible: false
                                     }
 
                                     Rectangle {
-                                        id: maskRect
+                                        id: fanMask
                                         anchors.fill: parent
                                         radius: 6
                                         visible: false
@@ -235,18 +195,23 @@ Item {
 
                                     OpacityMask {
                                         anchors.fill: parent
-                                        source: collectionImg
-                                        maskSource: maskRect
+                                        source: fanImg
+                                        maskSource: fanMask
                                     }
                                 }
                             }
                         }
                     }
 
-                    // RENAME BLOCK
+                    // ── Collection name ───────────────────────────────────────
                     Item {
                         id: renameBlock
-                        width: parent.width
+                        anchors.bottom: actionRow.top
+                        anchors.bottomMargin: 6
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.leftMargin: 10
+                        anchors.rightMargin: 10
                         height: nameLabel.implicitHeight
                         property bool editing: false
 
@@ -295,130 +260,169 @@ Item {
                         function finishRename() {
                             renameBlock.editing = false
                             let newName = nameEditor.text.trim()
-
                             if (newName.length === 0 || newName === modelData.name) return
-
                             let oldName = modelData.name
-
                             if (collectionsCarousel.logic) {
                                 collectionsCarousel.logic.rename_collection(oldName, newName)
                             }
-
                             modelData.name = newName
                             collectionsCarousel.modelChanged()
                         }
                     }
-                }
 
-                // ACTION ROW
-                Row {
-                    id: actionRow
-                    anchors.bottom: parent.bottom
-                    anchors.bottomMargin: 14
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    spacing: 25
-                    z: 110
+                    // ── Action row — FAV / EDIT / DEL ─────────────────────────
+                    Row {
+                        id: actionRow
+                        anchors.bottom: parent.bottom
+                        anchors.bottomMargin: 14
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        spacing: 10
+                        z: 110
 
-                    property bool anyHover: favM.containsMouse || renM.containsMouse || delM.containsMouse
+                        property bool anyHover: favM.containsMouse || renM.containsMouse || delM.containsMouse
 
-                    opacity: (cardHover.hovered || anyHover) ? 1.0 : 0.0
-                    Behavior on opacity { NumberAnimation { duration: 250 } }
+                        opacity: (cardHover.hovered || anyHover) ? 1.0 : 0.0
+                        Behavior on opacity { NumberAnimation { duration: 250 } }
 
-                    // FAV
-                    Item {
-                        width: 60; height: 30
-                        Row {
-                            anchors.centerIn: parent; spacing: 6
-                            Icon {
-                                name: "heart"
-                                iconColor: modelData.favorite ? "#FFD700" : (favM.containsMouse ? "#FFFFFF" : "#888888")
+                        // FAV
+                        Item {
+                            width: 48; height: 26
+                            Row {
+                                anchors.centerIn: parent; spacing: 4
+                                Icon {
+                                    name: "heart"
+                                    iconColor: modelData.favorite ? "#FFE040" : (favM.containsMouse ? "#FFE040" : "#BBBBBB")
+                                }
+                                Text {
+                                    text: "FAV"; font.pixelSize: 12; font.bold: true
+                                    color: favM.containsMouse ? "#FFE040" : "#BBBBBB"
+                                    Behavior on color { ColorAnimation { duration: 100 } }
+                                }
                             }
-                            Text {
-                                text: "FAV"; font.pixelSize: 14; font.bold: true
-                                color: favM.containsMouse ? "#FFD700" : "#888888"
+                            MouseArea {
+                                id: favM; anchors.fill: parent; hoverEnabled: true
+                                onClicked: {
+                                    if (collectionsCarousel.logic) {
+                                        modelData.favorite = !modelData.favorite
+                                        collectionsCarousel.logic.toggle_favorite(modelData.name)
+                                    }
+                                }
                             }
                         }
-                        MouseArea {
-                            id: favM; anchors.fill: parent; hoverEnabled: true
-                            onClicked: {
-                                console.log(">>>> CAROUSEL CLICK TRIGGERED 4 <<<<")
 
-                                if (collectionsCarousel.logic) {
-                                    modelData.favorite = !modelData.favorite
-                                    collectionsCarousel.logic.toggle_favorite(modelData.name)
+                        // EDIT
+                        Item {
+                            width: 52; height: 26
+                            Row {
+                                anchors.centerIn: parent; spacing: 4
+                                Icon {
+                                    name: "pen-to-square"
+                                    iconColor: renM.containsMouse ? "#66AAFF" : "#BBBBBB"
+                                }
+                                Text {
+                                    text: "EDIT"; font.pixelSize: 12; font.bold: true
+                                    color: renM.containsMouse ? "#66AAFF" : "#BBBBBB"
+                                    Behavior on color { ColorAnimation { duration: 100 } }
+                                }
+                            }
+                            MouseArea {
+                                id: renM; anchors.fill: parent; hoverEnabled: true
+                                onClicked: {
+                                    renameBlock.editing = true
+                                    nameEditor.forceActiveFocus()
+                                    nameEditor.selectAll()
+                                }
+                            }
+                        }
+
+                        // DELETE
+                        Item {
+                            width: 46; height: 26
+                            Row {
+                                anchors.centerIn: parent; spacing: 4
+                                Icon {
+                                    name: "trash"
+                                    iconColor: delM.containsMouse ? "#FF6060" : "#BBBBBB"
+                                }
+                                Text {
+                                    text: "DEL"; font.pixelSize: 12; font.bold: true
+                                    color: delM.containsMouse ? "#FF6060" : "#BBBBBB"
+                                    Behavior on color { ColorAnimation { duration: 100 } }
+                                }
+                            }
+                            MouseArea {
+                                id: delM; anchors.fill: parent; hoverEnabled: true
+                                onClicked: {
+                                    if (collectionsCarousel.logic) {
+                                        collectionsCarousel.logic.delete_collection(modelData.name)
+                                    }
+                                    collectionsCarousel.collectionsModel.splice(
+                                        collectionsCarousel.currentPage * collectionsCarousel.pageSize + index, 1)
+                                    collectionsCarousel.collectionsModelChanged()
                                 }
                             }
                         }
                     }
-
-                    // EDIT
-                    Item {
-                        width: 60; height: 30
-                        Row {
-                            anchors.centerIn: parent; spacing: 6
-                            Icon {
-                                name: "pen-to-square"
-                                iconColor: renM.containsMouse ? "#2566c2" : "#888888"
-                            }
-                            Text {
-                                text: "EDIT"; font.pixelSize: 14; font.bold: true
-                                color: renM.containsMouse ? "#2566c2" : "#888888"
-                            }
-                        }
-                        MouseArea {
-                            id: renM; anchors.fill: parent; hoverEnabled: true
-                            onClicked: {
-                                console.log(">>>> CAROUSEL CLICK TRIGGERED 5 <<<<")
-
-                                renameBlock.editing = true
-                                nameEditor.forceActiveFocus()
-                                nameEditor.selectAll()
-                            }
-                        }
-                    }
-
-                    // DELETE
-                    Item {
-                        width: 60; height: 30
-                        Row {
-                            anchors.centerIn: parent; spacing: 6
-                            Icon {
-                                name: "trash"
-                                iconColor: delM.containsMouse ? "#FF4444" : "#888888"
-                            }
-                            Text {
-                                text: "DEL"; font.pixelSize: 14; font.bold: true
-                                color: delM.containsMouse ? "#FF4444" : "#888888"
-                            }
-                        }
-                        MouseArea {
-                            id: delM; anchors.fill: parent; hoverEnabled: true
-                            onClicked: {
-                                console.log(">>>> CAROUSEL CLICK TRIGGERED 6 <<<<")
-
-                                if (collectionsCarousel.logic) {
-                                    collectionsCarousel.logic.delete_collection(modelData.name)
-                                }
-
-                                collectionsCarousel.collectionsModel.splice(index, 1)
-                                collectionsCarousel.model = collectionsCarousel.collectionsModel
-                            }
-                        }
-                    }
                 }
-            }
-
-            DropShadow {
-                anchors.fill: cardRect
-                radius: 15
-                samples: 20
-                color: (cardHover.hovered || actionRow.anyHover) ? "#802566c2" : "#99000000"
-                source: cardRect
             }
         }
     }
 
-    Component.onCompleted: {
-        collectionsCarousel.updatePosition()
+    // ── Left page button ──────────────────────────────────────────────────────
+    Rectangle {
+        id: leftBtn
+        width: 60; height: 200
+        anchors.left: parent.left
+        anchors.verticalCenter: parent.verticalCenter
+        color: "transparent"
+        visible: collectionsCarousel.currentPage > 0
+
+        Text {
+            anchors.centerIn: parent
+            text: "❮"
+            font.pixelSize: 70
+            color: leftMa.containsMouse ? "#FFFFFF" : "#666666"
+        }
+        MouseArea {
+            id: leftMa
+            anchors.fill: parent
+            hoverEnabled: true
+            onClicked: collectionsCarousel.currentPage = Math.max(0, collectionsCarousel.currentPage - 1)
+        }
+    }
+
+    // ── Right page button ─────────────────────────────────────────────────────
+    Rectangle {
+        id: rightBtn
+        width: 60; height: 200
+        anchors.right: parent.right
+        anchors.verticalCenter: parent.verticalCenter
+        color: "transparent"
+        visible: collectionsCarousel.currentPage < collectionsCarousel.totalPages - 1
+
+        Text {
+            anchors.centerIn: parent
+            text: "❯"
+            font.pixelSize: 70
+            color: rightMa.containsMouse ? "#FFFFFF" : "#666666"
+        }
+        MouseArea {
+            id: rightMa
+            anchors.fill: parent
+            hoverEnabled: true
+            onClicked: collectionsCarousel.currentPage = Math.min(
+                collectionsCarousel.totalPages - 1, collectionsCarousel.currentPage + 1)
+        }
+    }
+
+    // ── Page indicator ────────────────────────────────────────────────────────
+    Text {
+        visible: collectionsCarousel.totalPages > 1
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: 16
+        anchors.horizontalCenter: parent.horizontalCenter
+        text: (collectionsCarousel.currentPage + 1) + " / " + collectionsCarousel.totalPages
+        color: "#888888"
+        font.pixelSize: 18
     }
 }

@@ -137,7 +137,7 @@ class XMLCollections(QObject):
 
         random.shuffle(raw_paths)
         # raw_paths are already correct thumb URIs from image_lookup — return directly
-        return raw_paths[:3]
+        return raw_paths[:4]
     #start
     @Slot('QVariant', result=list)
     def get_collection_results(self, criteria):

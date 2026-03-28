@@ -7915,3 +7915,19 @@
 2026-03-28 13:37:10,430 - DEBUG - safe_json_write: wrote 6 items to manifest_build_log.json
 2026-03-28 13:37:53,399 - INFO - PlaybackController shutdown requested.
 2026-03-28 13:37:53,399 - INFO - PlaybackController shutdown complete.
+2026-03-28 13:49:43,618 - DEBUG - _make_backup: wrote manifest_b.json.bak
+2026-03-28 13:49:43,723 - DEBUG - safe_json_write: wrote 4 items to manifest_b.json
+2026-03-28 13:49:43,793 - DEBUG - _make_backup: wrote manifest_b.json.bak
+2026-03-28 13:49:43,887 - DEBUG - safe_json_write: wrote 4 items to manifest_b.json
+2026-03-28 13:49:43,903 - DEBUG - _make_backup: wrote manifest_build_log.json.bak
+2026-03-28 13:49:43,919 - DEBUG - safe_json_write: wrote 6 items to manifest_build_log.json
+2026-03-28 13:49:59,086 - INFO - PlaybackController shutdown requested.
+2026-03-28 13:49:59,086 - INFO - PlaybackController shutdown complete.
+2026-03-28 13:59:19,135 - DEBUG - _make_backup: wrote manifest_b.json.bak
+2026-03-28 13:59:19,235 - DEBUG - safe_json_write: wrote 4 items to manifest_b.json
+2026-03-28 13:59:19,300 - DEBUG - _make_backup: wrote manifest_b.json.bak
+2026-03-28 13:59:19,395 - DEBUG - safe_json_write: wrote 4 items to manifest_b.json
+2026-03-28 13:59:19,433 - DEBUG - _make_backup: wrote manifest_build_log.json.bak
+2026-03-28 13:59:19,433 - DEBUG - safe_json_write: wrote 6 items to manifest_build_log.json
+2026-03-28 13:59:57,620 - INFO - PlaybackController shutdown requested.
+2026-03-28 13:59:57,620 - INFO - PlaybackController shutdown complete.
