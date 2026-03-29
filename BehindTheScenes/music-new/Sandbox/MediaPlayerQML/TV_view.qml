@@ -36,6 +36,17 @@ Item {
     property var    currentActors: []
     property var    xmlCache:      ({})
 
+    // ── Background image ─────────────────────────────────────────────────────
+    Image {
+        anchors.fill: parent
+        source:       "../../Assets/Splash/rawhide%20tv%20series.jpg"
+        fillMode:     Image.PreserveAspectCrop
+        asynchronous: true
+        smooth:       true
+        opacity:      0.28
+        z:            0
+    }
+
     // ── Initialise ───────────────────────────────────────────────────────────
     Component.onCompleted: {
         root.seriesModel = JSON.parse(tvViewModel.get_series_list())

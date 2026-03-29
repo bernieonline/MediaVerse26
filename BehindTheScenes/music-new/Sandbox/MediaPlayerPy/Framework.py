@@ -266,9 +266,20 @@ def main():
 
         #playback_bridge = PlaybackQmlBridge()
         playback_bridge = router.http_bridge
-        app.aboutToQuit.connect(
-            lambda: threading.Thread(target=playback_bridge.shutdown, daemon=True).start()
-        )
+        def _on_quit():
+            """Shutdown playback + kill JRWeb.exe in a daemon thread."""
+            def _cleanup():
+                playback_bridge.shutdown()
+                try:
+                    subprocess.call(
+                        ["taskkill", "/F", "/IM", "JRWeb.exe"],
+                        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
+                    )
+                except Exception:
+                    pass
+            threading.Thread(target=_cleanup, daemon=True).start()
+
+        app.aboutToQuit.connect(_on_quit)
 
         search_controller = SearchController()
         ctx.setContextProperty("playbackBridge", playback_bridge)

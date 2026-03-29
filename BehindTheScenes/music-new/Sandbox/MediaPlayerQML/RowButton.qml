@@ -247,8 +247,23 @@ Column {
 
         // --- 7. CLOSE ---
         NavButton {
+            id: closeBtn
             line1: "Close"; width: 110; accent: "#FF5555"
-            onActivated: Qt.quit()
+            onActivated: {
+                if (closeBtn.enabled) {
+                    closeBtn.enabled = false
+                    closeBtn.line1   = "Closing"
+                    closeBtn.accent  = "#888888"
+                    closeTimer.start()
+                }
+            }
+        }
+
+        Timer {
+            id: closeTimer
+            interval: 150          // let the "Closing" label render
+            repeat: false
+            onTriggered: Qt.quit()
         }
     }
 }

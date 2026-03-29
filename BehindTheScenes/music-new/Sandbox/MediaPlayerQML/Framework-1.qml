@@ -199,6 +199,7 @@ ApplicationWindow {
         anchors.top: parent.top
         anchors.topMargin: 26
         spacing: 20
+        z: 998    // above UtilitySidebar dismissalShield (z:997) so clicks always reach buttons
         RowButton { id: rowButtons; width: parent.width - 100 }
     }
 
