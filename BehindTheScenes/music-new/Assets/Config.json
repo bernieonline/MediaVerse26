@@ -1,7 +1,7 @@
 {
   "name": "Bernard",
   "_comment": "This file provides persistence for user settings choices",
-  "Preferred Player": "mpc-be64",
+  "Preferred Player": "PowerDVD",
   "JRiverPort": "52199",
   "MpcBePort": "13579",
   "LibraryRoot": "W:\\Collection",
