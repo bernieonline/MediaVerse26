@@ -123,6 +123,19 @@ ApplicationWindow {
             ffmpegBackend.testFile(workbenchMode)
         }
 
+        function onCompareFilesClicked() {
+            if (typeof splash !== "undefined") splash.deactivate()
+            contentLoader.setSource("CompareView.qml")
+            ffmpegBackend.checkFFmpeg()
+            ffmpegBackend.compareFiles()
+        }
+
+        function onRepairFileClicked() {
+            if (typeof splash !== "undefined") splash.deactivate()
+            contentLoader.setSource("RepairView.qml")
+            ffmpegBackend.checkFFmpeg()
+        }
+
         function onTestFolderClicked() {
             if (typeof splash !== "undefined") splash.deactivate()
             contentLoader.setSource("WorkbenchView.qml")

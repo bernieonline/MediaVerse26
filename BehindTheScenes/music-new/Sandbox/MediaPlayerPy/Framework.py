@@ -51,7 +51,7 @@ from Playback.PlaybackRouter import PlaybackRouter
 # Project-specific imports
 from project_paths import paths
 from XML_Details import GetXMLDetails
-from dbMySql.db_utils import getLibraryList
+from dbMySql.db_utils import getLibraryList, create_db_connection
 from xml_controller import XmlController
 from FileSystem import FileSystem
 from Settings_Manager import SettingsManager
@@ -96,8 +96,9 @@ def main():
         # --------------------------------------------------------
         # Core Logic Setup
         # --------------------------------------------------------
-        myLibrary = getLibraryList()
-        fileSystem = FileSystem()
+        myLibrary    = getLibraryList()
+        db_connection = create_db_connection()   # persistent — available for future modules
+        fileSystem   = FileSystem()
 
         # --- Backup System Setup ---
         backup_manager = BackupManager()

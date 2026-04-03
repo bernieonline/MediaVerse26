@@ -55,6 +55,13 @@ class FFmpegBackend(QObject):
     analysisDone     = Signal(str, str)   # (verdict, summary)
     ffmpegAskAI      = Signal(str, str)   # (filename, prompt) → forward to aiController
 
+    # Compare (ffprobe spec analysis)
+    compareReady     = Signal(str, str, float, float)  # (header, body, scoreA, scoreB)
+
+    # Repair
+    repairReady      = Signal(str, str)   # (header, body)
+    repairProgress   = Signal(int)        # 0-100
+
     # Install / download
     ffmpegMissing    = Signal()
     downloadProgress = Signal(int)        # 0–100
@@ -67,6 +74,10 @@ class FFmpegBackend(QObject):
         self._worker = None
         self._current_file: str = ""
         self._current_mode: str = "standard"
+        self._compare_ref: str = ""
+        self._compare_cmp: str = ""
+        self._compare_proc = None
+        self._repair_proc  = None
 
     # ── Install check ─────────────────────────────────────────────────────────
 
@@ -243,6 +254,161 @@ class FFmpegBackend(QObject):
             )
             self.ffmpegAskAI.emit(filename, prompt)
 
+    # ── Compare Files (ffprobe spec analysis) ────────────────────────────────
+
+    @Slot()
+    def compareFiles(self):
+        """Open two file dialogs, probe both with ffprobe, emit compareReady."""
+        if not self._ffmpeg_exe:
+            self.checkFFmpeg()
+            if not self._ffmpeg_exe:
+                return
+
+        file_filter = (
+            "Video Files (*.mkv *.mp4 *.avi *.mov *.m4v *.mpg *.mpeg "
+            "*.ts *.m2ts *.wmv *.flv *.webm);;All Files (*.*)"
+        )
+        path_a, _ = QFileDialog.getOpenFileName(
+            None, "Select File A", "", file_filter
+        )
+        if not path_a:
+            return
+
+        path_b, _ = QFileDialog.getOpenFileName(
+            None, "Select File B", "", file_filter
+        )
+        if not path_b:
+            return
+
+        self._compare_ref  = path_a
+        self._compare_cmp  = path_b
+        self._current_file = path_b
+        self.statusMessage.emit("Analysing files…")
+        threading.Thread(target=self._do_compare, args=(path_a, path_b), daemon=True).start()
+
+    def _do_compare(self, path_a: str, path_b: str):
+        try:
+            ffprobe = str(Path(self._ffmpeg_exe).parent / "ffprobe.exe")
+            info_a  = _probe_file(ffprobe, path_a)
+            info_b  = _probe_file(ffprobe, path_b)
+            score_a = _quality_score(info_a)
+            score_b = _quality_score(info_b)
+
+            header = (
+                f"File A: {Path(path_a).name}\n"
+                f"File B: {Path(path_b).name}\n"
+                f"Compared: {datetime.now().strftime('%Y-%m-%d  %H:%M')}\n"
+                f"{'─' * 52}"
+            )
+            body = _format_comparison(info_a, info_b, score_a, score_b)
+
+            self.statusMessage.emit("Comparison complete.")
+            self.compareReady.emit(header, body, score_a, score_b)
+
+        except Exception as e:
+            self.testError.emit(f"Compare failed: {e}")
+
+    # ── Repair File ───────────────────────────────────────────────────────────
+
+    @Slot(str)
+    def repairFile(self, mode: str = "remux"):
+        """Open file dialog then repair in a background thread."""
+        if not self._ffmpeg_exe:
+            self.checkFFmpeg()
+            if not self._ffmpeg_exe:
+                return
+
+        file_path, _ = QFileDialog.getOpenFileName(
+            None, "Select File to Repair", "",
+            "Video Files (*.mkv *.mp4 *.avi *.mov *.m4v *.mpg *.mpeg "
+            "*.ts *.m2ts *.wmv *.flv *.webm);;All Files (*.*)"
+        )
+        if not file_path:
+            return
+
+        self._current_file = file_path
+        label = "Remuxing…" if mode == "remux" else "Transcoding…"
+        self.statusMessage.emit(label)
+        threading.Thread(target=self._do_repair, args=(file_path, mode), daemon=True).start()
+
+    def _do_repair(self, file_path: str, mode: str):
+        import subprocess
+        p = Path(file_path)
+
+        if mode == "remux":
+            out_path = p.parent / (p.stem + "_repair" + p.suffix)
+            cmd = [self._ffmpeg_exe, "-y", "-i", file_path, "-c", "copy", str(out_path)]
+            try:
+                self._repair_proc = subprocess.Popen(
+                    cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
+                )
+                _, stderr = self._repair_proc.communicate()
+                self._repair_proc = None
+                self._finish_repair(p, out_path, "Remux — lossless stream copy", stderr)
+            except Exception as e:
+                self._repair_proc = None
+                self.testError.emit(f"Repair failed: {e}")
+
+        else:  # transcode
+            out_path = p.parent / (p.stem + "_repair.mkv")
+            duration = _get_duration_secs(file_path, self._ffmpeg_exe)
+            cmd = [
+                self._ffmpeg_exe, "-y", "-i", file_path,
+                "-c:v", "libx264", "-crf", "18", "-preset", "medium",
+                "-c:a", "copy",
+                "-progress", "pipe:1", "-nostats",
+                str(out_path),
+            ]
+            try:
+                self._repair_proc = subprocess.Popen(
+                    cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
+                )
+                stderr_lines = []
+                for line in self._repair_proc.stdout:
+                    if line.startswith("out_time_ms="):
+                        try:
+                            ms = int(line.split("=")[1].strip())
+                            if duration > 0:
+                                pct = min(99, int(ms / 1000 / duration * 100))
+                                self.repairProgress.emit(pct)
+                        except Exception:
+                            pass
+                _, stderr = self._repair_proc.communicate()
+                self._repair_proc = None
+                self.repairProgress.emit(100)
+                self._finish_repair(p, out_path, "Transcode — H.264 re-encode (CRF 18)", stderr)
+            except Exception as e:
+                self._repair_proc = None
+                self.testError.emit(f"Repair failed: {e}")
+
+    def _finish_repair(self, src: Path, out_path: Path, mode_label: str, stderr: str):
+        success = out_path.exists() and out_path.stat().st_size > 0
+        header = (
+            f"Source:  {src.name}\n"
+            f"Mode:    {mode_label}\n"
+            f"Output:  {out_path.name}\n"
+            f"Folder:  {src.parent}\n"
+            f"{'─' * 45}"
+        )
+        if success:
+            body = f"\u2713 Complete — {_fmt_size(out_path.stat().st_size)}"
+        else:
+            errors = [ln for ln in stderr.splitlines()
+                      if any(k in ln for k in ("Error", "error", "Invalid", "failed"))]
+            body = "\u2717 Failed\n" + "\n".join(errors[-10:])
+
+        self.statusMessage.emit("Repair complete." if success else "Repair failed.")
+        self.repairReady.emit(header, body)
+
+    @Slot()
+    def cancelRepair(self):
+        if self._repair_proc:
+            try:
+                self._repair_proc.kill()
+            except Exception:
+                pass
+            self.statusMessage.emit("Repair cancelled.")
+
     # ── Cancel ────────────────────────────────────────────────────────────────
 
     @Slot()
@@ -262,9 +428,23 @@ def _fmt_size(n: int) -> str:
     return f"{n:.1f} PB"
 
 
+def _get_duration_secs(file_path: str, ffmpeg_exe: str) -> float:
+    import subprocess
+    ffprobe = str(Path(ffmpeg_exe).parent / "ffprobe.exe")
+    try:
+        r = subprocess.run(
+            [ffprobe, "-v", "quiet", "-show_entries", "format=duration",
+             "-of", "csv=p=0", file_path],
+            capture_output=True, text=True, timeout=15
+        )
+        return float(r.stdout.strip())
+    except Exception:
+        return 0.0
+
+
 def _get_duration_str(file_path: str, ffmpeg_exe: str) -> str:
     import subprocess
-    ffprobe = ffmpeg_exe.replace("ffmpeg", "ffprobe")
+    ffprobe = str(Path(ffmpeg_exe).parent / "ffprobe.exe")
     try:
         r = subprocess.run(
             [ffprobe, "-v", "quiet",
@@ -279,3 +459,169 @@ def _get_duration_str(file_path: str, ffmpeg_exe: str) -> str:
         return f"{h}:{m:02d}:{s:02d}"
     except Exception:
         return "unknown"
+
+
+# ── ffprobe / compare helpers ─────────────────────────────────────────────────
+
+def _probe_file(ffprobe_exe: str, file_path: str) -> dict:
+    """Return a dict of quality-relevant metrics for a video file."""
+    import subprocess, json as _json
+    r = subprocess.run(
+        [ffprobe_exe, "-v", "quiet", "-print_format", "json",
+         "-show_streams", "-show_format", file_path],
+        capture_output=True, text=True, timeout=30
+    )
+    data = _json.loads(r.stdout)
+    fmt  = data.get("format", {})
+
+    info = {
+        "size":             int(fmt.get("size", 0)),
+        "duration":         float(fmt.get("duration", 0)),
+        "overall_bitrate":  int(fmt.get("bit_rate", 0)),
+        "video_codec": "", "width": 0, "height": 0,
+        "framerate": 0.0,  "video_bitrate": 0,
+        "audio_codec": "", "audio_bitrate": 0,
+        "audio_channels": 0,
+    }
+
+    for s in data.get("streams", []):
+        if s.get("codec_type") == "video" and not info["video_codec"]:
+            info["video_codec"]   = s.get("codec_name", "")
+            info["width"]         = s.get("width", 0)
+            info["height"]        = s.get("height", 0)
+            info["video_bitrate"] = int(s.get("bit_rate", 0))
+            try:
+                num, den = s.get("r_frame_rate", "0/1").split("/")
+                info["framerate"] = round(int(num) / max(1, int(den)), 3)
+            except Exception:
+                info["framerate"] = 0.0
+
+        if s.get("codec_type") == "audio" and not info["audio_codec"]:
+            info["audio_codec"]    = s.get("codec_name", "")
+            info["audio_bitrate"]  = int(s.get("bit_rate", 0))
+            info["audio_channels"] = s.get("channels", 0)
+
+    # Some containers (M2TS) don't expose per-stream bitrate — estimate from overall
+    if info["video_bitrate"] == 0 and info["overall_bitrate"] > 0:
+        info["video_bitrate"] = max(0, info["overall_bitrate"] - info["audio_bitrate"])
+
+    return info
+
+
+def _quality_score(info: dict) -> float:
+    """
+    Score 0-100 based on codec, resolution, effective bitrate, and audio.
+    Works regardless of resolution or framerate differences between files.
+    """
+    import math
+    score = 0.0
+
+    # ── Codec (0-25) ──────────────────────────────────────────────────────────
+    codec = info["video_codec"].lower()
+    if   any(x in codec for x in ("hevc", "h265", "av1")):  score += 25
+    elif "vp9"  in codec:                                     score += 21
+    elif any(x in codec for x in ("h264", "avc")):           score += 17
+    elif any(x in codec for x in ("mpeg2", "vc1", "wmv")):   score += 9
+    else:                                                      score += 6
+
+    # ── Resolution (0-30) ─────────────────────────────────────────────────────
+    pixels = info["width"] * info["height"]
+    if   pixels >= 3840 * 2000: score += 30   # 4K UHD
+    elif pixels >= 1920 * 1000: score += 22   # 1080p
+    elif pixels >= 1280 *  700: score += 14   # 720p
+    elif pixels >= 720  *  500: score += 8    # 576p / 480p
+    else:                        score += 3
+
+    # ── Video bitrate — log scale (0-30) ─────────────────────────────────────
+    vbr_mbps = info["video_bitrate"] / 1_000_000
+    if vbr_mbps > 0:
+        score += min(30.0, 30.0 * math.log10(max(1, vbr_mbps)) / math.log10(80))
+
+    # ── Audio (0-15) ──────────────────────────────────────────────────────────
+    ac = info["audio_codec"].lower()
+    if   any(x in ac for x in ("truehd", "dtshd", "flac", "pcm")): score += 15
+    elif any(x in ac for x in ("dts", "ac3", "eac3")):              score += 10
+    elif "aac" in ac:                                                 score += 7
+    elif "mp3" in ac:                                                 score += 4
+    else:                                                              score += 5
+
+    return round(min(100.0, score), 1)
+
+
+def _fmt_bitrate(bps: int) -> str:
+    if bps <= 0:       return "n/a"
+    if bps >= 1_000_000: return f"{bps/1_000_000:.1f} Mbps"
+    return f"{bps//1000} Kbps"
+
+
+def _fmt_dur(secs: float) -> str:
+    if secs <= 0: return "n/a"
+    h = int(secs // 3600)
+    m = int((secs % 3600) // 60)
+    s = int(secs % 60)
+    return f"{h}:{m:02d}:{s:02d}"
+
+
+def _format_comparison(ia: dict, ib: dict, sa: float, sb: float) -> str:
+    """Return a formatted side-by-side spec table with verdict."""
+    W = 20   # column width
+
+    def row(label, va, vb):
+        return f"{label:<18} {str(va):>{W}}   {str(vb):>{W}}"
+
+    def winner_tag(va, vb, higher=True):
+        if va == vb: return ""
+        a_wins = (va > vb) if higher else (va < vb)
+        return "  ◄ A" if a_wins else "  ◄ B"
+
+    lines = [
+        f"{'METRIC':<18} {'FILE A':>{W}}   {'FILE B':>{W}}",
+        "─" * (18 + W*2 + 5),
+        row("Resolution",
+            f"{ia['width']}×{ia['height']}",
+            f"{ib['width']}×{ib['height']}") +
+            winner_tag(ia['width']*ia['height'], ib['width']*ib['height']),
+        row("Video Codec",
+            ia['video_codec'].upper() or "n/a",
+            ib['video_codec'].upper() or "n/a"),
+        row("Framerate",
+            f"{ia['framerate']} fps",
+            f"{ib['framerate']} fps"),
+        row("Video Bitrate",
+            _fmt_bitrate(ia['video_bitrate']),
+            _fmt_bitrate(ib['video_bitrate'])) +
+            winner_tag(ia['video_bitrate'], ib['video_bitrate']),
+        row("Audio Codec",
+            ia['audio_codec'].upper() or "n/a",
+            ib['audio_codec'].upper() or "n/a"),
+        row("Audio Bitrate",
+            _fmt_bitrate(ia['audio_bitrate']),
+            _fmt_bitrate(ib['audio_bitrate'])) +
+            winner_tag(ia['audio_bitrate'], ib['audio_bitrate']),
+        row("Channels",
+            str(ia['audio_channels']),
+            str(ib['audio_channels'])),
+        row("Duration",
+            _fmt_dur(ia['duration']),
+            _fmt_dur(ib['duration'])),
+        row("File Size",
+            _fmt_size(ia['size']),
+            _fmt_size(ib['size'])),
+        "─" * (18 + W*2 + 5),
+        row("QUALITY SCORE", f"{sa} / 100", f"{sb} / 100"),
+        "",
+    ]
+
+    diff = abs(sa - sb)
+    if   sa > sb: lines.append(f"► File A is the better choice  (+{diff:.1f} pts)")
+    elif sb > sa: lines.append(f"► File B is the better choice  (+{diff:.1f} pts)")
+    else:         lines.append("= Both files score equally")
+
+    if diff < 5:
+        lines.append("  Difference is marginal — either file is suitable.")
+    elif diff < 15:
+        lines.append("  Moderate advantage — the better file is noticeably superior.")
+    else:
+        lines.append("  Significant advantage — choose the higher-scoring file.")
+
+    return "\n".join(lines)

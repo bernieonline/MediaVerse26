@@ -16,6 +16,7 @@ Column {
     z: 9999
 
     signal testFileClicked()
+    signal compareFilesClicked()
     signal testFolderClicked()
     signal repairFileClicked()
     signal reformatClicked()
@@ -207,7 +208,13 @@ Column {
             onActivated: buttonColumn.testFileClicked()
         }
 
-        // --- 2. TEST FOLDER ---
+        // --- 2. COMPARE FILES ---
+        NavButton {
+            line1: "Compare"; line2: "Files"; accent: "#39FF14"
+            onActivated: buttonColumn.compareFilesClicked()
+        }
+
+        // --- 3. TEST FOLDER ---
         NavButton {
             line1: "Test"; line2: "Folder"; accent: "#39FF14"
             onActivated: buttonColumn.testFolderClicked()

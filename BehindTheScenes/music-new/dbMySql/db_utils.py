@@ -8,26 +8,13 @@ from datetime import datetime
 import tkinter as tk
 from tkinter import messagebox
 
-# Load environment variables 
-#from .env file load_dotenv()
-#use my credentials file as environment variables
-#load_dotenv(dotenv_path='sqlCreds.env')
-
-
-
-
 from pathlib import Path
 load_dotenv(dotenv_path=Path(__file__).parent.parent / "sqlCreds.env")
 
-#Access environment variables 
-host = os.getenv('MYSQL_HOST') 
-user = os.getenv('MYSQL_USER') 
-password = os.getenv('MYSQL_PASSWORD') 
+host     = os.getenv('MYSQL_HOST')
+user     = os.getenv('MYSQL_USER')
+password = os.getenv('MYSQL_PASSWORD')
 database = os.getenv('MYSQL_DB')
-
-
-
-print("Host from .env:", repr(host))
 
 
 
@@ -51,7 +38,6 @@ def test_mysql_connection():
         return False
     
     finally:
-        #print("inside finally")
         if connection and connection.is_connected():
             connection.close()
             print("Database connection closed.")
