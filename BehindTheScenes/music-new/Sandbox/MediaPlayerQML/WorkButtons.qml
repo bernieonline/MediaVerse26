@@ -21,6 +21,7 @@ Column {
     signal repairFileClicked()
     signal reformatClicked()
     signal fileDetailsClicked()
+    signal videoProcClicked()
     signal closeWorkbenchClicked()
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -238,7 +239,13 @@ Column {
             onActivated: buttonColumn.fileDetailsClicked()
         }
 
-        // --- 6. CLOSE ---
+        // --- 6. VIDEO PROC ---
+        NavButton {
+            line1: "Video"; line2: "Proc"; accent: "#39FF14"
+            onActivated: buttonColumn.videoProcClicked()
+        }
+
+        // --- 7. CLOSE ---
         NavButton {
             id: closeBtn
             line1: "Close"; width: 110; accent: "#FF5555"

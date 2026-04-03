@@ -143,6 +143,76 @@ class SettingsManager(QObject):
                     print(f"[ERROR] Failed to execute subprocess: {e}")
             else:
                 print(f"[ERROR] Path does not exist: {player_exe}")
+    @Slot(str)
+    def browse_and_save_tool_path(self, tool_name: str):
+        """Open a file dialog, then save the chosen exe under ToolPaths[tool_name]."""
+        from PySide6.QtWidgets import QFileDialog
+        path, _ = QFileDialog.getOpenFileName(
+            None,
+            f"Select {tool_name} Executable",
+            "",
+            "Executables (*.exe);;All Files (*.*)"
+        )
+        if not path:
+            return
+        clean = path.replace("file:///", "").replace("/", "\\")
+        if "ToolPaths" not in self._settings:
+            self._settings["ToolPaths"] = {}
+        self._settings["ToolPaths"][tool_name] = clean
+        try:
+            with open(self.config_path, "w", encoding="utf-8") as f:
+                json.dump(self._settings, f, indent=2)
+            print(f"[INFO] ToolPaths.{tool_name} saved: {clean}")
+        except Exception as e:
+            print(f"[ERROR] Could not save tool path: {e}")
+            return
+        self.settingsChanged.emit()
+
+    @Slot(str)
+    def launch_tool(self, tool_name: str):
+        """Launch the external tool registered under ToolPaths[tool_name]."""
+        tool_paths = self._settings.get("ToolPaths", {})
+        exe = tool_paths.get(tool_name, "")
+        if not exe or not os.path.exists(exe):
+            print(f"[ERROR] Tool not found or not configured: {tool_name} → '{exe}'")
+            return
+        try:
+            proc = subprocess.Popen([exe])
+            print(f"[INFO] Launched {tool_name}: {exe}")
+            import threading
+            threading.Thread(target=self._bring_to_front, args=(proc.pid,), daemon=True).start()
+        except Exception as e:
+            print(f"[ERROR] Failed to launch {tool_name}: {e}")
+
+    @staticmethod
+    def _bring_to_front(pid: int):
+        """Wait for the process to create a visible window, then raise it."""
+        import ctypes
+        import time
+        user32 = ctypes.windll.user32
+        WNDENUMPROC = ctypes.WINFUNCTYPE(ctypes.c_bool, ctypes.c_size_t, ctypes.c_size_t)
+        found = [0]
+
+        def _cb(hwnd, _):
+            wid = ctypes.c_ulong()
+            user32.GetWindowThreadProcessId(hwnd, ctypes.byref(wid))
+            if wid.value == pid and user32.IsWindowVisible(hwnd):
+                found[0] = hwnd
+                return False
+            return True
+
+        cb = WNDENUMPROC(_cb)
+        for _ in range(20):          # poll up to ~4 seconds
+            time.sleep(0.2)
+            user32.EnumWindows(cb, 0)
+            if found[0]:
+                break
+
+        if found[0]:
+            user32.ShowWindow(found[0], 9)       # SW_RESTORE
+            user32.SetForegroundWindow(found[0])
+            print(f"[INFO] Brought PID {pid} window to foreground")
+
     def sync_menu_players(self):
         """Refreshes the player list inside the menu data and notifies QML via JSON string."""
         if not self.menu_data:

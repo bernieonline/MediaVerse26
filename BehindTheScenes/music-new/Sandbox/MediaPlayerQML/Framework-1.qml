@@ -142,6 +142,17 @@ ApplicationWindow {
             ffmpegBackend.checkFFmpeg()
             ffmpegBackend.testFolder(workbenchMode)
         }
+
+        function onVideoProcClicked() {
+            SettingsManager.launch_tool("VideoProc")
+        }
+
+        function onFileDetailsClicked() {
+            if (typeof splash !== "undefined") splash.deactivate()
+            contentLoader.setSource("FileDetailsView.qml")
+            ffmpegBackend.checkFFmpeg()
+            ffmpegBackend.fileDetails()
+        }
     }
 
     // --- Forward ffmpeg AI requests to aiController ---

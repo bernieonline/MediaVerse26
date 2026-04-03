@@ -9,9 +9,6 @@
     "Splash": false,
     "Tiles": true
   },
-  "ToolPaths": {
-    "VideoProc": "C:\\Program Files (x86)\\Digiarty\\VideoProc Converter AI\\VideoProcConverterAI.exe"
-  },
   "PlayerPaths": {
     "MiniPlayer": "",
     "JRiver": "C:\\Program Files\\J River\\Media Center 35\\MC35.exe",

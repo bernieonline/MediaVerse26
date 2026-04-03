@@ -12,9 +12,15 @@ Popup {
     closePolicy: Popup.CloseOnEscape
 
     // ── Local state ────────────────────────────────────────────────
-    property var settings: ({})
+    property var    settings:       ({})
     property string recoveryStatus: ""
-    property int recoveryStatusTimer: 0
+    property int    recoveryStatusTimer: 0
+    property string videoProcPath:  ""
+
+    function refreshToolPaths() {
+        var tp = root.settings["ToolPaths"] || {}
+        root.videoProcPath = tp["VideoProc"] || ""
+    }
 
     // ── Load settings when panel opens ─────────────────────────────
     onOpened: {
@@ -22,6 +28,7 @@ Popup {
         nameField.text = settings["name"] || ""
         recoveryStatus = ""
         buildPlayerModel()
+        refreshToolPaths()
     }
 
     // ── Reload if settings change externally ───────────────────────
@@ -32,6 +39,7 @@ Popup {
                 settings = SettingsManager.get_settings()
                 nameField.text = settings["name"] || ""
                 buildPlayerModel()
+                refreshToolPaths()
             }
         }
     }
@@ -130,12 +138,12 @@ Popup {
             background: Rectangle { color: "#111" }
 
             Repeater {
-                model: ["Profile", "Player", "Library", "Startup", "Recovery"]
+                model: ["Profile", "Player", "Library", "Startup", "Recovery", "Tools"]
                 TabButton {
                     text: modelData
                     font.pixelSize: 18
                     font.bold: tabBar.currentIndex === index
-                    width: root.width / 5
+                    width: root.width / 6
 
                     background: Rectangle {
                         color: tabBar.currentIndex === index ? "#2566c2" : "#1a1a1a"
@@ -558,6 +566,122 @@ Popup {
                         font.pixelSize: 16
                         font.italic: true
                         visible: root.recoveryStatus !== ""
+                    }
+                }
+            }
+
+            // ── Tab 6: Tools ───────────────────────────────────────────
+            Item {
+                ColumnLayout {
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.top: parent.top
+                    anchors.margins: 32
+                    spacing: 24
+
+                    Text {
+                        text: "EXTERNAL TOOLS"
+                        color: "#aaaaaa"
+                        font.pixelSize: 13
+                        font.letterSpacing: 2
+                    }
+
+                    Rectangle { Layout.fillWidth: true; height: 1; color: "#333" }
+
+                    // ── VideoProc row ──────────────────────────────────
+                    ColumnLayout {
+                        spacing: 10
+
+                        Text {
+                            text: "VideoProc Converter AI"
+                            color: "white"
+                            font.pixelSize: 20
+                            font.bold: true
+                        }
+
+                        Text {
+                            text: "AI upscaling and video conversion. Path to VideoProcConverterAI.exe"
+                            color: "#888"
+                            font.pixelSize: 15
+                            wrapMode: Text.WordWrap
+                            Layout.fillWidth: true
+                        }
+
+                        // Path display box
+                        Rectangle {
+                            Layout.fillWidth: true
+                            height: 48
+                            color: "#111"
+                            radius: 6
+                            border.color: "#333"
+
+                            Text {
+                                anchors.verticalCenter: parent.verticalCenter
+                                anchors.left: parent.left
+                                anchors.right: parent.right
+                                anchors.leftMargin: 14
+                                anchors.rightMargin: 14
+                                text: root.videoProcPath !== "" ? root.videoProcPath : "(not configured)"
+                                color: root.videoProcPath !== "" ? "#ccc" : "#555"
+                                font.pixelSize: 15
+                                elide: Text.ElideLeft
+                            }
+                        }
+
+                        // Browse button
+                        Row {
+                            spacing: 12
+
+                            Rectangle {
+                                width: 160; height: 44
+                                color: browseVpHover ? "#39FF14" : "#2a2a2a"
+                                radius: 6
+                                border.color: "#39FF14"
+                                border.width: 1
+                                property bool browseVpHover: false
+
+                                Text {
+                                    anchors.centerIn: parent
+                                    text: "Browse..."
+                                    color: parent.browseVpHover ? "#111" : "white"
+                                    font.pixelSize: 18
+                                    font.bold: true
+                                }
+                                MouseArea {
+                                    anchors.fill: parent
+                                    hoverEnabled: true
+                                    cursorShape: Qt.PointingHandCursor
+                                    onEntered: parent.browseVpHover = true
+                                    onExited:  parent.browseVpHover = false
+                                    onClicked: SettingsManager.browse_and_save_tool_path("VideoProc")
+                                }
+                            }
+
+                            Rectangle {
+                                width: 160; height: 44
+                                color: launchVpHover ? "#333" : "#222"
+                                radius: 6
+                                border.color: "#555"
+                                border.width: 1
+                                property bool launchVpHover: false
+                                visible: root.videoProcPath !== ""
+
+                                Text {
+                                    anchors.centerIn: parent
+                                    text: "Launch"
+                                    color: "white"
+                                    font.pixelSize: 18
+                                }
+                                MouseArea {
+                                    anchors.fill: parent
+                                    hoverEnabled: true
+                                    cursorShape: Qt.PointingHandCursor
+                                    onEntered: parent.launchVpHover = true
+                                    onExited:  parent.launchVpHover = false
+                                    onClicked: SettingsManager.launch_tool("VideoProc")
+                                }
+                            }
+                        }
                     }
                 }
             }

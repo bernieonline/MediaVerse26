@@ -62,6 +62,9 @@ class FFmpegBackend(QObject):
     repairReady      = Signal(str, str)   # (header, body)
     repairProgress   = Signal(int)        # 0-100
 
+    # File Details
+    fileDetailsReady = Signal(str, str)   # (header, body)
+
     # Install / download
     ffmpegMissing    = Signal()
     downloadProgress = Signal(int)        # 0–100
@@ -78,6 +81,7 @@ class FFmpegBackend(QObject):
         self._compare_cmp: str = ""
         self._compare_proc = None
         self._repair_proc  = None
+        self._details_file: str = ""
 
     # ── Install check ─────────────────────────────────────────────────────────
 
@@ -409,6 +413,57 @@ class FFmpegBackend(QObject):
                 pass
             self.statusMessage.emit("Repair cancelled.")
 
+    # ── File Details ──────────────────────────────────────────────────────────
+
+    @Slot()
+    def fileDetails(self):
+        """Open file dialog, probe with ffprobe, emit fileDetailsReady."""
+        if not self._ffmpeg_exe:
+            self.checkFFmpeg()
+            if not self._ffmpeg_exe:
+                return
+
+        file_path, _ = QFileDialog.getOpenFileName(
+            None, "Select Video File", "",
+            "Video Files (*.mkv *.mp4 *.avi *.mov *.m4v *.mpg *.mpeg "
+            "*.ts *.m2ts *.wmv *.flv *.webm);;All Files (*.*)"
+        )
+        if not file_path:
+            return
+
+        self._details_file = file_path
+        self.statusMessage.emit("Probing file…")
+        threading.Thread(target=self._do_file_details, args=(file_path,), daemon=True).start()
+
+    def _do_file_details(self, file_path: str):
+        import subprocess, json as _json
+        ffprobe = str(Path(self._ffmpeg_exe).parent / "ffprobe.exe")
+        try:
+            r = subprocess.run(
+                [ffprobe, "-v", "quiet", "-print_format", "json",
+                 "-show_format", "-show_streams", "-show_chapters", file_path],
+                capture_output=True, text=True, timeout=30
+            )
+            data = _json.loads(r.stdout)
+            header, body = _format_file_details(data, file_path)
+            self.statusMessage.emit("Details ready.")
+            self.fileDetailsReady.emit(header, body)
+        except Exception as e:
+            self.testError.emit(f"File details failed: {e}")
+
+    @Slot(str)
+    def saveDetails(self, text: str):
+        """Save the details report next to the source file as <stem>_details.txt."""
+        if not self._details_file:
+            return
+        p = Path(self._details_file)
+        out_path = p.parent / (p.stem + "_details.txt")
+        try:
+            out_path.write_text(text, encoding="utf-8")
+            self.statusMessage.emit(f"Saved: {out_path.name}")
+        except OSError as e:
+            self.testError.emit(f"Save failed: {e}")
+
     # ── Cancel ────────────────────────────────────────────────────────────────
 
     @Slot()
@@ -560,6 +615,144 @@ def _fmt_dur(secs: float) -> str:
     m = int((secs % 3600) // 60)
     s = int(secs % 60)
     return f"{h}:{m:02d}:{s:02d}"
+
+
+def _format_file_details(data: dict, file_path: str) -> tuple:
+    """Format full ffprobe JSON into a readable details report. Returns (header, body)."""
+    p = Path(file_path)
+    fmt      = data.get("format", {})
+    streams  = data.get("streams", [])
+    chapters = data.get("chapters", [])
+
+    # ── Header ────────────────────────────────────────────────────────────────
+    try:
+        size_bytes = p.stat().st_size
+        size_str   = _fmt_size(size_bytes)
+    except OSError:
+        size_str   = _fmt_size(int(fmt.get("size", 0)))
+
+    duration    = float(fmt.get("duration", 0))
+    overall_br  = int(fmt.get("bit_rate", 0))
+    fmt_tags    = fmt.get("tags", {})
+    encoded     = fmt_tags.get("creation_time", "").replace("T", " ").split(".")[0]
+
+    header = (
+        f"File:     {p.name}\n"
+        f"Size:     {size_str}\n"
+        f"Duration: {_fmt_dur(duration)}\n"
+        f"Probed:   {datetime.now().strftime('%Y-%m-%d  %H:%M')}\n"
+        f"{'─' * 45}"
+    )
+
+    # ── Body ──────────────────────────────────────────────────────────────────
+    _CH = {1: "mono", 2: "stereo", 6: "5.1", 8: "7.1"}
+    lines = []
+
+    # Container
+    fmt_name = fmt.get("format_long_name") or fmt.get("format_name", "unknown")
+    lines += [
+        "─── CONTAINER " + "─" * 31,
+        f"Format:          {fmt_name}",
+        f"Overall Bitrate: {_fmt_bitrate(overall_br)}",
+    ]
+    if encoded:
+        lines.append(f"Encoded:         {encoded}")
+    lines.append("")
+
+    # Video streams
+    video_streams = [s for s in streams if s.get("codec_type") == "video"]
+    for i, s in enumerate(video_streams):
+        track_label = "" if len(video_streams) == 1 else f" (Track {i + 1})"
+        lines.append(f"─── VIDEO{track_label} " + "─" * (36 - len(track_label)))
+
+        codec_long = s.get("codec_long_name") or s.get("codec_name", "unknown")
+        profile    = s.get("profile", "")
+        level_raw  = s.get("level", -1)
+        level      = f"L{level_raw / 10:.1f}" if isinstance(level_raw, int) and level_raw > 0 else ""
+        codec_disp = codec_long
+        if profile and level:
+            codec_disp += f"  ({profile} {level})"
+        elif profile:
+            codec_disp += f"  ({profile})"
+
+        try:
+            num, den = s.get("r_frame_rate", "0/1").split("/")
+            fps = round(int(num) / max(1, int(den)), 3)
+        except Exception:
+            fps = 0.0
+
+        vbr      = int(s.get("bit_rate", 0))
+        pix_fmt  = s.get("pix_fmt", "")
+        colorsp  = s.get("color_space", "")
+
+        lines += [
+            f"Codec:           {codec_disp}",
+            f"Resolution:      {s.get('width', 0)} × {s.get('height', 0)}",
+            f"Framerate:       {fps} fps",
+        ]
+        if vbr:
+            lines.append(f"Bitrate:         {_fmt_bitrate(vbr)}")
+        if pix_fmt:
+            lines.append(f"Pixel Format:    {pix_fmt}")
+        if colorsp:
+            lines.append(f"Colour Space:    {colorsp}")
+        lines.append("")
+
+    # Audio streams
+    audio_streams = [s for s in streams if s.get("codec_type") == "audio"]
+    for i, s in enumerate(audio_streams):
+        track_label = "" if len(audio_streams) == 1 else f" (Track {i + 1})"
+        lines.append(f"─── AUDIO{track_label} " + "─" * (36 - len(track_label)))
+
+        codec    = s.get("codec_long_name") or s.get("codec_name", "unknown")
+        channels = s.get("channels", 0)
+        ch_label = _CH.get(channels, f"{channels}ch")
+        abr      = int(s.get("bit_rate", 0))
+        sr       = s.get("sample_rate", "")
+        tags     = s.get("tags", {})
+        lang     = tags.get("language", "")
+        title    = tags.get("title", "")
+
+        lines += [
+            f"Codec:           {codec}",
+            f"Channels:        {channels} ({ch_label})",
+        ]
+        if sr:
+            lines.append(f"Sample Rate:     {sr} Hz")
+        if abr:
+            lines.append(f"Bitrate:         {_fmt_bitrate(abr)}")
+        if lang:
+            lines.append(f"Language:        {lang}")
+        if title:
+            lines.append(f"Title:           {title}")
+        lines.append("")
+
+    # Subtitle streams
+    sub_streams = [s for s in streams if s.get("codec_type") == "subtitle"]
+    if sub_streams:
+        lines.append("─── SUBTITLES " + "─" * 31)
+        for i, s in enumerate(sub_streams):
+            codec = s.get("codec_name", "unknown").upper()
+            tags  = s.get("tags", {})
+            lang  = tags.get("language", "")
+            title = tags.get("title", "")
+            entry = f"Track {i + 1}:         {codec}"
+            if lang:
+                entry += f"  [{lang}]"
+            if title:
+                entry += f"  {title}"
+            lines.append(entry)
+        lines.append("")
+
+    # Chapters
+    if chapters:
+        lines += [
+            "─── CHAPTERS " + "─" * 32,
+            f"{len(chapters)} chapters",
+            "",
+        ]
+
+    return header, "\n".join(lines)
 
 
 def _format_comparison(ia: dict, ib: dict, sa: float, sb: float) -> str:
