@@ -25,8 +25,9 @@ Item {
 
     // ── Signals — wire these to modules when ready ────────────────────────────
     signal qobuzMusicClicked()
-    signal mediaEditClicked()
+    signal workbenchClicked()
     signal collectionCuratorClicked()
+    signal mediaverseClicked()
 
     // Size — position is set by the parent (Framework-1.qml)
     width:  panelW + 10     // extra room for drop shadow
@@ -261,8 +262,8 @@ Item {
                 }
                 IconButton {
                     width: slidePanelRoot.iconSize; height: slidePanelRoot.iconSize
-                    iconChar: "\u2702"; accent: "#FFB300"; tooltipText: "Media Edit"
-                    onActivated: slidePanelRoot.mediaEditClicked()
+                    iconChar: "\u2702"; accent: "#39FF14"; tooltipText: "Workbench"
+                    onActivated: slidePanelRoot.workbenchClicked()
                 }
                 IconButton {
                     width: slidePanelRoot.iconSize; height: slidePanelRoot.iconSize
@@ -271,7 +272,8 @@ Item {
                 }
                 IconButton {
                     width: slidePanelRoot.iconSize; height: slidePanelRoot.iconSize
-                    iconChar: "+"; accent: "#505050"; tooltipText: "Coming Soon"
+                    iconChar: "\u2B21"; accent: "#2566c2"; tooltipText: "MediaVerse"
+                    onActivated: slidePanelRoot.mediaverseClicked()
                 }
             }
         }

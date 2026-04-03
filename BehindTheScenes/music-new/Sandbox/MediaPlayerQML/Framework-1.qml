@@ -27,6 +27,7 @@ ApplicationWindow {
     // Each entry: { source: string, props: object }
     property var navHistory: []
     property var lastCollectionsModel: []     // restored when going back to CollectionsGallery
+    property string workbenchMode: "standard" // shared with WorkbenchView mode toggle
 
     property alias splashAlias: splash
 
@@ -84,9 +85,10 @@ ApplicationWindow {
         }
     }
 
-    // --- Connect the RowButton to the Loader ---
+    // --- RowButton signals (active only when RowButton.qml is loaded) ---
     Connections {
-        target: rowButtons
+        target: buttonLoader.source.toString().indexOf("RowButton") !== -1
+                ? buttonLoader.item : null
 
         function onArchitectClicked() {
             console.log("🚀 Switching to Architect Gallery Mode")
@@ -102,6 +104,53 @@ ApplicationWindow {
             console.log("📺 Switching to TV Series view")
             if (splash) splash.deactivate()
             contentLoader.setSource("TV_view.qml")
+        }
+    }
+
+    // --- WorkButtons signals (active only when WorkButtons.qml is loaded) ---
+    Connections {
+        target: buttonLoader.source.toString().indexOf("WorkButtons") !== -1
+                ? buttonLoader.item : null
+
+        function onCloseWorkbenchClicked() {
+            buttonLoader.source = "RowButton.qml"
+        }
+
+        function onTestFileClicked() {
+            if (typeof splash !== "undefined") splash.deactivate()
+            contentLoader.setSource("WorkbenchView.qml")
+            ffmpegBackend.checkFFmpeg()
+            ffmpegBackend.testFile(workbenchMode)
+        }
+
+        function onTestFolderClicked() {
+            if (typeof splash !== "undefined") splash.deactivate()
+            contentLoader.setSource("WorkbenchView.qml")
+            ffmpegBackend.checkFFmpeg()
+            ffmpegBackend.testFolder(workbenchMode)
+        }
+    }
+
+    // --- Forward ffmpeg AI requests to aiController ---
+    Connections {
+        target: ffmpegBackend
+        function onFfmpegAskAI(filename, prompt) {
+            aiController.ask(filename, prompt)
+        }
+    }
+
+    // --- SlidePanel module switching ---
+    Connections {
+        target: slidePanel
+
+        function onWorkbenchClicked() {
+            console.log("🔧 Switching to Workbench mode")
+            buttonLoader.source = "WorkButtons.qml"
+        }
+
+        function onMediaverseClicked() {
+            console.log("🏠 Returning to MediaVerse main buttons")
+            buttonLoader.source = "RowButton.qml"
         }
     }
 
@@ -200,7 +249,11 @@ ApplicationWindow {
         anchors.topMargin: 26
         spacing: 20
         z: 998    // above UtilitySidebar dismissalShield (z:997) so clicks always reach buttons
-        RowButton { id: rowButtons; width: parent.width - 100 }
+        Loader {
+            id: buttonLoader
+            width: parent.width - 100
+            source: "RowButton.qml"
+        }
     }
 
     // --- SEARCH BAR — floats midway between button row and display area ---
@@ -419,7 +472,7 @@ ApplicationWindow {
         anchors.leftMargin: 50
         anchors.right: parent.right
         anchors.rightMargin: 50
-        radius: 25
+        radius: 0
         color: "transparent"
         border.color: "#2566c2"
         border.width: 2
