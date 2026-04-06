@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Video Quality Audit — How It Works</title>
+<style>
+:root {
+  --bg:        #0d0d0d;
+  --surf:      #191919;
+  --surf2:     #222;
+  --border:    #2e2e2e;
+  --text:      #ddd;
+  --muted:     #777;
+  --critical:  #e84040;
+  --high:      #e07820;
+  --medium:    #d4b800;
+  --low:       #78b840;
+  --clean:     #3ea87a;
+  --accent:    #2566c2;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  font-size: 15px;
+  line-height: 1.7;
+  padding: 36px 40px;
+  max-width: 960px;
+}
+h1 { font-size: 30px; color: #fff; margin-bottom: 6px; letter-spacing: -.5px; }
+.subtitle { color: var(--muted); font-size: 14px; margin-bottom: 36px; }
+h2 {
+  font-size: 18px; color: #aaa;
+  margin: 40px 0 14px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+  letter-spacing: .03em;
+}
+h3 { font-size: 15px; color: #ccc; margin: 22px 0 8px; }
+p { margin-bottom: 12px; color: #bbb; }
+ul { margin: 0 0 14px 20px; color: #bbb; }
+li { margin-bottom: 6px; }
+strong { color: #e0e0e0; }
+code {
+  background: #1e1e1e;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 1px 6px;
+  font-family: Consolas, monospace;
+  font-size: 13px;
+  color: #c8d0d8;
+}
+
+/* ── Cards ── */
+.card-row { display: flex; gap: 14px; flex-wrap: wrap; margin: 18px 0; }
+.card {
+  background: var(--surf);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px 20px;
+  flex: 1;
+  min-width: 180px;
+}
+.card .lbl { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 6px; }
+.card p { margin: 0; font-size: 13px; }
+
+/* ── Severity bands ── */
+.band-table { width: 100%; border-collapse: collapse; margin: 14px 0 22px; }
+.band-table td {
+  padding: 10px 14px;
+  border-top: 1px solid var(--border);
+  vertical-align: top;
+  font-size: 14px;
+}
+.band-table tr:first-child td { border-top: none; }
+.band-label {
+  font-weight: 700;
+  font-size: 15px;
+  white-space: nowrap;
+  width: 160px;
+}
+.band-dot {
+  display: inline-block;
+  width: 11px; height: 11px;
+  border-radius: 50%;
+  margin-right: 7px;
+  vertical-align: middle;
+}
+.band-action { color: var(--muted); font-size: 13px; }
+
+/* ── Signal blocks ── */
+.signal {
+  background: var(--surf);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--accent);
+  border-radius: 8px;
+  padding: 14px 18px;
+  margin: 12px 0;
+}
+.signal.warn  { border-left-color: var(--high); }
+.signal.crit  { border-left-color: var(--critical); }
+.signal.good  { border-left-color: var(--clean); }
+.signal-title { font-weight: 700; color: #ddd; margin-bottom: 4px; }
+.signal p { margin: 0; font-size: 13px; }
+
+/* ── Columns ── */
+.col-table { width: 100%; border-collapse: collapse; margin: 14px 0; }
+.col-table th {
+  background: var(--surf2);
+  color: var(--muted);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  padding: 9px 13px;
+  text-align: left;
+}
+.col-table td {
+  padding: 9px 13px;
+  border-top: 1px solid var(--border);
+  font-size: 13px;
+  vertical-align: top;
+}
+.col-table tr:hover td { background: #1e1e1e; }
+.col-name { font-family: Consolas, monospace; color: #c8d0d8; white-space: nowrap; }
+
+/* ── Decision guide ── */
+.decision {
+  background: var(--surf);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 20px 24px;
+  margin: 14px 0;
+}
+.decision h3 { margin-top: 0; color: #ddd; }
+.decision ul { margin-bottom: 0; }
+
+/* ── Footer ── */
+.footer { margin-top: 52px; padding-top: 18px; border-top: 1px solid var(--border); color: var(--muted); font-size: 12px; }
+</style>
+</head>
+<body>
+
+<h1>Video Quality Audit — How It Works</h1>
+<p class="subtitle">A plain-language guide to understanding the report and making decisions about your video library</p>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<h2>What the Tool Does</h2>
+
+<p>The audit scans a folder of video files and attempts to identify files that have been <strong>degraded</strong> relative to their original source — typically a Blu-ray disc. Degradation usually happens when someone re-encodes the video to save space, artificially increases the frame rate, or strips out the high-quality audio track.</p>
+
+<p>The tool does <strong>not</strong> play the files or analyse the actual picture quality pixel-by-pixel. Instead it reads the <strong>technical metadata</strong> embedded in each file using MediaInfo, then applies a scoring model based on known patterns that indicate re-encoding or quality loss.</p>
+
+<p>Only <strong>1080p files</strong> are evaluated. 4K, 720p, and SD files are skipped.</p>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<h2>How the Scoring Works</h2>
+
+<p>Each file receives a numeric <strong>quality concern score</strong>. Points are added whenever a suspicious signal is detected. The more points, the more likely the file has been degraded. A score of zero does not guarantee a perfect file — it means no red flags were found in the metadata.</p>
+
+<div class="card-row">
+  <div class="card">
+    <div class="lbl">Frame rate / Interpolation</div>
+    <p>Checks whether the frame rate has been doubled or artificially raised from a standard cinema rate (24/25/30 fps). Up to <strong>50 points</strong>.</p>
+  </div>
+  <div class="card">
+    <div class="lbl">Re-encode detection</div>
+    <p>Looks for software encoder fingerprints (x264, x265, HandBrake, FFmpeg). A genuine disc remux has no encoder tag. Up to <strong>30 points</strong>.</p>
+  </div>
+  <div class="card">
+    <div class="lbl">Bitrate &amp; compression</div>
+    <p>Low bitrate for the codec type suggests heavy compression. Measures both raw Mbps and bits-per-pixel-per-frame (bpppf). Up to <strong>50 points</strong>.</p>
+  </div>
+  <div class="card">
+    <div class="lbl">Audio quality</div>
+    <p>Checks for a lossless audio track (TrueHD, DTS-HD MA, FLAC, PCM). Lossy-only audio (AC-3, AAC, MP3) is a downgrade signal. Up to <strong>15 points</strong>.</p>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<h2>Severity Bands</h2>
+
+<table class="band-table">
+  <tr>
+    <td class="band-label"><span class="band-dot" style="background:var(--critical)"></span><span style="color:var(--critical)">Critical ≥ 60</span></td>
+    <td>Multiple serious signals — confirmed frame-rate change, very low bitrate, or re-encode with heavy compression. <strong>Strong candidate for replacement.</strong></td>
+    <td class="band-action">Re-rip from disc or source a new copy.</td>
+  </tr>
+  <tr>
+    <td class="band-label"><span class="band-dot" style="background:var(--high)"></span><span style="color:var(--high)">High 35–59</span></td>
+    <td>Likely degraded. May look acceptable on a small screen but will show artefacts on a large display at normal viewing distance.</td>
+    <td class="band-action">Worth replacing if the disc is available.</td>
+  </tr>
+  <tr>
+    <td class="band-label"><span class="band-dot" style="background:var(--medium)"></span><span style="color:var(--medium)">Medium 20–34</span></td>
+    <td>One or two genuine concerns. Often a competent encode that sacrifices some quality for file size. May be perfectly watchable.</td>
+    <td class="band-action">Investigate before sourcing a replacement.</td>
+  </tr>
+  <tr>
+    <td class="band-label"><span class="band-dot" style="background:var(--low)"></span><span style="color:var(--low)">Low &lt; threshold</span></td>
+    <td>Minor signals only. Likely a good-quality file.</td>
+    <td class="band-action">Probably fine to keep.</td>
+  </tr>
+  <tr>
+    <td class="band-label"><span class="band-dot" style="background:var(--clean)"></span><span style="color:var(--clean)">Clean</span></td>
+    <td>No significant issues detected at the configured threshold.</td>
+    <td class="band-action">No action needed.</td>
+  </tr>
+</table>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<h2>Understanding the Report Columns</h2>
+
+<table class="col-table">
+  <thead>
+    <tr><th>Column</th><th>What it means</th><th>What to look for</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="col-name">Bitrate Mbps</td>
+      <td>The video stream data rate in megabits per second.</td>
+      <td>A genuine 1080p Blu-ray remux is typically <strong>20–40 Mbps</strong>. Below 10 Mbps for AVC or 6 Mbps for HEVC is a concern. Below 6/3.5 Mbps is a serious concern.</td>
+    </tr>
+    <tr>
+      <td class="col-name">FPS</td>
+      <td>Frames per second of the video stream. If the original source rate was different, it appears below in red.</td>
+      <td>Films are shot at 23.976 or 24 fps. A value of 47.952 or 48 is a double — almost certainly artificially interpolated ("soap opera effect").</td>
+    </tr>
+    <tr>
+      <td class="col-name">Codec</td>
+      <td>The video compression format: <strong>AVC</strong> (H.264) or <strong>HEVC</strong> (H.265).</td>
+      <td>Neither codec is inherently bad, but HEVC at the same bitrate delivers better quality. The key is bitrate relative to codec — see thresholds above.</td>
+    </tr>
+    <tr>
+      <td class="col-name">Audio</td>
+      <td>The primary audio track format.</td>
+      <td><strong>TrueHD, DTS-HD MA, FLAC, PCM</strong> = lossless (good). <strong>AC-3 (Dolby Digital), AAC, MP3</strong> = lossy (acceptable on encodes, a downgrade on remuxes).</td>
+    </tr>
+    <tr>
+      <td class="col-name">GB</td>
+      <td>File size in gigabytes.</td>
+      <td>A 2-hour 1080p Blu-ray remux is typically <strong>20–50 GB</strong>. A high-quality encode might be 8–15 GB. Below 4 GB for a feature film is a strong compression signal.</td>
+    </tr>
+    <tr>
+      <td class="col-name">bpppf</td>
+      <td><strong>Bits per pixel per frame</strong> — a normalised measure of how much data is allocated to each pixel in each frame, independent of resolution and frame rate.</td>
+      <td>A genuine Blu-ray remux is typically <strong>≥ 0.30</strong>. Below 0.12 is flagged; below 0.08 is a serious concern. This metric is particularly revealing when frame rate is elevated — a file at 48 fps has half the data per frame compared to the same bitrate at 24 fps.</td>
+    </tr>
+    <tr>
+      <td class="col-name">Score</td>
+      <td>The total quality concern score from all signals combined.</td>
+      <td>Use the severity bands above as your guide. Sort by Score descending to prioritise your review queue.</td>
+    </tr>
+    <tr>
+      <td class="col-name">Issues Detected</td>
+      <td>A plain-language description of every signal that contributed to the score.</td>
+      <td>Read these carefully before deciding to replace a file — some issues are more serious than others even at the same score.</td>
+    </tr>
+  </tbody>
+</table>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<h2>Key Signals Explained</h2>
+
+<div class="signal crit">
+  <div class="signal-title">CONFIRMED FRAME-RATE CHANGE (up to +50 points)</div>
+  <p>MediaInfo found a <code>FrameRate_Original</code> field that differs from the stream's current frame rate. This is definitive proof the frame rate was altered after the source was encoded — almost always artificial interpolation. This is the most reliable signal the tool produces.</p>
+</div>
+
+<div class="signal warn">
+  <div class="signal-title">SUSPECTED INTERPOLATION (up to +30 points)</div>
+  <p>The frame rate is an exact ×2 or ×2.5 multiple of a standard cinema rate (e.g. 47.952 fps = 23.976 × 2). No original rate tag was recorded, so this is inferred rather than confirmed, but the pattern is highly suspicious for films.</p>
+</div>
+
+<div class="signal warn">
+  <div class="signal-title">Re-encoded source (+20 points)</div>
+  <p>The file contains an encoder library tag such as <code>x264</code> or <code>x265</code>. A genuine Blu-ray remux is a direct copy of the disc stream and carries no such tag. This signal alone does not mean bad quality — many excellent encodes exist — but combined with low bitrate or high CRF it is significant.</p>
+</div>
+
+<div class="signal">
+  <div class="signal-title">High CRF value (+5 to +20 points)</div>
+  <p>CRF (Constant Rate Factor) is the quality setting used when encoding. Higher = more lossy. The thresholds used are CRF ≥ 20 for AVC and CRF ≥ 24 for HEVC. A CRF below the threshold still adds a small number of points since any lossy encode is a step down from a remux.</p>
+</div>
+
+<div class="signal">
+  <div class="signal-title">Lossy audio only (+8 to +15 points)</div>
+  <p>No lossless audio track (TrueHD, DTS-HD MA, FLAC, PCM) was found. For Blu-ray sourced content, the original disc almost always contains a lossless track. Its absence typically means the file was transcoded from a lower-quality source, or the lossless track was stripped to save space.</p>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<h2>Making Decisions — A Practical Guide</h2>
+
+<div class="decision">
+  <h3>Step 1 — Start with Critical files</h3>
+  <p>Sort by Score descending. Any file at Critical (≥ 60) almost certainly has a real problem. Look at the Issues column — if you see <em>CONFIRMED FRAME-RATE CHANGE</em> or <em>Very low bitrate</em> combined with a re-encode signal, that file should be replaced.</p>
+</div>
+
+<div class="decision">
+  <h3>Step 2 — Check the bpppf value</h3>
+  <p>bpppf is the most nuanced metric in the report. A file might show an acceptable headline bitrate (e.g. 12 Mbps) but if the frame rate has been doubled to 48 fps, each frame actually contains only half that data — the bpppf will reveal this. A bpppf below 0.10 on a 1080p film is almost always evidence of either heavy compression or frame interpolation.</p>
+</div>
+
+<div class="decision">
+  <h3>Step 3 — Don't automatically distrust encodes</h3>
+  <p>Not all encodes are bad. A file encoded with x265 at CRF 18, 12 Mbps, with a DTS-HD MA audio track, at 23.976 fps, is a perfectly good copy. It will appear in the report (re-encode signal adds points) but the score will be modest. The Issues column will make this clear — look at what the actual concerns are, not just the score number.</p>
+</div>
+
+<div class="decision">
+  <h3>Step 4 — Cross-check file size and duration</h3>
+  <p>The GB column is a quick sanity check. A 2-hour film at 4 GB has been heavily compressed. Compare against the stated bitrate — if they don't match (the report flags this as a <em>File size/bitrate mismatch</em>), the metadata itself may be unreliable, which makes all other measurements less trustworthy for that file.</p>
+</div>
+
+<div class="decision">
+  <h3>Step 5 — Use the filter bar to focus</h3>
+  <p>The All Flagged Files table has a filter box. Type a codec name, an issue keyword (e.g. <code>interpolat</code>, <code>HandBrake</code>, <code>TrueHD</code>), or part of a filename to narrow the list. The table columns are also sortable — sorting by bpppf ascending is particularly useful for finding the worst files regardless of headline bitrate.</p>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<h2>Limitations</h2>
+
+<ul>
+  <li><strong>Metadata only</strong> — the tool cannot see actual compression artefacts, banding, or noise. A file with terrible visible quality but accurate metadata will score lower than a visually clean encode that happens to carry an encoder tag.</li>
+  <li><strong>False positives on legitimate encodes</strong> — any file that was intentionally transcoded (e.g. a high-quality Remux→HEVC conversion) will be flagged for the re-encode signal regardless of the result quality. Read the Issues column in full.</li>
+  <li><strong>Variable bitrate files</strong> — MediaInfo reports average bitrate. A VBR file might average 15 Mbps but have scenes encoded at 4 Mbps. The per-scene quality cannot be assessed from metadata alone.</li>
+  <li><strong>Sports and action content</strong> — elevated frame rates (50/60 fps) are normal for live sports. The frame-rate flags are calibrated for film content. Sports content will accumulate points that don't reflect genuine degradation.</li>
+  <li><strong>Score is additive, not weighted</strong> — a file with many minor signals can outscore a file with one catastrophic signal. Always read the Issues column rather than relying on the number alone.</li>
+</ul>
+
+
+<div class="footer">
+  Video Quality Audit — companion guide &ensp;|&ensp; Generated for MediaVerse library management
+</div>
+
+</body>
+</html>

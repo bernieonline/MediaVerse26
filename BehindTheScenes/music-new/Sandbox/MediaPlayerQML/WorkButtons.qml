@@ -19,7 +19,7 @@ Column {
     signal compareFilesClicked()
     signal testFolderClicked()
     signal repairFileClicked()
-    signal reformatClicked()
+    signal qualityAuditsClicked()
     signal fileDetailsClicked()
     signal videoProcClicked()
     signal closeWorkbenchClicked()
@@ -227,10 +227,10 @@ Column {
             onActivated: buttonColumn.repairFileClicked()
         }
 
-        // --- 4. RE FORMAT ---
+        // --- 4. QUALITY AUDITS ---
         NavButton {
-            line1: "Re"; line2: "Format"; accent: "#39FF14"
-            onActivated: buttonColumn.reformatClicked()
+            line1: "Quality"; line2: "Audits"; accent: "#39FF14"
+            onActivated: buttonColumn.qualityAuditsClicked()
         }
 
         // --- 5. FILE DETAILS ---

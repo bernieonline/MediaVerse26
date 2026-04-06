@@ -71,6 +71,7 @@ from snatcher2_backend import Snatcher2Backend
 from landing_view import LandingViewModel
 from TV_view import TVViewModel
 from ffmpeg_backend import FFmpegBackend
+from quality_audit_backend import QualityAuditBackend
 
 from dotenv import load_dotenv
 
@@ -108,7 +109,8 @@ def main():
         snatcher2_backend  = Snatcher2Backend()
         landing_vm         = LandingViewModel()
         tv_vm              = TVViewModel()
-        ffmpeg_backend     = FFmpegBackend()
+        ffmpeg_backend         = FFmpegBackend()
+        quality_audit_backend  = QualityAuditBackend()
 
              # SURGICAL ADDITION: Connect the backup signal to the existing notifier
         # msg is the text, success is the boolean. We use 'not success' because 
@@ -245,7 +247,8 @@ def main():
         ctx.setContextProperty("aiController", ai_controller)
         ctx.setContextProperty("landingViewModel", landing_vm)
         ctx.setContextProperty("tvViewModel",     tv_vm)
-        ctx.setContextProperty("ffmpegBackend",   ffmpeg_backend)
+        ctx.setContextProperty("ffmpegBackend",        ffmpeg_backend)
+        ctx.setContextProperty("qualityAuditBackend",  quality_audit_backend)
         ctx.setContextProperty("startupMode", _startup_mode)
 
         # --------------------------------------------------------

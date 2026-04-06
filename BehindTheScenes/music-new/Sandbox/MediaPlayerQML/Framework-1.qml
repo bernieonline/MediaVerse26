@@ -153,6 +153,11 @@ ApplicationWindow {
             ffmpegBackend.checkFFmpeg()
             ffmpegBackend.fileDetails()
         }
+
+        function onQualityAuditsClicked() {
+            if (typeof splash !== "undefined") splash.deactivate()
+            contentLoader.setSource("QualityAuditView.qml")
+        }
     }
 
     // --- Forward ffmpeg AI requests to aiController ---
