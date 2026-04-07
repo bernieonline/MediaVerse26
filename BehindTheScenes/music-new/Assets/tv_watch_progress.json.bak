@@ -130,5 +130,47 @@
         "position_sec": 31,
         "duration_sec": 2641,
         "progress_pct": 1
+    },
+    "W:\\Collection\\1990s\\Narrow Margin (1990).mp4": {
+        "last_played": "29 Mar 2026",
+        "position_sec": 2,
+        "duration_sec": 5683,
+        "progress_pct": 0
+    },
+    "W:\\Collection\\Futuristic SciFi\\Jupiter Ascending (2015).mp4": {
+        "last_played": "03 Apr 2026",
+        "position_sec": 27390,
+        "duration_sec": 95269,
+        "progress_pct": 29
+    },
+    "W:\\Collection\\2010s\\Red Lights (2012).mp4": {
+        "last_played": "03 Apr 2026",
+        "position_sec": 464,
+        "duration_sec": 6547,
+        "progress_pct": 7
+    },
+    "W:\\Collection\\Western HD\\Cat Ballou (1965).TS": {
+        "last_played": "03 Apr 2026",
+        "position_sec": 3753,
+        "duration_sec": 5701,
+        "progress_pct": 66
+    },
+    "W:\\Collection\\Football\\1970s\\1975 Tottenham Hotspur v Manchester United 7576 Football League Division 1.mp4": {
+        "last_played": "04 Apr 2026",
+        "position_sec": 1888,
+        "duration_sec": 1889,
+        "progress_pct": 100
+    },
+    "W:\\Collection\\Bond Movies\\Thunderball (1965).TS": {
+        "last_played": "05 Apr 2026",
+        "position_sec": 394,
+        "duration_sec": 7489,
+        "progress_pct": 5
+    },
+    "W:\\Collection\\Futuristic SciFi\\Highlander (1986).mp4": {
+        "last_played": "05 Apr 2026",
+        "position_sec": 6979,
+        "duration_sec": 7000,
+        "progress_pct": 100
     }
 }

@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Video Quality Audit — 2026-04-06 21:32:04</title>
+<style>
+:root {
+  --bg:        #0d0d0d;
+  --surf:      #191919;
+  --surf2:     #222;
+  --border:    #2e2e2e;
+  --text:      #ddd;
+  --muted:     #777;
+  --critical:  #e84040;
+  --high:      #e07820;
+  --medium:    #d4b800;
+  --low:       #78b840;
+  --clean:     #3ea87a;
+  --accent:    #2566c2;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  padding: 28px 32px;
+}
+a { color: var(--accent); }
+h1 { font-size: 28px; color: #fff; margin-bottom: 6px; letter-spacing: -.5px; }
+h2 {
+  font-size: 17px; color: #aaa;
+  margin: 36px 0 14px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+  letter-spacing: .03em;
+}
+.meta { color: var(--muted); font-size: 13px; margin-bottom: 28px; }
+.meta strong { color: #ccc; }
+
+.cards {
+  display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 24px;
+}
+.card {
+  background: var(--surf);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px 22px;
+  min-width: 130px;
+}
+.card .lbl  { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+.card .val  { font-size: 30px; font-weight: 700; margin-top: 4px; }
+.card.c-total    .val { color: #fff; }
+.card.c-critical .val { color: var(--critical); }
+.card.c-high     .val { color: var(--high); }
+.card.c-medium   .val { color: var(--medium); }
+.card.c-clean    .val { color: var(--clean); }
+
+.score-bar {
+  display: flex; height: 20px; border-radius: 6px;
+  overflow: hidden; margin-bottom: 30px;
+  border: 1px solid var(--border);
+}
+.score-bar div {
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700; color: #000; min-width: 0;
+  transition: width .3s;
+}
+.score-bar .seg-clean { color: #fff; }
+
+.legend {
+  display: flex; gap: 18px; flex-wrap: wrap;
+  margin-bottom: 14px; font-size: 12px; color: var(--muted);
+}
+.legend-dot {
+  display: inline-block; width: 10px; height: 10px;
+  border-radius: 50%; margin-right: 5px; vertical-align: middle;
+}
+
+.filter-bar {
+  display: flex; gap: 10px; align-items: center; margin-bottom: 12px;
+}
+.filter-bar input {
+  background: var(--surf2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 7px 14px;
+  border-radius: 6px;
+  font-size: 13px;
+  width: 300px;
+  outline: none;
+}
+.filter-bar input:focus { border-color: var(--accent); }
+.filter-bar label { color: var(--muted); font-size: 13px; }
+.filter-bar span  { color: var(--muted); font-size: 12px; }
+
+.table-wrap {
+  width: 100%; overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  margin-bottom: 32px;
+}
+table {
+  width: 100%; border-collapse: collapse;
+  background: var(--surf);
+}
+thead th {
+  background: var(--surf2);
+  color: var(--muted);
+  text-transform: uppercase;
+  font-size: 11px;
+  letter-spacing: .06em;
+  padding: 10px 13px;
+  text-align: left;
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+  position: sticky; top: 0;
+}
+thead th:hover { color: var(--text); }
+thead th[data-sort]::after { content: " ↕"; opacity: .35; }
+td {
+  padding: 9px 13px;
+  border-top: 1px solid var(--border);
+  vertical-align: top;
+}
+tr:hover td { background: #1e1e1e; }
+
+.row-critical td:first-child { border-left: 4px solid var(--critical); }
+.row-high     td:first-child { border-left: 4px solid var(--high); }
+.row-medium   td:first-child { border-left: 4px solid var(--medium); }
+.row-low      td:first-child { border-left: 4px solid var(--low); }
+.top-row td { background: #1d1d1d; }
+
+.score-cell {
+  font-size: 20px; font-weight: 700;
+  text-align: center; white-space: nowrap;
+}
+.score-critical { color: var(--critical); }
+.score-high     { color: var(--high); }
+.score-medium   { color: var(--medium); }
+.score-low      { color: var(--low); }
+
+.filename {
+  max-width: 260px; word-break: break-all;
+  font-size: 12px; font-family: 'Consolas', monospace;
+}
+.num { text-align: right; font-variant-numeric: tabular-nums; }
+.issues-cell { min-width: 320px; }
+.issue-line {
+  font-size: 12px; line-height: 1.6; color: #bbb;
+  padding: 1px 0;
+  border-bottom: 1px solid #2a2a2a;
+}
+.issue-line:last-child { border-bottom: none; }
+small { color: var(--muted); font-size: 11px; }
+
+.error-list {
+  font-size: 12px; color: #aa6644; list-style: none;
+  background: var(--surf); border: 1px solid var(--border);
+  border-radius: 8px; padding: 14px 18px;
+}
+.error-list li { padding: 2px 0; }
+
+.guide {
+  background: var(--surf);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 18px 22px;
+  margin-bottom: 28px;
+  font-size: 13px;
+}
+.guide h3 { color: #aaa; margin-bottom: 10px; font-size: 14px; }
+.guide table { background: transparent; }
+.guide td { border: none; padding: 3px 14px 3px 0; }
+</style>
+</head>
+<body>
+
+<h1>Video Quality Audit</h1>
+<div class="meta">
+  Directory: <strong>W:\Collection\Bond Movies</strong> &ensp;|&ensp;
+  Run: <strong>2026-04-06 21:32:04</strong> &ensp;|&ensp;
+  Score threshold: <strong>25</strong> &ensp;|&ensp;
+  Tool: MediaInfo + Python
+</div>
+
+<div class="cards">
+  <div class="card c-total">   <div class="lbl">Files Scanned</div> <div class="val">27</div></div>
+  <div class="card c-total">   <div class="lbl">1080p Files</div>   <div class="val">27</div></div>
+  <div class="card c-critical"><div class="lbl">Critical ≥60</div>  <div class="val">24</div></div>
+  <div class="card c-high">    <div class="lbl">High 35–59</div>    <div class="val">0</div></div>
+  <div class="card c-medium">  <div class="lbl">Medium 20–34</div>  <div class="val">0</div></div>
+  <div class="card c-clean">   <div class="lbl">Clean &lt;25</div> <div class="val">3</div></div>
+</div>
+
+<div class="score-bar">
+  <div style="width:88.9%;background:var(--critical)">24</div>
+  <div style="width:0.0%;background:var(--high)"></div>
+  <div style="width:0.0%;background:var(--medium)"></div>
+  <div style="width:0.0%;background:var(--low)"></div>
+  <div class="seg-clean" style="flex:1;background:var(--clean)">3</div>
+</div>
+
+<div class="guide">
+  <h3>Scoring Guide</h3>
+  <table>
+    <tr><td><span class="legend-dot" style="background:var(--critical)"></span><strong style="color:var(--critical)">Critical ≥ 60</strong></td><td>Confirmed interpolation or catastrophic bitrate — replace immediately</td></tr>
+    <tr><td><span class="legend-dot" style="background:var(--high)"></span><strong style="color:var(--high)">High 35–59</strong></td><td>Likely genuinely degraded — worth re-ripping if disc is available</td></tr>
+    <tr><td><span class="legend-dot" style="background:var(--medium)"></span><strong style="color:var(--medium)">Medium 20–34</strong></td><td>One or more real concerns — investigate before sourcing a replacement</td></tr>
+    <tr><td><span class="legend-dot" style="background:var(--low)"></span><strong style="color:var(--low)">Low &lt; 20</strong></td><td>Minor concerns only — probably acceptable</td></tr>
+    <tr><td><span class="legend-dot" style="background:var(--clean)"></span><strong style="color:var(--clean)">Clean</strong></td><td>No significant issues detected at threshold 25</td></tr>
+  </table>
+</div>
+
+<h2>Top 10 Priority Files</h2>
+<div class="table-wrap">
+<table>
+  <thead><tr>
+    <th>Filename</th><th>Resolution</th><th>Bitrate&nbsp;Mbps</th>
+    <th>FPS</th><th>Codec</th><th>Audio</th>
+    <th>GB</th><th>bpppf</th><th>Score</th><th>Issues Detected</th>
+  </tr></thead>
+  <tbody><tr class="row-critical  top-row"><td class="filename" title="W:\Collection\Bond Movies\Casino Royal (1967).TS">Casino Royal (1967).TS</td><td class="num">1920×1080</td><td class="num">9.7</td><td class="num">25.000<br><small style="color:#ff4444">orig: 50.000</small></td><td>AVC</td><td>AC-3</td><td class="num">8.88</td><td class="num">0.1872</td><td class="score-cell score-critical">75<br><small>CRITICAL</small></td><td class="issues-cell"><div class="issue-line">CONFIRMED FRAME-RATE CHANGE: source was 50.000 fps, stream is 25.000 fps (×0.50) — almost certainly interpolated</div><div class="issue-line">Low bitrate for AVC: 9.7 Mbps (below 10.0 Mbps — quality may be compromised)</div><div class="issue-line">Lossy audio only: AC-3 — lossless track (TrueHD, DTS-HD MA, FLAC, PCM) absent, suggesting re-encoded or downgraded audio</div></td></tr>
+<tr class="row-critical  top-row"><td class="filename" title="W:\Collection\Bond Movies\A View to a Kill (1985).TS">A View to a Kill (1985).TS</td><td class="num">1920×1080</td><td class="num">9.7</td><td class="num">25.000<br><small style="color:#ff4444">orig: 50.000</small></td><td>AVC</td><td>AC-3</td><td class="num">8.80</td><td class="num">0.1870</td><td class="score-cell score-critical">75<br><small>CRITICAL</small></td><td class="issues-cell"><div class="issue-line">CONFIRMED FRAME-RATE CHANGE: source was 50.000 fps, stream is 25.000 fps (×0.50) — almost certainly interpolated</div><div class="issue-line">Low bitrate for AVC: 9.7 Mbps (below 10.0 Mbps — quality may be compromised)</div><div class="issue-line">Lossy audio only: AC-3 — lossless track (TrueHD, DTS-HD MA, FLAC, PCM) absent, suggesting re-encoded or downgraded audio</div></td></tr>
+<tr class="row-critical  top-row"><td class="filename" title="W:\Collection\Bond Movies\Diamonds are Forever (1971).TS">Diamonds are Forever (1971).TS</td><td class="num">1920×1080</td><td class="num">9.7</td><td class="num">25.000<br><small style="color:#ff4444">orig: 50.000</small></td><td>AVC</td><td>AC-3</td><td class="num">8.05</td><td class="num">0.1867</td><td class="score-cell score-critical">75<br><small>CRITICAL</small></td><td class="issues-cell"><div class="issue-line">CONFIRMED FRAME-RATE CHANGE: source was 50.000 fps, stream is 25.000 fps (×0.50) — almost certainly interpolated</div><div class="issue-line">Low bitrate for AVC: 9.7 Mbps (below 10.0 Mbps — quality may be compromised)</div><div class="issue-line">Lossy audio only: AC-3 — lossless track (TrueHD, DTS-HD MA, FLAC, PCM) absent, suggesting re-encoded or downgraded audio</div></td></tr>
+<tr class="row-critical  top-row"><td class="filename" title="W:\Collection\Bond Movies\Casino Royale (2006).TS">Casino Royale (2006).TS</td><td class="num">1920×1080</td><td class="num">9.5</td><td class="num">25.000<br><small style="color:#ff4444">orig: 50.000</small></td><td>AVC</td><td>AC-3</td><td class="num">10.47</td><td class="num">0.1831</td><td class="score-cell score-critical">75<br><small>CRITICAL</small></td><td class="issues-cell"><div class="issue-line">CONFIRMED FRAME-RATE CHANGE: source was 50.000 fps, stream is 25.000 fps (×0.50) — almost certainly interpolated</div><div class="issue-line">Low bitrate for AVC: 9.5 Mbps (below 10.0 Mbps — quality may be compromised)</div><div class="issue-line">Lossy audio only: AC-3 — lossless track (TrueHD, DTS-HD MA, FLAC, PCM) absent, suggesting re-encoded or downgraded audio</div></td></tr>
+<tr class="row-critical  top-row"><td class="filename" title="W:\Collection\Bond Movies\Die Another Day (2002).TS">Die Another Day (2002).TS</td><td class="num">1920×1080</td><td class="num">9.7</td><td class="num">25.000<br><small style="color:#ff4444">orig: 50.000</small></td><td>AVC</td><td>AC-3</td><td class="num">8.57</td><td class="num">0.1872</td><td class="score-cell score-critical">75<br><small>CRITICAL</small></td><td class="issues-cell"><div class="issue-line">CONFIRMED FRAME-RATE CHANGE: source was 50.000 fps, stream is 25.000 fps (×0.50) — almost certainly interpolated</div><div class="issue-line">Low bitrate for AVC: 9.7 Mbps (below 10.0 Mbps — quality may be compromised)</div><div class="issue-line">Lossy audio only: AC-3 — lossless track (TrueHD, DTS-HD MA, FLAC, PCM) absent, suggesting re-encoded or downgraded audio</div></td></tr>
+<tr class="row-critical  top-row"><td class="filename" title="W:\Collection\Bond Movies\Dr No (1962).TS">Dr No (1962).TS</td><td class="num">1920×1080</td><td class="num">9.4</td><td class="num">25.000<br><small style="color:#ff4444">orig: 50.000</small></td><td>AVC</td><td>AC-3</td><td class="num">8.52</td><td class="num">0.1813</td><td class="score-cell score-critical">75<br><small>CRITICAL</small></td><td class="issues-cell"><div class="issue-line">CONFIRMED FRAME-RATE CHANGE: source was 50.000 fps, stream is 25.000 fps (×0.50) — almost certainly interpolated</div><div class="issue-line">Low bitrate for AVC: 9.4 Mbps (below 10.0 Mbps — quality may be compromised)</div><div class="issue-line">Lossy audio only: AC-3 — lossless track (TrueHD, DTS-HD MA, FLAC, PCM) absent, suggesting re-encoded or downgraded audio</div></td></tr>
+<tr class="row-critical  top-row"><td class="filename" title="W:\Collection\Bond Movies\From Russia with Love (1963).TS">From Russia with Love (1963).TS</td><td class="num">1920×1080</td><td class="num">9.7</td><td class="num">25.000<br><small style="color:#ff4444">orig: 50.000</small></td><td>AVC</td><td>AC-3</td><td class="num">7.47</td><td class="num">0.1871</td><td class="score-cell score-critical">75<br><small>CRITICAL</small></td><td class="issues-cell"><div class="issue-line">CONFIRMED FRAME-RATE CHANGE: source was 50.000 fps, stream is 25.000 fps (×0.50) — almost certainly interpolated</div><div class="issue-line">Low bitrate for AVC: 9.7 Mbps (below 10.0 Mbps — quality may be compromised)</div><div class="issue-line">Lossy audio only: AC-3 — lossless track (TrueHD, DTS-HD MA, FLAC, PCM) absent, suggesting re-encoded or downgraded audio</div></td></tr>
+<tr class="row-critical  top-row"><td class="filename" title="W:\Collection\Bond Movies\For Your Eyes  Only (1981).TS">For Your Eyes  Only (1981).TS</td><td class="num">1920×1080</td><td class="num">9.7</td><td class="num">25.000<br><small style="color:#ff4444">orig: 50.000</small></td><td>AVC</td><td>AC-3</td><td class="num">8.80</td><td class="num">0.1870</td><td class="score-cell score-critical">75<br><small>CRITICAL</small></td><td class="issues-cell"><div class="issue-line">CONFIRMED FRAME-RATE CHANGE: source was 50.000 fps, stream is 25.000 fps (×0.50) — almost certainly interpolated</div><div class="issue-line">Low bitrate for AVC: 9.7 Mbps (below 10.0 Mbps — quality may be compromised)</div><div class="issue-line">Lossy audio only: AC-3 — lossless track (TrueHD, DTS-HD MA, FLAC, PCM) absent, suggesting re-encoded or downgraded audio</div></td></tr>
+<tr class="row-critical  top-row"><td class="filename" title="W:\Collection\Bond Movies\GoldenEye (1995).TS">GoldenEye (1995).TS</td><td class="num">1920×1080</td><td class="num">9.7</td><td class="num">25.000<br><small style="color:#ff4444">orig: 50.000</small></td><td>AVC</td><td>AC-3</td><td class="num">8.58</td><td class="num">0.1865</td><td class="score-cell score-critical">75<br><small>CRITICAL</small></td><td class="issues-cell"><div class="issue-line">CONFIRMED FRAME-RATE CHANGE: source was 50.000 fps, stream is 25.000 fps (×0.50) — almost certainly interpolated</div><div class="issue-line">Low bitrate for AVC: 9.7 Mbps (below 10.0 Mbps — quality may be compromised)</div><div class="issue-line">Lossy audio only: AC-3 — lossless track (TrueHD, DTS-HD MA, FLAC, PCM) absent, suggesting re-encoded or downgraded audio</div></td></tr>
+<tr class="row-critical  top-row"><td class="filename" title="W:\Collection\Bond Movies\License to Kill (1989).TS">License to Kill (1989).TS</td><td class="num">1920×1080</td><td class="num">9.7</td><td class="num">25.000<br><small style="color:#ff4444">orig: 50.000</small></td><td>AVC</td><td>AC-3</td><td class="num">8.60</td><td class="num">0.1872</td><td class="score-cell score-critical">75<br><small>CRITICAL</small></td><td class="issues-cell"><div class="issue-line">CONFIRMED FRAME-RATE CHANGE: source was 50.000 fps, stream is 25.000 fps (×0.50) — almost certainly interpolated</div><div class="issue-line">Low bitrate for AVC: 9.7 Mbps (below 10.0 Mbps — quality may be compromised)</div><div class="issue-line">Lossy audio only: AC-3 — lossless track (TrueHD, DTS-HD MA, FLAC, PCM) absent, suggesting re-encoded or downgraded audio</div></td></tr>
+</tbody>
+</table>
+</div>
+
+<h2>All Flagged Files — 24 file(s) with score ≥ 25</h2>
+
+<div class="legend">
+  <span><span class="legend-dot" style="background:var(--critical)"></span>Critical ≥ 60</span>
+  <span><span class="legend-dot" style="background:var(--high)"></span>High 35–59</span>
+  <span><span class="legend-dot" style="background:var(--medium)"></span>Medium 20–34</span>
+  <span><span class="legend-dot" style="background:var(--low)"></span>Low flagged</span>
+</div>
+
+<div class="filter-bar">
+  <label for="fi">Filter:</label>
+  <input id="fi" type="text" placeholder="filename or issue keyword…" oninput="filterTable()">
+  <span id="filter-count"></span>
+</div>
+
+<div class="table-wrap">
+<table id="main-table">
+  <thead><tr>
+    <th data-sort onclick="sortTable(0)">Filename</th>
+    <th data-sort onclick="sortTable(1)">Resolution</th>
+    <th data-sort onclick="sortTable(2)">Bitrate&nbsp;Mbps</th>
+    <th data-sort onclick="sortTable(3)">FPS</th>
+    <th data-sort onclick="sortTable(4)">Codec</th>
+    <th data-sort onclick="sortTable(5)">Audio</th>
+    <th data-sort onclick="sortTable(6)">GB</th>
+    <th data-sort onclick="sortTable(7)">bpppf</th>
+    <th data-sort onclick="sortTable(8)">Score</th>
+    <th>Issues Detected</th>
+  </tr></thead>
+  <tbody id="main-tbody"><tr class="row-critical"><td class="filename" title="W:\Collection\Bond Movies\Casino Royal (1967).TS">Casino Royal (1967).TS</td><td class="num">1920×1080</td><td class="num">9.7</td><td class="num">25.000<br><small style="color:#ff4444">orig: 50.000</small></td><td>AVC</td><td>AC-3</td><td class="num">8.88</td><td class="num">0.1872</td><td class="score-cell score-critical">75<br><small>CRITICAL</small></td><td class="issues-cell"><div class="issue-line">CONFIRMED FRAME-RATE CHANGE: source was 50.000 fps, stream is 25.000 fps (×0.50) — almost certainly interpolated</div><div class="issue-line">Low bitrate for AVC: 9.7 Mbps (below 10.0 Mbps — quality may be compromised)</div><div class="issue-line">Lossy audio only: AC-3 — lossless track (TrueHD, DTS-HD MA, FLAC, PCM) absent, suggesting re-encoded or downgraded audio</div></td></tr>
+<tr class="row-critical"><td class="filename" title="W:\Collection\Bond Movies\A View to a Kill (1985).TS">A View to a Kill (1985).TS</td><td class="num">1920×1080</td><td class="num">9.7</td><td class="num">25.000<br><small style="color:#ff4444">orig: 50.000</small></td><td>AVC</td><td>AC-3</td><td class="num">8.80</td><td class="num">0.1870</td><td class="score-cell score-critical">75<br><small>CRITICAL</small></td><td class="issues-cell"><div class="issue-line">CONFIRMED FRAME-RATE CHANGE: source was 50.000 fps, stream is 25.000 fps (×0.50) — almost certainly interpolated</div><div class="issue-line">Low bitrate for AVC: 9.7 Mbps (below 10.0 Mbps — quality may be compromised)</div><div class="issue-line">Lossy audio only: AC-3 — lossless track (TrueHD, DTS-HD MA, FLAC, PCM) absent, suggesting re-encoded or downgraded audio</div></td></tr>
+<tr class="row-critical"><td class="filename" title="W:\Collection\Bond Movies\Diamonds are Forever (1971).TS">Diamonds are Forever (1971).TS</td><td class="num">1920×1080</td><td class="num">9.7</td><td class="num">25.000<br><small style="color:#ff4444">orig: 50.000</small></td><td>AVC</td><td>AC-3</td><td class="num">8.05</td><td class="num">0.1867</td><td class="score-cell score-critical">75<br><small>CRITICAL</small></td><td class="issues-cell"><div class="issue-line">CONFIRMED FRAME-RATE CHANGE: source was 50.000 fps, stream is 25.000 fps (×0.50) — almost certainly interpolated</div><div class="issue-line">Low bitrate for AVC: 9.7 Mbps (below 10.0 Mbps — quality may be compromised)</div><div class="issue-line">Lossy audio only: AC-3 — lossless track (TrueHD, DTS-HD MA, FLAC, PCM) absent, suggesting re-encoded or downgraded audio</div></td></tr>
+<tr class="row-critical"><td class="filename" title="W:\Collection\Bond Movies\Casino Royale (2006).TS">Casino Royale (2006).TS</td><td class="num">1920×1080</td><td class="num">9.5</td><td class="num">25.000<br><small style="color:#ff4444">orig: 50.000</small></td><td>AVC</td><td>AC-3</td><td class="num">10.47</td><td class="num">0.1831</td><td class="score-cell score-critical">75<br><small>CRITICAL</small></td><td class="issues-cell"><div class="issue-line">CONFIRMED FRAME-RATE CHANGE: source was 50.000 fps, stream is 25.000 fps (×0.50) — almost certainly interpolated</div><div class="issue-line">Low bitrate for AVC: 9.5 Mbps (below 10.0 Mbps — quality may be compromised)</div><div class="issue-line">Lossy audio only: AC-3 — lossless track (TrueHD, DTS-HD MA, FLAC, PCM) absent, suggesting re-encoded or downgraded audio</div></td></tr>
+<tr class="row-critical"><td class="filename" title="W:\Collection\Bond Movies\Die Another Day (2002).TS">Die Another Day (2002).TS</td><td class="num">1920×1080</td><td class="num">9.7</td><td class="num">25.000<br><small style="color:#ff4444">orig: 50.000</small></td><td>AVC</td><td>AC-3</td><td class="num">8.57</td><td class="num">0.1872</td><td class="score-cell score-critical">75<br><small>CRITICAL</small></td><td class="issues-cell"><div class="issue-line">CONFIRMED FRAME-RATE CHANGE: source was 50.000 fps, stream is 25.000 fps (×0.50) — almost certainly interpolated</div><div class="issue-line">Low bitrate for AVC: 9.7 Mbps (below 10.0 Mbps — quality may be compromised)</div><div class="issue-line">Lossy audio only: AC-3 — lossless track (TrueHD, DTS-HD MA, FLAC, PCM) absent, suggesting re-encoded or downgraded audio</div></td></tr>
+<tr class="row-critical"><td class="filename" title="W:\Collection\Bond Movies\Dr No (1962).TS">Dr No (1962).TS</td><td class="num">1920×1080</td><td class="num">9.4</td><td class="num">25.000<br><small style="color:#ff4444">orig: 50.000</small></td><td>AVC</td><td>AC-3</td><td class="num">8.52</td><td class="num">0.1813</td><td class="score-cell score-critical">75<br><small>CRITICAL</small></td><td class="issues-cell"><div class="issue-line">CONFIRMED FRAME-RATE CHANGE: source was 50.000 fps, stream is 25.000 fps (×0.50) — almost certainly interpolated</div><div class="issue-line">Low bitrate for AVC: 9.4 Mbps (below 10.0 Mbps — quality may be compromised)</div><div class="issue-line">Lossy audio only: AC-3 — lossless track (TrueHD, DTS-HD MA, FLAC, PCM) absent, suggesting re-encoded or downgraded audio</div></td></tr>
+<tr class="row-critical"><td class="filename" title="W:\Collection\Bond Movies\From Russia with Love (1963).TS">From Russia with Love (1963).TS</td><td class="num">1920×1080</td><td class="num">9.7</td><td class="num">25.000<br><small style="color:#ff4444">orig: 50.000</small></td><td>AVC</td><td>AC-3</td><td class="num">7.47</td><td class="num">0.1871</td><td class="score-cell score-critical">75<br><small>CRITICAL</small></td><td class="issues-cell"><div class="issue-line">CONFIRMED FRAME-RATE CHANGE: source was 50.000 fps, stream is 25.000 fps (×0.50) — almost certainly interpolated</div><div class="issue-line">Low bitrate for AVC: 9.7 Mbps (below 10.0 Mbps — quality may be compromised)</div><div class="issue-line">Lossy audio only: AC-3 — lossless track (TrueHD, DTS-HD MA, FLAC, PCM) absent, suggesting re-encoded or downgraded audio</div></td></tr>
+<tr class="row-critical"><td class="filename" title="W:\Collection\Bond Movies\For Your Eyes  Only (1981).TS">For Your Eyes  Only (1981).TS</td><td class="num">1920×1080</td><td class="num">9.7</td><td class="num">25.000<br><small style="color:#ff4444">orig: 50.000</small></td><td>AVC</td><td>AC-3</td><td class="num">8.80</td><td class="num">0.1870</td><td class="score-cell score-critical">75<br><small>CRITICAL</small></td><td class="issues-cell"><div class="issue-line">CONFIRMED FRAME-RATE CHANGE: source was 50.000 fps, stream is 25.000 fps (×0.50) — almost certainly interpolated</div><div class="issue-line">Low bitrate for AVC: 9.7 Mbps (below 10.0 Mbps — quality may be compromised)</div><div class="issue-line">Lossy audio only: AC-3 — lossless track (TrueHD, DTS-HD MA, FLAC, PCM) absent, suggesting re-encoded or downgraded audio</div></td></tr>
+<tr class="row-critical"><td class="filename" title="W:\Collection\Bond Movies\GoldenEye (1995).TS">GoldenEye (1995).TS</td><td class="num">1920×1080</td><td class="num">9.7</td><td class="num">25.000<br><small style="color:#ff4444">orig: 50.000</small></td><td>AVC</td><td>AC-3</td><td class="num">8.58</td><td class="num">0.1865</td><td class="score-cell score-critical">75<br><small>CRITICAL</small></td><td class="issues-cell"><div class="issue-line">CONFIRMED FRAME-RATE CHANGE: source was 50.000 fps, stream is 25.000 fps (×0.50) — almost certainly interpolated</div><div class="issue-line">Low bitrate for AVC: 9.7 Mbps (below 10.0 Mbps — quality may be compromised)</div><div class="issue-line">Lossy audio only: AC-3 — lossless track (TrueHD, DTS-HD MA, FLAC, PCM) absent, suggesting re-encoded or downgraded audio</div></td></tr>
+<tr class="row-critical"><td class="filename" title="W:\Collection\Bond Movies\License to Kill (1989).TS">License to Kill (1989).TS</td><td class="num">1920×1080</td><td class="num">9.7</td><td class="num">25.000<br><small style="color:#ff4444">orig: 50.000</small></td><td>AVC</td><td>AC-3</td><td class="num">8.60</td><td class="num">0.1872</td><td class="score-cell score-critical">75<br><small>CRITICAL</small></td><td class="issues-cell"><div class="issue-line">CONFIRMED FRAME-RATE CHANGE: source was 50.000 fps, stream is 25.000 fps (×0.50) — almost certainly interpolated</div><div class="issue-line">Low bitrate for AVC: 9.7 Mbps (below 10.0 Mbps — quality may be compromised)</div><div class="issue-line">Lossy audio only: AC-3 — lossless track (TrueHD, DTS-HD MA, FLAC, PCM) absent, suggesting re-encoded or downgraded audio</div></td></tr>
+<tr class="row-critical"><td class="filename" title="W:\Collection\Bond Movies\Goldfinger (1964).TS">Goldfinger (1964).TS</td><td class="num">1920×1080</td><td class="num">9.5</td><td class="num">25.000<br><small style="color:#ff4444">orig: 50.000</small></td><td>AVC</td><td>AC-3</td><td class="num">7.70</td><td class="num">0.1834</td><td class="score-cell score-critical">75<br><small>CRITICAL</small></td><td class="issues-cell"><div class="issue-line">CONFIRMED FRAME-RATE CHANGE: source was 50.000 fps, stream is 25.000 fps (×0.50) — almost certainly interpolated</div><div class="issue-line">Low bitrate for AVC: 9.5 Mbps (below 10.0 Mbps — quality may be compromised)</div><div class="issue-line">Lossy audio only: AC-3 — lossless track (TrueHD, DTS-HD MA, FLAC, PCM) absent, suggesting re-encoded or downgraded audio</div></td></tr>
+<tr class="row-critical"><td class="filename" title="W:\Collection\Bond Movies\Moonraker (1979).TS">Moonraker (1979).TS</td><td class="num">1920×1080</td><td class="num">9.7</td><td class="num">25.000<br><small style="color:#ff4444">orig: 50.000</small></td><td>AVC</td><td>AC-3</td><td class="num">7.92</td><td class="num">0.1869</td><td class="score-cell score-critical">75<br><small>CRITICAL</small></td><td class="issues-cell"><div class="issue-line">CONFIRMED FRAME-RATE CHANGE: source was 50.000 fps, stream is 25.000 fps (×0.50) — almost certainly interpolated</div><div class="issue-line">Low bitrate for AVC: 9.7 Mbps (below 10.0 Mbps — quality may be compromised)</div><div class="issue-line">Lossy audio only: AC-3 — lossless track (TrueHD, DTS-HD MA, FLAC, PCM) absent, suggesting re-encoded or downgraded audio</div></td></tr>
+<tr class="row-critical"><td class="filename" title="W:\Collection\Bond Movies\Never Say Never Again (1983).TS">Never Say Never Again (1983).TS</td><td class="num">1920×1080</td><td class="num">9.7</td><td class="num">25.000<br><small style="color:#ff4444">orig: 50.000</small></td><td>AVC</td><td>AC-3</td><td class="num">9.12</td><td class="num">0.1866</td><td class="score-cell score-critical">75<br><small>CRITICAL</small></td><td class="issues-cell"><div class="issue-line">CONFIRMED FRAME-RATE CHANGE: source was 50.000 fps, stream is 25.000 fps (×0.50) — almost certainly interpolated</div><div class="issue-line">Low bitrate for AVC: 9.7 Mbps (below 10.0 Mbps — quality may be compromised)</div><div class="issue-line">Lossy audio only: AC-3 — lossless track (TrueHD, DTS-HD MA, FLAC, PCM) absent, suggesting re-encoded or downgraded audio</div></td></tr>
+<tr class="row-critical"><td class="filename" title="W:\Collection\Bond Movies\Octopussy (1983).TS">Octopussy (1983).TS</td><td class="num">1920×1080</td><td class="num">9.7</td><td class="num">25.000<br><small style="color:#ff4444">orig: 50.000</small></td><td>AVC</td><td>AC-3</td><td class="num">8.67</td><td class="num">0.1870</td><td class="score-cell score-critical">75<br><small>CRITICAL</small></td><td class="issues-cell"><div class="issue-line">CONFIRMED FRAME-RATE CHANGE: source was 50.000 fps, stream is 25.000 fps (×0.50) — almost certainly interpolated</div><div class="issue-line">Low bitrate for AVC: 9.7 Mbps (below 10.0 Mbps — quality may be compromised)</div><div class="issue-line">Lossy audio only: AC-3 — lossless track (TrueHD, DTS-HD MA, FLAC, PCM) absent, suggesting re-encoded or downgraded audio</div></td></tr>
+<tr class="row-critical"><td class="filename" title="W:\Collection\Bond Movies\On her majestys secret service (1969).TS">On her majestys secret service (1969).TS</td><td class="num">1920×1080</td><td class="num">9.5</td><td class="num">25.000<br><small style="color:#ff4444">orig: 50.000</small></td><td>AVC</td><td>AC-3</td><td class="num">10.13</td><td class="num">0.1829</td><td class="score-cell score-critical">75<br><small>CRITICAL</small></td><td class="issues-cell"><div class="issue-line">CONFIRMED FRAME-RATE CHANGE: source was 50.000 fps, stream is 25.000 fps (×0.50) — almost certainly interpolated</div><div class="issue-line">Low bitrate for AVC: 9.5 Mbps (below 10.0 Mbps — quality may be compromised)</div><div class="issue-line">Lossy audio only: AC-3 — lossless track (TrueHD, DTS-HD MA, FLAC, PCM) absent, suggesting re-encoded or downgraded audio</div></td></tr>
+<tr class="row-critical"><td class="filename" title="W:\Collection\Bond Movies\The World is not enough (1999).TS">The World is not enough (1999).TS</td><td class="num">1920×1080</td><td class="num">9.7</td><td class="num">25.000<br><small style="color:#ff4444">orig: 50.000</small></td><td>AVC</td><td>AC-3</td><td class="num">8.46</td><td class="num">0.1870</td><td class="score-cell score-critical">75<br><small>CRITICAL</small></td><td class="issues-cell"><div class="issue-line">CONFIRMED FRAME-RATE CHANGE: source was 50.000 fps, stream is 25.000 fps (×0.50) — almost certainly interpolated</div><div class="issue-line">Low bitrate for AVC: 9.7 Mbps (below 10.0 Mbps — quality may be compromised)</div><div class="issue-line">Lossy audio only: AC-3 — lossless track (TrueHD, DTS-HD MA, FLAC, PCM) absent, suggesting re-encoded or downgraded audio</div></td></tr>
+<tr class="row-critical"><td class="filename" title="W:\Collection\Bond Movies\The Living Daylights (1987).TS">The Living Daylights (1987).TS</td><td class="num">1920×1080</td><td class="num">9.7</td><td class="num">25.000<br><small style="color:#ff4444">orig: 50.000</small></td><td>AVC</td><td>AC-3</td><td class="num">8.58</td><td class="num">0.1871</td><td class="score-cell score-critical">75<br><small>CRITICAL</small></td><td class="issues-cell"><div class="issue-line">CONFIRMED FRAME-RATE CHANGE: source was 50.000 fps, stream is 25.000 fps (×0.50) — almost certainly interpolated</div><div class="issue-line">Low bitrate for AVC: 9.7 Mbps (below 10.0 Mbps — quality may be compromised)</div><div class="issue-line">Lossy audio only: AC-3 — lossless track (TrueHD, DTS-HD MA, FLAC, PCM) absent, suggesting re-encoded or downgraded audio</div></td></tr>
+<tr class="row-critical"><td class="filename" title="W:\Collection\Bond Movies\The spy who loved me (1977).TS">The spy who loved me (1977).TS</td><td class="num">1920×1080</td><td class="num">9.7</td><td class="num">25.000<br><small style="color:#ff4444">orig: 50.000</small></td><td>AVC</td><td>AC-3</td><td class="num">8.46</td><td class="num">0.1871</td><td class="score-cell score-critical">75<br><small>CRITICAL</small></td><td class="issues-cell"><div class="issue-line">CONFIRMED FRAME-RATE CHANGE: source was 50.000 fps, stream is 25.000 fps (×0.50) — almost certainly interpolated</div><div class="issue-line">Low bitrate for AVC: 9.7 Mbps (below 10.0 Mbps — quality may be compromised)</div><div class="issue-line">Lossy audio only: AC-3 — lossless track (TrueHD, DTS-HD MA, FLAC, PCM) absent, suggesting re-encoded or downgraded audio</div></td></tr>
+<tr class="row-critical"><td class="filename" title="W:\Collection\Bond Movies\The Man with the Golden Gun (1974).TS">The Man with the Golden Gun (1974).TS</td><td class="num">1920×1080</td><td class="num">9.7</td><td class="num">25.000<br><small style="color:#ff4444">orig: 50.000</small></td><td>AVC</td><td>AC-3</td><td class="num">8.27</td><td class="num">0.1872</td><td class="score-cell score-critical">75<br><small>CRITICAL</small></td><td class="issues-cell"><div class="issue-line">CONFIRMED FRAME-RATE CHANGE: source was 50.000 fps, stream is 25.000 fps (×0.50) — almost certainly interpolated</div><div class="issue-line">Low bitrate for AVC: 9.7 Mbps (below 10.0 Mbps — quality may be compromised)</div><div class="issue-line">Lossy audio only: AC-3 — lossless track (TrueHD, DTS-HD MA, FLAC, PCM) absent, suggesting re-encoded or downgraded audio</div></td></tr>
+<tr class="row-critical"><td class="filename" title="W:\Collection\Bond Movies\Thunderball (1965).TS">Thunderball (1965).TS</td><td class="num">1920×1080</td><td class="num">9.7</td><td class="num">25.000<br><small style="color:#ff4444">orig: 50.000</small></td><td>AVC</td><td>AC-3</td><td class="num">8.48</td><td class="num">0.1877</td><td class="score-cell score-critical">75<br><small>CRITICAL</small></td><td class="issues-cell"><div class="issue-line">CONFIRMED FRAME-RATE CHANGE: source was 50.000 fps, stream is 25.000 fps (×0.50) — almost certainly interpolated</div><div class="issue-line">Low bitrate for AVC: 9.7 Mbps (below 10.0 Mbps — quality may be compromised)</div><div class="issue-line">Lossy audio only: AC-3 — lossless track (TrueHD, DTS-HD MA, FLAC, PCM) absent, suggesting re-encoded or downgraded audio</div></td></tr>
+<tr class="row-critical"><td class="filename" title="W:\Collection\Bond Movies\Tomorrow Never Dies (1997).TS">Tomorrow Never Dies (1997).TS</td><td class="num">1920×1080</td><td class="num">9.7</td><td class="num">25.000<br><small style="color:#ff4444">orig: 50.000</small></td><td>AVC</td><td>AC-3</td><td class="num">7.71</td><td class="num">0.1872</td><td class="score-cell score-critical">75<br><small>CRITICAL</small></td><td class="issues-cell"><div class="issue-line">CONFIRMED FRAME-RATE CHANGE: source was 50.000 fps, stream is 25.000 fps (×0.50) — almost certainly interpolated</div><div class="issue-line">Low bitrate for AVC: 9.7 Mbps (below 10.0 Mbps — quality may be compromised)</div><div class="issue-line">Lossy audio only: AC-3 — lossless track (TrueHD, DTS-HD MA, FLAC, PCM) absent, suggesting re-encoded or downgraded audio</div></td></tr>
+<tr class="row-critical"><td class="filename" title="W:\Collection\Bond Movies\You Only Live Twice (1967).TS">You Only Live Twice (1967).TS</td><td class="num">1920×1080</td><td class="num">9.7</td><td class="num">25.000<br><small style="color:#ff4444">orig: 50.000</small></td><td>AVC</td><td>AC-3</td><td class="num">7.57</td><td class="num">0.1872</td><td class="score-cell score-critical">75<br><small>CRITICAL</small></td><td class="issues-cell"><div class="issue-line">CONFIRMED FRAME-RATE CHANGE: source was 50.000 fps, stream is 25.000 fps (×0.50) — almost certainly interpolated</div><div class="issue-line">Low bitrate for AVC: 9.7 Mbps (below 10.0 Mbps — quality may be compromised)</div><div class="issue-line">Lossy audio only: AC-3 — lossless track (TrueHD, DTS-HD MA, FLAC, PCM) absent, suggesting re-encoded or downgraded audio</div></td></tr>
+<tr class="row-critical"><td class="filename" title="W:\Collection\Bond Movies\Quantum of Solace (2008).m2ts">Quantum of Solace (2008).m2ts</td><td class="num">1920×1080</td><td class="num">11.3</td><td class="num">25.000<br><small style="color:#ff4444">orig: 50.000</small></td><td>AVC</td><td>AC-3</td><td class="num">7.77</td><td class="num">0.2177</td><td class="score-cell score-critical">65<br><small>CRITICAL</small></td><td class="issues-cell"><div class="issue-line">CONFIRMED FRAME-RATE CHANGE: source was 50.000 fps, stream is 25.000 fps (×0.50) — almost certainly interpolated</div><div class="issue-line">Lossy audio only: AC-3 — lossless track (TrueHD, DTS-HD MA, FLAC, PCM) absent, suggesting re-encoded or downgraded audio</div></td></tr>
+<tr class="row-critical"><td class="filename" title="W:\Collection\Bond Movies\Spectre (2015).m2ts">Spectre (2015).m2ts</td><td class="num">1920×1080</td><td class="num">11.8</td><td class="num">25.000<br><small style="color:#ff4444">orig: 50.000</small></td><td>AVC</td><td>AC-3</td><td class="num">11.21</td><td class="num">0.2276</td><td class="score-cell score-critical">65<br><small>CRITICAL</small></td><td class="issues-cell"><div class="issue-line">CONFIRMED FRAME-RATE CHANGE: source was 50.000 fps, stream is 25.000 fps (×0.50) — almost certainly interpolated</div><div class="issue-line">Lossy audio only: AC-3 — lossless track (TrueHD, DTS-HD MA, FLAC, PCM) absent, suggesting re-encoded or downgraded audio</div></td></tr>
+</tbody>
+</table>
+</div>
+
+
+
+<script>
+let sortCol = 8, sortAsc = false;
+function sortTable(col) {
+  const tbody = document.getElementById('main-tbody');
+  const rows  = Array.from(tbody.querySelectorAll('tr'));
+  sortAsc = (sortCol === col) ? !sortAsc : false;
+  sortCol = col;
+  rows.sort((a, b) => {
+    const va = a.cells[col].innerText.trim().split('\n')[0];
+    const vb = b.cells[col].innerText.trim().split('\n')[0];
+    const na = parseFloat(va), nb = parseFloat(vb);
+    const cmp = (!isNaN(na) && !isNaN(nb)) ? na - nb : va.localeCompare(vb);
+    return sortAsc ? cmp : -cmp;
+  });
+  rows.forEach(r => tbody.appendChild(r));
+}
+
+function filterTable() {
+  const q    = document.getElementById('fi').value.toLowerCase();
+  const rows = document.querySelectorAll('#main-tbody tr');
+  let shown  = 0;
+  rows.forEach(r => {
+    const match = r.innerText.toLowerCase().includes(q);
+    r.style.display = match ? '' : 'none';
+    if (match) shown++;
+  });
+  document.getElementById('filter-count').textContent =
+    q ? `Showing ${shown} of ${rows.length} files` : '';
+}
+</script>
+</body>
+</html>

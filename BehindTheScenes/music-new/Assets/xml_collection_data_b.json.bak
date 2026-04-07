@@ -374,28 +374,6 @@
         "TheMovieDB Series ID": ""
     },
     {
-        "Filename": "W:\\Collection\\1960s 70s 80s\\El Cid (1961).m2ts",
-        "Year": "1961",
-        "Genre": "Action;Drama;History;Romance",
-        "Keywords": "Spain;Historical Figure;Epic;Devoutness;Honor;11th Century",
-        "Actors": [
-            "Charlton Heston",
-            "Sophia Loren",
-            "Raf Vallone",
-            "Geneviève Page",
-            "John Fraser"
-        ],
-        "Director": "Anthony Mann",
-        "Name": "El Cid",
-        "Series": "",
-        "IMDb ID": "tt0054847",
-        "Media Sub Type": "Movie",
-        "Season": "",
-        "Episode": "",
-        "TheTVDB Series ID": "",
-        "TheMovieDB Series ID": ""
-    },
-    {
         "Filename": "W:\\Collection\\1960s 70s 80s\\First Blood (1982).M2TS",
         "Year": "1982",
         "Genre": "Action;Adventure;Thriller",
@@ -3492,6 +3470,28 @@
         "TheMovieDB Series ID": ""
     },
     {
+        "Filename": "W:\\Collection\\2000s\\Master and Commander (2003).mkv",
+        "Year": "2003",
+        "Genre": "Adventure;Drama;War",
+        "Keywords": "Ship;Navy;Based On Novel Or Book;Surgeon;Royal Navy;Historical Fiction;Period Drama;Napoleonic Wars;Naturalist;Frigate;Self Surgery;Sea Battle;Weevil;High Seas;Naval Warfare;Aggressive;19th Century;Galapagos Islands;Naval Battle;English Navy;Commanding;Surprise-Ending",
+        "Actors": [
+            "Russell Crowe",
+            "Paul Bettany",
+            "James D'Arcy",
+            "Robert Pugh",
+            "David Threlfall"
+        ],
+        "Director": "Peter Weir",
+        "Name": "Master and Commander",
+        "Series": "",
+        "IMDb ID": "tt0311113",
+        "Media Sub Type": "Movie",
+        "Season": "",
+        "Episode": "",
+        "TheTVDB Series ID": "",
+        "TheMovieDB Series ID": ""
+    },
+    {
         "Filename": "W:\\Collection\\2000s\\Matrix Revolutions (2003).TS",
         "Year": "2003",
         "Genre": "Adventure;Action;Thriller;Science Fiction",
@@ -6336,8 +6336,8 @@
         "TheMovieDB Series ID": ""
     },
     {
-        "Filename": "W:\\Collection\\Bond Movies\\No Time to Die.mkv",
-        "Year": "",
+        "Filename": "W:\\Collection\\Bond Movies\\No Time to Die (2021).mkv",
+        "Year": "2021",
         "Genre": "Adventure;Action;Thriller",
         "Keywords": "Poison;Spy;Based On Novel Or Book;Forgiveness;Mi6;Family;British Secret Service;Parents;Global Threat;Nanobots;James Bond;Film of a Book",
         "Actors": [
