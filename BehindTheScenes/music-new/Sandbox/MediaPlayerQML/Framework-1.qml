@@ -138,7 +138,7 @@ ApplicationWindow {
 
         function onTestFolderClicked() {
             if (typeof splash !== "undefined") splash.deactivate()
-            contentLoader.setSource("WorkbenchView.qml")
+            contentLoader.setSource("FolderTestView.qml")
             ffmpegBackend.checkFFmpeg()
             ffmpegBackend.testFolder(workbenchMode)
         }

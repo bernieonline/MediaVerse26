@@ -65,6 +65,12 @@ class FFmpegBackend(QObject):
     # File Details
     fileDetailsReady = Signal(str, str)   # (header, body)
 
+    # Folder test
+    folderTestStarted     = Signal(int)        # total file count
+    folderTestFileStarted = Signal(str, int, int)  # (filename, current, total)
+    folderTestFileDone    = Signal(str, bool)  # (filename, had_errors)
+    folderTestComplete    = Signal(str)        # summary text
+
     # Install / download
     ffmpegMissing    = Signal()
     downloadProgress = Signal(int)        # 0–100
@@ -82,6 +88,7 @@ class FFmpegBackend(QObject):
         self._compare_proc = None
         self._repair_proc  = None
         self._details_file: str = ""
+        self._folder_cancelled: bool = False
 
     # ── Install check ─────────────────────────────────────────────────────────
 
@@ -461,6 +468,223 @@ class FFmpegBackend(QObject):
         try:
             out_path.write_text(text, encoding="utf-8")
             self.statusMessage.emit(f"Saved: {out_path.name}")
+        except OSError as e:
+            self.testError.emit(f"Save failed: {e}")
+
+    # ── Load Saved Report ─────────────────────────────────────────────────────
+
+    @Slot()
+    def loadReport(self):
+        """Load a previously saved _ffmpeg.txt report into the test panel."""
+        txt_path, _ = QFileDialog.getOpenFileName(
+            None, "Load FFMPEG Report", "",
+            "FFMPEG Reports (*_ffmpeg.txt);;Text Files (*.txt);;All Files (*.*)"
+        )
+        if not txt_path:
+            return
+
+        try:
+            text = Path(txt_path).read_text(encoding="utf-8")
+        except OSError as e:
+            self.testError.emit(f"Cannot read report: {e}")
+            return
+
+        # Split at the ─── divider line
+        lines     = text.splitlines()
+        div_idx   = next(
+            (i for i, ln in enumerate(lines) if ln.startswith("\u2500" * 10)),
+            len(lines) - 1,
+        )
+        header = "\n".join(lines[: div_idx + 1])
+        body   = "\n".join(lines[div_idx + 1 :]).lstrip("\n")
+
+        # Restore _current_file so Save still works (looks for original video file)
+        p = Path(txt_path)
+        stem = p.stem  # e.g. "Rocky (1976)_ffmpeg"
+        if stem.endswith("_ffmpeg"):
+            video_stem = stem[:-7]  # "Rocky (1976)"
+            for ext in VIDEO_EXTENSIONS:
+                candidate = p.parent / (video_stem + ext)
+                if candidate.exists():
+                    self._current_file = str(candidate)
+                    break
+            else:
+                self._current_file = txt_path  # fallback: save back to txt
+        else:
+            self._current_file = txt_path
+
+        self.statusMessage.emit(f"Loaded: {p.name}")
+        self.reportReady.emit(header, body)
+
+    # ── Test Folder ───────────────────────────────────────────────────────────
+
+    @Slot(str)
+    def testFolder(self, mode: str = "standard"):
+        """Open folder dialog, test all video files sequentially, auto-save each report."""
+        if not self._ffmpeg_exe:
+            self.checkFFmpeg()
+            if not self._ffmpeg_exe:
+                return
+
+        folder = QFileDialog.getExistingDirectory(None, "Select Folder to Test")
+        if not folder:
+            return
+
+        files = sorted(
+            [f for f in Path(folder).iterdir()
+             if f.is_file() and f.suffix.lower() in VIDEO_EXTENSIONS],
+            key=lambda f: f.name.lower(),
+        )
+
+        if not files:
+            self.statusMessage.emit("No video files found in folder.")
+            return
+
+        self._folder_cancelled = False
+        self.statusMessage.emit(f"Folder test: {len(files)} file(s) found\u2026")
+        self.folderTestStarted.emit(len(files))
+        threading.Thread(
+            target=self._do_folder_test, args=(files, mode, folder), daemon=True
+        ).start()
+
+    def _do_folder_test(self, files: list, mode: str, folder: str):
+        from error_library import filter_lines
+
+        total = len(files)
+        error_files: list[str] = []
+
+        err_flags = ["-err_detect", "+careful"] if mode == "thorough" else []
+
+        for i, fp in enumerate(files):
+            if self._folder_cancelled:
+                self.statusMessage.emit("Folder test cancelled.")
+                self.folderTestComplete.emit("")
+                return
+
+            self.folderTestFileStarted.emit(fp.name, i + 1, total)
+
+            # ── Run ffmpeg test (blocking) ─────────────────────────────────────
+            cmd = (
+                [self._ffmpeg_exe, "-v", "error", "-nostdin"]
+                + err_flags
+                + ["-i", str(fp), "-map", "0", "-f", "null", "-"]
+            )
+            import subprocess as _sp
+            try:
+                result = _sp.run(
+                    cmd, capture_output=True, text=True,
+                    encoding="utf-8", errors="replace"
+                )
+                raw_lines = result.stderr.splitlines(keepends=True)
+                filtered  = filter_lines(raw_lines)
+                body      = "\n".join(filtered) if filtered else "\u2713 No errors detected"
+            except Exception as exc:
+                body = f"\u2717 Test failed: {exc}"
+                filtered = [body]
+
+            had_errors = bool(filtered and filtered[0] != "\u2713 No errors detected")
+            if had_errors:
+                error_files.append(fp.name)
+
+            # ── Auto-save per-file report ──────────────────────────────────────
+            try:
+                size_str     = _fmt_size(fp.stat().st_size)
+                duration_str = _get_duration_str(str(fp), self._ffmpeg_exe)
+            except OSError:
+                size_str     = "unknown"
+                duration_str = "unknown"
+
+            report_header = (
+                f"File:     {fp.name}\n"
+                f"Size:     {size_str}\n"
+                f"Duration: {duration_str}\n"
+                f"Tested:   {datetime.now().strftime('%Y-%m-%d  %H:%M')}\n"
+                f"Mode:     {mode.capitalize()}\n"
+                f"Part of folder test\n"
+                f"{'─' * 45}"
+            )
+            out_path = fp.parent / (fp.stem + "_ffmpeg.txt")
+            try:
+                out_path.write_text(
+                    report_header + "\n" + body, encoding="utf-8"
+                )
+            except OSError:
+                pass  # don't abort the whole run for a save failure
+
+            self.folderTestFileDone.emit(fp.name, had_errors)
+            self.progressChanged.emit(int((i + 1) / total * 100))
+
+        # ── Build and emit summary ─────────────────────────────────────────────
+        self.progressChanged.emit(100)
+        clean_count = total - len(error_files)
+        summary = self._build_folder_summary(
+            folder, files, error_files, mode, clean_count
+        )
+
+        # Auto-save summary to the tested folder
+        ts      = datetime.now().strftime("%Y%m%d_%H%M")
+        sum_out = Path(folder) / f"_folder_test_{ts}.txt"
+        try:
+            sum_out.write_text(summary, encoding="utf-8")
+        except OSError:
+            pass
+
+        self.statusMessage.emit(
+            f"Folder test complete \u2014 {total} files, {len(error_files)} with errors."
+        )
+        self.folderTestComplete.emit(summary)
+
+    def _build_folder_summary(
+        self, folder: str, files: list, error_files: list, mode: str, clean_count: int
+    ) -> str:
+        total   = len(files)
+        divider = "\u2500" * 45
+        lines   = [
+            "FOLDER TEST REPORT",
+            f"Folder:  {folder}",
+            f"Tested:  {datetime.now().strftime('%Y-%m-%d  %H:%M')}",
+            f"Mode:    {mode.capitalize()}",
+            f"Files:   {total} tested",
+            f"Clean:   {clean_count}  \u2713",
+            f"Errors:  {len(error_files)}  {'✗' if error_files else '✓'}",
+            divider,
+        ]
+        for i, fp in enumerate(files):
+            name   = fp.name
+            status = "\u2717 errors" if name in error_files else "\u2713 Clean"
+            lines.append(f" {i+1:>3}. {name:<55} {status}")
+
+        if error_files:
+            lines += ["", divider, "Files with errors:"]
+            for name in error_files:
+                lines.append(f"  \u2022 {name}")
+
+        return "\n".join(lines)
+
+    @Slot()
+    def cancelFolderTest(self):
+        self._folder_cancelled = True
+        self.statusMessage.emit("Cancelling\u2026")
+
+    @Slot(str)
+    def saveFolderSummary(self, text: str):
+        """Save the folder summary to the folder (already auto-saved; this is for manual re-save)."""
+        if not text:
+            return
+        # Extract folder from first lines of the summary
+        folder = ""
+        for line in text.splitlines():
+            if line.startswith("Folder:"):
+                folder = line.split(":", 1)[1].strip()
+                break
+        if not folder:
+            self.testError.emit("Cannot determine folder from summary.")
+            return
+        ts      = datetime.now().strftime("%Y%m%d_%H%M")
+        out     = Path(folder) / f"_folder_test_{ts}.txt"
+        try:
+            out.write_text(text, encoding="utf-8")
+            self.statusMessage.emit(f"Summary saved: {out.name}")
         except OSError as e:
             self.testError.emit(f"Save failed: {e}")
 

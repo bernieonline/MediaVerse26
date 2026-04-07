@@ -2,10 +2,10 @@ import QtQuick 2.15
 import QtQuick.Controls 2.15
 
 // ─────────────────────────────────────────────────────────────────────────────
-//  WorkbenchView — FFMPEG test report panel
+//  FolderTestView — FFMPEG folder test panel
 //
-//  Loaded into the RIGHT third of the display area when a test runs.
-//  Left two-thirds stay available for splash / landing content.
+//  Loaded into the right 38% when the Test Folder button is clicked.
+//  Shows per-file progress as each test completes, then a final summary.
 // ─────────────────────────────────────────────────────────────────────────────
 
 Item {
@@ -17,9 +17,12 @@ Item {
     readonly property color panelBg:   "#0d1a08"
     readonly property color borderCol: "#39FF14"
 
-    // true while ffmpeg is running; false when report received or idle
-    property bool testing:   false
-    property bool analysing: false
+    property bool running:   false   // true while folder test is in progress
+    property bool done:      false   // true when folderTestComplete received
+    property int  fileTotal: 0
+    property int  fileCurrent: 0
+    property string currentFileName: ""
+    property string summaryText: ""
 
     // ── Report panel — right 38% ──────────────────────────────────────────────
     Rectangle {
@@ -33,8 +36,8 @@ Item {
         border.color: root.borderCol
         border.width: 1
 
-        // Visible as soon as the view loads
-        property bool ready: true
+        // Slide in when test starts
+        property bool ready: false
         anchors.rightMargin: ready ? 0 : -width
         Behavior on anchors.rightMargin {
             NumberAnimation { duration: 320; easing.type: Easing.OutCubic }
@@ -51,7 +54,7 @@ Item {
 
             Text {
                 anchors.verticalCenter: parent.verticalCenter
-                text: "TEST REPORT"
+                text: "FOLDER TEST"
                 font.family:        "Segoe UI"
                 font.pixelSize:     15
                 font.bold:          true
@@ -67,30 +70,41 @@ Item {
                 spacing: 0
 
                 property string mode: "standard"
+                enabled: !root.running
 
                 Rectangle {
                     width: 78; height: 22; radius: 4
                     color:        modeToggle.mode === "standard" ? root.dimGreen : "transparent"
                     border.color: root.borderCol; border.width: 1
+                    opacity: modeToggle.enabled ? 1.0 : 0.4
                     Text {
                         anchors.centerIn: parent
                         text: "Standard"
                         font.pixelSize: 11; font.family: "Segoe UI"
                         color: root.green
                     }
-                    MouseArea { anchors.fill: parent; onClicked: modeToggle.mode = "standard" }
+                    MouseArea {
+                        anchors.fill: parent
+                        enabled: modeToggle.enabled
+                        onClicked: modeToggle.mode = "standard"
+                    }
                 }
                 Rectangle {
                     width: 78; height: 22; radius: 4
                     color:        modeToggle.mode === "thorough" ? root.dimGreen : "transparent"
                     border.color: root.borderCol; border.width: 1
+                    opacity: modeToggle.enabled ? 1.0 : 0.4
                     Text {
                         anchors.centerIn: parent
                         text: "Thorough"
                         font.pixelSize: 11; font.family: "Segoe UI"
                         color: root.green
                     }
-                    MouseArea { anchors.fill: parent; onClicked: modeToggle.mode = "thorough" }
+                    MouseArea {
+                        anchors.fill: parent
+                        enabled: modeToggle.enabled
+                        onClicked: modeToggle.mode = "thorough"
+                    }
                 }
             }
         }
@@ -104,14 +118,32 @@ Item {
             height: 1; color: root.borderCol; opacity: 0.4
         }
 
-        // ── Progress bar (visible while testing) ─────────────────────────────
+        // ── Status line ──────────────────────────────────────────────────────
+        Text {
+            id: statusLine
+            anchors.top:        divider.bottom; anchors.topMargin: 8
+            anchors.left:       parent.left;    anchors.leftMargin:  14
+            anchors.right:      parent.right;   anchors.rightMargin: 14
+            height: 18
+            text: {
+                if (root.done)    return "Complete \u2014 see summary below"
+                if (root.running) return "Testing " + root.fileCurrent + " / " + root.fileTotal + ":  " + root.currentFileName
+                return "Select a folder to begin\u2026"
+            }
+            font.family:    "Segoe UI"
+            font.pixelSize: 12
+            color: root.done ? "#b0d4a0" : root.green
+            elide: Text.ElideMiddle
+        }
+
+        // ── Overall progress bar ──────────────────────────────────────────────
         Item {
             id: progressRow
-            anchors.top:   divider.bottom; anchors.topMargin: 6
-            anchors.left:  parent.left;    anchors.leftMargin:  14
-            anchors.right: parent.right;   anchors.rightMargin: 14
-            height: visible ? 26 : 0
-            visible: root.testing
+            anchors.top:   statusLine.bottom; anchors.topMargin: 6
+            anchors.left:  parent.left;       anchors.leftMargin:  14
+            anchors.right: parent.right;      anchors.rightMargin: 14
+            height: 20
+            visible: root.running || root.done
 
             ProgressBar {
                 id: progressBar
@@ -119,19 +151,18 @@ Item {
                 anchors.right:          pctLabel.left
                 anchors.rightMargin:    6
                 anchors.verticalCenter: parent.verticalCenter
-                height: 20
+                height: 16
                 from: 0; to: 100; value: 0
-                // indeterminate when we have no duration info (value stays 0)
-                indeterminate: value === 0
 
                 background: Rectangle {
                     color: "#1a1a1a"; radius: 3
                     border.color: root.borderCol; border.width: 1
                 }
                 contentItem: Item {
-                    // real fill bar
+                    clip: true
+                    // Filled portion — files completed so far
                     Rectangle {
-                        visible: !progressBar.indeterminate
+                        id: fillBar
                         width:  progressBar.visualPosition * progressBar.width
                         height: parent.height; radius: 3
                         gradient: Gradient {
@@ -140,18 +171,30 @@ Item {
                             GradientStop { position: 1.0; color: root.green }
                         }
                     }
-                    // pulsing bar for indeterminate
+                    // Pulse strip — sweeps across the unfilled portion while a file is running
                     Rectangle {
-                        id: pulseBar
-                        visible: progressBar.indeterminate
-                        width:  parent.width * 0.35
-                        height: parent.height; radius: 3
-                        color:  root.green; opacity: 0.85
+                        id: pulseStrip
+                        visible: root.running
+                        x: fillBar.width - width / 2
+                        width:  parent.width * 0.22
+                        height: parent.height
+                        radius: 3
+                        color:  Qt.rgba(0.22, 1, 0.08, 0.55)
 
                         SequentialAnimation on x {
-                            running: pulseBar.visible
+                            running: pulseStrip.visible
                             loops:   Animation.Infinite
-                            NumberAnimation { from: -pulseBar.width; to: progressBar.width; duration: 1200; easing.type: Easing.InOutSine }
+                            NumberAnimation {
+                                from:     fillBar.width - pulseStrip.width / 2
+                                to:       progressBar.width
+                                duration: 1100
+                                easing.type: Easing.InOutSine
+                            }
+                            NumberAnimation {
+                                from:     progressBar.width
+                                to:       fillBar.width - pulseStrip.width / 2
+                                duration: 0
+                            }
                         }
                     }
                 }
@@ -161,27 +204,10 @@ Item {
                 id: pctLabel
                 anchors.right:          parent.right
                 anchors.verticalCenter: parent.verticalCenter
-                text:  progressBar.indeterminate ? "…" : (progressBar.value + "%")
+                text:  Math.round(progressBar.value) + "%"
                 font.pixelSize: 12; font.family: "Segoe UI"
                 color: root.green; width: 34
             }
-        }
-
-        // ── Header (read-only) ────────────────────────────────────────────────
-        TextArea {
-            id: headerArea
-            anchors.top:   progressRow.bottom; anchors.topMargin: 6
-            anchors.left:  parent.left;  anchors.leftMargin:  14
-            anchors.right: parent.right; anchors.rightMargin: 14
-            height:   visible ? contentHeight + 8 : 0
-            readOnly: true
-            text:     ""
-            color:    "#b0d4a0"
-            font.family:    "Courier New"
-            font.pixelSize: 12
-            background: Rectangle { color: "transparent" }
-            wrapMode: TextArea.NoWrap
-            visible:  text !== ""
         }
 
         // ── Action buttons (anchored to bottom) ───────────────────────────────
@@ -191,47 +217,50 @@ Item {
             anchors.left:         parent.left;   anchors.leftMargin:   14
             spacing: 10
 
+            // Save Summary — visible when done
             WorkbenchActionButton {
-                label: "Save"
+                label: "Save Summary"
                 accent: root.green
-                enabled: bodyArea.text !== ""
-                onActivated: {
-                    var full = headerArea.text + "\n" + bodyArea.text
-                    ffmpegBackend.saveReport(full)
-                    headerArea.text   = ""
-                    bodyArea.text     = ""
-                    progressBar.value = 0
-                }
+                visible: root.done && root.summaryText !== ""
+                onActivated: ffmpegBackend.saveFolderSummary(root.summaryText)
             }
 
+            // New Test — visible when done
             WorkbenchActionButton {
-                id: analyseBtn
-                label: "Analyse"
+                label: "New Test"
                 accent: "#00BFFF"
-                enabled: bodyArea.text !== "" && !root.analysing
+                visible: root.done
                 onActivated: {
-                    root.analysing = true
-                    // extract just the body errors (below the header divider)
-                    var txt = bodyArea.text
-                    var divPos = txt.indexOf("\u2500\u2500\u2500")
-                    var errors = divPos >= 0 ? txt.substring(divPos + 46) : txt
-                    ffmpegBackend.analyseReport(headerArea.text.split("\n")[0].replace("File:","").trim(), errors)
+                    root.running        = false
+                    root.done           = false
+                    root.fileTotal      = 0
+                    root.fileCurrent    = 0
+                    root.currentFileName = ""
+                    root.summaryText    = ""
+                    logArea.text        = ""
+                    progressBar.value   = 0
+                    reportPanel.ready   = false
+
+                    // Start a fresh test immediately
+                    ffmpegBackend.testFolder(modeToggle.mode)
                 }
             }
 
+            // Cancel — visible while running
             WorkbenchActionButton {
-                label: "Load Report"
-                accent: "#AAAAAA"
-                onActivated: ffmpegBackend.loadReport()
+                label: "Cancel"
+                accent: "#FF5555"
+                visible: root.running
+                onActivated: ffmpegBackend.cancelFolderTest()
             }
         }
 
-        // ── Body (editable — fills remaining space) ───────────────────────────
+        // ── Live log body (fills remaining space) ─────────────────────────────
         Rectangle {
-            anchors.top:          headerArea.bottom; anchors.topMargin:    8
-            anchors.bottom:       actionRow.top;     anchors.bottomMargin: 8
-            anchors.left:         parent.left;       anchors.leftMargin:   14
-            anchors.right:        parent.right;      anchors.rightMargin:  14
+            anchors.top:          progressRow.bottom; anchors.topMargin:    8
+            anchors.bottom:       actionRow.top;      anchors.bottomMargin: 8
+            anchors.left:         parent.left;        anchors.leftMargin:   14
+            anchors.right:        parent.right;       anchors.rightMargin:  14
             color:        "#0a120a"
             border.color: root.borderCol
             border.width: 1
@@ -239,20 +268,22 @@ Item {
             clip:         true
 
             ScrollView {
+                id: logScroll
                 anchors.fill:    parent
                 anchors.margins: 4
                 ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
 
                 TextArea {
-                    id: bodyArea
+                    id: logArea
                     width:    parent.width
+                    readOnly: true
                     wrapMode: TextArea.Wrap
                     text:     ""
                     color:    root.green
                     font.family:    "Courier New"
-                    font.pixelSize: 12
+                    font.pixelSize: 11
                     background: Rectangle { color: "transparent" }
-                    placeholderText: "Results will appear here…"
+                    placeholderText: "Results will appear here as each file is tested\u2026"
                     placeholderTextColor: "#2a5a1a"
                 }
             }
@@ -263,43 +294,62 @@ Item {
     Connections {
         target: ffmpegBackend
 
-        function onProgressChanged(pct) {
-            progressBar.value = pct
+        function onFolderTestStarted(total) {
+            root.fileTotal      = total
+            root.fileCurrent    = 0
+            root.currentFileName = ""
+            root.running        = true
+            root.done           = false
+            root.summaryText    = ""
+            logArea.text        = ""
+            progressBar.value   = 0
+            reportPanel.ready   = true
         }
 
-        function onReportReady(header, body) {
-            headerArea.text   = header
-            bodyArea.text     = body
+        function onFolderTestFileStarted(filename, current, total) {
+            root.fileCurrent     = current
+            root.fileTotal       = total
+            root.currentFileName = filename
+        }
+
+        function onFolderTestFileDone(filename, hadErrors) {
+            var icon   = hadErrors ? "\u2717" : "\u2713"
+            var status = hadErrors ? "errors" : "Clean"
+            var num    = root.fileCurrent
+            var total  = root.fileTotal
+            var line   = "[" + num + "/" + total + "]  " + icon + "  " + filename + "  \u2014  " + status
+            logArea.text += (logArea.text === "" ? "" : "\n") + line
+            // Auto-scroll to bottom
+            logScroll.ScrollBar.vertical.position = 1.0
+        }
+
+        function onFolderTestComplete(summary) {
+            root.running      = false
+            root.done         = true
+            root.summaryText  = summary
             progressBar.value = 100
-            root.testing      = false
-            reportPanel.ready = true
+            if (summary === "") {
+                logArea.text += "\n\n\u2500 Cancelled"
+            } else {
+                logArea.text += "\n\n" + summary
+            }
+            // Defer scroll until after layout recalculates for the new content
+            Qt.callLater(function() {
+                logArea.cursorPosition = logArea.length - 1
+            })
+        }
+
+        function onProgressChanged(pct) {
+            if (root.running) {
+                progressBar.value = pct
+            }
         }
 
         function onStatusMessage(msg) {
-            console.log("Workbench status: " + msg)
-            if (msg.indexOf("Running") !== -1) {
-                root.testing      = true
-                bodyArea.text     = ""
-                headerArea.text   = ""
-                progressBar.value = 0
-            }
+            // No-op — status displayed via folderTestFileStarted bindings
+            console.log("FolderTest status: " + msg)
         }
 
-        function onAnalysisDone(verdict, summary) {
-            root.analysing = false
-            var divider = "\n\n\u2500\u2500\u2500 Analysis \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n"
-            if (verdict === "none") {
-                bodyArea.text += divider + "\u2713 No significant issues found."
-            } else {
-                bodyArea.text += divider + summary
-                // AI feedback will follow automatically for major/critical
-                if (verdict === "major" || verdict === "critical") {
-                    bodyArea.text += "\n\n\u2500\u2500\u2500 AI Feedback \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\nAsking AI\u2026"
-                }
-            }
-        }
-
-        // ffmpeg not installed — show install dialog
         function onFfmpegMissing() {
             installDialog.open()
         }
@@ -313,25 +363,13 @@ Item {
         }
 
         function onDownloadFailed(reason) {
-            dlErrorText.text = "Download failed: " + reason
-            dlProgress.visible = false
+            dlErrorText.text    = "Download failed: " + reason
+            dlProgress.visible  = false
             dlErrorText.visible = true
         }
     }
 
-    // ── AI response — replace "Asking AI…" placeholder with real answer ───────
-    Connections {
-        target: aiController
-        function onAnswerReady(answer) {
-            var placeholder = "Asking AI\u2026"
-            var pos = bodyArea.text.lastIndexOf(placeholder)
-            if (pos >= 0) {
-                bodyArea.text = bodyArea.text.substring(0, pos) + answer
-            }
-        }
-    }
-
-    // ── FFmpeg install dialog ─────────────────────────────────────────────────
+    // ── FFmpeg install dialog (same as WorkbenchView) ─────────────────────────
     Rectangle {
         id: installDialog
         anchors.centerIn: parent
@@ -382,8 +420,7 @@ Item {
                 }
                 contentItem: Rectangle {
                     width:  dlProgress.visualPosition * dlProgress.width
-                    height: parent.height
-                    radius: 3
+                    height: parent.height; radius: 3
                     color: root.green
                 }
             }

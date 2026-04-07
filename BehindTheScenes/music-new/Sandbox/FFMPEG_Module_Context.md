@@ -14,7 +14,8 @@ _Last updated: 2026-04-03 | Branch: MediaVerseL5_
 | 2026-04-03 | Repair File (Button 3)            | ✅ COMPLETE |
 | 2026-04-03 | Video Proc (Button 7)             | ✅ COMPLETE |
 |            | Re Format (Button 4)              | TODO |
-|            | Test Folder (Button 5)            | TODO |
+| 2026-04-07 | Test Folder (Button 5)            | ✅ COMPLETE |
+| 2026-04-07 | Test Folder (Button 5)            | ✅ COMPLETE |
 | 2026-04-03 | File Details (Button 6)           | ✅ COMPLETE |
 
 ---
@@ -234,10 +235,38 @@ Path configured under `ToolPaths.VideoProc` in Config.json, browseable via Setti
 
 ## Remaining Buttons
 
-### Test Folder (Button 5)
-- Single folder, non-recursive (user confirmed)
-- Slot stub exists in `ffmpeg_backend.py` — iterate video files, run FFmpegWorker sequentially
-- Show per-file progress + cumulative summary
+### Test Folder (Button 5) — COMPLETE
+
+#### Files Created
+| File | Purpose |
+|------|---------|
+| `Sandbox/MediaPlayerQML/FolderTestView.qml` | Dedicated folder test panel — live log, overall progress, Save Summary / Cancel |
+
+#### Files Modified
+- `ffmpeg_backend.py` — added `folderTestStarted(int)`, `folderTestFileStarted(str,int,int)`, `folderTestFileDone(str,bool)`, `folderTestComplete(str)` signals; `testFolder(mode)`, `_do_folder_test`, `cancelFolderTest`, `saveFolderSummary` slots
+- `Framework-1.qml` — `onTestFolderClicked` loads `FolderTestView.qml` instead of `WorkbenchView.qml`
+
+#### Folder Test Flow
+1. Click Test Folder → `FolderTestView.qml` loads; `ffmpegBackend.testFolder(mode)` called
+2. `QFileDialog.getExistingDirectory` opens — user selects a folder
+3. Folder scanned non-recursively for video files; sorted by name
+4. `folderTestStarted(total)` → panel slides in; running state begins
+5. Each file tested sequentially with `subprocess.run` (blocking) — same ffmpeg command as single-file test
+6. `filter_lines()` applied — same noise filter as single-file test
+7. Report auto-saved as `<stem>_ffmpeg.txt` next to each file (same naming as Test File)
+8. `folderTestFileDone(name, hadErrors)` → line appended to live log: `[3/12] ✓ Movie.mkv — Clean`
+9. When all done: summary built, saved as `_folder_test_YYYYMMDD_HHMM.txt` in tested folder
+10. `folderTestComplete(summary)` → log footer shows "Summary saved to folder"
+
+#### Cancellation
+- Cancel button → `cancelFolderTest()` → sets `_folder_cancelled = True` → loop exits between files
+- Current file completes before cancel takes effect (no mid-file kill)
+
+#### Output Naming
+| File | Location |
+|------|----------|
+| Per-file report | `<stem>_ffmpeg.txt` — same folder as video |
+| Folder summary  | `_folder_test_YYYYMMDD_HHMM.txt` — in the tested folder |
 
 ### File Details (Button 6) — COMPLETE
 - ffprobe JSON → formatted text report (not MediaInfo — no extra tool required)
@@ -283,6 +312,12 @@ compareReady     = Signal(str, str, float, float)  # (header, body, scoreA, scor
 # Repair
 repairReady      = Signal(str, str)          # (header, body)
 repairProgress   = Signal(int)               # 0–100
+
+# Folder test
+folderTestStarted     = Signal(int)              # total file count
+folderTestFileStarted = Signal(str, int, int)    # (filename, current, total)
+folderTestFileDone    = Signal(str, bool)        # (filename, had_errors)
+folderTestComplete    = Signal(str)              # summary text
 ```
 
 ## QML Views — Summary
@@ -292,6 +327,7 @@ repairProgress   = Signal(int)               # 0–100
 | `WorkbenchView.qml` | Test File button | Right 38%, slides in on test start |
 | `CompareView.qml` | Compare Files button | Right 38%, slides in on result |
 | `RepairView.qml` | Repair File button | Right 38%, always visible (mode selection first) |
+| `FolderTestView.qml` | Test Folder button | Right 38%, slides in on folder selection; live log |
 
 ## Context Properties
 ```python
