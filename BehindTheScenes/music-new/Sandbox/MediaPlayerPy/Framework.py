@@ -72,6 +72,7 @@ from landing_view import LandingViewModel
 from TV_view import TVViewModel
 from ffmpeg_backend import FFmpegBackend
 from quality_audit_backend import QualityAuditBackend
+from media_manager_backend import MediaManagerBackend
 
 from dotenv import load_dotenv
 
@@ -111,6 +112,7 @@ def main():
         tv_vm              = TVViewModel()
         ffmpeg_backend         = FFmpegBackend()
         quality_audit_backend  = QualityAuditBackend()
+        media_manager_backend  = MediaManagerBackend()
 
              # SURGICAL ADDITION: Connect the backup signal to the existing notifier
         # msg is the text, success is the boolean. We use 'not success' because 
@@ -249,6 +251,7 @@ def main():
         ctx.setContextProperty("tvViewModel",     tv_vm)
         ctx.setContextProperty("ffmpegBackend",        ffmpeg_backend)
         ctx.setContextProperty("qualityAuditBackend",  quality_audit_backend)
+        ctx.setContextProperty("mediaManagerBackend",  media_manager_backend)
         ctx.setContextProperty("startupMode", _startup_mode)
 
         # --------------------------------------------------------

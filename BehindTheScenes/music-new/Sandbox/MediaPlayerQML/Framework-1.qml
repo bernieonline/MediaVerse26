@@ -181,6 +181,68 @@ ApplicationWindow {
             console.log("🏠 Returning to MediaVerse main buttons")
             buttonLoader.source = "RowButton.qml"
         }
+
+        function onCollectionManagerClicked() {
+            console.log("📦 Switching to Collection Manager")
+            if (typeof splash !== "undefined") splash.deactivate()
+            buttonLoader.source  = "CollectButtons.qml"
+            contentLoader.source = "MediaManagerView.qml"
+        }
+    }
+
+    // --- CollectButtons signals ---
+    Connections {
+        target: buttonLoader.source.toString().indexOf("CollectButtons") !== -1
+                ? buttonLoader.item : null
+
+        function onCloseCollectClicked() {
+            buttonLoader.source  = "RowButton.qml"
+            contentLoader.source = ""
+        }
+
+        function onDbEditClicked() {
+            if (buttonLoader.item) {
+                var view = contentLoader.item
+                if (view && typeof view.loadPanel === "function")
+                    view.loadPanel("MM_DbEdit.qml")
+            }
+        }
+
+        function onDbSearchClicked() {
+            var view = contentLoader.item
+            if (view && typeof view.loadPanel === "function")
+                view.loadPanel("MM_DbSearch.qml")
+        }
+
+        function onScanLocationClicked() {
+            var view = contentLoader.item
+            if (view && typeof view.loadPanel === "function")
+                view.loadPanel("MM_Scan.qml")
+        }
+
+        function onScanMasterClicked() {
+            var view = contentLoader.item
+            if (view && typeof view.loadPanel === "function")
+                view.loadPanel("MM_ScanMaster.qml")
+        }
+
+        function onReportClicked() {
+            var view = contentLoader.item
+            if (view && typeof view.loadPanel === "function")
+                view.loadPanel("MM_Report.qml")
+        }
+
+        function onCompareClicked() {
+            var view = contentLoader.item
+            if (view && typeof view.loadPanel === "function")
+                view.loadPanel("MM_Compare.qml")
+        }
+
+        function onManageClicked() {
+            var view = contentLoader.item
+            if (view && typeof view.loadPanel === "function")
+                view.loadPanel("MM_Manage.qml")
+        }
     }
 
 

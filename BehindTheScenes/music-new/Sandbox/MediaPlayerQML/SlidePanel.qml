@@ -26,7 +26,7 @@ Item {
     // ── Signals — wire these to modules when ready ────────────────────────────
     signal qobuzMusicClicked()
     signal workbenchClicked()
-    signal collectionCuratorClicked()
+    signal collectionManagerClicked()
     signal mediaverseClicked()
 
     // Size — position is set by the parent (Framework-1.qml)
@@ -267,8 +267,8 @@ Item {
                 }
                 IconButton {
                     width: slidePanelRoot.iconSize; height: slidePanelRoot.iconSize
-                    isStack: true; accent: "#E8E8E8"; tooltipText: "Collection Curator"
-                    onActivated: slidePanelRoot.collectionCuratorClicked()
+                    isStack: true; accent: "#00BFFF"; tooltipText: "Collection Manager"
+                    onActivated: slidePanelRoot.collectionManagerClicked()
                 }
                 IconButton {
                     width: slidePanelRoot.iconSize; height: slidePanelRoot.iconSize
