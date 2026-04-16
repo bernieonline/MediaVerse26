@@ -169,7 +169,8 @@ def search_all_collections(query: str) -> list:
         for tbl in ("mediafiledetail", "masterfiledetail"):
             cur.execute(
                 f"""SELECT id, file_path, file_name, file_extension,
-                           collection_name, media_category, device, created_at,
+                           file_creation_date, collection_name, media_category,
+                           device, location, created_at,
                            '{tbl}' AS source_table
                     FROM {tbl}
                     WHERE file_name LIKE %s OR file_path LIKE %s OR collection_name LIKE %s
@@ -257,24 +258,30 @@ def batch_insert_files(table: str, records: list) -> int:
         if table == "mediafiledetail":
             sql = """INSERT INTO mediafiledetail
                      (file_path, file_name, file_extension, file_size_bytes,
-                      collection_name, media_category, device, checksum)
-                     VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"""
+                      file_creation_date, collection_name, media_category,
+                      device, location, checksum, duplicated)
+                     VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
             rows = [
                 (r["file_path"], r["file_name"], r["file_extension"],
-                 r.get("file_size_bytes", 0), r["collection_name"],
-                 r.get("media_category", ""), r.get("device", ""), r.get("checksum", ""))
+                 r.get("file_size_bytes", 0), r.get("file_creation_date"),
+                 r["collection_name"], r.get("media_category", ""),
+                 r.get("device", ""), r.get("location", ""),
+                 r.get("checksum", ""), r.get("duplicated", "0"))
                 for r in records
             ]
         else:
             sql = """INSERT INTO masterfiledetail
                      (file_path, file_name, file_extension, file_size_bytes,
-                      collection_name, media_category, device, master_type, checksum)
-                     VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)"""
+                      file_creation_date, collection_name, media_category,
+                      device, location, master_type, checksum, duplicated)
+                     VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
             rows = [
                 (r["file_path"], r["file_name"], r["file_extension"],
-                 r.get("file_size_bytes", 0), r["collection_name"],
-                 r.get("media_category", ""), r.get("device", ""),
-                 r.get("master_type", "Master"), r.get("checksum", ""))
+                 r.get("file_size_bytes", 0), r.get("file_creation_date"),
+                 r["collection_name"], r.get("media_category", ""),
+                 r.get("device", ""), r.get("location", ""),
+                 r.get("master_type", "Master"), r.get("checksum", ""),
+                 r.get("duplicated", "0"))
                 for r in records
             ]
         cur.executemany(sql, rows)
@@ -286,13 +293,15 @@ def batch_insert_files(table: str, records: list) -> int:
     return inserted
 
 
-def collection_exists(device: str, path: str) -> list:
-    """Return existing collection records matching device+path prefix (duplicate check)."""
+def collection_exists(prefix: str) -> list:
+    """Return existing collection records whose name starts with prefix (duplicate check).
+    prefix should be built as: device:drive_letter:/subfolder:
+    """
     results = []
     try:
         conn = get_mm2_connection()
         cur = conn.cursor(dictionary=True)
-        like = f"{device}:{path}%"
+        like = f"{prefix}%"
         for tbl in ("mediafiledetail", "masterfiledetail"):
             cur.execute(
                 f"SELECT DISTINCT collection_name FROM {tbl} WHERE collection_name LIKE %s LIMIT 10",
@@ -343,6 +352,10 @@ def get_collection_summary(table: str, master_only: bool = False,
         )
         rows = cur.fetchall()
         cur.close(); conn.close()
+        # Convert Decimal → float so QML can do arithmetic on total_size_mb
+        for row in rows:
+            if "total_size_mb" in row and row["total_size_mb"] is not None:
+                row["total_size_mb"] = float(row["total_size_mb"])
         return rows
     except Exception as e:
         log.error("[MM2] get_collection_summary: %s", e)
