@@ -31,6 +31,13 @@ Item {
     property string selectedCategory: ""
     property string selectedKeyword: ""
 
+    // Scales all selection-overlay elements proportionally to panel width (reference: 288px)
+    readonly property real scaleFactor:      panelRoot.width / 288.0
+    readonly property real selectBtnWidth:   Math.floor(Math.min(180 * scaleFactor, panelRoot.width - 40))
+    readonly property real selectBtnHeight:  Math.floor(45 * scaleFactor)
+    readonly property int  selectHeadingPx:  Math.round(18 * scaleFactor)
+    readonly property int  selectBtnFontPx:  Math.round(13 * scaleFactor)
+
     // --- DEBUG ---
     function debugSignal(name, payload) {
         console.log("📡 PANEL " + panelIndex + " RECEIVED SIGNAL:", name, "Items:", (payload.list ? payload.list.length : 0))
@@ -202,16 +209,36 @@ Item {
         // --- SELECTION OVERLAY (The Master Mode Switches) ---
         Column {
             visible: currentMode === "selection"
-            anchors.centerIn: parent; spacing: 15
+            anchors.centerIn: parent
+            spacing: Math.floor(15 * panelRoot.scaleFactor)
             z: 10
-            Text { 
-                text: "SELECT LOGIC"; color: "white"; font.pixelSize: 18; 
-                font.bold: true; anchors.horizontalCenter: parent.horizontalCenter; opacity: 0.6 
+
+            Text {
+                text: "SELECT LOGIC"
+                color: "white"
+                font.pixelSize: panelRoot.selectHeadingPx
+                font.bold: true
+                anchors.horizontalCenter: parent.horizontalCenter
+                opacity: 0.6
             }
-            // SURGICAL FIX: We set the mode explicitly here
-            Button { text: "🔍 SEARCH"; width: 180; height: 45; onClicked: { currentMode = "search" } }
-            Button { text: "📁 FOLDER"; width: 180; height: 45; onClicked: { currentMode = "folder" } }
-            Button { text: "🏷️ CATEGORY"; width: 180; height: 45; onClicked: { currentMode = "category" } }
+            Button {
+                text: "🔍 SEARCH"
+                width: panelRoot.selectBtnWidth; height: panelRoot.selectBtnHeight
+                font.pixelSize: panelRoot.selectBtnFontPx
+                onClicked: { currentMode = "search" }
+            }
+            Button {
+                text: "📁 FOLDER"
+                width: panelRoot.selectBtnWidth; height: panelRoot.selectBtnHeight
+                font.pixelSize: panelRoot.selectBtnFontPx
+                onClicked: { currentMode = "folder" }
+            }
+            Button {
+                text: "🏷️ CATEGORY"
+                width: panelRoot.selectBtnWidth; height: panelRoot.selectBtnHeight
+                font.pixelSize: panelRoot.selectBtnFontPx
+                onClicked: { currentMode = "category" }
+            }
         }
 
         // --- FOOTER AREA ---

@@ -66,7 +66,8 @@ Rectangle {
 
     property var externalImageList: []
     property int currentPage: 0
-    property int itemsPerPage: 12
+    readonly property int columnCount: Math.max(1, Math.floor((gridContainer.width + 40) / (posterWidth + 40)))
+    property int itemsPerPage: columnCount * 2
     property bool showLabels: true
     property string sortMode: "oldest"
 
@@ -121,7 +122,7 @@ Rectangle {
             Grid {
                 id: imageGrid
                 anchors.centerIn: parent
-                columns: 6
+                columns: gridRoot.columnCount
                 columnSpacing: 40
                 rowSpacing: gridRoot.rowSpacing
 

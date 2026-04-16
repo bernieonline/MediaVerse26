@@ -94,13 +94,20 @@ Item {
             z: 2
 
             property int  currentPage: 0
-            readonly property int totalPages: Math.max(1, Math.ceil(root.seriesModel.length / 6))
+            readonly property int totalPages: Math.max(1, Math.ceil(root.seriesModel.length / (colCount * 2)))
 
             // Same sizing formula as ArchitectGallery
             readonly property real edgeMargin: 24
             readonly property real imgGap:     12
             readonly property real posterH: (parent.height - edgeMargin * 2 - imgGap * 3) / 2 - 36
             readonly property real posterW: posterH * 2 / 3
+
+            // Use 4 columns when the screen is wide enough to leave ≥600px for the detail panel
+            readonly property int colCount: {
+                var fourColW = 4 * posterW + 3 * imgGap
+                var needed   = edgeMargin * 2 + imgGap * 2 + fourColW + 90 + imgGap * 2 + 600
+                return parent.width >= needed ? 4 : 3
+            }
 
             // ── Page-flip function + animation (verbatim from ArchitectGallery) ──
             function flipPage(target, forward) {
@@ -144,7 +151,7 @@ Item {
                 id: gridContainer
                 x:      gridPane.edgeMargin + gridPane.imgGap
                 y:      gridPane.edgeMargin + gridPane.imgGap
-                width:  3 * gridPane.posterW + 2 * gridPane.imgGap
+                width:  gridPane.colCount * gridPane.posterW + (gridPane.colCount - 1) * gridPane.imgGap
                 height: 2 * (gridPane.posterH + 36) + gridPane.imgGap
                 layer.enabled: true
 
@@ -158,18 +165,18 @@ Item {
 
                 Grid {
                     id: seriesGrid
-                    columns:       3
+                    columns:       gridPane.colCount
                     rowSpacing:    gridPane.imgGap
                     columnSpacing: gridPane.imgGap
 
                     Repeater {
-                        model: 6
+                        model: gridPane.colCount * 2
                         delegate: Item {
                             id: cellItem
                             width:  gridPane.posterW
                             height: gridPane.posterH + 36
 
-                            property int  absIdx:     gridPane.currentPage * 6 + index
+                            property int  absIdx:     gridPane.currentPage * (gridPane.colCount * 2) + index
                             property bool hasData:    absIdx < root.seriesModel.length
                             property var  seriesData: hasData
                                 ? root.seriesModel[absIdx]
@@ -498,9 +505,9 @@ Item {
                         // Layout calculations
                         property int   count:    root.seasonsModel.length
                         property real  availW:   width - 24
-                        property real  maxPostH: Math.min(height * 0.88, 320)
+                        property real  maxPostH: height * 0.92
                         property real  maxPostW: maxPostH * 2 / 3
-                        property real  minStep:  68   // min exposed pixels for badge visibility
+                        property real  minStep:  68   // min exposed pixels — keeps season badge visible
 
                         property real  step: {
                             if (count <= 1) return 0

@@ -11,9 +11,11 @@ Rectangle {
     clip: true
 
     // --- DIMENSIONS ---
-    readonly property int cardWidth: 288
-    readonly property int cardHeight: 480
-    readonly property int joinGap: 48
+    // Panels fill the available width: 5 panels + 4 gate gaps + 40px side padding
+    readonly property int joinGap:   48
+    readonly property int maxPanels: 5
+    readonly property int cardWidth: Math.floor((architectRoot.width - 40 - (maxPanels - 1) * joinGap) / maxPanels)
+    readonly property int cardHeight: Math.min(Math.floor(architectRoot.height - 240), 680)
 
     property int totalMatches: 0
     property bool filterEnabled: false
@@ -183,8 +185,7 @@ Rectangle {
         Row {
             id: cardRow
             anchors.horizontalCenter: parent.horizontalCenter
-            anchors.bottom: parent.bottom
-            anchors.bottomMargin: 80
+            anchors.verticalCenter: parent.verticalCenter
             spacing: 0
 
             Repeater {
