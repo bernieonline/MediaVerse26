@@ -297,14 +297,20 @@ class MediaManagerBackend(QObject):
     @Slot(str, str, str, str)
     def compare_collections(self, table_a: str, coll_a: str,
                              table_b: str, coll_b: str):
+        def _key(p: str) -> str:
+            return os.path.basename(p).lower().strip()
+
         def _run():
-            paths_a = set(db.get_file_paths_for_collection(table_a, coll_a))
-            paths_b = set(db.get_file_paths_for_collection(table_b, coll_b))
-            only_a = [{"file_path": p} for p in sorted(paths_a - paths_b)]
-            only_b = [{"file_path": p} for p in sorted(paths_b - paths_a)]
+            raw_a = db.get_file_paths_for_collection(table_a, coll_a)
+            raw_b = db.get_file_paths_for_collection(table_b, coll_b)
+            map_a = {_key(p): p for p in raw_a}
+            map_b = {_key(p): p for p in raw_b}
+            keys_a, keys_b = set(map_a), set(map_b)
+            only_a = [{"file_path": map_a[k]} for k in sorted(keys_a - keys_b)]
+            only_b = [{"file_path": map_b[k]} for k in sorted(keys_b - keys_a)]
             self.compareResult.emit(only_a, only_b)
             self.statusMessage.emit(
-                f"Compare done — {len(only_a)} only in A, {len(only_b)} only in B"
+                f"Compare done — {len(only_a)} missing from B, {len(only_b)} missing from A"
             )
         threading.Thread(target=_run, daemon=True).start()
 

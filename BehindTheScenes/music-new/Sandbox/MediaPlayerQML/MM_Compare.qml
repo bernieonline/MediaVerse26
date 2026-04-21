@@ -318,7 +318,7 @@ Item {
         // ── Summary strip ─────────────────────────────────────────────────────
         Text {
             visible: compareRoot.countA > 0 || compareRoot.countB > 0
-            text: "Only in A: " + compareRoot.countA + "   ·   Only in B: " + compareRoot.countB
+            text: "Missing from B: " + compareRoot.countA + "   ·   Missing from A: " + compareRoot.countB
                   + "   ·   " + (compareRoot.countA === 0 && compareRoot.countB === 0
                                  ? "Collections are identical"
                                  : compareRoot.countA + compareRoot.countB + " differences total")
@@ -349,7 +349,7 @@ Item {
                         Text {
                             anchors.fill: parent; anchors.leftMargin: 10
                             verticalAlignment: Text.AlignVCenter
-                            text: "Only in A"
+                            text: "In A — Missing from B"
                             color: compareRoot.accent; font.pixelSize: 12; font.bold: true
                         }
                     }
@@ -409,7 +409,7 @@ Item {
                         Text {
                             anchors.fill: parent; anchors.leftMargin: 10
                             verticalAlignment: Text.AlignVCenter
-                            text: "Only in B"
+                            text: "In B — Missing from A"
                             color: compareRoot.accent; font.pixelSize: 12; font.bold: true
                         }
                     }
