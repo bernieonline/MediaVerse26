@@ -168,6 +168,11 @@ class SettingsManager(QObject):
             return
         self.settingsChanged.emit()
 
+    @Slot(str, result=bool)
+    def is_tool_available(self, tool_name: str) -> bool:
+        exe = self._settings.get("ToolPaths", {}).get(tool_name, "")
+        return bool(exe and os.path.exists(exe))
+
     @Slot(str)
     def launch_tool(self, tool_name: str):
         """Launch the external tool registered under ToolPaths[tool_name]."""

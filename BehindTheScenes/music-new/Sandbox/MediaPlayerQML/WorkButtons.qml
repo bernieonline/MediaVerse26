@@ -15,6 +15,8 @@ Column {
     spacing: 0
     z: 9999
 
+    property bool videoProcAvailable: true
+
     signal testFileClicked()
     signal compareFilesClicked()
     signal testFolderClicked()
@@ -242,6 +244,7 @@ Column {
         // --- 6. VIDEO PROC ---
         NavButton {
             line1: "Video"; line2: "Proc"; accent: "#39FF14"
+            visible: buttonColumn.videoProcAvailable
             onActivated: buttonColumn.videoProcClicked()
         }
 

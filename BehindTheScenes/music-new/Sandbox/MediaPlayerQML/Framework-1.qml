@@ -168,6 +168,18 @@ ApplicationWindow {
         }
     }
 
+    // --- Check tool availability when WorkButtons loads ---
+    Connections {
+        target: buttonLoader
+        function onLoaded() {
+            if (buttonLoader.source.toString().indexOf("WorkButtons") === -1) return
+            var available = SettingsManager.is_tool_available("VideoProc")
+            buttonLoader.item.videoProcAvailable = available
+            if (!available)
+                notificationManager.post_notification("VideoProc is not installed or configured. Set the path in Settings → Tools.", false)
+        }
+    }
+
     // --- SlidePanel module switching ---
     Connections {
         target: slidePanel
