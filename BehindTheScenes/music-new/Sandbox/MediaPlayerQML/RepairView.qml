@@ -21,9 +21,6 @@ Item {
     property bool repairing: false
     property bool done:      false
 
-    // ── Static poster backdrop ────────────────────────────────────────────────
-    WorkbenchSplash { anchors.fill: parent; z: 0 }
-
     // ── Outer glow ring ───────────────────────────────────────────────────────
     Rectangle {
         anchors.centerIn: parent

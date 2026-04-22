@@ -35,10 +35,10 @@ ApplicationWindow {
     Material.accent: Material.Yellow
 
     // --- Background Layer ---
-    Rectangle { 
+    Rectangle {
         id: background
         anchors.fill: parent
-        color: "#1e1e1e"
+        color: "#030810"
     }
 
     // --- Global Shortcuts ---
@@ -580,6 +580,15 @@ ApplicationWindow {
         border.color: "#2566c2"
         border.width: 2
         clip: true
+
+        // ── Persistent movie wall — always visible behind all content ─────────
+        // Shows through whenever contentLoader is empty or loads a view with a
+        // transparent root (workbench panels, etc.).  Covered automatically by
+        // SplashScreen (z:9999) and any fully-opaque loaded view.
+        WorkbenchSplash {
+            anchors.fill: parent
+            z: 0
+        }
 
         SplashScreen {
             id: splash

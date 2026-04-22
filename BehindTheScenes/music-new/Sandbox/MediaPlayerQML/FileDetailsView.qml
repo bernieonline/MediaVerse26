@@ -19,9 +19,6 @@ Item {
     readonly property color borderCol: "#39FF14"
     readonly property color bodyBg:    "#080f18"
 
-    // ── Static poster backdrop ────────────────────────────────────────────────
-    WorkbenchSplash { anchors.fill: parent; z: 0 }
-
     // ── Outer glow ring ───────────────────────────────────────────────────────
     Rectangle {
         anchors.centerIn: parent

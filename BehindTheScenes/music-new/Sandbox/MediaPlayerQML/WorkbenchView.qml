@@ -22,9 +22,6 @@ Item {
     property bool testing:   false
     property bool analysing: false
 
-    // ── Static poster backdrop ────────────────────────────────────────────────
-    WorkbenchSplash { anchors.fill: parent; z: 0 }
-
     // ── Outer glow ring ───────────────────────────────────────────────────────
     Rectangle {
         anchors.centerIn: parent

@@ -25,9 +25,6 @@ Item {
     property string currentFileName: ""
     property string summaryText: ""
 
-    // ── Static poster backdrop ────────────────────────────────────────────────
-    WorkbenchSplash { anchors.fill: parent; z: 0 }
-
     // ── Outer glow ring ───────────────────────────────────────────────────────
     Rectangle {
         anchors.centerIn: parent
