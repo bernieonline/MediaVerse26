@@ -3,19 +3,154 @@ import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
 
 // ─────────────────────────────────────────────────────────────────────────────
-//  FileDetailsView.qml — ffprobe file details panel
-//  Slides in from the right (same 38% panel pattern as other Workbench views).
+//  FileDetailsView — ffprobe file details panel
+//
+//  Centred modal panel over a static movie poster backdrop.
+//  Unified with the rest of the Workbench panel design.
 // ─────────────────────────────────────────────────────────────────────────────
 
 Item {
     id: root
     anchors.fill: parent
 
-    // ── Slide-in ──────────────────────────────────────────────────────────────
-    property real targetX: parent ? parent.width * 0.62 : 0
-    x: targetX + 30
-    opacity: 0
+    // ── Palette ───────────────────────────────────────────────────────────────
+    readonly property color green:     "#39FF14"
+    readonly property color panelBg:   "#06101c"
+    readonly property color borderCol: "#39FF14"
+    readonly property color bodyBg:    "#080f18"
 
+    // ── Static poster backdrop ────────────────────────────────────────────────
+    WorkbenchSplash { anchors.fill: parent; z: 0 }
+
+    // ── Outer glow ring ───────────────────────────────────────────────────────
+    Rectangle {
+        anchors.centerIn: parent
+        width: panel.width + 10; height: panel.height + 10; radius: 20
+        color: "transparent"; border.color: root.green; border.width: 1; opacity: 0.07; z: 1
+    }
+
+    // ── Centred panel ─────────────────────────────────────────────────────────
+    Rectangle {
+        id: panel
+        anchors.centerIn: parent
+        width:  parent.width  * 0.70
+        height: parent.height * 0.84
+        radius: 14; color: root.panelBg
+        border.color: root.borderCol; border.width: 2; z: 2
+
+        opacity: 0
+        NumberAnimation on opacity { from: 0; to: 1; duration: 300; easing.type: Easing.OutCubic }
+
+        // ── Title bar ─────────────────────────────────────────────────────────
+        Rectangle {
+            id: titleBar
+            anchors.top: parent.top; anchors.left: parent.left; anchors.right: parent.right
+            height: 62; color: Qt.rgba(0,0,0,0.28); radius: 14
+            Rectangle { anchors.bottom: parent.bottom; anchors.left: parent.left; anchors.right: parent.right; height: parent.radius; color: parent.color }
+
+            Text {
+                anchors.left: parent.left; anchors.leftMargin: 26
+                anchors.verticalCenter: parent.verticalCenter
+                text: "FILE DETAILS"
+                font.family: "Segoe UI"; font.pixelSize: 26; font.bold: true; font.letterSpacing: 4
+                color: root.green
+            }
+
+            // Buttons — only when results are loaded
+            Row {
+                anchors.right: parent.right; anchors.rightMargin: 24
+                anchors.verticalCenter: parent.verticalCenter
+                spacing: 12
+                visible: bodyArea.text !== ""
+
+                WorkbenchActionButton {
+                    label: "Save"; accent: root.green
+                    onActivated: ffmpegBackend.saveDetails(headerArea.text + "\n" + bodyArea.text)
+                }
+                WorkbenchActionButton {
+                    label: "New File"; accent: "#AAAAAA"
+                    onActivated: {
+                        headerArea.text = ""; bodyArea.text = ""; statusBar.text = ""
+                        ffmpegBackend.fileDetails()
+                    }
+                }
+            }
+        }
+
+        Rectangle {
+            id: divider
+            anchors.top: titleBar.bottom
+            anchors.left: parent.left; anchors.leftMargin: 24
+            anchors.right: parent.right; anchors.rightMargin: 24
+            height: 1; color: root.borderCol; opacity: 0.30
+        }
+
+        // ── Waiting state ─────────────────────────────────────────────────────
+        Text {
+            id: waitingLabel
+            anchors.centerIn: parent
+            text: "Select a file to view its technical details…"
+            color: "#334455"; font.pixelSize: 20; font.italic: true
+            visible: bodyArea.text === ""
+        }
+
+        // ── Header — filename / size / duration ───────────────────────────────
+        TextArea {
+            id: headerArea
+            anchors.top:   divider.bottom; anchors.topMargin: 12
+            anchors.left:  parent.left;  anchors.leftMargin:  24
+            anchors.right: parent.right; anchors.rightMargin: 24
+            readOnly: true; wrapMode: TextArea.Wrap
+            color: "#aaccbb"; font.pixelSize: 18; font.family: "Consolas"
+            background: Rectangle { color: "transparent" }
+            padding: 0; implicitHeight: contentHeight
+            visible: text !== ""
+        }
+
+        // Divider between header and body
+        Rectangle {
+            anchors.top:   headerArea.bottom; anchors.topMargin: 8
+            anchors.left:  parent.left;  anchors.leftMargin:  24
+            anchors.right: parent.right; anchors.rightMargin: 24
+            height: 1; color: "#1e2e3e"; visible: headerArea.text !== ""
+        }
+
+        // ── Body — scrollable technical detail ───────────────────────────────
+        Rectangle {
+            anchors.top:    headerArea.bottom; anchors.topMargin:    headerArea.text !== "" ? 18 : 0
+            anchors.bottom: statusBar.visible ? statusBar.top : parent.bottom
+            anchors.bottomMargin: statusBar.visible ? 8 : 24
+            anchors.left:   parent.left;  anchors.leftMargin:  24
+            anchors.right:  parent.right; anchors.rightMargin: 24
+            color: root.bodyBg; border.color: root.borderCol; border.width: 1; radius: 6; clip: true
+            visible: bodyArea.text !== ""
+
+            ScrollView {
+                anchors.fill: parent; anchors.margins: 8
+                ScrollBar.vertical.policy:   ScrollBar.AsNeeded
+                ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
+                TextArea {
+                    id: bodyArea; width: parent.width; readOnly: true
+                    wrapMode: TextArea.NoWrap; text: ""
+                    color: "white"; font.pixelSize: 20; font.family: "Consolas"
+                    background: Rectangle { color: "transparent" }
+                    padding: 0
+                }
+            }
+        }
+
+        // ── Status bar ────────────────────────────────────────────────────────
+        Text {
+            id: statusBar
+            anchors.bottom: parent.bottom; anchors.bottomMargin: 16
+            anchors.left:   parent.left;   anchors.leftMargin:   24
+            anchors.right:  parent.right;  anchors.rightMargin:  24
+            color: "#7aaabb"; font.pixelSize: 16; font.italic: true
+            elide: Text.ElideRight; visible: text !== ""
+        }
+    }
+
+    // ── Backend connections ───────────────────────────────────────────────────
     Connections {
         target: ffmpegBackend
 
@@ -23,189 +158,14 @@ Item {
             headerArea.text = header
             bodyArea.text   = body
             statusBar.text  = ""
-            root.state      = "visible"
         }
 
         function onStatusMessage(msg) {
             statusBar.text = msg
-            if (msg.toLowerCase().indexOf("prob") !== -1 ||
-                msg.toLowerCase().indexOf("detail") !== -1) {
-                root.state = "visible"
-            }
         }
 
         function onTestError(msg) {
             statusBar.text = "Error: " + msg
-        }
-    }
-
-    states: State {
-        name: "visible"
-        PropertyChanges { target: root; x: root.targetX; opacity: 1 }
-    }
-    transitions: Transition {
-        to: "visible"
-        ParallelAnimation {
-            NumberAnimation { property: "x";       duration: 320; easing.type: Easing.OutCubic }
-            NumberAnimation { property: "opacity"; duration: 260 }
-        }
-    }
-
-    // ── Background ────────────────────────────────────────────────────────────
-    Rectangle {
-        anchors.fill: parent
-        color:   "#0d1117"
-        opacity: 0.97
-    }
-
-    // ── Layout ────────────────────────────────────────────────────────────────
-    ColumnLayout {
-        anchors.fill:    parent
-        anchors.margins: 20
-        spacing:         12
-
-        // Title bar
-        RowLayout {
-            Layout.fillWidth: true
-
-            Text {
-                text:              "FILE DETAILS"
-                color:             "#39FF14"
-                font.pixelSize:    18
-                font.bold:         true
-                font.letterSpacing: 3
-            }
-
-            Item { Layout.fillWidth: true }
-
-            // Save button — only shown once results are loaded
-            Rectangle {
-                id:     saveBtn
-                width:  90; height: 34
-                color:  saveHover ? "#39FF14" : "#1a2a1a"
-                radius: 6
-                border.color: "#39FF14"
-                border.width: 1
-                visible: bodyArea.text !== ""
-                property bool saveHover: false
-
-                Text {
-                    anchors.centerIn: parent
-                    text:           "Save"
-                    color:          parent.saveHover ? "#111" : "white"
-                    font.pixelSize: 16
-                    font.bold:      true
-                }
-                MouseArea {
-                    anchors.fill:  parent
-                    hoverEnabled:  true
-                    cursorShape:   Qt.PointingHandCursor
-                    onEntered:     parent.saveHover = true
-                    onExited:      parent.saveHover = false
-                    onClicked:     ffmpegBackend.saveDetails(headerArea.text + "\n" + bodyArea.text)
-                }
-            }
-
-            // New File button — once results are loaded
-            Rectangle {
-                width:  100; height: 34
-                color:  newHover ? "#333" : "#222"
-                radius: 6
-                border.color: "#555"
-                border.width: 1
-                visible: bodyArea.text !== ""
-                property bool newHover: false
-
-                Text {
-                    anchors.centerIn: parent
-                    text:           "New File"
-                    color:          "white"
-                    font.pixelSize: 15
-                }
-                MouseArea {
-                    anchors.fill: parent
-                    hoverEnabled: true
-                    cursorShape:  Qt.PointingHandCursor
-                    onEntered:    parent.newHover = true
-                    onExited:     parent.newHover = false
-                    onClicked: {
-                        headerArea.text = ""
-                        bodyArea.text   = ""
-                        statusBar.text  = ""
-                        ffmpegBackend.fileDetails()
-                    }
-                }
-            }
-        }
-
-        // Accent line
-        Rectangle { Layout.fillWidth: true; height: 1; color: "#39FF14"; opacity: 0.35 }
-
-        // Waiting state
-        Text {
-            id: waitingLabel
-            Layout.fillWidth: true
-            text:           "Select a file to view its technical details…"
-            color:          "#555"
-            font.pixelSize: 16
-            font.italic:    true
-            horizontalAlignment: Text.AlignHCenter
-            visible:        bodyArea.text === ""
-        }
-
-        // Header — filename / size / duration
-        TextArea {
-            id: headerArea
-            Layout.fillWidth: true
-            readOnly:    true
-            wrapMode:    TextArea.Wrap
-            color:       "#aaaaaa"
-            font.pixelSize: 14
-            font.family: "Consolas"
-            background:  Rectangle { color: "transparent" }
-            padding:     0
-            implicitHeight: contentHeight
-            visible:     text !== ""
-        }
-
-        // Divider
-        Rectangle {
-            Layout.fillWidth: true
-            height:  1
-            color:   "#333"
-            visible: headerArea.text !== ""
-        }
-
-        // Body — scrollable details
-        ScrollView {
-            Layout.fillWidth:  true
-            Layout.fillHeight: true
-            clip: true
-            ScrollBar.vertical.policy:   ScrollBar.AsNeeded
-            ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
-
-            TextArea {
-                id: bodyArea
-                width:       parent.width
-                readOnly:    true
-                wrapMode:    TextArea.NoWrap
-                color:       "white"
-                font.pixelSize: 15
-                font.family: "Consolas"
-                background:  Rectangle { color: "transparent" }
-                padding:     0
-            }
-        }
-
-        // Status bar
-        Text {
-            id:             statusBar
-            Layout.fillWidth: true
-            color:          "#888"
-            font.pixelSize: 13
-            font.italic:    true
-            elide:          Text.ElideRight
-            visible:        text !== ""
         }
     }
 }

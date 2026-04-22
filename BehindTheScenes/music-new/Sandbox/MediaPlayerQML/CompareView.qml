@@ -4,18 +4,18 @@ import QtQuick.Controls 2.15
 // ─────────────────────────────────────────────────────────────────────────────
 //  CompareView — VMAF file comparison panel
 //
-//  Loaded into the display area when Compare Files is clicked.
-//  Picks two files via dialog (Python side), runs ffmpeg libvmaf, and
-//  displays the score with colour coding plus the raw ffmpeg output.
+//  Centred modal panel over a static movie poster backdrop.
 // ─────────────────────────────────────────────────────────────────────────────
 
 Item {
     id: root
     anchors.fill: parent
 
+    // ── Palette ───────────────────────────────────────────────────────────────
     readonly property color green:     "#39FF14"
-    readonly property color panelBg:   "#0d1a08"
+    readonly property color panelBg:   "#06101c"
     readonly property color borderCol: "#39FF14"
+    readonly property color bodyBg:    "#080f18"
 
     property bool comparing: false
     property real scoreA:   -1
@@ -28,223 +28,179 @@ Item {
         return "#FF3333"
     }
 
-    // ── Report panel — right 38% ──────────────────────────────────────────────
+    // ── Static poster backdrop ────────────────────────────────────────────────
+    WorkbenchSplash { anchors.fill: parent; z: 0 }
+
+    // ── Outer glow ring ───────────────────────────────────────────────────────
     Rectangle {
-        id: reportPanel
-        anchors.top:    parent.top
-        anchors.bottom: parent.bottom
-        anchors.right:  parent.right
-        width: parent.width * 0.38
+        anchors.centerIn: parent
+        width:  panel.width  + 10
+        height: panel.height + 10
+        radius: 20; color: "transparent"
+        border.color: root.green; border.width: 1; opacity: 0.07; z: 1
+    }
 
-        color:        root.panelBg
-        border.color: root.borderCol
-        border.width: 1
+    // ── Centred panel ─────────────────────────────────────────────────────────
+    Rectangle {
+        id: panel
+        anchors.centerIn: parent
+        width:  parent.width  * 0.70
+        height: parent.height * 0.84
+        radius: 14; color: root.panelBg
+        border.color: root.borderCol; border.width: 2; z: 2
 
-        property bool ready: false
-        anchors.rightMargin: ready ? 0 : -width
-        Behavior on anchors.rightMargin {
-            NumberAnimation { duration: 320; easing.type: Easing.OutCubic }
-        }
+        opacity: 0
+        NumberAnimation on opacity { from: 0; to: 1; duration: 300; easing.type: Easing.OutCubic }
 
-        // ── Title bar ────────────────────────────────────────────────────────
-        Item {
+        // ── Title bar ─────────────────────────────────────────────────────────
+        Rectangle {
             id: titleBar
-            anchors.top:    parent.top
-            anchors.left:   parent.left
-            anchors.right:  parent.right
-            anchors.margins: 14
-            height: 26
+            anchors.top: parent.top; anchors.left: parent.left; anchors.right: parent.right
+            height: 62; color: Qt.rgba(0,0,0,0.28); radius: 14
+            Rectangle {
+                anchors.bottom: parent.bottom; anchors.left: parent.left; anchors.right: parent.right
+                height: parent.radius; color: parent.color
+            }
 
             Text {
+                anchors.left: parent.left; anchors.leftMargin: 26
                 anchors.verticalCenter: parent.verticalCenter
                 text: "FILE COMPARE"
-                font.family:        "Segoe UI"
-                font.pixelSize:     15
-                font.bold:          true
-                font.letterSpacing: 2.5
+                font.family: "Segoe UI"; font.pixelSize: 26; font.bold: true; font.letterSpacing: 4
                 color: root.green
             }
 
-            // ── Info button ──────────────────────────────────────────────────
+            // Info button
             Rectangle {
                 id: infoBtn
-                anchors.right:          parent.right
+                anchors.right: parent.right; anchors.rightMargin: 24
                 anchors.verticalCenter: parent.verticalCenter
-                width: 22; height: 22; radius: 11
-                color:        infoMa.containsMouse ? Qt.rgba(0.22, 1, 0.08, 0.18) : "transparent"
-                border.color: root.green
-                border.width: 1
-
+                width: 30; height: 30; radius: 15
+                color: infoMa.containsMouse ? Qt.rgba(0.22,1,0.08,0.18) : "transparent"
+                border.color: root.green; border.width: 1
                 Text {
-                    anchors.centerIn: parent
-                    text: "i"
-                    font.family:    "Segoe UI"
-                    font.pixelSize: 13
-                    font.italic:    true
-                    font.bold:      true
+                    anchors.centerIn: parent; text: "i"
+                    font.family: "Segoe UI"; font.pixelSize: 16; font.italic: true; font.bold: true
                     color: root.green
                 }
-
-                MouseArea {
-                    id: infoMa
-                    anchors.fill: parent
-                    hoverEnabled: true
-                    onClicked: infoOverlay.visible = !infoOverlay.visible
-                }
-
+                MouseArea { id: infoMa; anchors.fill: parent; hoverEnabled: true; onClicked: infoOverlay.visible = !infoOverlay.visible }
                 Behavior on color { ColorAnimation { duration: 150 } }
             }
         }
 
         Rectangle {
             id: divider
-            anchors.top:   titleBar.bottom
-            anchors.left:  parent.left;  anchors.leftMargin:  14
-            anchors.right: parent.right; anchors.rightMargin: 14
-            height: 1; color: root.borderCol; opacity: 0.4
+            anchors.top: titleBar.bottom
+            anchors.left: parent.left; anchors.leftMargin: 24
+            anchors.right: parent.right; anchors.rightMargin: 24
+            height: 1; color: root.borderCol; opacity: 0.30
         }
 
-        // ── Pulsing bar (visible while comparing) ─────────────────────────────
+        // ── Pulsing progress bar (while comparing) ────────────────────────────
         Item {
             id: progressRow
-            anchors.top:   divider.bottom; anchors.topMargin: 6
-            anchors.left:  parent.left;    anchors.leftMargin:  14
-            anchors.right: parent.right;   anchors.rightMargin: 14
-            height: visible ? 26 : 0
-            visible: root.comparing
+            anchors.top: divider.bottom; anchors.topMargin: 10
+            anchors.left: parent.left; anchors.leftMargin: 24
+            anchors.right: parent.right; anchors.rightMargin: 24
+            height: visible ? 32 : 0; visible: root.comparing
 
             ProgressBar {
                 id: progressBar
-                anchors.fill: parent
-                from: 0; to: 100; value: 0
-
-                background: Rectangle {
-                    color: "#1a1a1a"; radius: 3
-                    border.color: root.borderCol; border.width: 1
-                }
+                anchors.fill: parent; from: 0; to: 100; value: 0
+                background: Rectangle { color: "#0a1820"; radius: 4; border.color: root.borderCol; border.width: 1 }
                 contentItem: Item {
                     Rectangle {
-                        id: pulseBar
-                        width:  parent.width * 0.35
-                        height: parent.height; radius: 3
-                        color:  root.green; opacity: 0.85
+                        id: pulseBar; width: parent.width * 0.35; height: parent.height; radius: 4
+                        color: root.green; opacity: 0.85
                         SequentialAnimation on x {
-                            running: root.comparing
-                            loops:   Animation.Infinite
-                            NumberAnimation {
-                                from: -pulseBar.width; to: progressBar.width
-                                duration: 1200; easing.type: Easing.InOutSine
-                            }
+                            running: root.comparing; loops: Animation.Infinite
+                            NumberAnimation { from: -pulseBar.width; to: progressBar.width; duration: 1200; easing.type: Easing.InOutSine }
                         }
                     }
                 }
             }
         }
 
-        // ── Header (file names + score line) ─────────────────────────────────
+        // ── File info header ──────────────────────────────────────────────────
         TextArea {
             id: headerArea
-            anchors.top:   progressRow.bottom; anchors.topMargin: 6
-            anchors.left:  parent.left;  anchors.leftMargin:  14
-            anchors.right: parent.right; anchors.rightMargin: 14
-            height:   visible ? contentHeight + 8 : 0
-            readOnly: true
-            text:     ""
-            color:    "#b0d4a0"
-            font.family:    "Courier New"
-            font.pixelSize: 12
+            anchors.top: progressRow.bottom; anchors.topMargin: 8
+            anchors.left: parent.left; anchors.leftMargin: 24
+            anchors.right: parent.right; anchors.rightMargin: 24
+            height: visible ? contentHeight + 8 : 0
+            readOnly: true; text: ""
+            color: "#aaccbb"
+            font.family: "Consolas"; font.pixelSize: 18
             background: Rectangle { color: "transparent" }
-            wrapMode:  TextArea.Wrap
-            visible:   text !== ""
+            wrapMode: TextArea.Wrap; visible: text !== ""
         }
 
-        // ── Dual score display ───────────────────────────────────────────────
+        // ── Dual score display ────────────────────────────────────────────────
         Item {
             id: scoreDisplay
-            anchors.top:   headerArea.bottom; anchors.topMargin: 12
-            anchors.left:  parent.left;  anchors.leftMargin:  14
-            anchors.right: parent.right; anchors.rightMargin: 14
-            height: visible ? 72 : 0
+            anchors.top: headerArea.bottom; anchors.topMargin: 16
+            anchors.left: parent.left; anchors.leftMargin: 24
+            anchors.right: parent.right; anchors.rightMargin: 24
+            height: visible ? 100 : 0
             visible: root.scoreA >= 0 && root.scoreB >= 0
 
             Row {
-                anchors.fill: parent
-                spacing: 6
+                anchors.fill: parent; spacing: 8
 
-                // ── File A score ─────────────────────────────────────────────
                 Rectangle {
-                    width:  (parent.width - 6) / 2
-                    height: parent.height
-                    color:  Qt.rgba(0, 0, 0, 0.35)
-                    radius: 6
+                    width: (parent.width - 8) / 2; height: parent.height
+                    color: Qt.rgba(0,0,0,0.35); radius: 8
                     border.color: root.scoreColor(root.scoreA)
                     border.width: root.scoreA >= root.scoreB ? 2 : 1
                     opacity:      root.scoreA >= root.scoreB ? 1.0 : 0.65
 
                     Column {
-                        anchors.centerIn: parent
-                        spacing: 4
-
+                        anchors.centerIn: parent; spacing: 6
                         Text {
-                            anchors.horizontalCenter: parent.horizontalCenter
-                            text: "FILE A"
-                            font.family: "Segoe UI"; font.pixelSize: 10
-                            font.letterSpacing: 1.5
+                            anchors.horizontalCenter: parent.horizontalCenter; text: "FILE A"
+                            font.family: "Segoe UI"; font.pixelSize: 14; font.letterSpacing: 2
                             color: "#808080"
                         }
                         Text {
                             anchors.horizontalCenter: parent.horizontalCenter
                             text: root.scoreA >= 0 ? root.scoreA.toFixed(1) : ""
-                            font.family: "Segoe UI"; font.pixelSize: 30
-                            font.bold: true
+                            font.family: "Segoe UI"; font.pixelSize: 36; font.bold: true
                             color: root.scoreColor(root.scoreA)
                         }
                         Text {
                             anchors.horizontalCenter: parent.horizontalCenter
                             text: root.scoreA > root.scoreB ? "▲ WINNER" : (root.scoreA === root.scoreB ? "EQUAL" : "")
-                            font.family: "Segoe UI"; font.pixelSize: 10
-                            font.bold: true
-                            color: root.scoreColor(root.scoreA)
-                            visible: text !== ""
+                            font.family: "Segoe UI"; font.pixelSize: 13; font.bold: true
+                            color: root.scoreColor(root.scoreA); visible: text !== ""
                         }
                     }
                 }
 
-                // ── File B score ─────────────────────────────────────────────
                 Rectangle {
-                    width:  (parent.width - 6) / 2
-                    height: parent.height
-                    color:  Qt.rgba(0, 0, 0, 0.35)
-                    radius: 6
+                    width: (parent.width - 8) / 2; height: parent.height
+                    color: Qt.rgba(0,0,0,0.35); radius: 8
                     border.color: root.scoreColor(root.scoreB)
                     border.width: root.scoreB >= root.scoreA ? 2 : 1
                     opacity:      root.scoreB >= root.scoreA ? 1.0 : 0.65
 
                     Column {
-                        anchors.centerIn: parent
-                        spacing: 4
-
+                        anchors.centerIn: parent; spacing: 6
                         Text {
-                            anchors.horizontalCenter: parent.horizontalCenter
-                            text: "FILE B"
-                            font.family: "Segoe UI"; font.pixelSize: 10
-                            font.letterSpacing: 1.5
+                            anchors.horizontalCenter: parent.horizontalCenter; text: "FILE B"
+                            font.family: "Segoe UI"; font.pixelSize: 14; font.letterSpacing: 2
                             color: "#808080"
                         }
                         Text {
                             anchors.horizontalCenter: parent.horizontalCenter
                             text: root.scoreB >= 0 ? root.scoreB.toFixed(1) : ""
-                            font.family: "Segoe UI"; font.pixelSize: 30
-                            font.bold: true
+                            font.family: "Segoe UI"; font.pixelSize: 36; font.bold: true
                             color: root.scoreColor(root.scoreB)
                         }
                         Text {
                             anchors.horizontalCenter: parent.horizontalCenter
                             text: root.scoreB > root.scoreA ? "▲ WINNER" : (root.scoreB === root.scoreA ? "EQUAL" : "")
-                            font.family: "Segoe UI"; font.pixelSize: 10
-                            font.bold: true
-                            color: root.scoreColor(root.scoreB)
-                            visible: text !== ""
+                            font.family: "Segoe UI"; font.pixelSize: 13; font.bold: true
+                            color: root.scoreColor(root.scoreB); visible: text !== ""
                         }
                     }
                 }
@@ -254,201 +210,105 @@ Item {
         // ── Action buttons ────────────────────────────────────────────────────
         Row {
             id: actionRow
-            anchors.bottom:       parent.bottom; anchors.bottomMargin: 14
-            anchors.left:         parent.left;   anchors.leftMargin:   14
-            spacing: 10
+            anchors.bottom: parent.bottom; anchors.bottomMargin: 20
+            anchors.left:   parent.left;   anchors.leftMargin:   24
+            spacing: 14
 
             WorkbenchActionButton {
-                label: "Save"
-                accent: root.green
+                label: "Save"; accent: root.green
                 enabled: bodyArea.text !== ""
                 onActivated: {
                     ffmpegBackend.saveReport(headerArea.text + "\n" + bodyArea.text)
-                    reportPanel.ready = false
-                    headerArea.text   = ""
-                    bodyArea.text     = ""
-                    root.scoreA       = -1
-                    root.scoreB       = -1
+                    headerArea.text = ""; bodyArea.text = ""; root.scoreA = -1; root.scoreB = -1
                 }
             }
-
         }
 
         // ── Raw output area ───────────────────────────────────────────────────
         Rectangle {
-            anchors.top:          scoreDisplay.bottom; anchors.topMargin:    8
-            anchors.bottom:       actionRow.top;       anchors.bottomMargin: 8
-            anchors.left:         parent.left;         anchors.leftMargin:   14
-            anchors.right:        parent.right;        anchors.rightMargin:  14
-            color:        "#0a120a"
-            border.color: root.borderCol
-            border.width: 1
-            radius:       3
-            clip:         true
+            anchors.top:    scoreDisplay.bottom; anchors.topMargin:    10
+            anchors.bottom: actionRow.top;       anchors.bottomMargin: 12
+            anchors.left:   parent.left;         anchors.leftMargin:   24
+            anchors.right:  parent.right;        anchors.rightMargin:  24
+            color: root.bodyBg; border.color: root.borderCol; border.width: 1; radius: 6; clip: true
 
             ScrollView {
-                anchors.fill:    parent
-                anchors.margins: 4
+                anchors.fill: parent; anchors.margins: 6
                 ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
-
                 TextArea {
-                    id: bodyArea
-                    width:    parent.width
-                    wrapMode: TextArea.Wrap
-                    text:     ""
-                    color:    root.green
-                    font.family:    "Courier New"
-                    font.pixelSize: 12
+                    id: bodyArea; width: parent.width; wrapMode: TextArea.Wrap; text: ""
+                    color: root.green; font.family: "Consolas"; font.pixelSize: 20
                     background: Rectangle { color: "transparent" }
                     placeholderText: "ffmpeg output will appear here…"
-                    placeholderTextColor: "#2a5a1a"
+                    placeholderTextColor: "#1f4a18"
                 }
             }
         }
     }
 
-    // ── Info overlay ─────────────────────────────────────────────────────────
+    // ── Info overlay ──────────────────────────────────────────────────────────
     Rectangle {
         id: infoOverlay
-        anchors.fill:        reportPanel
-        anchors.leftMargin:  1
-        anchors.rightMargin: 1
-        color:   "#0d1a08"
-        radius:  0
-        visible: false
-        z:       100
+        anchors.fill: panel; anchors.margins: 2
+        color: "#06101c"; radius: 12; visible: false; z: 100
 
-        // Dismiss on click outside the content
         MouseArea { anchors.fill: parent; onClicked: infoOverlay.visible = false }
 
         Column {
-            anchors.top:    parent.top
-            anchors.left:   parent.left
-            anchors.right:  parent.right
-            anchors.bottom: closeRow.top
-            anchors.margins: 18
-            spacing: 14
+            anchors.top: parent.top; anchors.left: parent.left; anchors.right: parent.right
+            anchors.bottom: closeRow.top; anchors.margins: 24; spacing: 16
 
             Text {
                 text: "HOW IT WORKS"
-                font.family: "Segoe UI"; font.pixelSize: 13
-                font.bold: true; font.letterSpacing: 2
+                font.family: "Segoe UI"; font.pixelSize: 18; font.bold: true; font.letterSpacing: 2
                 color: root.green
             }
-
             Text {
-                width: parent.width
-                wrapMode: Text.WordWrap
-                font.family: "Segoe UI"; font.pixelSize: 12
-                color: "#b0d4a0"
-                lineHeight: 1.4
-                text:
-                    "Each file is read by ffprobe (no decoding, completes in seconds). " +
-                    "Four technical factors are measured and combined into a Quality Score out of 100."
+                width: parent.width; wrapMode: Text.WordWrap
+                font.family: "Segoe UI"; font.pixelSize: 16; color: "#aaccbb"; lineHeight: 1.5
+                text: "Each file is read by ffprobe (no decoding). Four technical factors are measured and combined into a Quality Score out of 100."
             }
 
-            // Score breakdown table
             Column {
-                width: parent.width
-                spacing: 5
-
+                width: parent.width; spacing: 8
                 Repeater {
                     model: [
-                        { factor: "Video Codec",    pts: "25 pts", detail: "HEVC / AV1 score highest. H.264 is mid-range. Older codecs (MPEG-2, VC-1) score low. A modern codec delivers more quality per bit." },
-                        { factor: "Resolution",     pts: "30 pts", detail: "4K = 30 pts, 1080p = 22, 720p = 14, 576p = 8. Higher resolution means more visual detail available." },
-                        { factor: "Video Bitrate",  pts: "30 pts", detail: "Scored on a log scale up to 80 Mbps. More bits per second means more detail is preserved, especially in fast motion." },
-                        { factor: "Audio Quality",  pts: "15 pts", detail: "TrueHD / DTS-MA / PCM (lossless) score highest. DTS / Dolby Digital mid-range. AAC and MP3 score lower." },
+                        { factor: "Video Codec",   pts: "25 pts", detail: "HEVC / AV1 score highest. H.264 is mid-range. Older codecs score low." },
+                        { factor: "Resolution",    pts: "30 pts", detail: "4K = 30 pts, 1080p = 22, 720p = 14, 576p = 8." },
+                        { factor: "Video Bitrate", pts: "30 pts", detail: "Scored on a log scale up to 80 Mbps." },
+                        { factor: "Audio Quality", pts: "15 pts", detail: "TrueHD / DTS-MA score highest. AAC and MP3 score lower." },
                     ]
-
                     delegate: Column {
-                        width: parent.width
-                        spacing: 3
-
+                        width: parent.width; spacing: 4
                         Row {
-                            spacing: 8
-                            Text {
-                                text: modelData.factor
-                                font.family: "Segoe UI"; font.pixelSize: 12
-                                font.bold: true; color: root.green
-                                width: 100
-                            }
-                            Text {
-                                text: modelData.pts
-                                font.family: "Segoe UI"; font.pixelSize: 12
-                                color: "#FFB300"
-                            }
+                            spacing: 10
+                            Text { text: modelData.factor; font.family: "Segoe UI"; font.pixelSize: 16; font.bold: true; color: root.green; width: 130 }
+                            Text { text: modelData.pts;    font.family: "Segoe UI"; font.pixelSize: 16; color: "#FFB300" }
                         }
-                        Text {
-                            width: parent.width
-                            text: modelData.detail
-                            wrapMode: Text.WordWrap
-                            font.family: "Segoe UI"; font.pixelSize: 11
-                            color: "#7a9a70"; lineHeight: 1.3
-                        }
+                        Text { width: parent.width; text: modelData.detail; wrapMode: Text.WordWrap; font.family: "Segoe UI"; font.pixelSize: 14; color: "#7a9a70"; lineHeight: 1.3 }
                     }
                 }
             }
 
-            Text {
-                text: "READING THE RESULTS"
-                font.family: "Segoe UI"; font.pixelSize: 13
-                font.bold: true; font.letterSpacing: 2
-                color: root.green
-            }
-
+            Text { text: "SCORE BANDS"; font.family: "Segoe UI"; font.pixelSize: 18; font.bold: true; font.letterSpacing: 2; color: root.green }
             Column {
-                width: parent.width
-                spacing: 4
-
+                width: parent.width; spacing: 6
                 Repeater {
-                    model: [
-                        { score: "80 – 100", col: "#39FF14", label: "Excellent" },
-                        { score: "60 – 79",  col: "#FFB300", label: "Good" },
-                        { score: "40 – 59",  col: "#FF6600", label: "Fair" },
-                        { score: "0  – 39",  col: "#FF3333", label: "Poor" },
-                    ]
+                    model: [{ score:"80–100", col:"#39FF14", label:"Excellent"}, {score:"60–79", col:"#FFB300", label:"Good"}, {score:"40–59", col:"#FF6600", label:"Fair"}, {score:"0–39", col:"#FF3333", label:"Poor"}]
                     delegate: Row {
-                        spacing: 10
-                        Rectangle {
-                            width: 10; height: 10; radius: 5
-                            color: modelData.col
-                            anchors.verticalCenter: parent.verticalCenter
-                        }
-                        Text {
-                            text: modelData.score + "  —  " + modelData.label
-                            font.family: "Segoe UI"; font.pixelSize: 12
-                            color: modelData.col
-                        }
+                        spacing: 12
+                        Rectangle { width: 12; height: 12; radius: 6; color: modelData.col; anchors.verticalCenter: parent.verticalCenter }
+                        Text { text: modelData.score + "  —  " + modelData.label; font.family: "Segoe UI"; font.pixelSize: 16; color: modelData.col }
                     }
-                }
-
-                Text {
-                    width: parent.width
-                    topPadding: 6
-                    wrapMode: Text.WordWrap
-                    font.family: "Segoe UI"; font.pixelSize: 11
-                    color: "#7a9a70"; lineHeight: 1.3
-                    text:
-                        "A gap under 5 pts is marginal — either file is fine. " +
-                        "5–15 pts is a moderate advantage. Over 15 pts is significant — " +
-                        "the higher-scoring file will deliver a noticeably better experience."
                 }
             }
         }
 
-        // Close button
         Row {
             id: closeRow
-            anchors.bottom:       parent.bottom
-            anchors.right:        parent.right
-            anchors.bottomMargin: 14
-            anchors.rightMargin:  18
-
-            WorkbenchActionButton {
-                label: "Close"
-                accent: root.green
-                onActivated: infoOverlay.visible = false
-            }
+            anchors.bottom: parent.bottom; anchors.right: parent.right
+            anchors.bottomMargin: 20; anchors.rightMargin: 24
+            WorkbenchActionButton { label: "Close"; accent: root.green; onActivated: infoOverlay.visible = false }
         }
     }
 
@@ -462,106 +322,49 @@ Item {
             root.scoreA       = scoreA
             root.scoreB       = scoreB
             root.comparing    = false
-            reportPanel.ready = true
         }
 
         function onStatusMessage(msg) {
             if (msg.indexOf("Analysing") !== -1 || msg.indexOf("comparison") !== -1) {
-                root.comparing    = true
-                reportPanel.ready = true
-                bodyArea.text     = ""
-                headerArea.text   = ""
-                root.scoreA       = -1
-                root.scoreB       = -1
+                root.comparing  = true
+                bodyArea.text   = ""
+                headerArea.text = ""
+                root.scoreA     = -1
+                root.scoreB     = -1
             }
         }
 
-        function onFfmpegMissing() { installDialog.open() }
-
-        function onDownloadProgress(pct) { dlProgress.value = pct }
-        function onDownloadComplete()    { installDialog.close() }
-        function onDownloadFailed(reason) {
-            dlErrorText.text    = "Download failed: " + reason
-            dlProgress.visible  = false
-            dlErrorText.visible = true
+        function onFfmpegMissing()          { installDialog.open() }
+        function onDownloadProgress(pct)    { dlProgress.value = pct }
+        function onDownloadComplete()       { installDialog.close() }
+        function onDownloadFailed(reason)   {
+            dlErrorText.text = "Download failed: " + reason
+            dlProgress.visible = false; dlErrorText.visible = true
         }
     }
 
     // ── FFmpeg install dialog ─────────────────────────────────────────────────
     Rectangle {
         id: installDialog
-        anchors.centerIn: parent
-        width: 420; height: 200
-        radius: 10
-        color:        "#111a0d"
-        border.color: root.borderCol
-        border.width: 2
-        visible: false
-        z: 500
+        anchors.centerIn: parent; width: 460; height: 220; radius: 12
+        color: "#0a1520"; border.color: root.borderCol; border.width: 2; visible: false; z: 500
 
         function open()  { visible = true  }
         function close() { visible = false }
 
         Column {
-            anchors.centerIn: parent
-            spacing: 18
-            width: parent.width - 40
-
-            Text {
-                anchors.horizontalCenter: parent.horizontalCenter
-                text: "FFmpeg Not Found"
-                font.pixelSize: 16; font.bold: true
-                color: root.green
+            anchors.centerIn: parent; spacing: 20; width: parent.width - 48
+            Text { anchors.horizontalCenter: parent.horizontalCenter; text: "FFmpeg Not Found"; font.pixelSize: 20; font.bold: true; color: root.green }
+            Text { width: parent.width; anchors.horizontalCenter: parent.horizontalCenter; text: "FFmpeg is required for Workbench features.\nWould you like to download it now?"; font.pixelSize: 16; color: "#aaccbb"; horizontalAlignment: Text.AlignHCenter; wrapMode: Text.WordWrap }
+            ProgressBar { id: dlProgress; width: parent.width; height: 22; from: 0; to: 100; value: 0; visible: false
+                background: Rectangle { color: "#0a1820"; radius: 4; border.color: root.borderCol; border.width: 1 }
+                contentItem: Rectangle { width: dlProgress.visualPosition * dlProgress.width; height: parent.height; radius: 4; color: root.green }
             }
-
-            Text {
-                width: parent.width
-                anchors.horizontalCenter: parent.horizontalCenter
-                text:  "FFmpeg is required for Workbench features.\nWould you like to download it now?"
-                font.pixelSize: 13; color: "#b0d4a0"
-                horizontalAlignment: Text.AlignHCenter
-                wrapMode: Text.WordWrap
-            }
-
-            ProgressBar {
-                id: dlProgress
-                width: parent.width; height: 20
-                from: 0; to: 100; value: 0
-                visible: false
-                background: Rectangle {
-                    color: "#1a1a1a"; radius: 3
-                    border.color: root.borderCol; border.width: 1
-                }
-                contentItem: Rectangle {
-                    width:  dlProgress.visualPosition * dlProgress.width
-                    height: parent.height; radius: 3
-                    color:  root.green
-                }
-            }
-
-            Text {
-                id: dlErrorText
-                visible: false; width: parent.width; text: ""
-                color: "#FF5555"; font.pixelSize: 12
-                wrapMode: Text.WordWrap
-            }
-
+            Text { id: dlErrorText; visible: false; width: parent.width; text: ""; color: "#FF5555"; font.pixelSize: 14; wrapMode: Text.WordWrap }
             Row {
-                anchors.horizontalCenter: parent.horizontalCenter
-                spacing: 16
-
-                WorkbenchActionButton {
-                    label: "Download"; accent: root.green
-                    onActivated: {
-                        dlProgress.value   = 0
-                        dlProgress.visible = true
-                        ffmpegBackend.downloadFFmpeg()
-                    }
-                }
-                WorkbenchActionButton {
-                    label: "Not Now"; accent: "#888888"
-                    onActivated: installDialog.close()
-                }
+                anchors.horizontalCenter: parent.horizontalCenter; spacing: 16
+                WorkbenchActionButton { label: "Download"; accent: root.green; onActivated: { dlProgress.value = 0; dlProgress.visible = true; ffmpegBackend.downloadFFmpeg() } }
+                WorkbenchActionButton { label: "Not Now"; accent: "#888888"; onActivated: installDialog.close() }
             }
         }
     }
