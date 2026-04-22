@@ -69,13 +69,7 @@ Item {
     }
 
     function rebuildDeviceList() {
-        var seen = {}
-        var devices = []
-        for (var i = 0; i < allData.length; i++) {
-            var d = allData[i].device
-            if (d && !seen[d]) { seen[d] = true; devices.push(d) }
-        }
-        devices.sort()
+        var devices = mediaManagerBackend.get_distinct_devices(reportRoot.selectedTable)
         deviceModel.clear()
         deviceModel.append({ text: "All Devices" })
         for (var j = 0; j < devices.length; j++)
@@ -155,6 +149,7 @@ Item {
                                 reportRoot.selectedTable = modelData.tbl
                                 reportRoot.selectedCollection = ""
                                 detailModel.clear()
+                                rebuildDeviceList()
                             }
                         }
                     }

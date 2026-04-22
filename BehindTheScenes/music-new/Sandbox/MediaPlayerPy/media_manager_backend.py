@@ -395,6 +395,10 @@ class MediaManagerBackend(QObject):
         return db.get_distinct_collection_names(table)
 
     @Slot(str, result=list)
+    def get_distinct_devices(self, table: str) -> list:
+        return db.get_distinct_devices(table)
+
+    @Slot(str, result=list)
     def get_collection_detail_sync(self, collection_name: str) -> list:
         """Return detail rows for canvas chart click (called from QML, runs on main thread)."""
         # Small enough to do sync for now
