@@ -1,23 +1,30 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
+import Qt5Compat.GraphicalEffects
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  WorkbenchView — FFmpeg test report panel  (Test File)
 //
-//  Centred modal panel over a static movie poster backdrop.
+//  Centred modal panel over the cinematic rotating backdrop.
+//  Frosted glass effect: blurred backdrop + dark tint behind the panel.
 // ─────────────────────────────────────────────────────────────────────────────
 
 Item {
     id: root
     anchors.fill: parent
 
+    // Passed from Framework-1.qml so we can capture the live backdrop
+    property var backdropLayer: null
+
     // ── Palette ───────────────────────────────────────────────────────────────
     readonly property color green:     "#39FF14"
     readonly property color dimGreen:  "#162e08"
-    readonly property color panelBg:   "#06101c"
+    readonly property color panelBg:   Qt.rgba(0, 0, 0, 0.08)   // near-transparent — glass base provides depth
     readonly property color borderCol: "#39FF14"
-    readonly property color bodyBg:    "#080f18"
+    readonly property color bodyBg:    "transparent"
     readonly property color textMuted: "#7aaabb"
+    readonly property color textLabel: "#5a8a7a"
+    readonly property color textValue: "#c0ddd0"
 
     property bool testing:   false
     property bool analysing: false
@@ -31,8 +38,35 @@ Item {
         color:  "transparent"
         border.color: root.green
         border.width: 1
-        opacity: 0.07
+        opacity: 0.12
         z: 1
+    }
+
+    // ── Frosted glass base (behind panel, same footprint) ─────────────────────
+    Item {
+        id: glassBg
+        anchors.centerIn: parent
+        width:  parent.width  * 0.70
+        height: parent.height * 0.84
+        z: 1
+        visible: root.backdropLayer !== null
+
+        FastBlur {
+            anchors.fill: parent
+            radius: 40
+            source: ShaderEffectSource {
+                sourceItem: root.backdropLayer
+                live:       true
+                hideSource: false
+                sourceRect: Qt.rect(glassBg.x, glassBg.y, glassBg.width, glassBg.height)
+            }
+        }
+
+        Rectangle {
+            anchors.fill: parent
+            color: "#010306"
+            opacity: 0.55
+        }
     }
 
     // ── Centred panel ─────────────────────────────────────────────────────────
@@ -57,9 +91,8 @@ Item {
             anchors.left:  parent.left
             anchors.right: parent.right
             height: 62
-            color:  Qt.rgba(0, 0, 0, 0.28)
+            color:  Qt.rgba(0, 0, 0, 0.45)
             radius: 14
-            // extend bottom corners below clip so only top corners round
             Rectangle {
                 anchors.bottom: parent.bottom
                 anchors.left:   parent.left
@@ -68,9 +101,19 @@ Item {
                 color:  parent.color
             }
 
+            // Left accent stripe
+            Rectangle {
+                anchors.top:    parent.top;    anchors.topMargin:    10
+                anchors.bottom: parent.bottom; anchors.bottomMargin: 10
+                anchors.left:   parent.left;   anchors.leftMargin:   0
+                width: 4
+                color: root.green
+                radius: 2
+            }
+
             Text {
                 anchors.left:            parent.left
-                anchors.leftMargin:      26
+                anchors.leftMargin:      20
                 anchors.verticalCenter:  parent.verticalCenter
                 text: "TEST REPORT"
                 font.family:        "Segoe UI"
@@ -123,7 +166,7 @@ Item {
             anchors.top:   titleBar.bottom
             anchors.left:  parent.left;  anchors.leftMargin:  24
             anchors.right: parent.right; anchors.rightMargin: 24
-            height: 1; color: root.borderCol; opacity: 0.30
+            height: 1; color: root.borderCol; opacity: 0.25
         }
 
         // ── Progress bar ──────────────────────────────────────────────────────
@@ -184,7 +227,7 @@ Item {
             }
         }
 
-        // ── Header (file info) ────────────────────────────────────────────────
+        // ── Header (file info) — styled two-column labels ─────────────────────
         TextArea {
             id: headerArea
             anchors.top:   progressRow.bottom; anchors.topMargin: 8
@@ -192,11 +235,20 @@ Item {
             anchors.right: parent.right; anchors.rightMargin: 24
             height:   visible ? contentHeight + 8 : 0
             readOnly: true; text: ""
-            color:    "#aaccbb"
-            font.family: "Consolas"; font.pixelSize: 18
+            color:    root.textValue
+            font.family: "Consolas"; font.pixelSize: 20
             background: Rectangle { color: "transparent" }
             wrapMode:  TextArea.NoWrap
             visible:   text !== ""
+        }
+
+        // Thin separator between header and body
+        Rectangle {
+            id: headerBodyDiv
+            anchors.top:   headerArea.bottom; anchors.topMargin: 6
+            anchors.left:  parent.left;  anchors.leftMargin:  24
+            anchors.right: parent.right; anchors.rightMargin: 24
+            height: 1; color: "#1a2e20"; visible: headerArea.text !== ""
         }
 
         // ── Action buttons (anchored to bottom) ───────────────────────────────
@@ -242,7 +294,8 @@ Item {
 
         // ── Body (scrollable output area) ─────────────────────────────────────
         Rectangle {
-            anchors.top:          headerArea.bottom; anchors.topMargin:    10
+            anchors.top:          headerBodyDiv.visible ? headerBodyDiv.bottom : (headerArea.visible ? headerArea.bottom : progressRow.bottom)
+            anchors.topMargin:    10
             anchors.bottom:       actionRow.top;     anchors.bottomMargin: 12
             anchors.left:         parent.left;       anchors.leftMargin:   24
             anchors.right:        parent.right;      anchors.rightMargin:  24
@@ -254,8 +307,21 @@ Item {
 
             ScrollView {
                 anchors.fill:    parent
-                anchors.margins: 6
+                anchors.margins: 8
                 ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
+                ScrollBar.vertical: ScrollBar {
+                    width: 6
+                    policy: ScrollBar.AsNeeded
+                    contentItem: Rectangle {
+                        radius: 3
+                        color:  "#39FF14"
+                        opacity: 0.55
+                    }
+                    background: Rectangle {
+                        color: Qt.rgba(0.22, 1, 0.08, 0.07)
+                        radius: 3
+                    }
+                }
 
                 TextArea {
                     id: bodyArea

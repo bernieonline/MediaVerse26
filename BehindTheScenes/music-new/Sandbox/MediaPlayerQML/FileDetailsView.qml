@@ -1,29 +1,51 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
+import Qt5Compat.GraphicalEffects
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  FileDetailsView — ffprobe file details panel
 //
-//  Centred modal panel over a static movie poster backdrop.
-//  Unified with the rest of the Workbench panel design.
+//  Centred modal panel over the cinematic rotating backdrop.
+//  Frosted glass effect: blurred backdrop + dark tint behind the panel.
 // ─────────────────────────────────────────────────────────────────────────────
 
 Item {
     id: root
     anchors.fill: parent
 
+    property var backdropLayer: null
+
     // ── Palette ───────────────────────────────────────────────────────────────
     readonly property color green:     "#39FF14"
-    readonly property color panelBg:   "#06101c"
+    readonly property color panelBg:   Qt.rgba(0, 0, 0, 0.08)
     readonly property color borderCol: "#39FF14"
-    readonly property color bodyBg:    "#080f18"
+    readonly property color bodyBg:    "transparent"
 
     // ── Outer glow ring ───────────────────────────────────────────────────────
     Rectangle {
         anchors.centerIn: parent
         width: panel.width + 10; height: panel.height + 10; radius: 20
-        color: "transparent"; border.color: root.green; border.width: 1; opacity: 0.07; z: 1
+        color: "transparent"; border.color: root.green; border.width: 1; opacity: 0.12; z: 1
+    }
+
+    // ── Frosted glass base ────────────────────────────────────────────────────
+    Item {
+        id: glassBg
+        anchors.centerIn: parent
+        width:  parent.width  * 0.70
+        height: parent.height * 0.84
+        z: 1
+        visible: root.backdropLayer !== null
+
+        FastBlur {
+            anchors.fill: parent; radius: 40
+            source: ShaderEffectSource {
+                sourceItem: root.backdropLayer; live: true; hideSource: false
+                sourceRect: Qt.rect(glassBg.x, glassBg.y, glassBg.width, glassBg.height)
+            }
+        }
+        Rectangle { anchors.fill: parent; color: "#010306"; opacity: 0.55 }
     }
 
     // ── Centred panel ─────────────────────────────────────────────────────────
@@ -42,11 +64,17 @@ Item {
         Rectangle {
             id: titleBar
             anchors.top: parent.top; anchors.left: parent.left; anchors.right: parent.right
-            height: 62; color: Qt.rgba(0,0,0,0.28); radius: 14
+            height: 62; color: Qt.rgba(0,0,0,0.45); radius: 14
             Rectangle { anchors.bottom: parent.bottom; anchors.left: parent.left; anchors.right: parent.right; height: parent.radius; color: parent.color }
+            Rectangle {
+                anchors.top: parent.top; anchors.topMargin: 10
+                anchors.bottom: parent.bottom; anchors.bottomMargin: 10
+                anchors.left: parent.left
+                width: 4; color: root.green; radius: 2
+            }
 
             Text {
-                anchors.left: parent.left; anchors.leftMargin: 26
+                anchors.left: parent.left; anchors.leftMargin: 20
                 anchors.verticalCenter: parent.verticalCenter
                 text: "FILE DETAILS"
                 font.family: "Segoe UI"; font.pixelSize: 26; font.bold: true; font.letterSpacing: 4
@@ -124,12 +152,16 @@ Item {
 
             ScrollView {
                 anchors.fill: parent; anchors.margins: 8
-                ScrollBar.vertical.policy:   ScrollBar.AsNeeded
                 ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
+                ScrollBar.vertical: ScrollBar {
+                    width: 6; policy: ScrollBar.AsNeeded
+                    contentItem: Rectangle { radius: 3; color: "#39FF14"; opacity: 0.55 }
+                    background:  Rectangle { color: Qt.rgba(0.22, 1, 0.08, 0.07); radius: 3 }
+                }
                 TextArea {
                     id: bodyArea; width: parent.width; readOnly: true
                     wrapMode: TextArea.NoWrap; text: ""
-                    color: "white"; font.pixelSize: 20; font.family: "Consolas"
+                    color: "#c0ddd0"; font.pixelSize: 20; font.family: "Consolas"
                     background: Rectangle { color: "transparent" }
                     padding: 0
                 }

@@ -118,27 +118,27 @@ ApplicationWindow {
 
         function onTestFileClicked() {
             if (typeof splash !== "undefined") splash.deactivate()
-            contentLoader.setSource("WorkbenchView.qml")
+            contentLoader.setSource("WorkbenchView.qml", { "backdropLayer": workbenchSplash })
             ffmpegBackend.checkFFmpeg()
             ffmpegBackend.testFile(workbenchMode)
         }
 
         function onCompareFilesClicked() {
             if (typeof splash !== "undefined") splash.deactivate()
-            contentLoader.setSource("CompareView.qml")
+            contentLoader.setSource("CompareView.qml", { "backdropLayer": workbenchSplash })
             ffmpegBackend.checkFFmpeg()
             ffmpegBackend.compareFiles()
         }
 
         function onRepairFileClicked() {
             if (typeof splash !== "undefined") splash.deactivate()
-            contentLoader.setSource("RepairView.qml")
+            contentLoader.setSource("RepairView.qml", { "backdropLayer": workbenchSplash })
             ffmpegBackend.checkFFmpeg()
         }
 
         function onTestFolderClicked() {
             if (typeof splash !== "undefined") splash.deactivate()
-            contentLoader.setSource("FolderTestView.qml")
+            contentLoader.setSource("FolderTestView.qml", { "backdropLayer": workbenchSplash })
             ffmpegBackend.checkFFmpeg()
             ffmpegBackend.testFolder(workbenchMode)
         }
@@ -149,7 +149,7 @@ ApplicationWindow {
 
         function onFileDetailsClicked() {
             if (typeof splash !== "undefined") splash.deactivate()
-            contentLoader.setSource("FileDetailsView.qml")
+            contentLoader.setSource("FileDetailsView.qml", { "backdropLayer": workbenchSplash })
             ffmpegBackend.checkFFmpeg()
             ffmpegBackend.fileDetails()
         }
@@ -586,6 +586,7 @@ ApplicationWindow {
         // transparent root (workbench panels, etc.).  Covered automatically by
         // SplashScreen (z:9999) and any fully-opaque loaded view.
         WorkbenchSplash {
+            id: workbenchSplash
             anchors.fill: parent
             z: 0
         }

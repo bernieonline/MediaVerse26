@@ -1,22 +1,26 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
+import Qt5Compat.GraphicalEffects
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  FolderTestView — FFmpeg folder test panel
 //
-//  Centred modal panel over a static movie poster backdrop.
+//  Centred modal panel over the cinematic rotating backdrop.
+//  Frosted glass effect: blurred backdrop + dark tint behind the panel.
 // ─────────────────────────────────────────────────────────────────────────────
 
 Item {
     id: root
     anchors.fill: parent
 
+    property var backdropLayer: null
+
     // ── Palette ───────────────────────────────────────────────────────────────
     readonly property color green:     "#39FF14"
     readonly property color dimGreen:  "#162e08"
-    readonly property color panelBg:   "#06101c"
+    readonly property color panelBg:   Qt.rgba(0, 0, 0, 0.08)
     readonly property color borderCol: "#39FF14"
-    readonly property color bodyBg:    "#080f18"
+    readonly property color bodyBg:    "transparent"
 
     property bool running:       false
     property bool done:          false
@@ -29,7 +33,26 @@ Item {
     Rectangle {
         anchors.centerIn: parent
         width: panel.width + 10; height: panel.height + 10; radius: 20
-        color: "transparent"; border.color: root.green; border.width: 1; opacity: 0.07; z: 1
+        color: "transparent"; border.color: root.green; border.width: 1; opacity: 0.12; z: 1
+    }
+
+    // ── Frosted glass base ────────────────────────────────────────────────────
+    Item {
+        id: glassBg
+        anchors.centerIn: parent
+        width:  parent.width  * 0.70
+        height: parent.height * 0.84
+        z: 1
+        visible: root.backdropLayer !== null
+
+        FastBlur {
+            anchors.fill: parent; radius: 40
+            source: ShaderEffectSource {
+                sourceItem: root.backdropLayer; live: true; hideSource: false
+                sourceRect: Qt.rect(glassBg.x, glassBg.y, glassBg.width, glassBg.height)
+            }
+        }
+        Rectangle { anchors.fill: parent; color: "#010306"; opacity: 0.55 }
     }
 
     // ── Centred panel ─────────────────────────────────────────────────────────
@@ -48,11 +71,17 @@ Item {
         Rectangle {
             id: titleBar
             anchors.top: parent.top; anchors.left: parent.left; anchors.right: parent.right
-            height: 62; color: Qt.rgba(0,0,0,0.28); radius: 14
+            height: 62; color: Qt.rgba(0,0,0,0.45); radius: 14
             Rectangle { anchors.bottom: parent.bottom; anchors.left: parent.left; anchors.right: parent.right; height: parent.radius; color: parent.color }
+            Rectangle {
+                anchors.top: parent.top; anchors.topMargin: 10
+                anchors.bottom: parent.bottom; anchors.bottomMargin: 10
+                anchors.left: parent.left
+                width: 4; color: root.green; radius: 2
+            }
 
             Text {
-                anchors.left: parent.left; anchors.leftMargin: 26
+                anchors.left: parent.left; anchors.leftMargin: 20
                 anchors.verticalCenter: parent.verticalCenter
                 text: "FOLDER TEST"
                 font.family: "Segoe UI"; font.pixelSize: 26; font.bold: true; font.letterSpacing: 4
@@ -201,8 +230,13 @@ Item {
             color: root.bodyBg; border.color: root.borderCol; border.width: 1; radius: 6; clip: true
 
             ScrollView {
-                id: logScroll; anchors.fill: parent; anchors.margins: 6
+                id: logScroll; anchors.fill: parent; anchors.margins: 8
                 ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
+                ScrollBar.vertical: ScrollBar {
+                    width: 6; policy: ScrollBar.AsNeeded
+                    contentItem: Rectangle { radius: 3; color: "#39FF14"; opacity: 0.55 }
+                    background:  Rectangle { color: Qt.rgba(0.22, 1, 0.08, 0.07); radius: 3 }
+                }
                 TextArea {
                     id: logArea; width: parent.width; readOnly: true
                     wrapMode: TextArea.Wrap; text: ""

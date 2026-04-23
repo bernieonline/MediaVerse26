@@ -244,6 +244,19 @@ def main():
 
         ctx.setContextProperty("playbackRouter", router)
         ctx.setContextProperty("splashLayout", generate_splash_layout())
+
+        # ── Workbench cinematic backdrop ──────────────────────────────────────
+        try:
+            with open(paths["splash_json"], "r", encoding="utf-8") as _f:
+                _wb_entries = json.load(_f)
+            _splash_dir = paths["splash_images"]
+            for _e in _wb_entries:
+                _img = _splash_dir / _e["image"]
+                _e["uri"] = _img.as_uri() if _img.exists() else ""
+        except Exception as _ex:
+            print(f"[WorkbenchSplash] Could not load Splash.json: {_ex}")
+            _wb_entries = []
+        ctx.setContextProperty("workbenchSplashData", _wb_entries)
         ctx.setContextProperty("architectView", arch_view_instance)
         ctx.setContextProperty("backupManager", backup_manager)
         ctx.setContextProperty("aiController", ai_controller)
