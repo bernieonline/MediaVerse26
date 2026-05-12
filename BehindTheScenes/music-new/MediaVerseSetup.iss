@@ -3,7 +3,7 @@
 
 [Setup]
 AppName=MediaVerse
-AppVersion=1.0
+AppVersion=1.1
 AppPublisher=MediaVerse
 AppPublisherURL=https://mediaverse.local
 DefaultDirName={localappdata}\MediaVerse
