@@ -154,8 +154,13 @@ class ManifestUpdater_v2(QObject):
 
 
 
-            # Step 6: Trigger cache if needed
-            # Rebuild if: manifest changed OR local cache empty (fresh install) OR cache stale (missed sync)
+            # Step 6: Determine if cache rebuild is needed (three scenarios)
+            # A. manifest["content_changed"] = True  -> Library was updated on server
+            # B. local_cache_empty = True           -> Fresh install or cache corrupted
+            # C. cache_stale = True                 -> Device missed a sync cycle
+            #
+            # Rebuild triggers on ANY of these conditions (logical OR).
+            # After rebuild, save cache_manifest.json with current server state.
             local_cache_empty = self._is_local_cache_empty()
             cache_stale = self._check_cache_freshness(manifest)
             needs_rebuild = manifest["content_changed"] or local_cache_empty or cache_stale
@@ -168,7 +173,8 @@ class ManifestUpdater_v2(QObject):
             if needs_rebuild:
                 print("[ManifestUpdater_v2] Triggering cache rebuild.")
                 self.sync_engine.run_server_cache_builder(manifest)
-                # Write cache_manifest after rebuild completes
+                # After rebuild: count current server cache and record it locally
+                # Next startup will compare these counts to detect future changes
                 manifest_hash = manifest.get("manifest_hash", "")
                 server_counts = self._count_server_cache_files()
                 self._write_cache_manifest(server_counts, manifest_hash)
@@ -196,6 +202,21 @@ class ManifestUpdater_v2(QObject):
             return len(data.get("items", []))
         except Exception:
             return 0
+
+    # -- Cache Freshness Detection (Stale Device Handling) --
+    # Strategy: Track server cache state (file counts per tier) locally.
+    # On startup: compare stored vs current server counts.
+    # If mismatch detected -> device missed a sync cycle -> force rebuild.
+    #
+    # This handles devices that:
+    # 1. Missed a full cache rebuild (library changed while device was offline)
+    # 2. Have a fresh install (no cache_manifest.json yet)
+    # 3. Are used rarely and become out of sync
+    #
+    # Files involved:
+    # - cache_manifest.json (local): {last_sync, server_counts, local_manifest_hash}
+    # - Server cache tiers: W:\MediaVerse\cache\images\{display, thumb, carousel}
+    # - Local cache: cacheV2\images\{display, thumb, carousel}
 
     def _count_server_cache_files(self) -> dict:
         """Count image files in each server cache tier. Returns {display: N, thumb: N, carousel: N}."""
@@ -232,9 +253,23 @@ class ManifestUpdater_v2(QObject):
 
     def _check_cache_freshness(self, current_manifest: dict) -> bool:
         """
-        Check if local cache is stale by comparing server vs stored cache counts.
-        Returns True if cache is stale or missing (needs rebuild).
-        Returns False if cache is fresh.
+        Detect stale cache by comparing server vs stored cache file counts.
+
+        Algorithm:
+        1. If no cache_manifest.json exists -> Fresh install, needs rebuild
+        2. If cache_manifest.json corrupted -> Rebuild (fail-safe)
+        3. Count current server cache files in each tier (display/thumb/carousel)
+        4. Compare counts against stored counts from last sync
+        5. If any tier has different count -> Cache is stale, needs rebuild
+        6. If all counts match -> Cache is fresh, no rebuild needed
+
+        Returns True if cache is stale/missing (rebuild needed).
+        Returns False if cache is fresh (skip rebuild).
+
+        This approach handles:
+        - Fresh installs: no cache_manifest yet
+        - Stale devices: server library changed while device was offline
+        - Synced devices: cache_manifest matches current server state
         """
         cache_manifest_path = paths["cache_manifest"]
 
