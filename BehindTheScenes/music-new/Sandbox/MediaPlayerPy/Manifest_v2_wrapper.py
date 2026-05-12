@@ -155,16 +155,23 @@ class ManifestUpdater_v2(QObject):
 
 
             # Step 6: Trigger cache if needed
-            # Also force rebuild when local cache is empty (fresh install)
+            # Rebuild if: manifest changed OR local cache empty (fresh install) OR cache stale (missed sync)
             local_cache_empty = self._is_local_cache_empty()
-            needs_rebuild = manifest["content_changed"] or local_cache_empty
+            cache_stale = self._check_cache_freshness(manifest)
+            needs_rebuild = manifest["content_changed"] or local_cache_empty or cache_stale
 
             if local_cache_empty:
                 print("[ManifestUpdater_v2] Local cache is empty (fresh install) -- forcing cache rebuild.")
+            if cache_stale and not local_cache_empty:
+                print("[ManifestUpdater_v2] Local cache is stale (missed sync) -- forcing cache rebuild.")
 
             if needs_rebuild:
                 print("[ManifestUpdater_v2] Triggering cache rebuild.")
                 self.sync_engine.run_server_cache_builder(manifest)
+                # Write cache_manifest after rebuild completes
+                manifest_hash = manifest.get("manifest_hash", "")
+                server_counts = self._count_server_cache_files()
+                self._write_cache_manifest(server_counts, manifest_hash)
                 self.cacheRebuildFinished.emit()
             else:
                 print("[ManifestUpdater_v2] No content change detected.")
@@ -189,6 +196,74 @@ class ManifestUpdater_v2(QObject):
             return len(data.get("items", []))
         except Exception:
             return 0
+
+    def _count_server_cache_files(self) -> dict:
+        """Count image files in each server cache tier. Returns {display: N, thumb: N, carousel: N}."""
+        counts = {"display": 0, "thumb": 0, "carousel": 0}
+        cache_dirs = {
+            "display": server_cache_display_v2,
+            "thumb": server_cache_thumb_v2,
+            "carousel": server_cache_carousel_v2,
+        }
+        for tier, cache_dir in cache_dirs.items():
+            try:
+                if cache_dir.exists():
+                    count = sum(1 for f in cache_dir.iterdir()
+                               if f.is_file() and f.suffix.lower() in ('.jpg', '.png', '.webp'))
+                    counts[tier] = count
+            except Exception as e:
+                print(f"[ManifestUpdater_v2] Error counting {tier} cache: {e}")
+        return counts
+
+    def _write_cache_manifest(self, server_counts: dict, manifest_hash: str) -> None:
+        """Write cache_manifest.json with server cache counts and manifest hash."""
+        from datetime import datetime
+        cache_manifest_path = paths["cache_manifest"]
+        cache_data = {
+            "last_sync": datetime.now().isoformat(),
+            "server_counts": server_counts,
+            "local_manifest_hash": manifest_hash,
+        }
+        try:
+            safe_json_write(cache_manifest_path, cache_data)
+            print(f"[ManifestUpdater_v2] Cache manifest written: {server_counts}")
+        except Exception as e:
+            print(f"[ManifestUpdater_v2] Error writing cache manifest: {e}")
+
+    def _check_cache_freshness(self, current_manifest: dict) -> bool:
+        """
+        Check if local cache is stale by comparing server vs stored cache counts.
+        Returns True if cache is stale or missing (needs rebuild).
+        Returns False if cache is fresh.
+        """
+        cache_manifest_path = paths["cache_manifest"]
+
+        # No local cache_manifest = fresh install, needs rebuild
+        if not cache_manifest_path.exists():
+            print("[ManifestUpdater_v2] No cache_manifest found (fresh install)")
+            return True
+
+        # Read stored counts
+        try:
+            stored = safe_json_read(cache_manifest_path, "cache_manifest")
+            stored_counts = stored.get("server_counts", {})
+        except Exception as e:
+            print(f"[ManifestUpdater_v2] Error reading cache_manifest: {e} - forcing rebuild")
+            return True
+
+        # Count current server cache
+        current_counts = self._count_server_cache_files()
+
+        # Compare each tier
+        for tier in ["display", "thumb", "carousel"]:
+            stored = stored_counts.get(tier, 0)
+            current = current_counts.get(tier, 0)
+            if stored != current:
+                print(f"[ManifestUpdater_v2] Cache mismatch in {tier}: stored={stored}, current={current}")
+                return True
+
+        print("[ManifestUpdater_v2] Cache is fresh - no rebuild needed")
+        return False
 
     def bootstrap_manifest(self):
         """
@@ -235,6 +310,10 @@ class ManifestUpdater_v2(QObject):
             # 5. Build server image cache (was missing -- update path has this, bootstrap didn't)
             print("[ManifestUpdater_v2] BOOTSTRAP: triggering cache build...")
             self.sync_engine.run_server_cache_builder(manifest)
+            # Write cache_manifest after bootstrap rebuild completes
+            manifest_hash = manifest.get("manifest_hash", "")
+            server_counts = self._count_server_cache_files()
+            self._write_cache_manifest(server_counts, manifest_hash)
             self.cacheRebuildFinished.emit()
 
         except Exception as e:
