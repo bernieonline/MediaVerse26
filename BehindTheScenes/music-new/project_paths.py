@@ -1,8 +1,9 @@
 # project_paths.py
 # Centralised path definitions for MediaVerse.
-# Prevents hard‑coded paths and ensures portability across machines.
+# Prevents hard-coded paths and ensures portability across machines.
 
 import os
+import sys
 from pathlib import Path
 import json
 
@@ -13,7 +14,14 @@ def find_music_new_root():
     """
     Climbs up from this file to find the 'music-new' directory.
     This bypasses the 'BehindTheScenes' nesting irritant.
+    When running as a PyInstaller bundle, uses the install directory.
     """
+    if getattr(sys, 'frozen', False):
+        # PyInstaller puts data files in _internal/ next to the exe
+        internal = Path(sys.executable).resolve().parent / '_internal'
+        if internal.is_dir():
+            return internal
+        return Path(sys.executable).resolve().parent
     current = Path(__file__).resolve().parent
     for _ in range(5):
         if current.name == "music-new":
@@ -22,7 +30,7 @@ def find_music_new_root():
     return Path(__file__).resolve().parent
 
 project_root = find_music_new_root()
-print(f"🚀 [PATHS] Project Root Anchored at: {project_root}")
+print(f"[PATHS] Project Root Anchored at: {project_root}")
 
 # 1. Convert the root to a Path object (if it's a string) to ensure / works for use setting library server path
 project_root = Path(project_root)

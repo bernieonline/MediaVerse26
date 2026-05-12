@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-Slide panel prototype — v4.
+Slide panel prototype -- v4.
 Fixed icon panel, cover slides down over it to hide and up to reveal.
-HoverHandler drives open/close — composable, never steals hover from icons.
+HoverHandler drives open/close -- composable, never steals hover from icons.
 
 Run: D:\MediaVerse1.0\BehindTheScenes\venv\Scripts\python.exe slide_panel_test.py
 """
@@ -20,16 +20,16 @@ ApplicationWindow {
     width:  1280
     height: 820
     color:  "#1e1e1e"
-    title:  "MediaVerse — Slide Panel v4"
+    title:  "MediaVerse -- Slide Panel v4"
 
-    // ── Simulated button bar ──────────────────────────────────────────────────
+    // -- Simulated button bar --------------------------------------------------
     Rectangle {
         anchors.top: parent.top; anchors.left: parent.left; anchors.right: parent.right
         height: 110; color: "transparent"
         Text { anchors.centerIn: parent; text: "[ Button bar ]"; color: "#303030"; font.pixelSize: 18 }
     }
 
-    // ── Simulated display area ────────────────────────────────────────────────
+    // -- Simulated display area ------------------------------------------------
     Rectangle {
         id: displayArea
         anchors.top:          parent.top
@@ -56,9 +56,9 @@ ApplicationWindow {
         }
 
 
-        // ─────────────────────────────────────────────────────────────────────
+        // ---------------------------------------------------------------------
         //  Inline component: glossy icon button
-        // ─────────────────────────────────────────────────────────────────────
+        // ---------------------------------------------------------------------
         component IconButton: Item {
             id: iconRoot
             width:  68; height: 68
@@ -181,22 +181,22 @@ ApplicationWindow {
                 ToolTip.delay:   500
             }
         }
-        // ── End component IconButton ──────────────────────────────────────────
+        // -- End component IconButton ------------------------------------------
 
 
-        // ─────────────────────────────────────────────────────────────────────
-        //  PANEL — always at full fixed size
+        // ---------------------------------------------------------------------
+        //  PANEL -- always at full fixed size
         //
-        //  Layers (back → front):
-        //    z:1  icon body  — always present
-        //    z:3  cover      — slides DOWN to hide (clipped), UP to reveal
-        //    z:5  handle     — always visible on top
+        //  Layers (back -> front):
+        //    z:1  icon body  -- always present
+        //    z:3  cover      -- slides DOWN to hide (clipped), UP to reveal
+        //    z:5  handle     -- always visible on top
         //
         //  HoverHandler on the panel Item drives isOpen.
-        //  HoverHandler is composable — it never steals hover from icon buttons.
-        // ─────────────────────────────────────────────────────────────────────
+        //  HoverHandler is composable -- it never steals hover from icon buttons.
+        // ---------------------------------------------------------------------
 
-        // Shadow — declared BEFORE panel so it sits behind at same z:0
+        // Shadow -- declared BEFORE panel so it sits behind at same z:0
         Rectangle {
             id: panelShadow
             x: 18 + 5; y: 18 + 5
@@ -233,8 +233,8 @@ ApplicationWindow {
         Item {
             id: panel
 
-            // ── Single value to tune — everything else derives from it ─────────
-            readonly property int iconSize: 52      // try 52 → 56 → 60 → 64
+            // -- Single value to tune -- everything else derives from it ---------
+            readonly property int iconSize: 52      // try 52 -> 56 -> 60 -> 64
 
             readonly property int iconGap:  8       // gap between icons in grid
             readonly property int padding:  14      // body inner padding each side
@@ -244,7 +244,7 @@ ApplicationWindow {
 
             property bool isOpen: false
 
-            // ── Top-left corner locked here — panel grows down + right ─────────
+            // -- Top-left corner locked here -- panel grows down + right ---------
             anchors.top:        parent.top
             anchors.topMargin:  18          // margin from top of display area
             anchors.left:       parent.left
@@ -254,13 +254,13 @@ ApplicationWindow {
             height: handleH + bodyH
             clip:   true   // clips the cover as it slides out of bounds
 
-            // ── HoverHandler — composable, never steals icon hover ────────────
+            // -- HoverHandler -- composable, never steals icon hover ------------
             HoverHandler {
                 id: panelHover
                 onHoveredChanged: panel.isOpen = hovered
             }
 
-            // ── z:1  Icon body (always present, behind cover) ─────────────────
+            // -- z:1  Icon body (always present, behind cover) -----------------
             Rectangle {
                 id: iconBody
                 z: 1
@@ -328,9 +328,9 @@ ApplicationWindow {
                 }
             }
 
-            // ── z:3  Cover — slides DOWN to hide icons, UP to reveal ──────────
-            // Closed: y = handleH  → sits exactly over the icon body
-            // Open:   y = handleH + bodyH → fully below panel bottom, clipped
+            // -- z:3  Cover -- slides DOWN to hide icons, UP to reveal ----------
+            // Closed: y = handleH  -> sits exactly over the icon body
+            // Open:   y = handleH + bodyH -> fully below panel bottom, clipped
             Rectangle {
                 id: cover
                 z: 3
@@ -353,7 +353,7 @@ ApplicationWindow {
                     }
                 }
 
-                // Border — prominent
+                // Border -- prominent
                 Rectangle {
                     anchors.fill: parent; color: "transparent"
                     border.color: "#505050"; border.width: 1; radius: 4
@@ -368,7 +368,7 @@ ApplicationWindow {
                 }
             }
 
-            // ── z:5  Handle strip — always on top ─────────────────────────────
+            // -- z:5  Handle strip -- always on top -----------------------------
             Rectangle {
                 id: handleStrip
                 z: 5
@@ -438,7 +438,7 @@ ApplicationWindow {
                 }
             }
         }
-        // ── End panel ─────────────────────────────────────────────────────────
+        // -- End panel ---------------------------------------------------------
 
     } // end displayArea
 }

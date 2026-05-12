@@ -39,7 +39,7 @@ class ToDoManager(QObject):
         try:
             with open(self.filepath, 'w', encoding='utf-8') as f:
                 f.write(content)
-            print(f"✅ Saved to: {self.filepath}")
+            print(f"[OK] Saved to: {self.filepath}")
             self.todoChanged.emit(content)
         except Exception as e:
-            print(f"❌ Save Error: {e}")
+            print(f"[ERROR] Save Error: {e}")

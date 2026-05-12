@@ -1,16 +1,16 @@
 """
-design_preview_carousel.py — Carousel 3D Effects Preview
+design_preview_carousel.py -- Carousel 3D Effects Preview
 Standalone design tool: 5-visible horizontal carousel with switchable 3D effects.
 
 Run with:
   PYTHONUTF8=1 /d/MediaVerse1.0/BehindTheScenes/venv/Scripts/python.exe design_preview_carousel.py
 
 Variants:
-  V1 — scale + opacity only (current)
-  V2 — + FastBlur depth-of-field on non-centre posters
-  V3 — + DropShadow on centre poster
-  V4 — + Y-axis perspective tilt on side posters
-  V5 — Full combo: blur + shadow + tilt
+  V1 -- scale + opacity only (current)
+  V2 -- + FastBlur depth-of-field on non-centre posters
+  V3 -- + DropShadow on centre poster
+  V4 -- + Y-axis perspective tilt on side posters
+  V5 -- Full combo: blur + shadow + tilt
 """
 import os
 import sys
@@ -189,7 +189,7 @@ ApplicationWindow {
         id: leftArrow
         anchors.left: parent.left; anchors.leftMargin: 60
         anchors.verticalCenter: parent.verticalCenter
-        text: "❮"; font.pixelSize: 70
+        text: ""; font.pixelSize: 70
         color: leftMa.containsMouse ? "#FFFFFF" : "#555555"
         Behavior on color { ColorAnimation { duration: 120 } }
         MouseArea {
@@ -201,7 +201,7 @@ ApplicationWindow {
         id: rightArrow
         anchors.right: parent.right; anchors.rightMargin: 60
         anchors.verticalCenter: parent.verticalCenter
-        text: "❯"; font.pixelSize: 70
+        text: ""; font.pixelSize: 70
         color: rightMa.containsMouse ? "#FFFFFF" : "#555555"
         Behavior on color { ColorAnimation { duration: 120 } }
         MouseArea {
@@ -221,11 +221,11 @@ ApplicationWindow {
         Row {
             id: btnRow; anchors.centerIn: parent; spacing: 8
             Repeater {
-                model: [{ v: 1, lbl: "V1 — Scale/Opacity"    },
-                        { v: 2, lbl: "V2 — + Blur DoF"        },
-                        { v: 3, lbl: "V3 — + Shadow"          },
-                        { v: 4, lbl: "V4 — + Tilt"            },
-                        { v: 5, lbl: "V5 — Full Combo"        }]
+                model: [{ v: 1, lbl: "V1 -- Scale/Opacity"    },
+                        { v: 2, lbl: "V2 -- + Blur DoF"        },
+                        { v: 3, lbl: "V3 -- + Shadow"          },
+                        { v: 4, lbl: "V4 -- + Tilt"            },
+                        { v: 5, lbl: "V5 -- Full Combo"        }]
                 delegate: Rectangle {
                     width: btnLbl.implicitWidth + 20; height: 36; radius: 6
                     color: root.variant === modelData.v ? "#2566c2" : "#333333"

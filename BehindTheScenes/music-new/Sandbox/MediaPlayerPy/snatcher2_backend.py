@@ -18,7 +18,7 @@ try:
     _PIL_OK = True
 except ImportError:
     _PIL_OK = False
-    print("[Snatcher2] WARNING: Pillow not installed — clipboard monitoring disabled")
+    print("[Snatcher2] WARNING: Pillow not installed -- clipboard monitoring disabled")
 
 
 class Snatcher2Backend(QObject):
@@ -52,7 +52,7 @@ class Snatcher2Backend(QObject):
         if _PIL_OK:
             self._timer.start()
         else:
-            self.statusMessage.emit("⚠ Pillow not installed")
+            self.statusMessage.emit("[WARN] Pillow not installed")
 
     @Slot()
     def stopMonitoring(self):
@@ -96,7 +96,7 @@ class Snatcher2Backend(QObject):
         dest: "Splash" | "Temp"
         """
         if self._current_pil is None:
-            self.statusMessage.emit("⚠ No image loaded yet")
+            self.statusMessage.emit("[WARN] No image loaded yet")
             return
 
         iw, ih = self._current_pil.size
@@ -106,7 +106,7 @@ class Snatcher2Backend(QObject):
         bottom = min(ih, int((y_ratio + h_ratio) * ih))
 
         if right <= left or bottom <= top:
-            self.statusMessage.emit("⚠ Invalid crop area — try again")
+            self.statusMessage.emit("[WARN] Invalid crop area -- try again")
             return
 
         cropped = self._current_pil.crop((left, top, right, bottom))
@@ -124,9 +124,9 @@ class Snatcher2Backend(QObject):
         crop_w = right - left
         crop_h = bottom - top
         self.statusMessage.emit(
-            f"✓ Saved {crop_w}×{crop_h}px → {save_path.name}"
+            f" Saved {crop_w}×{crop_h}px -> {save_path.name}"
         )
-        print(f"[Snatcher2] ✅ {save_path}")
+        print(f"[Snatcher2] [OK] {save_path}")
 
     # ------------------------------------------------------------------
     @Slot(str)

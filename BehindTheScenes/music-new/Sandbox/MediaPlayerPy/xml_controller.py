@@ -33,15 +33,15 @@ class XmlController(QObject):
         if url_or_path.startswith("file:"):
             parsed = urlparse(url_or_path)
             raw_path = unquote(parsed.path)
-            # On Windows, strip leading slash before drive letter (/W:/ → W:/)
+            # On Windows, strip leading slash before drive letter (/W:/ -> W:/)
             if raw_path.startswith("/") and len(raw_path) > 2 and raw_path[2] == ":":
                 raw_path = raw_path[1:]
             p = Path(raw_path)
-            print(f"🔎 _file_url_to_path → URL: {url_or_path} → FS Path: {p}")
+            print(f" _file_url_to_path -> URL: {url_or_path} -> FS Path: {p}")
             return p
         else:
             p = Path(url_or_path)
-            print(f"🔎 _file_url_to_path → Plain path: {p}")
+            print(f" _file_url_to_path -> Plain path: {p}")
             return p
 
     # ---------------- JSON loading ----------------
@@ -50,12 +50,12 @@ class XmlController(QObject):
             with Path(path).open("r", encoding="utf-8") as f:
                 self._data = json.load(f)
             self._categories = list(self._data.keys())
-            #print(f"✅ XmlController loaded JSON from: {Path(path).resolve()}")
-            #print("✅ Categories:", self._categories)
-            #print("✅ Category → Fields mapping:", self._data)
+            #print(f"[OK] XmlController loaded JSON from: {Path(path).resolve()}")
+            #print("[OK] Categories:", self._categories)
+            #print("[OK] Category -> Fields mapping:", self._data)
             self.categoriesChanged.emit()
         except Exception as e:
-            print(f"❌ Error loading JSON at {path}: {e}")
+            print(f"[ERROR] Error loading JSON at {path}: {e}")
             self._data = {}
             self._categories = []
             self.categoriesChanged.emit()
@@ -70,13 +70,13 @@ class XmlController(QObject):
 
     @Slot(result="QVariant")
     def getCategories(self):
-        print("🔎 getCategories called →", self._categories)
+        print(" getCategories called ->", self._categories)
         return self._categories
 
     @Slot(str, result="QVariant")
     def getFieldsForCategory(self, category):
         fields = self._data.get(category, [])
-        print(f"🔎 getFieldsForCategory({category}) → {fields}")
+        print(f" getFieldsForCategory({category}) -> {fields}")
         return fields
 
     # ---------------- XML parsing ----------------
@@ -84,24 +84,24 @@ class XmlController(QObject):
     def loadXMLOld(self, image_path: str):
         """Parse XML sidecar file for the given image path."""
         try:
-            print(f"🔎 loadXML called with image_path: {image_path}")
+            print(f" loadXML called with image_path: {image_path}")
             img_fs_path = self._file_url_to_path(image_path)
             stem = img_fs_path.stem
             folder = img_fs_path.parent
 
-            print(f"🔎 Looking for XML sidecar in {folder} with stem '{stem}'")
+            print(f" Looking for XML sidecar in {folder} with stem '{stem}'")
 
             # Find any .xml file in the folder that starts with the image stem
             matches = list(folder.glob(f"{stem}*.xml"))
 
             if not matches:
-                print(f"❌ No XML sidecar found for {image_path}")
+                print(f"[ERROR] No XML sidecar found for {image_path}")
                 self._xml_fields = {}
                 return
 
             # Take the first match
             xml_path = matches[0]
-            print(f"✅ Sidecar found: {xml_path}")
+            print(f"[OK] Sidecar found: {xml_path}")
 
             tree = ET.parse(xml_path)
             root = tree.getroot()
@@ -114,14 +114,14 @@ class XmlController(QObject):
                     parsed[name] = value
 
             self._xml_fields = parsed
-            print(f"✅ Parsed XML fields: {len(parsed)} entries from {xml_path}")
+            print(f"[OK] Parsed XML fields: {len(parsed)} entries from {xml_path}")
             first_keys = list(parsed.keys())[:10]
-            print(f"🔎 First 10 keys: {first_keys}")
+            print(f" First 10 keys: {first_keys}")
             sample_vals = {k: parsed[k] for k in first_keys}
-            print(f"🔎 Sample key→value: {sample_vals}")
+            print(f" Sample key->value: {sample_vals}")
 
         except Exception as e:
-            print(f"❌ Error parsing XML for {image_path}: {e}")
+            print(f"[ERROR] Error parsing XML for {image_path}: {e}")
             self._xml_fields = {}
 
     # ---------------- Category content ----------------
@@ -129,7 +129,7 @@ class XmlController(QObject):
     def requestCategoryContent(self, category):
         """Emit field:value pairs for the given category."""
         fields = self._data.get(category, [])
-        print(f"🔎 requestCategoryContent({category}) → fields: {fields}")
+        print(f" requestCategoryContent({category}) -> fields: {fields}")
         values = []
         for field in fields:
             val = self._xml_fields.get(field, "")
@@ -137,7 +137,7 @@ class XmlController(QObject):
                 values.append(f"{field}: {val}")
             else:
                 values.append(f"{field}: (no value)")
-        print(f"🔎 BG Emitting values for {category}: {values}")
+        print(f" BG Emitting values for {category}: {values}")
         self.categoryContentUpdated.emit(category, values)
 
     # ---------------- Tab navigation ----------------
@@ -145,14 +145,14 @@ class XmlController(QObject):
     def nextTab(self, currentIndex, totalTabs):
         if totalTabs > 0:
             new_index = (currentIndex + 1) % totalTabs
-            print(f"🔎 nextTab → {new_index}")
+            print(f" nextTab -> {new_index}")
             self.tabChangeRequested.emit(new_index)
 
     @Slot(int, int)
     def prevTab(self, currentIndex, totalTabs):
         if totalTabs > 0:
             new_index = (currentIndex - 1 + totalTabs) % totalTabs
-            print(f"🔎 prevTab → {new_index}")
+            print(f" prevTab -> {new_index}")
             self.tabChangeRequested.emit(new_index)
 
 
@@ -160,8 +160,8 @@ class XmlController(QObject):
     def loadXML(self, xml_path_str: str):
         """Load XML directly from the provided server path."""
         try:
-            print("────────────────────────────────────────────")
-            print(f"📥 [XmlController] loadXML() called")
+            print("--------------------------------------------")
+            print(f" [XmlController] loadXML() called")
             print(f"    Raw xmlPath: {xml_path_str}")
 
             xml_fs_path = self._file_url_to_path(xml_path_str)
@@ -179,14 +179,14 @@ class XmlController(QObject):
 
             self._xml_fields = parsed
             print(f"    Parsed fields: {len(parsed)} entries")
-            print("📄 [XmlController] XML load complete")
-            print("────────────────────────────────────────────")
+            print(" [XmlController] XML load complete")
+            print("--------------------------------------------")
 
         except Exception as e:
-            print("❌ [XmlController] XML load FAILED")
+            print("[ERROR] [XmlController] XML load FAILED")
             print(f"    Path: {xml_path_str}")
             print(f"    Error: {e}")
-            print("────────────────────────────────────────────")
+            print("--------------------------------------------")
             self._xml_fields = {}
 
     @Slot(str, result="QVariantMap")
@@ -230,7 +230,7 @@ class XmlController(QObject):
         print(f"[resolve_paths] local_display_v2 = {display_root}")
 
         if is_thumb:
-            # Convert thumb → display
+            # Convert thumb -> display
             display_path = display_root / filename
         else:
             # Already a display path
@@ -263,7 +263,7 @@ class XmlController(QObject):
                 if manifest_filename == filename:
                     xml_path = Path(item["shared"]["xml"]).as_uri()
                     video_path = item["shared"].get("video", "")
-                    print(f"[resolve_paths] MATCH FOUND → xml_path = {xml_path}")
+                    print(f"[resolve_paths] MATCH FOUND -> xml_path = {xml_path}")
                     video_path = str(item["shared"].get("video", "") or "")
 
                     break

@@ -1,7 +1,7 @@
 import os
 
 
-print("✅ myPyForQMLFunctions.py loaded")
+print("[OK] myPyForQMLFunctions.py loaded")
 #this function will receive input from qml when user selects a library folder
 #  and will return a list of folders inside the library
 def get_subfolder_names_test(path):
@@ -16,8 +16,8 @@ def get_subfolder_names_test(path):
             entry for entry in os.listdir(test_path)
             if os.path.isdir(os.path.join(test_path, entry))
         )
-        print(f"✅ Folders in {test_path}: {folder_names}")
+        print(f"[OK] Folders in {test_path}: {folder_names}")
         return folder_names
     except Exception as e:
-        print(f"❌ Error accessing {test_path}: {e}")
+        print(f"[ERROR] Error accessing {test_path}: {e}")
         return ()

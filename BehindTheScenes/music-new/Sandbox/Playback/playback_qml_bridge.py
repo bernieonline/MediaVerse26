@@ -24,7 +24,7 @@ class PlaybackQmlBridge(QObject):
 
     @Slot()
     def shutdown(self):
-        """Called on app exit — stops all watchdogs."""
+        """Called on app exit -- stops all watchdogs."""
         self.controller.shutdown()
         self.mpcbe_watchdog.shutdown()
 

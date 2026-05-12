@@ -17,7 +17,7 @@ from pathlib import Path
 
 from PySide6.QtCore import QObject, Signal, Slot, QThread
 
-# ── Paths ────────────────────────────────────────────────────────────────────
+# -- Paths --------------------------------------------------------------------
 _this_dir   = Path(__file__).resolve().parent       # .../Sandbox/MediaPlayerPy/
 _sandbox    = _this_dir.parent                       # .../Sandbox/
 _proj_root  = _sandbox.parent                        # .../music-new/
@@ -30,7 +30,7 @@ if str(_this_dir) not in sys.path:
     sys.path.insert(0, str(_this_dir))
 
 
-# ── Worker thread ─────────────────────────────────────────────────────────────
+# -- Worker thread -------------------------------------------------------------
 
 class _AuditThread(QThread):
     """Runs scan_directory + generate_html_report in a background thread."""
@@ -55,7 +55,7 @@ class _AuditThread(QThread):
             from quality_audit import scan_directory, generate_html_report
 
             scan_path = Path(self._folder)
-            self.statusMessage.emit(f"Scanning {scan_path.name}…")
+            self.statusMessage.emit(f"Scanning {scan_path.name}...")
 
             results, total_scanned, errors = scan_directory(
                 scan_path,
@@ -67,7 +67,7 @@ class _AuditThread(QThread):
                 self.statusMessage.emit("Audit cancelled.")
                 return
 
-            self.statusMessage.emit("Generating report…")
+            self.statusMessage.emit("Generating report...")
             generate_html_report(
                 results, total_scanned, scan_path,
                 self._threshold, self._output, errors,
@@ -78,10 +78,10 @@ class _AuditThread(QThread):
             self.statusMessage.emit(f"Error: {exc}")
 
 
-# ── QObject backend ───────────────────────────────────────────────────────────
+# -- QObject backend -----------------------------------------------------------
 
 class QualityAuditBackend(QObject):
-    """QML context property — qualityAuditBackend."""
+    """QML context property -- qualityAuditBackend."""
 
     progressChanged = Signal(int, int)   # (completed, total)
     auditComplete   = Signal(str)        # absolute report path
@@ -92,7 +92,7 @@ class QualityAuditBackend(QObject):
         self._thread: _AuditThread | None = None
         REPORTS_DIR.mkdir(parents=True, exist_ok=True)
 
-    # ── Slots ─────────────────────────────────────────────────────────────────
+    # -- Slots -----------------------------------------------------------------
 
     @Slot(str)
     def startAudit(self, folder_path: str) -> None:
@@ -105,7 +105,7 @@ class QualityAuditBackend(QObject):
             folder_path = folder_path[8:]
         elif folder_path.startswith("file://"):
             folder_path = folder_path[7:]
-        # On Windows the path may have forward slashes — Path() handles this
+        # On Windows the path may have forward slashes -- Path() handles this
         folder = Path(folder_path)
 
         if not folder.exists():
@@ -116,7 +116,7 @@ class QualityAuditBackend(QObject):
         from quality_audit import FFPROBE_EXE
         if not FFPROBE_EXE:
             self.statusMessage.emit(
-                "Error: ffprobe not found — install FFmpeg or add it to your PATH"
+                "Error: ffprobe not found -- install FFmpeg or add it to your PATH"
             )
             return
 
@@ -160,7 +160,7 @@ class QualityAuditBackend(QObject):
     @Slot(str)
     def diagnoseFirst(self, folder_path: str) -> None:
         """Run MediaInfo on the first video file in the folder (in a thread)."""
-        self.statusMessage.emit("Starting diagnostic…")
+        self.statusMessage.emit("Starting diagnostic...")
 
         def _run():
             try:
@@ -174,7 +174,7 @@ class QualityAuditBackend(QObject):
 
                 folder = Path(fp)
                 if not folder.exists():
-                    self.statusMessage.emit(f"Diagnose: folder not found — {fp}")
+                    self.statusMessage.emit(f"Diagnose: folder not found -- {fp}")
                     return
 
                 video_files = [
@@ -187,7 +187,7 @@ class QualityAuditBackend(QObject):
                     return
 
                 test_file = video_files[0]
-                self.statusMessage.emit(f"Diagnosing: {test_file.name}…")
+                self.statusMessage.emit(f"Diagnosing: {test_file.name}...")
 
                 from quality_audit import get_ffprobe, FFPROBE_EXE
                 self.statusMessage.emit(f"ffprobe: {FFPROBE_EXE}")

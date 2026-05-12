@@ -81,7 +81,7 @@ class SyncEngine_v2(QObject):
                 return json.load(f)
         except Exception as e:
             msg = f"Failed to load JSON from {path}: {e}"
-            print("⚠️ " + msg)
+            print("[WARN] " + msg)
             self.report["errors"].append(msg)
             return None
 
@@ -116,7 +116,7 @@ class SyncEngine_v2(QObject):
             print(f">>> Server manifest written to {self.server_manifest_path}")
         except Exception as e:
             msg = f"Failed to write server manifest: {e}"
-            print("⚠️ " + msg)
+            print("[WARN] " + msg)
             self.report["errors"].append(msg)
     
     
@@ -146,11 +146,11 @@ class SyncEngine_v2(QObject):
 
 
     # ---------------------------------------------------------
-    # Check 0 — Library folder vs manifest .....
+    # Check 0 -- Library folder vs manifest .....
     # ---------------------------------------------------------
         # ---------------------------------------------------------
     # ---------------------------------------------------------
-    # Check 0 — Library folder vs manifest (content-aware)
+    # Check 0 -- Library folder vs manifest (content-aware)
     # ---------------------------------------------------------
     def _check_library_vs_manifest(self, path_a: Path, path_b: Path) -> dict:
         print(">>> Check 0: Comparing manifest A vs B")
@@ -162,7 +162,7 @@ class SyncEngine_v2(QObject):
 
         if manifest_a is None or manifest_b is None:
             msg = "One or both manifest files could not be loaded."
-            print("❌ " + msg)
+            print("[ERROR] " + msg)
             self.report["library_check"] = msg
             self.report["errors"].append(msg)
             return None
@@ -177,8 +177,8 @@ class SyncEngine_v2(QObject):
         print(f"    Count B: {count_B}, Hash B: {hash_B}")
 
         if count_A != count_B:
-            print(f"⚠️ Item count changed ({count_A} vs {count_B}) — content changed.")
-            self.report["library_check"] = "Item count differs — content changed"
+            print(f"[WARN] Item count changed ({count_A} vs {count_B}) -- content changed.")
+            self.report["library_check"] = "Item count differs -- content changed"
             self.report["manifest_check"] = "Server manifest should be updated"
             notifier.post_notification("Manifest content changed - Rebuild.", False)
 
@@ -186,8 +186,8 @@ class SyncEngine_v2(QObject):
             return manifest_a
 
         if hash_A != hash_B:
-            print("⚠️ Hash mismatch — content changed.")
-            self.report["library_check"] = "Hash mismatch — content changed"
+            print("[WARN] Hash mismatch -- content changed.")
+            self.report["library_check"] = "Hash mismatch -- content changed"
             self.report["manifest_check"] = "Server manifest should be updated"
             #manifest_a["content_changed"] = True
             #return manifest_a
@@ -197,7 +197,7 @@ class SyncEngine_v2(QObject):
 
 
 
-        msg = "Manifest hashes and item counts are identical — no rebuild required"
+        msg = "Manifest hashes and item counts are identical -- no rebuild required"
         notifier.post_notification("Manifest contents unchanged no action needed.", False)
 
         print("    " + msg)
@@ -209,7 +209,7 @@ class SyncEngine_v2(QObject):
 
 
     # ---------------------------------------------------------
-    # Check A — Server cache vs manifest
+    # Check A -- Server cache vs manifest
     # ---------------------------------------------------------
     def _check_and_rebuild_server_cache_if_needed(self):
         print(">>> Check A: Server cache vs manifest")
@@ -217,7 +217,7 @@ class SyncEngine_v2(QObject):
         manifest = self._load_json(self.server_manifest_path)
         if manifest is None:
             msg = f"Server manifest not found at {self.server_manifest_path}"
-            print("❌ " + msg)
+            print("[ERROR] " + msg)
             self.report["manifest_check"] = msg
             self.report["errors"].append(msg)
             return None
@@ -231,8 +231,8 @@ class SyncEngine_v2(QObject):
         print(f"    cache_info.manifest_generated = {cache_manifest_generated or 'None'}")
 
         if manifest_generated != cache_manifest_generated:
-            msg = "Manifest and server cache differ — rebuilding server cache"
-            print("⚠️ " + msg)
+            msg = "Manifest and server cache differ -- rebuilding server cache"
+            print("[WARN] " + msg)
             self.report["server_cache_check"] = msg
             self._notify_action("Rebuilding server cache for MediaVerse")
 
@@ -247,7 +247,7 @@ class SyncEngine_v2(QObject):
             self._write_cache_info(manifest)
             self._notify_action("Server cache rebuild completed")
         else:
-            msg = "Server cache already matches manifest — no action required"
+            msg = "Server cache already matches manifest -- no action required"
             print("    " + msg)
             self.report["server_cache_check"] = msg
 
@@ -255,12 +255,12 @@ class SyncEngine_v2(QObject):
         cache_info = self._load_json(self.server_cache_info_path)
         if cache_info is None:
             msg = "Server cache_info.json missing or unreadable after rebuild"
-            print("❌ " + msg)
+            print("[ERROR] " + msg)
             self.report["errors"].append(msg)
         return cache_info
     
     # ---------------------------------------------------------
-    # Check C — Local manifest vs server manifest
+    # Check C -- Local manifest vs server manifest
     # ---------------------------------------------------------
     def _sync_local_manifest_if_needed(self):
         print(">>> Check C: Local manifest vs server manifest")
@@ -270,8 +270,8 @@ class SyncEngine_v2(QObject):
         # Load server manifest
         server_manifest = self._load_json(self.server_manifest_path)
         if server_manifest is None:
-            msg = "Server manifest missing — cannot compare with local manifest"
-            print("❌ " + msg)
+            msg = "Server manifest missing -- cannot compare with local manifest"
+            print("[ERROR] " + msg)
             self.report["manifest_check"] = msg
             self.report["errors"].append(msg)
             return False
@@ -286,16 +286,16 @@ class SyncEngine_v2(QObject):
 
         print(f"    local  manifest.generated = {local_generated or 'None'}")
 
-        # If timestamps match → nothing to do
+        # If timestamps match -> nothing to do
         if local_generated == server_generated and local_generated != "":
-            msg = "Local manifest already matches server manifest — no action required"
+            msg = "Local manifest already matches server manifest -- no action required"
             print("    " + msg)
             self.report["manifest_check"] = msg
             return False
 
-        # Otherwise → update local manifest
-        msg = "Local manifest missing or outdated — updating from server"
-        print("⚠️ " + msg)
+        # Otherwise -> update local manifest
+        msg = "Local manifest missing or outdated -- updating from server"
+        print("[WARN] " + msg)
         self.report["manifest_check"] = msg
         self._notify_action("Updating local MediaVerse manifest from server")
 
@@ -304,7 +304,7 @@ class SyncEngine_v2(QObject):
             print("    Local manifest updated")
         except Exception as e:
             err = f"Failed to update local manifest: {e}"
-            print("❌ " + err)
+            print("[ERROR] " + err)
             self.report["errors"].append(err)
             return False
 
@@ -313,7 +313,7 @@ class SyncEngine_v2(QObject):
 
 
     # ---------------------------------------------------------
-    # Check B — Server cache vs local cache
+    # Check B -- Server cache vs local cache
     # ---------------------------------------------------------
     def _sync_server_to_local_if_needed(self, server_cache_info):
         print(">>> Check B: Server cache vs local cache")
@@ -328,14 +328,14 @@ class SyncEngine_v2(QObject):
         print(f"    local  cache_built = {local_built or 'None'}")
 
         if server_built == local_built and local_built != "":
-            msg = "Local cache is already up to date — no action required"
+            msg = "Local cache is already up to date -- no action required"
             print("    " + msg)
             self.report["local_cache_check"] = msg
             return
 
         # If we reach here, local cache is missing or outdated
-        msg = "Local cache missing or outdated — syncing from server"
-        print("⚠️ " + msg)
+        msg = "Local cache missing or outdated -- syncing from server"
+        print("[WARN] " + msg)
         self.report["local_cache_check"] = msg
         self._notify_action("Updating local MediaVerse cache from server")
 
@@ -394,19 +394,19 @@ class SyncEngine_v2(QObject):
     def run_sync(self):
         print("\n=== MediaVerse V2 Sync Started ===")
 
-        # Check 0 — Library freshness
+        # Check 0 -- Library freshness
         library_requires_rebuild = self._check_library_vs_manifest()
         # Note: actual manifest rebuild is assumed to be handled externally
         # (e.g. ManifestBuilder_v2), then rerun sync.
 
-        # Check A — Server cache freshness
+        # Check A -- Server cache freshness
         server_cache_info = self._check_and_rebuild_server_cache_if_needed()
         if server_cache_info is None:
             print(">>> Aborting sync: server cache_info unavailable")
             self._print_report()
             return
 
-        # Check B — Local cache freshness
+        # Check B -- Local cache freshness
         #self._sync_server_to_local_if_needed(server_cache_info)
 
         # Final report to terminal
@@ -428,14 +428,14 @@ class SyncEngine_v2(QObject):
             builder = CacheBuilder_v2(manifest, self.server_cache_root)
 
             builder.cacheStarted.connect(
-                lambda: notifier.post_notification("Image cache build started…", False)
+                lambda: notifier.post_notification("Image cache build started...", False)
             )
 
             # Progress: notify every 100 items so the user sees activity
             def _on_progress(done, total):
                 if total > 0 and done % 100 == 0:
                     notifier.post_notification(
-                        f"Building image cache: {done} of {total}…", False
+                        f"Building image cache: {done} of {total}...", False
                     )
             builder.cacheProgress.connect(_on_progress)
 
@@ -452,13 +452,13 @@ class SyncEngine_v2(QObject):
                 display_ok = found_d   >= exp_d   * 0.95
                 has_gaps   = not thumb_ok or not display_ok or errors > 0
 
-                parts = [f"Cache build complete — {written} new, {skipped} unchanged"]
+                parts = [f"Cache build complete -- {written} new, {skipped} unchanged"]
                 if errors:
                     parts.append(f"{errors} errors")
                 if not thumb_ok:
-                    parts.append(f"⚠ thumb: {found_t}/{exp_t}")
+                    parts.append(f"[WARN] thumb: {found_t}/{exp_t}")
                 if not display_ok:
-                    parts.append(f"⚠ display: {found_d}/{exp_d}")
+                    parts.append(f"[WARN] display: {found_d}/{exp_d}")
 
                 notifier.post_notification(" | ".join(parts), has_gaps)
                 print(f"[CacheBuilder_v2] {' | '.join(parts)}")

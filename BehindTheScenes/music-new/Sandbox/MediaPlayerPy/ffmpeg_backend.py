@@ -1,9 +1,9 @@
-# ─────────────────────────────────────────────────────────────────────────────
-#  ffmpeg_backend.py — PySide6 QObject backend for the Workbench module
+# -----------------------------------------------------------------------------
+#  ffmpeg_backend.py -- PySide6 QObject backend for the Workbench module
 #
 #  Exposed to QML as context property "ffmpegBackend".
 #  Handles: ffmpeg install check, download, test file, save report.
-# ─────────────────────────────────────────────────────────────────────────────
+# -----------------------------------------------------------------------------
 
 import shutil
 import os
@@ -17,7 +17,7 @@ from PySide6.QtWidgets import QFileDialog
 
 from project_paths import paths as _paths
 
-# ── Config ────────────────────────────────────────────────────────────────────
+# -- Config --------------------------------------------------------------------
 
 _project_root = _paths["project_root"]
 
@@ -40,20 +40,20 @@ def _resolve_ffmpeg() -> Optional[str]:
     return found  # None if not on PATH
 
 
-# ── Backend ───────────────────────────────────────────────────────────────────
+# -- Backend -------------------------------------------------------------------
 
 class FFmpegBackend(QObject):
 
-    # ── Signals ───────────────────────────────────────────────────────────────
+    # -- Signals ---------------------------------------------------------------
     # Test / report
     reportReady      = Signal(str, str)   # (header, body)
-    progressChanged  = Signal(int)        # 0–100
+    progressChanged  = Signal(int)        # 0-100
     statusMessage    = Signal(str)        # status bar text
     testError        = Signal(str)        # error message if test fails
 
     # Analysis
     analysisDone     = Signal(str, str)   # (verdict, summary)
-    ffmpegAskAI      = Signal(str, str)   # (filename, prompt) → forward to aiController
+    ffmpegAskAI      = Signal(str, str)   # (filename, prompt) -> forward to aiController
 
     # Compare (ffprobe spec analysis)
     compareReady     = Signal(str, str, float, float)  # (header, body, scoreA, scoreB)
@@ -73,7 +73,7 @@ class FFmpegBackend(QObject):
 
     # Install / download
     ffmpegMissing    = Signal()
-    downloadProgress = Signal(int)        # 0–100
+    downloadProgress = Signal(int)        # 0-100
     downloadComplete = Signal()
     downloadFailed   = Signal(str)        # reason string
 
@@ -90,7 +90,7 @@ class FFmpegBackend(QObject):
         self._details_file: str = ""
         self._folder_cancelled: bool = False
 
-    # ── Install check ─────────────────────────────────────────────────────────
+    # -- Install check ---------------------------------------------------------
 
     @Slot()
     def checkFFmpeg(self):
@@ -101,7 +101,7 @@ class FFmpegBackend(QObject):
         else:
             self.statusMessage.emit(f"ffmpeg ready: {self._ffmpeg_exe}")
 
-    # ── Download ──────────────────────────────────────────────────────────────
+    # -- Download --------------------------------------------------------------
 
     @Slot()
     def downloadFFmpeg(self):
@@ -157,7 +157,7 @@ class FFmpegBackend(QObject):
                 zip_path.unlink(missing_ok=True)
             self.downloadFailed.emit(str(e))
 
-    # ── Test File ─────────────────────────────────────────────────────────────
+    # -- Test File -------------------------------------------------------------
 
     @Slot(str)
     def testFile(self, mode: str = "standard"):
@@ -208,7 +208,7 @@ class FFmpegBackend(QObject):
         except OSError:
             size_str = "unknown"
 
-        # Duration (already measured by worker — re-read from ffprobe for header)
+        # Duration (already measured by worker -- re-read from ffprobe for header)
         duration_str = _get_duration_str(self._current_file, self._ffmpeg_exe)
 
         header = (
@@ -217,7 +217,7 @@ class FFmpegBackend(QObject):
             f"Duration: {duration_str}\n"
             f"Tested:   {datetime.now().strftime('%Y-%m-%d  %H:%M')}\n"
             f"Mode:     {self._current_mode.capitalize()}\n"
-            f"{'─' * 45}"
+            f"{'-' * 45}"
         )
 
         body = filtered_output if filtered_output.strip() else "\u2713 No errors detected"
@@ -226,7 +226,7 @@ class FFmpegBackend(QObject):
         self.reportReady.emit(header, body)
         print(f"[FFMPEG] reportReady emitted")
 
-    # ── Save Report ───────────────────────────────────────────────────────────
+    # -- Save Report -----------------------------------------------------------
 
     @Slot(str)
     def saveReport(self, text: str):
@@ -241,7 +241,7 @@ class FFmpegBackend(QObject):
         except OSError as e:
             self.testError.emit(f"Save failed: {e}")
 
-    # ── Analyse Report ────────────────────────────────────────────────────────
+    # -- Analyse Report --------------------------------------------------------
 
     @Slot(str, str)
     def analyseReport(self, filename: str, error_text: str):
@@ -265,7 +265,7 @@ class FFmpegBackend(QObject):
             )
             self.ffmpegAskAI.emit(filename, prompt)
 
-    # ── Compare Files (ffprobe spec analysis) ────────────────────────────────
+    # -- Compare Files (ffprobe spec analysis) --------------------------------
 
     @Slot()
     def compareFiles(self):
@@ -294,7 +294,7 @@ class FFmpegBackend(QObject):
         self._compare_ref  = path_a
         self._compare_cmp  = path_b
         self._current_file = path_b
-        self.statusMessage.emit("Analysing files…")
+        self.statusMessage.emit("Analysing files...")
         threading.Thread(target=self._do_compare, args=(path_a, path_b), daemon=True).start()
 
     def _do_compare(self, path_a: str, path_b: str):
@@ -309,7 +309,7 @@ class FFmpegBackend(QObject):
                 f"File A: {Path(path_a).name}\n"
                 f"File B: {Path(path_b).name}\n"
                 f"Compared: {datetime.now().strftime('%Y-%m-%d  %H:%M')}\n"
-                f"{'─' * 52}"
+                f"{'-' * 52}"
             )
             body = _format_comparison(info_a, info_b, score_a, score_b)
 
@@ -319,7 +319,7 @@ class FFmpegBackend(QObject):
         except Exception as e:
             self.testError.emit(f"Compare failed: {e}")
 
-    # ── Repair File ───────────────────────────────────────────────────────────
+    # -- Repair File -----------------------------------------------------------
 
     @Slot(str)
     def repairFile(self, mode: str = "remux"):
@@ -338,7 +338,7 @@ class FFmpegBackend(QObject):
             return
 
         self._current_file = file_path
-        label = "Remuxing…" if mode == "remux" else "Transcoding…"
+        label = "Remuxing..." if mode == "remux" else "Transcoding..."
         self.statusMessage.emit(label)
         threading.Thread(target=self._do_repair, args=(file_path, mode), daemon=True).start()
 
@@ -355,7 +355,7 @@ class FFmpegBackend(QObject):
                 )
                 _, stderr = self._repair_proc.communicate()
                 self._repair_proc = None
-                self._finish_repair(p, out_path, "Remux — lossless stream copy", stderr)
+                self._finish_repair(p, out_path, "Remux -- lossless stream copy", stderr)
             except Exception as e:
                 self._repair_proc = None
                 self.testError.emit(f"Repair failed: {e}")
@@ -387,7 +387,7 @@ class FFmpegBackend(QObject):
                 _, stderr = self._repair_proc.communicate()
                 self._repair_proc = None
                 self.repairProgress.emit(100)
-                self._finish_repair(p, out_path, "Transcode — H.264 re-encode (CRF 18)", stderr)
+                self._finish_repair(p, out_path, "Transcode -- H.264 re-encode (CRF 18)", stderr)
             except Exception as e:
                 self._repair_proc = None
                 self.testError.emit(f"Repair failed: {e}")
@@ -399,10 +399,10 @@ class FFmpegBackend(QObject):
             f"Mode:    {mode_label}\n"
             f"Output:  {out_path.name}\n"
             f"Folder:  {src.parent}\n"
-            f"{'─' * 45}"
+            f"{'-' * 45}"
         )
         if success:
-            body = f"\u2713 Complete — {_fmt_size(out_path.stat().st_size)}"
+            body = f"\u2713 Complete -- {_fmt_size(out_path.stat().st_size)}"
         else:
             errors = [ln for ln in stderr.splitlines()
                       if any(k in ln for k in ("Error", "error", "Invalid", "failed"))]
@@ -420,7 +420,7 @@ class FFmpegBackend(QObject):
                 pass
             self.statusMessage.emit("Repair cancelled.")
 
-    # ── File Details ──────────────────────────────────────────────────────────
+    # -- File Details ----------------------------------------------------------
 
     @Slot()
     def fileDetails(self):
@@ -439,7 +439,7 @@ class FFmpegBackend(QObject):
             return
 
         self._details_file = file_path
-        self.statusMessage.emit("Probing file…")
+        self.statusMessage.emit("Probing file...")
         threading.Thread(target=self._do_file_details, args=(file_path,), daemon=True).start()
 
     def _do_file_details(self, file_path: str):
@@ -471,7 +471,7 @@ class FFmpegBackend(QObject):
         except OSError as e:
             self.testError.emit(f"Save failed: {e}")
 
-    # ── Load Saved Report ─────────────────────────────────────────────────────
+    # -- Load Saved Report -----------------------------------------------------
 
     @Slot()
     def loadReport(self):
@@ -489,7 +489,7 @@ class FFmpegBackend(QObject):
             self.testError.emit(f"Cannot read report: {e}")
             return
 
-        # Split at the ─── divider line
+        # Split at the --- divider line
         lines     = text.splitlines()
         div_idx   = next(
             (i for i, ln in enumerate(lines) if ln.startswith("\u2500" * 10)),
@@ -516,7 +516,7 @@ class FFmpegBackend(QObject):
         self.statusMessage.emit(f"Loaded: {p.name}")
         self.reportReady.emit(header, body)
 
-    # ── Test Folder ───────────────────────────────────────────────────────────
+    # -- Test Folder -----------------------------------------------------------
 
     @Slot(str)
     def testFolder(self, mode: str = "standard"):
@@ -563,7 +563,7 @@ class FFmpegBackend(QObject):
 
             self.folderTestFileStarted.emit(fp.name, i + 1, total)
 
-            # ── Run ffmpeg test (blocking) ─────────────────────────────────────
+            # -- Run ffmpeg test (blocking) -------------------------------------
             cmd = (
                 [self._ffmpeg_exe, "-v", "error", "-nostdin"]
                 + err_flags
@@ -586,7 +586,7 @@ class FFmpegBackend(QObject):
             if had_errors:
                 error_files.append(fp.name)
 
-            # ── Auto-save per-file report ──────────────────────────────────────
+            # -- Auto-save per-file report --------------------------------------
             try:
                 size_str     = _fmt_size(fp.stat().st_size)
                 duration_str = _get_duration_str(str(fp), self._ffmpeg_exe)
@@ -601,7 +601,7 @@ class FFmpegBackend(QObject):
                 f"Tested:   {datetime.now().strftime('%Y-%m-%d  %H:%M')}\n"
                 f"Mode:     {mode.capitalize()}\n"
                 f"Part of folder test\n"
-                f"{'─' * 45}"
+                f"{'-' * 45}"
             )
             out_path = fp.parent / (fp.stem + "_ffmpeg.txt")
             try:
@@ -614,7 +614,7 @@ class FFmpegBackend(QObject):
             self.folderTestFileDone.emit(fp.name, had_errors)
             self.progressChanged.emit(int((i + 1) / total * 100))
 
-        # ── Build and emit summary ─────────────────────────────────────────────
+        # -- Build and emit summary ---------------------------------------------
         self.progressChanged.emit(100)
         clean_count = total - len(error_files)
         summary = self._build_folder_summary(
@@ -646,7 +646,7 @@ class FFmpegBackend(QObject):
             f"Mode:    {mode.capitalize()}",
             f"Files:   {total} tested",
             f"Clean:   {clean_count}  \u2713",
-            f"Errors:  {len(error_files)}  {'✗' if error_files else '✓'}",
+            f"Errors:  {len(error_files)}  {'' if error_files else ''}",
             divider,
         ]
         for i, fp in enumerate(files):
@@ -688,7 +688,7 @@ class FFmpegBackend(QObject):
         except OSError as e:
             self.testError.emit(f"Save failed: {e}")
 
-    # ── Cancel ────────────────────────────────────────────────────────────────
+    # -- Cancel ----------------------------------------------------------------
 
     @Slot()
     def cancelTest(self):
@@ -697,7 +697,7 @@ class FFmpegBackend(QObject):
             self.statusMessage.emit("Test cancelled.")
 
 
-# ── Helpers ───────────────────────────────────────────────────────────────────
+# -- Helpers -------------------------------------------------------------------
 
 def _fmt_size(n: int) -> str:
     for unit in ("B", "KB", "MB", "GB", "TB"):
@@ -740,7 +740,7 @@ def _get_duration_str(file_path: str, ffmpeg_exe: str) -> str:
         return "unknown"
 
 
-# ── ffprobe / compare helpers ─────────────────────────────────────────────────
+# -- ffprobe / compare helpers -------------------------------------------------
 
 def _probe_file(ffprobe_exe: str, file_path: str) -> dict:
     """Return a dict of quality-relevant metrics for a video file."""
@@ -780,7 +780,7 @@ def _probe_file(ffprobe_exe: str, file_path: str) -> dict:
             info["audio_bitrate"]  = int(s.get("bit_rate", 0))
             info["audio_channels"] = s.get("channels", 0)
 
-    # Some containers (M2TS) don't expose per-stream bitrate — estimate from overall
+    # Some containers (M2TS) don't expose per-stream bitrate -- estimate from overall
     if info["video_bitrate"] == 0 and info["overall_bitrate"] > 0:
         info["video_bitrate"] = max(0, info["overall_bitrate"] - info["audio_bitrate"])
 
@@ -795,7 +795,7 @@ def _quality_score(info: dict) -> float:
     import math
     score = 0.0
 
-    # ── Codec (0-25) ──────────────────────────────────────────────────────────
+    # -- Codec (0-25) ----------------------------------------------------------
     codec = info["video_codec"].lower()
     if   any(x in codec for x in ("hevc", "h265", "av1")):  score += 25
     elif "vp9"  in codec:                                     score += 21
@@ -803,7 +803,7 @@ def _quality_score(info: dict) -> float:
     elif any(x in codec for x in ("mpeg2", "vc1", "wmv")):   score += 9
     else:                                                      score += 6
 
-    # ── Resolution (0-30) ─────────────────────────────────────────────────────
+    # -- Resolution (0-30) -----------------------------------------------------
     pixels = info["width"] * info["height"]
     if   pixels >= 3840 * 2000: score += 30   # 4K UHD
     elif pixels >= 1920 * 1000: score += 22   # 1080p
@@ -811,12 +811,12 @@ def _quality_score(info: dict) -> float:
     elif pixels >= 720  *  500: score += 8    # 576p / 480p
     else:                        score += 3
 
-    # ── Video bitrate — log scale (0-30) ─────────────────────────────────────
+    # -- Video bitrate -- log scale (0-30) -------------------------------------
     vbr_mbps = info["video_bitrate"] / 1_000_000
     if vbr_mbps > 0:
         score += min(30.0, 30.0 * math.log10(max(1, vbr_mbps)) / math.log10(80))
 
-    # ── Audio (0-15) ──────────────────────────────────────────────────────────
+    # -- Audio (0-15) ----------------------------------------------------------
     ac = info["audio_codec"].lower()
     if   any(x in ac for x in ("truehd", "dtshd", "flac", "pcm")): score += 15
     elif any(x in ac for x in ("dts", "ac3", "eac3")):              score += 10
@@ -848,7 +848,7 @@ def _format_file_details(data: dict, file_path: str) -> tuple:
     streams  = data.get("streams", [])
     chapters = data.get("chapters", [])
 
-    # ── Header ────────────────────────────────────────────────────────────────
+    # -- Header ----------------------------------------------------------------
     try:
         size_bytes = p.stat().st_size
         size_str   = _fmt_size(size_bytes)
@@ -865,17 +865,17 @@ def _format_file_details(data: dict, file_path: str) -> tuple:
         f"Size:     {size_str}\n"
         f"Duration: {_fmt_dur(duration)}\n"
         f"Probed:   {datetime.now().strftime('%Y-%m-%d  %H:%M')}\n"
-        f"{'─' * 45}"
+        f"{'-' * 45}"
     )
 
-    # ── Body ──────────────────────────────────────────────────────────────────
+    # -- Body ------------------------------------------------------------------
     _CH = {1: "mono", 2: "stereo", 6: "5.1", 8: "7.1"}
     lines = []
 
     # Container
     fmt_name = fmt.get("format_long_name") or fmt.get("format_name", "unknown")
     lines += [
-        "─── CONTAINER " + "─" * 31,
+        "--- CONTAINER " + "-" * 31,
         f"Format:          {fmt_name}",
         f"Overall Bitrate: {_fmt_bitrate(overall_br)}",
     ]
@@ -887,7 +887,7 @@ def _format_file_details(data: dict, file_path: str) -> tuple:
     video_streams = [s for s in streams if s.get("codec_type") == "video"]
     for i, s in enumerate(video_streams):
         track_label = "" if len(video_streams) == 1 else f" (Track {i + 1})"
-        lines.append(f"─── VIDEO{track_label} " + "─" * (36 - len(track_label)))
+        lines.append(f"--- VIDEO{track_label} " + "-" * (36 - len(track_label)))
 
         codec_long = s.get("codec_long_name") or s.get("codec_name", "unknown")
         profile    = s.get("profile", "")
@@ -926,7 +926,7 @@ def _format_file_details(data: dict, file_path: str) -> tuple:
     audio_streams = [s for s in streams if s.get("codec_type") == "audio"]
     for i, s in enumerate(audio_streams):
         track_label = "" if len(audio_streams) == 1 else f" (Track {i + 1})"
-        lines.append(f"─── AUDIO{track_label} " + "─" * (36 - len(track_label)))
+        lines.append(f"--- AUDIO{track_label} " + "-" * (36 - len(track_label)))
 
         codec    = s.get("codec_long_name") or s.get("codec_name", "unknown")
         channels = s.get("channels", 0)
@@ -954,7 +954,7 @@ def _format_file_details(data: dict, file_path: str) -> tuple:
     # Subtitle streams
     sub_streams = [s for s in streams if s.get("codec_type") == "subtitle"]
     if sub_streams:
-        lines.append("─── SUBTITLES " + "─" * 31)
+        lines.append("--- SUBTITLES " + "-" * 31)
         for i, s in enumerate(sub_streams):
             codec = s.get("codec_name", "unknown").upper()
             tags  = s.get("tags", {})
@@ -971,7 +971,7 @@ def _format_file_details(data: dict, file_path: str) -> tuple:
     # Chapters
     if chapters:
         lines += [
-            "─── CHAPTERS " + "─" * 32,
+            "--- CHAPTERS " + "-" * 32,
             f"{len(chapters)} chapters",
             "",
         ]
@@ -989,11 +989,11 @@ def _format_comparison(ia: dict, ib: dict, sa: float, sb: float) -> str:
     def winner_tag(va, vb, higher=True):
         if va == vb: return ""
         a_wins = (va > vb) if higher else (va < vb)
-        return "  ◄ A" if a_wins else "  ◄ B"
+        return "  < A" if a_wins else "  < B"
 
     lines = [
         f"{'METRIC':<18} {'FILE A':>{W}}   {'FILE B':>{W}}",
-        "─" * (18 + W*2 + 5),
+        "-" * (18 + W*2 + 5),
         row("Resolution",
             f"{ia['width']}×{ia['height']}",
             f"{ib['width']}×{ib['height']}") +
@@ -1024,21 +1024,21 @@ def _format_comparison(ia: dict, ib: dict, sa: float, sb: float) -> str:
         row("File Size",
             _fmt_size(ia['size']),
             _fmt_size(ib['size'])),
-        "─" * (18 + W*2 + 5),
+        "-" * (18 + W*2 + 5),
         row("QUALITY SCORE", f"{sa} / 100", f"{sb} / 100"),
         "",
     ]
 
     diff = abs(sa - sb)
-    if   sa > sb: lines.append(f"► File A is the better choice  (+{diff:.1f} pts)")
-    elif sb > sa: lines.append(f"► File B is the better choice  (+{diff:.1f} pts)")
+    if   sa > sb: lines.append(f"> File A is the better choice  (+{diff:.1f} pts)")
+    elif sb > sa: lines.append(f"> File B is the better choice  (+{diff:.1f} pts)")
     else:         lines.append("= Both files score equally")
 
     if diff < 5:
-        lines.append("  Difference is marginal — either file is suitable.")
+        lines.append("  Difference is marginal -- either file is suitable.")
     elif diff < 15:
-        lines.append("  Moderate advantage — the better file is noticeably superior.")
+        lines.append("  Moderate advantage -- the better file is noticeably superior.")
     else:
-        lines.append("  Significant advantage — choose the higher-scoring file.")
+        lines.append("  Significant advantage -- choose the higher-scoring file.")
 
     return "\n".join(lines)

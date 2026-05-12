@@ -27,11 +27,11 @@ class DriveManager(QObject):
     def play_video(self, file_path, is_master):
         """
         Hybrid playback:
-        - Master library folders → HTTP playback via MCWS
-        - Non-master folders → Direct subprocess launch
+        - Master library folders -> HTTP playback via MCWS
+        - Non-master folders -> Direct subprocess launch
         """
         try:
-            # Clean QML URI → Windows path
+            # Clean QML URI -> Windows path
             clean_win_path = file_path.replace("file:///", "")
             clean_win_path = clean_win_path.replace("/", "\\")
             clean_win_path = os.path.normpath(clean_win_path)
@@ -40,15 +40,15 @@ class DriveManager(QObject):
             print(f"[DEBUG] isMaster flag: {is_master}")
 
             # -------------------------------------------------
-            # NON-MASTER FOLDER → SKIP MANIFEST LOOKUP ENTIRELY
+            # NON-MASTER FOLDER -> SKIP MANIFEST LOOKUP ENTIRELY
             # -------------------------------------------------
             if not is_master:
-                print("[DEBUG] Non-master folder → Subprocess playback")
+                print("[DEBUG] Non-master folder -> Subprocess playback")
                 self.play_via_subprocess(clean_win_path)
                 return
 
             # -------------------------------------------------
-            # MASTER FOLDER → LOOK UP MANIFEST ID
+            # MASTER FOLDER -> LOOK UP MANIFEST ID
             # -------------------------------------------------
             video_id = None
             if self.folder_mapper:
@@ -63,14 +63,14 @@ class DriveManager(QObject):
             # ROUTING DECISION
             # -------------------------------------------------
             if video_id:
-                print(f"[DEBUG] Master folder → HTTP playback (ID={video_id})")
+                print(f"[DEBUG] Master folder -> HTTP playback (ID={video_id})")
                 self.play_via_http(video_id)
             else:
-                print("[DEBUG] Master folder but NO ID → Subprocess fallback")
+                print("[DEBUG] Master folder but NO ID -> Subprocess fallback")
                 self.play_via_subprocess(clean_win_path)
 
         except Exception as e:
-            print(f"❌ Playback Controller Error: {e}")
+            print(f"[ERROR] Playback Controller Error: {e}")
             traceback.print_exc()
 
     # ---------------------------------------------------------
@@ -82,10 +82,10 @@ class DriveManager(QObject):
             requests.get(url, timeout=1.5)
             print("[DEBUG] HTTP Command Sent Successfully")
         except Exception as e:
-            print(f"❌ HTTP Playback Failed: {e}")
+            print(f"[ERROR] HTTP Playback Failed: {e}")
 
     # ---------------------------------------------------------
-    # SUBPROCESS PLAYBACK (NON-MASTER) — FULL DEBUG VERSION
+    # SUBPROCESS PLAYBACK (NON-MASTER) -- FULL DEBUG VERSION
     # ---------------------------------------------------------
     @Slot(str)
     def play_via_subprocess(self, win_path):
@@ -95,7 +95,7 @@ class DriveManager(QObject):
         """
         try:
             print("\n" + "="*80)
-            print("🔍 SUBPROCESS DEBUG REPORT")
+            print("[SEARCH] SUBPROCESS DEBUG REPORT")
             print("="*80)
 
             print(f"RAW INPUT PATH FROM QML:\n    {win_path}")
@@ -113,18 +113,18 @@ class DriveManager(QObject):
             print(f"\nAFTER os.path.normpath():\n    {path}")
 
             print("\nCHECKING FILE EXISTS:")
-            print(f"    os.path.exists(path) → {os.path.exists(path)}")
+            print(f"    os.path.exists(path) -> {os.path.exists(path)}")
 
             print("\nCHECKING JRiver EXE EXISTS:")
-            print(f"    {self.jriver_exe} → {os.path.exists(self.jriver_exe)}")
+            print(f"    {self.jriver_exe} -> {os.path.exists(self.jriver_exe)}")
 
             if not os.path.exists(path):
-                print(f"\n❌ ERROR: File does NOT exist on disk:\n    {path}")
+                print(f"\n[ERROR] ERROR: File does NOT exist on disk:\n    {path}")
                 print("="*80 + "\n")
                 return
 
             if not os.path.exists(self.jriver_exe):
-                print(f"\n❌ ERROR: JRiver EXE not found:\n    {self.jriver_exe}")
+                print(f"\n[ERROR] ERROR: JRiver EXE not found:\n    {self.jriver_exe}")
                 print("="*80 + "\n")
                 return
 
@@ -135,13 +135,13 @@ class DriveManager(QObject):
             for part in cmd:
                 print(f"    {part}")
 
-            print("\n🚀 LAUNCHING JRiver NOW...")
+            print("\n[>>] LAUNCHING JRiver NOW...")
             print("="*80 + "\n")
 
             subprocess.Popen(cmd)
 
         except Exception as e:
-            print(f"❌ Subprocess Launch Failed: {e}")
+            print(f"[ERROR] Subprocess Launch Failed: {e}")
             traceback.print_exc()
 
     # ---------------------------------------------------------
@@ -181,7 +181,7 @@ class DriveManager(QObject):
 
                 image_path = ""
 
-                # MASTER LIBRARY → USE MANIFEST THUMB
+                # MASTER LIBRARY -> USE MANIFEST THUMB
                 if is_master_library:
                     video_key = str(item).replace('/', '\\')
                     if self.folder_mapper:
@@ -216,7 +216,7 @@ class DriveManager(QObject):
             return sorted(video_data, key=lambda x: x["title"].lower())
 
         except Exception as e:
-            print(f"❌ DriveManager Triage Error: {e}")
+            print(f"[ERROR] DriveManager Triage Error: {e}")
             return []
 
     # ---------------------------------------------------------

@@ -1,9 +1,9 @@
-# ─────────────────────────────────────────────────────────────────────────────
-#  ffmpeg_worker.py — QThread worker for FFMPEG test operations
+# -----------------------------------------------------------------------------
+#  ffmpeg_worker.py -- QThread worker for FFMPEG test operations
 #
 #  Runs ffprobe to get duration, then ffmpeg with -progress pipe to emit
 #  real percentage progress.  Error lines streamed live via lineReady signal.
-# ─────────────────────────────────────────────────────────────────────────────
+# -----------------------------------------------------------------------------
 
 import subprocess
 import re
@@ -34,10 +34,10 @@ class FFmpegWorker(QThread):
 
     Signals
     -------
-    lineReady(str)        — each filtered error line as it arrives
-    progressChanged(int)  — 0–100 percentage based on out_time vs duration
-    finished(str)         — full filtered output when complete (empty = clean)
-    errorOccurred(str)    — emitted if ffmpeg/ffprobe itself fails to launch
+    lineReady(str)        -- each filtered error line as it arrives
+    progressChanged(int)  -- 0-100 percentage based on out_time vs duration
+    finished(str)         -- full filtered output when complete (empty = clean)
+    errorOccurred(str)    -- emitted if ffmpeg/ffprobe itself fails to launch
     """
 
     lineReady       = Signal(str)
@@ -61,7 +61,7 @@ class FFmpegWorker(QThread):
     def cancel(self):
         self._cancelled = True
 
-    # ── ffprobe duration ──────────────────────────────────────────────────────
+    # -- ffprobe duration ------------------------------------------------------
 
     def _get_duration(self) -> float:
         ffprobe = str(Path(self._ffmpeg_exe).parent / "ffprobe.exe")
@@ -77,7 +77,7 @@ class FFmpegWorker(QThread):
         except Exception:
             return 0.0
 
-    # ── main thread entry ─────────────────────────────────────────────────────
+    # -- main thread entry -----------------------------------------------------
 
     def run(self):
         from error_library import filter_lines

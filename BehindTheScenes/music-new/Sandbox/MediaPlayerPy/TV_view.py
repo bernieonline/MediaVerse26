@@ -1,9 +1,9 @@
 """
 TV_view.py
-TV series data backend — exposed to QML as context property "tvViewModel".
+TV series data backend -- exposed to QML as context property "tvViewModel".
 
 Hierarchy built at load time:
-    series_name → season_num → [episode_dict, ...]
+    series_name -> season_num -> [episode_dict, ...]
 
 Each episode dict:
     ep_num, ep_end, ep_name, image_uri, video_path,
@@ -29,10 +29,10 @@ from project_paths import (
 )
 from json_safe import safe_json_write, safe_json_read
 
-# ── Title parsing ────────────────────────────────────────────────────────────
+# -- Title parsing ------------------------------------------------------------
 
-# Range episode (checked first — most specific):
-# "Series.S03E01-3.Title" — one file covering merged episodes
+# Range episode (checked first -- most specific):
+# "Series.S03E01-3.Title" -- one file covering merged episodes
 _RANGE_RE = re.compile(
     r'^(.+?)\.S(\d{1,2})E(\d{2,3})-(\d+)(?:\.(.*))?$', re.IGNORECASE
 )
@@ -49,11 +49,11 @@ _EXTENDED = [
 ]
 
 
-_APOSTROPHE_RE = re.compile(r"'([A-Z])")   # fix title() artefact: 's → 's
+_APOSTROPHE_RE = re.compile(r"'([A-Z])")   # fix title() artefact: 's -> 's
 
 
 def _normalise_series(raw: str) -> str:
-    """Dots→spaces, collapse whitespace, title-case, fix post-apostrophe caps."""
+    """Dots->spaces, collapse whitespace, title-case, fix post-apostrophe caps."""
     name = " ".join(raw.replace(".", " ").split())   # collapse multiple spaces
     name = name.title()
     name = _APOSTROPHE_RE.sub(lambda m: "'" + m.group(1).lower(), name)
@@ -62,7 +62,7 @@ def _normalise_series(raw: str) -> str:
 
 def _parse_title(title: str) -> dict | None:
     """Parse a manifest title into series/season/episode components.
-    Returns None for any title that does not match — caller skips it silently."""
+    Returns None for any title that does not match -- caller skips it silently."""
     # Strip video extension if present so regex anchors work cleanly
     stem = title
     for ext in (".mp4", ".mkv", ".avi", ".m4v"):
@@ -70,19 +70,19 @@ def _parse_title(title: str) -> dict | None:
             stem = stem[: -len(ext)]
             break
 
-    # Range episode — check first
+    # Range episode -- check first
     m = _RANGE_RE.match(stem)
     if m:
         series_raw, s_num, e_start, e_end, ep_name = m.groups()
         return {
             "series":  _normalise_series(series_raw),
             "season":  int(s_num),
-            "episode": int(e_start),       # sort key — start of range
-            "ep_end":  int(e_end),         # end of range for display "Ep 1–3"
+            "episode": int(e_start),       # sort key -- start of range
+            "ep_end":  int(e_end),         # end of range for display "Ep 1-3"
             "ep_name": (ep_name or "").replace(".", " ").strip(),
         }
 
-    # Single episode — primary then extended
+    # Single episode -- primary then extended
     m = _PRIMARY_RE.match(stem)
     if not m:
         for pat in _EXTENDED:
@@ -102,11 +102,11 @@ def _parse_title(title: str) -> dict | None:
     }
 
 
-# ── XML sidecar reader ───────────────────────────────────────────────────────
+# -- XML sidecar reader -------------------------------------------------------
 
 def _read_sidecar(xml_path: str) -> dict:
     """Extract last_played and progress_pct from a JRiver XML sidecar.
-    Best-effort — returns empty dict on any failure."""
+    Best-effort -- returns empty dict on any failure."""
     if not xml_path:
         return {}
     try:
@@ -132,7 +132,7 @@ def _read_sidecar(xml_path: str) -> dict:
         return {}
 
 
-# ── Watch Progress Store ──────────────────────────────────────────────────────
+# -- Watch Progress Store ------------------------------------------------------
 
 class TVWatchProgressStore:
     """
@@ -151,7 +151,7 @@ class TVWatchProgressStore:
 
     Hard rules:
       - All writes go through safe_json_write (atomic swap + .bak copy).
-      - Writes happen under a threading.Lock() — safe to call from the
+      - Writes happen under a threading.Lock() -- safe to call from the
         watchdog background thread.
       - Progress >= 95 % is promoted to 100 % (natural-end rounding).
     """
@@ -162,9 +162,9 @@ class TVWatchProgressStore:
         self._path = Path(_tv_progress_path)
         self._lock = threading.Lock()
         self._data: dict = self._load()
-        print(f"✅ [TVProgress] Store loaded — {len(self._data)} episodes tracked")
+        print(f"[OK] [TVProgress] Store loaded -- {len(self._data)} episodes tracked")
 
-    # ── Internal ─────────────────────────────────────────────────────────────
+    # -- Internal -------------------------------------------------------------
 
     def _load(self) -> dict:
         if not self._path.exists():
@@ -177,13 +177,13 @@ class TVWatchProgressStore:
         try:
             safe_json_write(self._path, self._data)
         except Exception as exc:
-            print(f"⚠️  [TVProgress] save failed: {exc}")
+            print(f"[WARN]  [TVProgress] save failed: {exc}")
 
     @staticmethod
     def _normalise_key(path: str) -> str:
         return path.replace("/", "\\").strip()
 
-    # ── Public API ────────────────────────────────────────────────────────────
+    # -- Public API ------------------------------------------------------------
 
     def get(self, video_path: str) -> dict:
         """Return the progress record for video_path, or {} if not tracked."""
@@ -196,7 +196,7 @@ class TVWatchProgressStore:
 
         JRiver resets PositionMS to 0 after natural completion, so the
         last captured position (from the final non-zero poll) will be
-        very close to the end — promoted to 100 % at >= 95 %.
+        very close to the end -- promoted to 100 % at >= 95 %.
         """
         if not video_path or duration_sec <= 0:
             return
@@ -217,16 +217,16 @@ class TVWatchProgressStore:
             self._data[key] = entry
             self._save()
         print(
-            f"✅ [TVProgress] Recorded {pct}% "
-            f"({position_sec:.0f}s/{duration_sec:.0f}s) → {Path(video_path).name}"
+            f"[OK] [TVProgress] Recorded {pct}% "
+            f"({position_sec:.0f}s/{duration_sec:.0f}s) -> {Path(video_path).name}"
         )
 
 
-# Module-level singleton — imported by playback_controller for injection
+# Module-level singleton -- imported by playback_controller for injection
 progress_store = TVWatchProgressStore()
 
 
-# ── ViewModel ────────────────────────────────────────────────────────────────
+# -- ViewModel ----------------------------------------------------------------
 
 class TVViewModel(QObject):
     """
@@ -238,7 +238,7 @@ class TVViewModel(QObject):
         var eps     = JSON.parse(tvViewModel.get_episodes("Yellowstone", 1))
     """
 
-    # Emitted after progress_store records new progress (watchdog thread → QML thread)
+    # Emitted after progress_store records new progress (watchdog thread -> QML thread)
     progressUpdated = Signal()
 
     def __init__(self, parent=None):
@@ -247,14 +247,14 @@ class TVViewModel(QObject):
         self._hierarchy: dict[str, dict[int, list[dict]]] = {}
         # xml_collection_data keyed by video-path stem for fast lookup
         self._xml_coll: dict[str, dict] = {}
-        # preloaded XML cache: series_name → { xml_path: {description, actors} }
+        # preloaded XML cache: series_name -> { xml_path: {description, actors} }
         self._series_xml_cache: dict[str, dict] = {}
         # Shared progress store (also held by module-level singleton for
         # injection into PlaybackController)
         self.progress_store = progress_store
         self._load()
 
-    # ── Startup loading ──────────────────────────────────────────────────────
+    # -- Startup loading ------------------------------------------------------
 
     def _load(self) -> None:
         self._load_xml_collection()
@@ -264,7 +264,7 @@ class TVViewModel(QObject):
         """Index xml_collection_data.json by filename stem for O(1) lookup."""
         path = Path(xml_collection_data)
         if not path.exists():
-            print(f"⚠️  [TV] xml_collection_data not found: {path}")
+            print(f"[WARN]  [TV] xml_collection_data not found: {path}")
             return
         try:
             with open(path, "r", encoding="utf-8") as fh:
@@ -273,21 +273,21 @@ class TVViewModel(QObject):
                 fn = item.get("Filename", "")
                 if fn:
                     self._xml_coll[Path(fn).stem] = item
-            print(f"✅ [TV] xml_collection_data: {len(self._xml_coll)} records indexed")
+            print(f"[OK] [TV] xml_collection_data: {len(self._xml_coll)} records indexed")
         except Exception as exc:
-            print(f"❌ [TV] xml_collection_data load error: {exc}")
+            print(f"[ERROR] [TV] xml_collection_data load error: {exc}")
 
     def _build_hierarchy(self) -> None:
-        """Read manifest → parse TV titles → build series/season/episode tree."""
+        """Read manifest -> parse TV titles -> build series/season/episode tree."""
         manifest_path = Path(server_manifest_v2)
         if not manifest_path.exists():
-            print(f"⚠️  [TV] Manifest not found: {manifest_path}")
+            print(f"[WARN]  [TV] Manifest not found: {manifest_path}")
             return
         try:
             with open(manifest_path, "r", encoding="utf-8") as fh:
                 raw = json.load(fh)
         except Exception as exc:
-            print(f"❌ [TV] Manifest load error: {exc}")
+            print(f"[ERROR] [TV] Manifest load error: {exc}")
             return
 
         records      = raw if isinstance(raw, list) else raw.get("items", [])
@@ -305,7 +305,7 @@ class TVViewModel(QObject):
                 skipped_n += 1
                 continue
 
-            # Resolve display image — flat cache folder, filename only
+            # Resolve display image -- flat cache folder, filename only
             cache     = rec.get("cache", {})
             shared    = rec.get("shared", {})
             rel_disp  = cache.get("display") or cache.get("relative_display") or ""
@@ -338,11 +338,11 @@ class TVViewModel(QObject):
                 season_eps.sort(key=lambda e: e["ep_num"])
 
         print(
-            f"✅ [TV] {len(self._hierarchy)} series | "
+            f"[OK] [TV] {len(self._hierarchy)} series | "
             f"{parsed_n} episodes parsed | {skipped_n} skipped"
         )
 
-    # ── Image helpers ────────────────────────────────────────────────────────
+    # -- Image helpers --------------------------------------------------------
 
     def _season_image(self, series: str, season: int) -> str:
         """Image URI of the first (lowest-numbered) episode in the season."""
@@ -356,7 +356,7 @@ class TVViewModel(QObject):
             return ""
         return self._season_image(series, min(seasons.keys()))
 
-    # ── QML slots ────────────────────────────────────────────────────────────
+    # -- QML slots ------------------------------------------------------------
 
     @Slot(result=str)
     def get_series_list(self) -> str:
@@ -424,7 +424,7 @@ class TVViewModel(QObject):
     @Slot(str, result=str)
     def get_episode_detail(self, xml_path: str) -> str:
         """Returns JSON: {description, actors, director, genre, year, keywords}
-        Reads XML sidecar directly — xml_collection_data does not hold Description."""
+        Reads XML sidecar directly -- xml_collection_data does not hold Description."""
         if not xml_path:
             return json.dumps({})
         try:
@@ -475,5 +475,5 @@ class TVViewModel(QObject):
                     cache[xml_path] = {"description": "", "actors": []}
 
         self._series_xml_cache[series_name] = cache
-        print(f"✅ [TV] XML preloaded: {len(cache)} episodes for '{series_name}'")
+        print(f"[OK] [TV] XML preloaded: {len(cache)} episodes for '{series_name}'")
         return json.dumps(cache)

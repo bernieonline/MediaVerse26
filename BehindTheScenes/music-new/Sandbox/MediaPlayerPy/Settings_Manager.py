@@ -179,7 +179,7 @@ class SettingsManager(QObject):
         tool_paths = self._settings.get("ToolPaths", {})
         exe = tool_paths.get(tool_name, "")
         if not exe or not os.path.exists(exe):
-            print(f"[ERROR] Tool not found or not configured: {tool_name} → '{exe}'")
+            print(f"[ERROR] Tool not found or not configured: {tool_name} -> '{exe}'")
             return
         try:
             proc = subprocess.Popen([exe])

@@ -1,5 +1,5 @@
 """
-media_manager_db.py — MySQL layer for MediaManager2 database.
+media_manager_db.py -- MySQL layer for MediaManager2 database.
 
 All functions open a fresh connection per call (same pattern as dbMySql/db_utils.py).
 Credentials loaded from sqlCreds.env: MM2_HOST, MM2_USER, MM2_PASSWORD, MM2_DB.
@@ -21,9 +21,9 @@ _MM2_DB = os.getenv("MM2_DB", "MediaManager2")
 log = logging.getLogger(__name__)
 
 
-# ─────────────────────────────────────────────────────────────────────────────
+# -----------------------------------------------------------------------------
 #  Connection
-# ─────────────────────────────────────────────────────────────────────────────
+# -----------------------------------------------------------------------------
 
 def get_mm2_connection() -> mysql.connector.MySQLConnection:
     """Open and return a fresh connection to MediaManager2."""
@@ -48,9 +48,9 @@ def test_connection() -> bool:
         return False
 
 
-# ─────────────────────────────────────────────────────────────────────────────
+# -----------------------------------------------------------------------------
 #  List management
-# ─────────────────────────────────────────────────────────────────────────────
+# -----------------------------------------------------------------------------
 
 def get_media_types() -> list:
     """Return all rows from mediatypename."""
@@ -95,7 +95,7 @@ def get_master_types() -> list:
 
 
 def get_file_extensions() -> list:
-    """Return all rows from mediatypes (extension → category mapping)."""
+    """Return all rows from mediatypes (extension -> category mapping)."""
     try:
         conn = get_mm2_connection()
         cur = conn.cursor(dictionary=True)
@@ -155,9 +155,9 @@ def upsert_list(table: str, items: list) -> bool:
         return False
 
 
-# ─────────────────────────────────────────────────────────────────────────────
+# -----------------------------------------------------------------------------
 #  Search
-# ─────────────────────────────────────────────────────────────────────────────
+# -----------------------------------------------------------------------------
 
 def search_all_collections(query: str) -> list:
     """Search both mediafiledetail and masterfiledetail for LIKE %query%."""
@@ -184,9 +184,9 @@ def search_all_collections(query: str) -> list:
     return results
 
 
-# ─────────────────────────────────────────────────────────────────────────────
+# -----------------------------------------------------------------------------
 #  Collection creation
-# ─────────────────────────────────────────────────────────────────────────────
+# -----------------------------------------------------------------------------
 
 def insert_media_file(record: dict) -> bool:
     """Insert one record into mediafiledetail."""
@@ -314,9 +314,9 @@ def collection_exists(prefix: str) -> list:
     return results
 
 
-# ─────────────────────────────────────────────────────────────────────────────
+# -----------------------------------------------------------------------------
 #  Reporting
-# ─────────────────────────────────────────────────────────────────────────────
+# -----------------------------------------------------------------------------
 
 def get_collection_summary(table: str, master_only: bool = False,
                            device_filter: str = "", category_filter: str = "") -> list:
@@ -352,7 +352,7 @@ def get_collection_summary(table: str, master_only: bool = False,
         )
         rows = cur.fetchall()
         cur.close(); conn.close()
-        # Convert Decimal → float so QML can do arithmetic on total_size_mb
+        # Convert Decimal -> float so QML can do arithmetic on total_size_mb
         for row in rows:
             if "total_size_mb" in row and row["total_size_mb"] is not None:
                 row["total_size_mb"] = float(row["total_size_mb"])
@@ -385,9 +385,9 @@ def get_collection_detail(table: str, collection_name: str) -> list:
         return []
 
 
-# ─────────────────────────────────────────────────────────────────────────────
+# -----------------------------------------------------------------------------
 #  Utilities
-# ─────────────────────────────────────────────────────────────────────────────
+# -----------------------------------------------------------------------------
 
 def remove_collection_records(table: str, collection_name: str) -> int:
     """Delete all DB rows for a collection. Returns rows deleted."""

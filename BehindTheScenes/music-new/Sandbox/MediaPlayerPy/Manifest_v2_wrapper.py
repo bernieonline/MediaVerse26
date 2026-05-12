@@ -43,7 +43,7 @@ class ManifestUpdater_v2(QObject):
         self.sync_engine = SyncEngine_v2()
 
     # ------------------------------------------------------------
-    # PUBLIC API — QML and Framework.py expect these
+    # PUBLIC API -- QML and Framework.py expect these
     # ------------------------------------------------------------
 
     @Slot()
@@ -66,7 +66,7 @@ class ManifestUpdater_v2(QObject):
         rebuild from scratch. Runs in a background thread.
         Use when manifest.json is suspected corrupt or incomplete.
         """
-        print("[ManifestUpdater_v2] force_rebuild_manifest called — bypassing hash check.")
+        print("[ManifestUpdater_v2] force_rebuild_manifest called -- bypassing hash check.")
         notifier.post_notification("Rebuilding manifest from scratch...", False)
         thread = threading.Thread(target=self.bootstrap_manifest, daemon=True)
         thread.start()
@@ -108,7 +108,7 @@ class ManifestUpdater_v2(QObject):
                 candidate_count = self._safe_item_count(self.comparison_path)
 
                 if current_count > 0 and candidate_count < current_count * 0.8:
-                    msg = (f"⚠️ Manifest swap refused — candidate has {candidate_count} items "
+                    msg = (f"[WARN] Manifest swap refused -- candidate has {candidate_count} items "
                            f"vs {current_count} in current manifest (less than 80%). "
                            f"Library scan may be incomplete. Restart to retry.")
                     print(f"[ManifestUpdater_v2] {msg}")
@@ -127,16 +127,16 @@ class ManifestUpdater_v2(QObject):
 
             manifest = safe_json_read(self.manifest_path, "manifest")
             if not manifest.get("items"):
-                raise ValueError("Manifest loaded but items list is empty — aborting.")
+                raise ValueError("Manifest loaded but items list is empty -- aborting.")
 
             if not manifest.get("scan_complete"):
                 notifier.post_notification(
-                    "Manifest scan_complete flag missing — scan may have been interrupted. Restart recommended.",
+                    "Manifest scan_complete flag missing -- scan may have been interrupted. Restart recommended.",
                     is_urgent=True
                 )
             if not manifest.get("manifest_hash"):
                 notifier.post_notification(
-                    "Manifest hash missing — hash step failed. Cache comparison unreliable.",
+                    "Manifest hash missing -- hash step failed. Cache comparison unreliable.",
                     is_urgent=True
                 )
 
@@ -155,17 +155,17 @@ class ManifestUpdater_v2(QObject):
 
 
             # Step 6: Trigger cache if needed
-            if manifest["content_changed"]:
-                print("[ManifestUpdater_v2] Content changed — triggering cache rebuild.")
+            # Also force rebuild when local cache is empty (fresh install)
+            local_cache_empty = self._is_local_cache_empty()
+            needs_rebuild = manifest["content_changed"] or local_cache_empty
+
+            if local_cache_empty:
+                print("[ManifestUpdater_v2] Local cache is empty (fresh install) -- forcing cache rebuild.")
+
+            if needs_rebuild:
+                print("[ManifestUpdater_v2] Triggering cache rebuild.")
                 self.sync_engine.run_server_cache_builder(manifest)
-                #AFTER CACHE REBUILD COPY TO LOCAL DRIVE
-                #self.clone_server_to_local()
-                #NOW THE LOCAL CACHE
                 self.cacheRebuildFinished.emit()
-
-                #self.start_local_cache_sync()
-
-
             else:
                 print("[ManifestUpdater_v2] No content change detected.")
 
@@ -174,6 +174,14 @@ class ManifestUpdater_v2(QObject):
             print("[ManifestUpdater_v2]", msg)
             self.manifestError.emit(msg)
     
+    def _is_local_cache_empty(self) -> bool:
+        """Return True if the local display cache has fewer than 5 images."""
+        try:
+            count = sum(1 for f in local_display_v2.iterdir() if f.suffix.lower() in ('.jpg', '.png', '.webp'))
+            return count < 5
+        except Exception:
+            return True
+
     def _safe_item_count(self, path: Path) -> int:
         """Return the number of items in a manifest JSON file, or 0 on any failure."""
         try:
@@ -184,7 +192,7 @@ class ManifestUpdater_v2(QObject):
 
     def bootstrap_manifest(self):
         """
-        First‑run manifest builder.
+        First-run manifest builder.
 
         Reuse the existing manifest_v3.write_manifest_to_disk logic
         to build the canonical manifest at self.manifest_path,
@@ -208,7 +216,7 @@ class ManifestUpdater_v2(QObject):
             # 2. Load manifest from disk
             manifest = safe_json_read(self.manifest_path, "manifest")
             if not manifest.get("items"):
-                raise ValueError("Bootstrap manifest loaded but items list is empty — aborting.")
+                raise ValueError("Bootstrap manifest loaded but items list is empty -- aborting.")
 
             # 3. Inject V2 flags/metadata
             manifest["content_changed"] = True          # bootstrap always forces cache rebuild
@@ -224,7 +232,7 @@ class ManifestUpdater_v2(QObject):
             self.manifestLoaded.emit(copy.deepcopy(manifest))
             print("[ManifestUpdater_v2] BOOTSTRAP: manifestLoaded emitted")
 
-            # 5. Build server image cache (was missing — update path has this, bootstrap didn't)
+            # 5. Build server image cache (was missing -- update path has this, bootstrap didn't)
             print("[ManifestUpdater_v2] BOOTSTRAP: triggering cache build...")
             self.sync_engine.run_server_cache_builder(manifest)
             self.cacheRebuildFinished.emit()
@@ -330,19 +338,19 @@ class ManifestUpdater_v2(QObject):
                     print(f"  > Copying {Path(src).name}...")
                     # dirs_exist_ok=True performs a 'merge/overwrite' clone
                     shutil.copytree(src, dst, dirs_exist_ok=True)
-                    print(f"  ✅ {Path(src).name} synced.")
+                    print(f"  [OK] {Path(src).name} synced.")
                 else:
-                    print(f"  ⚠️ Source missing on server: {src}")
+                    print(f"  [WARN] Source missing on server: {src}")
             except Exception as e:
-                print(f"  ❌ Error cloning {src}: {e}")
+                print(f"  [ERROR] Error cloning {src}: {e}")
 
         print("="*40)
         print("[Sync] Clone operation finished.")
         print("="*40)
 
     def start_local_cache_sync(self):
-        print("Starting async local cache sync…")
-        notifier.post_notification("Syncing image cache to local device…", False)
+        print("Starting async local cache sync...")
+        notifier.post_notification("Syncing image cache to local device...", False)
 
         self.sync_thread = QThread()
         self.sync_worker = CacheSyncWorker(paths)
@@ -355,9 +363,9 @@ class ManifestUpdater_v2(QObject):
         self.sync_worker.finished.connect(self.sync_worker.deleteLater)
         self.sync_thread.finished.connect(self.sync_thread.deleteLater)
 
-        # Progress label → discreet notification
+        # Progress label -> discreet notification
         self.sync_worker.progress.connect(
-            lambda label: notifier.post_notification(f"Syncing {label} cache…", False)
+            lambda label: notifier.post_notification(f"Syncing {label} cache...", False)
         )
 
         # Result summary notification
@@ -366,11 +374,11 @@ class ManifestUpdater_v2(QObject):
             has_gaps = False
             for label, info in tier_results.items():
                 if info["ok"]:
-                    parts.append(f"{label}: {info['local']}/{info['server']} ✓")
+                    parts.append(f"{label}: {info['local']}/{info['server']} ")
                 else:
-                    parts.append(f"{label}: {info['local']}/{info['server']} ⚠")
+                    parts.append(f"{label}: {info['local']}/{info['server']} [WARN]")
                     has_gaps = True
-            msg = "Local cache sync complete — " + ", ".join(parts)
+            msg = "Local cache sync complete -- " + ", ".join(parts)
             notifier.post_notification(msg, has_gaps)
             print(f"[CacheSyncWorker] {msg}")
 

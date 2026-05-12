@@ -24,23 +24,23 @@ from pathlib import Path
 from project_paths import paths
 
 
-# ── Manifest helpers ──────────────────────────────────────────────────────────
+# -- Manifest helpers ----------------------------------------------------------
 
 def _build_manifest_index() -> dict:
     """
     Load the server manifest and return a dict keyed by title stem.
-    e.g. "Rocky (1976)" → { full manifest record }
+    e.g. "Rocky (1976)" -> { full manifest record }
     """
     manifest_path = paths.get("server_manifest_v2")
     if not manifest_path or not Path(manifest_path).exists():
-        print(f"⚠️ [SPLASH LAYOUT] Manifest not found: {manifest_path}")
+        print(f"[WARN] [SPLASH LAYOUT] Manifest not found: {manifest_path}")
         return {}
 
     try:
         with open(manifest_path, "r", encoding="utf-8") as f:
             data = json.load(f)
     except Exception as e:
-        print(f"❌ [SPLASH LAYOUT] Manifest read error: {e}")
+        print(f"[ERROR] [SPLASH LAYOUT] Manifest read error: {e}")
         return {}
 
     items = data if isinstance(data, list) else data.get("items", [])
@@ -48,11 +48,11 @@ def _build_manifest_index() -> dict:
     for record in items:
         raw_title = record.get("title", "")
         if raw_title:
-            # Title may be "Rocky (1976)" or "Rocky (1976).mp4" — strip extension.
+            # Title may be "Rocky (1976)" or "Rocky (1976).mp4" -- strip extension.
             stem = Path(raw_title).stem
             index[stem] = record
 
-    print(f"✅ [SPLASH LAYOUT] Manifest indexed: {len(index)} records")
+    print(f"[OK] [SPLASH LAYOUT] Manifest indexed: {len(index)} records")
     return index
 
 
@@ -64,28 +64,28 @@ def _uri_from_record(record: dict, cache_root: Path):
     display = record.get("cache", {}).get("display", "")
     if not display:
         return None
-    # "Cache/display/Rocky (1976).jpg" → "Rocky (1976).jpg"
+    # "Cache/display/Rocky (1976).jpg" -> "Rocky (1976).jpg"
     filename = Path(display).name
     local = cache_root / filename
     return local.as_uri() if local.exists() else None
 
 
-# ── Main entry point ──────────────────────────────────────────────────────────
+# -- Main entry point ----------------------------------------------------------
 
 def generate_splash_layout(count: int = 10, seed: int = None) -> list:
     """
     Returns a list of card dicts for the QML context property 'splashLayout'.
 
     Layout rules
-    ────────────
+    ------------
     • Index 0 is always the initial hero.  QML centres it precisely; the
       Python x/y for the hero serve as its scatter-back position once a
       different card takes focus.
     • All cards are constrained to the left 75 % of the display width so
       they never overlap the category navigation column on the right.
-    • x, y   — fractions of component width / height respectively.
-    • width  — fraction of component width.
-    • height — NOT used for QML sizing (QML derives height as width × 1.48
+    • x, y   -- fractions of component width / height respectively.
+    • width  -- fraction of component width.
+    • height -- NOT used for QML sizing (QML derives height as width × 1.48
                for a consistent portrait ratio).  Kept in the dict for
                reference only.
     """
@@ -96,13 +96,13 @@ def generate_splash_layout(count: int = 10, seed: int = None) -> list:
     collections_path = paths.get("movies_coll_v2")
 
     if not cache_root or not Path(cache_root).exists():
-        print(f"⚠️ [SPLASH LAYOUT] local_display_v2 not found: {cache_root}")
+        print(f"[WARN] [SPLASH LAYOUT] local_display_v2 not found: {cache_root}")
         return []
 
     cache_root = Path(cache_root)
 
-    # ── Step 1: resolve TopTen collection images via manifest ─────────────────
-    resolved: list[tuple[str, str]] = []   # [(uri, title), …]
+    # -- Step 1: resolve TopTen collection images via manifest -----------------
+    resolved: list[tuple[str, str]] = []   # [(uri, title), ...]
     top_ten_found = False
     index = _build_manifest_index()
 
@@ -119,21 +119,21 @@ def generate_splash_layout(count: int = 10, seed: int = None) -> list:
 
             if top_ten:
                 top_ten_found = True
-                print(f"✅ [SPLASH LAYOUT] Using TopTen: '{top_ten.get('name')}'")
+                print(f"[OK] [SPLASH LAYOUT] Using TopTen: '{top_ten.get('name')}'")
                 for rule in top_ten.get("rules", []):
                     if rule.get("mode") != "Files":
                         continue
                     for file_path in rule.get("data", {}).get("files", []):
                         stem = Path(file_path).stem          # "Rocky (1976)"
 
-                        # ── Primary: direct cache lookup ──────────────────────
-                        # The cache file is simply {stem}.jpg — fast and reliable.
+                        # -- Primary: direct cache lookup ----------------------
+                        # The cache file is simply {stem}.jpg -- fast and reliable.
                         direct = cache_root / (stem + ".jpg")
                         if direct.exists():
                             resolved.append((direct.as_uri(), stem))
                             continue
 
-                        # ── Secondary: manifest lookup ─────────────────────────
+                        # -- Secondary: manifest lookup -------------------------
                         # Only reached if the direct cache file wasn't found.
                         record = index.get(stem)
                         if record:
@@ -142,14 +142,14 @@ def generate_splash_layout(count: int = 10, seed: int = None) -> list:
                                 resolved.append((uri, stem))
                                 continue
 
-                        print(f"⚠️ [SPLASH LAYOUT] No image found for: {stem}")
+                        print(f"[WARN] [SPLASH LAYOUT] No image found for: {stem}")
             else:
-                print("⚠️ [SPLASH LAYOUT] No TopTen Architect collection found.")
+                print("[WARN] [SPLASH LAYOUT] No TopTen Architect collection found.")
 
         except Exception as e:
-            print(f"❌ [SPLASH LAYOUT] Collection error: {e}")
+            print(f"[ERROR] [SPLASH LAYOUT] Collection error: {e}")
 
-    # ── Step 2: random fallback — only when TopTen was not found at all ───────
+    # -- Step 2: random fallback -- only when TopTen was not found at all -------
     # If TopTen exists but some images are missing from the local cache,
     # we still show only the TopTen images that did resolve rather than
     # mixing in unrelated random images.
@@ -167,13 +167,13 @@ def generate_splash_layout(count: int = 10, seed: int = None) -> list:
             resolved.append((f.as_uri(), f.stem))
 
     if not resolved:
-        print("❌ [SPLASH LAYOUT] No images resolved — returning empty layout.")
+        print("[ERROR] [SPLASH LAYOUT] No images resolved -- returning empty layout.")
         return []
 
     pool = resolved[:count]
     random.shuffle(pool)
 
-    # ── Step 3: assign positions ──────────────────────────────────────────────
+    # -- Step 3: assign positions ----------------------------------------------
     # Hero width is fixed so QML can render it consistently.
     HERO_W = 0.28
 
@@ -211,5 +211,5 @@ def generate_splash_layout(count: int = 10, seed: int = None) -> list:
             "title":    title,
         })
 
-    print(f"✅ [SPLASH LAYOUT] {len(layout)} cards — hero: '{layout[0]['title']}'")
+    print(f"[OK] [SPLASH LAYOUT] {len(layout)} cards -- hero: '{layout[0]['title']}'")
     return layout

@@ -41,7 +41,7 @@ def build_dna_bank() -> dict:
 
     if not source_manifest or not source_manifest.exists():
         result["error"] = "Manifest not found"
-        print(f"❌ [XMLCollectionBuilder] {result['error']}: {source_manifest}")
+        print(f"[ERROR] [XMLCollectionBuilder] {result['error']}: {source_manifest}")
         return result
 
     # --- 1. Read manifest -------------------------------------------------
@@ -50,10 +50,10 @@ def build_dna_bank() -> dict:
         raw_items = manifest.get("items", [])
     except Exception as e:
         result["error"] = f"Manifest read failed: {e}"
-        print(f"❌ [XMLCollectionBuilder] {result['error']}")
+        print(f"[ERROR] [XMLCollectionBuilder] {result['error']}")
         return result
 
-    # DVD items have type=="movie" but video==null — excluded from DNA bank by design
+    # DVD items have type=="movie" but video==null -- excluded from DNA bank by design
     movie_items = [
         i for i in raw_items
         if i.get("metadata", {}).get("type") == "movie"
@@ -69,7 +69,7 @@ def build_dna_bank() -> dict:
         except Exception:
             result["previous_count"] = 0
 
-    print(f"🚀 Rebuilding xml_collection_data DNA Bank - Matching Original Record Spec...")
+    print(f"[>>] Rebuilding xml_collection_data DNA Bank - Matching Original Record Spec...")
 
     # --- 3. Build enriched records ----------------------------------------
     enriched_data = []
@@ -132,7 +132,7 @@ def build_dna_bank() -> dict:
 
                 except Exception as e:
                     xml_parse_errors += 1
-                    print(f"⚠️ XML Parse Error for {video_path.name}: {e}")
+                    print(f"[WARN] XML Parse Error for {video_path.name}: {e}")
 
         enriched_data.append(entry)
 
@@ -145,19 +145,19 @@ def build_dna_bank() -> dict:
         safe_json_write(staging_json, enriched_data)
     except Exception as e:
         result["error"] = f"Staging write failed: {e}"
-        print(f"❌ [XMLCollectionBuilder] {result['error']}")
+        print(f"[ERROR] [XMLCollectionBuilder] {result['error']}")
         return result
 
     # --- 5. Validate staging file -----------------------------------------
 
-    # 5a. JSON integrity — re-read what was written
+    # 5a. JSON integrity -- re-read what was written
     try:
         validated = safe_json_read(staging_json, "xml_collection_data")
         if not isinstance(validated, list):
             raise ValueError("Staging file is not a list")
     except Exception as e:
         result["error"] = f"Staging JSON validation failed: {e}"
-        print(f"❌ [XMLCollectionBuilder] {result['error']}")
+        print(f"[ERROR] [XMLCollectionBuilder] {result['error']}")
         return result
 
     staged_count = len(validated)
@@ -168,7 +168,7 @@ def build_dna_bank() -> dict:
             f"Record count mismatch: staged {staged_count} "
             f"vs manifest movie count {result['manifest_movie_count']}"
         )
-        print(f"❌ [XMLCollectionBuilder] {result['error']}")
+        print(f"[ERROR] [XMLCollectionBuilder] {result['error']}")
         return result
 
     # 5c. 80% guard vs previous live file
@@ -178,10 +178,10 @@ def build_dna_bank() -> dict:
             f"80% guard: staged {staged_count} records "
             f"vs previous {prev} (less than 80%). Build refused."
         )
-        print(f"❌ [XMLCollectionBuilder] {result['error']}")
+        print(f"[ERROR] [XMLCollectionBuilder] {result['error']}")
         return result
 
-    # 5d. Metadata quality — count records with all-blank Genre+Actors+Director
+    # 5d. Metadata quality -- count records with all-blank Genre+Actors+Director
     blank_count = sum(
         1 for r in validated
         if not r.get("Genre") and not r.get("Actors") and r.get("Director") in ("Unknown", "", None)
@@ -190,22 +190,22 @@ def build_dna_bank() -> dict:
     blank_pct = (blank_count / staged_count * 100) if staged_count else 0
     if blank_pct > 10:
         print(
-            f"⚠️ [XMLCollectionBuilder] Metadata quality warning: "
+            f"[WARN] [XMLCollectionBuilder] Metadata quality warning: "
             f"{blank_count}/{staged_count} records ({blank_pct:.1f}%) have blank Genre+Actors+Director. "
             f"XML files may be inaccessible. Build proceeding but review recommended."
         )
 
-    # --- 6. All tests passed — atomic replace live file -------------------
+    # --- 6. All tests passed -- atomic replace live file -------------------
     try:
         safe_json_write(output_json, validated)
     except Exception as e:
         result["error"] = f"Live file replace failed: {e}"
-        print(f"❌ [XMLCollectionBuilder] {result['error']}")
+        print(f"[ERROR] [XMLCollectionBuilder] {result['error']}")
         return result
 
     result["success"] = True
     print(
-        f"✅ DNA Bank Replicated: {staged_count} items saved. "
+        f"[OK] DNA Bank Replicated: {staged_count} items saved. "
         f"({xml_parse_errors} XML parse errors, {blank_count} blank metadata records)"
     )
     return result

@@ -15,7 +15,7 @@ Rectangle {
         spacing: 20
 
         // ============================================================
-        //  TEST BUTTON — LOAD DETAIL VIEW WITH IMAGE + XML
+        //  TEST BUTTON -- LOAD DETAIL VIEW WITH IMAGE + XML
         // ============================================================
         Button {
             id: testDetailButton
@@ -24,10 +24,10 @@ Rectangle {
             Layout.preferredHeight: 60
 
             onClicked: {
-                console.log("🔵 [Button] Test Detail View clicked")
+                console.log(" [Button] Test Detail View clicked")
 
                 // --------------------------------------------------------
-                // 1. Test image (DISPLAY tier — correct 2:3 ratio)
+                // 1. Test image (DISPLAY tier -- correct 2:3 ratio)
                 // --------------------------------------------------------
                 let testImagePath =  _paths.local_display_v2 + "/Chisum (1970).jpg"
                     //"file:///D:/MediaVerse1.0/BehindTheScenes/BehindTheScenes/music-new/cacheV2/images/display/Chisum (1970).jpg"
@@ -38,9 +38,9 @@ Rectangle {
                 let testXmlPath =
                     "file:///W:/Movies/John Wayne/Chisum (1970).xml"
 
-                console.log("📄 [Button] imagePath =", testImagePath)
-                console.log("📄 [Button] xmlPath   =", testXmlPath)
-                console.log("📄 [Button] xmlController =", xmlController)
+                console.log(" [Button] imagePath =", testImagePath)
+                console.log(" [Button] xmlPath   =", testXmlPath)
+                console.log(" [Button] xmlController =", xmlController)
 
                 // --------------------------------------------------------
                 // 3. Load Detail_View_v2.qml with all required properties
@@ -63,7 +63,7 @@ Rectangle {
             Layout.preferredHeight: 60
 
             onClicked: {
-                console.log("🔴 [Button] Closing detail view")
+                console.log(" [Button] Closing detail view")
                 contentLoader.source = ""
             }
         }

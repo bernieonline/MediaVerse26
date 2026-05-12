@@ -1,6 +1,6 @@
 """
 landing_view.py
-Mosaic tile landing view — scrolling grid of movie poster tiles.
+Mosaic tile landing view -- scrolling grid of movie poster tiles.
 
 Tile sizes are computed dynamically from the viewport dimensions so the
 mosaic always fills the full display area:
@@ -11,7 +11,7 @@ mosaic always fills the full display area:
 Three recipe strips vary the hero position across cycles.
 
 Batch behaviour:
-  - BATCH_SIZE films are selected per scroll cycle (≈100 images, ~10 min at 1080p).
+  - BATCH_SIZE films are selected per scroll cycle (100 images, ~10 min at 1080p).
   - _used_ids prevents any film from repeating in the immediately following batch.
   - The next batch is pre-built while the current one is still scrolling so the
     cycle transition (a brief fade to black) uses a cached JSON payload and is
@@ -28,14 +28,14 @@ from PySide6.QtCore import QObject, Slot, Signal, Property
 
 from project_paths import server_manifest_v2, local_thumb_v2, local_display_v2
 
-# px/sec — determines how long one full canvas scroll takes
+# px/sec -- determines how long one full canvas scroll takes
 SCROLL_SPEED_PPS: float = 48.0
 
 # Target number of films per scroll batch.
-# 5 tiles per recipe → 100 films ≈ 20 recipes ≈ 10 min scroll at 1920×1080.
+# 5 tiles per recipe -> 100 films  20 recipes  10 min scroll at 1920×1080.
 BATCH_SIZE: int = 100
 
-# Recipe definitions — coordinates in grid units (col, row).
+# Recipe definitions -- coordinates in grid units (col, row).
 # All recipes are exactly 2 rows tall.  Hero occupies 2 cols × 2 rows.
 #
 #  Strip A (4 cols):  [Hero 2×2 | S S]
@@ -91,7 +91,7 @@ class LandingViewModel(QObject):
         // at ~75% of canvas:
         landingViewModel.prebuild_next_model(width, height)
 
-    Then call build_tile_model() again at cycle end — it returns the
+    Then call build_tile_model() again at cycle end -- it returns the
     pre-built payload instantly.
     """
 
@@ -113,7 +113,7 @@ class LandingViewModel(QObject):
         self._next_scroll_ms: int = 0
         self._load_film_pool()
 
-    # ── Data loading ───────────────────────────────────────────────────────────
+    # -- Data loading -----------------------------------------------------------
 
     def _load_film_pool(self) -> None:
         """
@@ -121,7 +121,7 @@ class LandingViewModel(QObject):
         image, and populate self._film_pool keyed by title stem.
 
         Follows the same image-resolution logic as splash_layout.py:
-          1. cache["display"]  — e.g. "Cache/display/Rocky (1976).jpg"
+          1. cache["display"]  -- e.g. "Cache/display/Rocky (1976).jpg"
           2. cache["relative_display"] as fallback
           3. Stem + ".jpg" direct lookup as last resort
         """
@@ -130,14 +130,14 @@ class LandingViewModel(QObject):
         manifest_path = Path(server_manifest_v2)
 
         if not manifest_path.exists():
-            print(f"⚠️ [LANDING] Manifest not found: {manifest_path}")
+            print(f"[WARN] [LANDING] Manifest not found: {manifest_path}")
             return
 
         try:
             with open(manifest_path, "r", encoding="utf-8") as fh:
                 raw = json.load(fh)
         except Exception as exc:
-            print(f"❌ [LANDING] Manifest read error: {exc}")
+            print(f"[ERROR] [LANDING] Manifest read error: {exc}")
             return
 
         records = raw if isinstance(raw, list) else raw.get("items", [])
@@ -157,7 +157,7 @@ class LandingViewModel(QObject):
             cache  = record.get("cache", {})
             shared = record.get("shared", {})
 
-            # ── Resolve display image (flat folder, filename only) ─────────────
+            # -- Resolve display image (flat folder, filename only) -------------
             rel_display = (
                 cache.get("display") or
                 cache.get("relative_display") or
@@ -170,7 +170,7 @@ class LandingViewModel(QObject):
                 if not display_path.exists():
                     display_path = None
 
-            # ── Resolve thumbnail as fallback ─────────────────────────────────
+            # -- Resolve thumbnail as fallback ---------------------------------
             rel_thumb  = cache.get("relative_thumb", "")
             thumb_name = Path(rel_thumb).name if rel_thumb else (film_id + ".jpg")
             thumb_path = thumb_root / thumb_name
@@ -179,7 +179,7 @@ class LandingViewModel(QObject):
 
             poster_path = display_path or thumb_path
             if not poster_path:
-                continue   # no local image → skip
+                continue   # no local image -> skip
 
             self._film_pool[film_id] = {
                 "display_path": str(display_path) if display_path else "",
@@ -193,15 +193,15 @@ class LandingViewModel(QObject):
             }
             loaded += 1
 
-        print(f"✅ [LANDING] Film pool: {loaded} movies with local images")
+        print(f"[OK] [LANDING] Film pool: {loaded} movies with local images")
 
-    # ── Film shuffling ─────────────────────────────────────────────────────────
+    # -- Film shuffling ---------------------------------------------------------
 
     def _shuffle_films(self) -> None:
         """Shuffle available films, excluding IDs used in the previous batch."""
         available = [fid for fid in self._film_pool if fid not in self._used_ids]
         if len(available) < 20:
-            # Pool nearly exhausted — reset and use all films
+            # Pool nearly exhausted -- reset and use all films
             self._used_ids.clear()
             available = list(self._film_pool.keys())
         random.shuffle(available)
@@ -217,7 +217,7 @@ class LandingViewModel(QObject):
         self._shuffle_cursor += 1
         return fid
 
-    # ── Internal layout engine ─────────────────────────────────────────────────
+    # -- Internal layout engine -------------------------------------------------
 
     def _do_build(self, viewport_width: float, viewport_height: float) -> tuple[str, int]:
         """
@@ -227,16 +227,16 @@ class LandingViewModel(QObject):
         Side effects: updates _used_ids, _current_tiles, advances _hero_slot_index.
         """
         if not self._film_pool:
-            print("⚠️ [LANDING] _do_build: film pool empty")
+            print("[WARN] [LANDING] _do_build: film pool empty")
             return json.dumps([]), 60_000
 
-        # ── Dynamic sizing so tiles fill the full display area ─────────────────
+        # -- Dynamic sizing so tiles fill the full display area -----------------
         U_H: float = viewport_height / 2.0          # 2 rows fills full height
         U_W: float = U_H * (2.0 / 3.0)             # portrait 2:3 ratio
         HERO_W: float = U_W * 2
         HERO_H: float = U_H * 2                    # = viewport_height
 
-        # ── Rotate recipe order each batch ─────────────────────────────────────
+        # -- Rotate recipe order each batch -------------------------------------
         n = len(_RECIPE_DEFS)
         self._hero_slot_index = (self._hero_slot_index + 1) % n
         recipe_order = [(self._hero_slot_index + i) % n for i in range(n)]
@@ -251,7 +251,7 @@ class LandingViewModel(QObject):
                 "tiles": pixel_tiles,
             })
 
-        # ── Shuffle films for this batch (excludes _used_ids) ──────────────────
+        # -- Shuffle films for this batch (excludes _used_ids) ------------------
         self._shuffle_films()
         batch_size = min(BATCH_SIZE, len(self._film_pool))
 
@@ -303,11 +303,11 @@ class LandingViewModel(QObject):
 
             x_cursor += recipe["width"]
 
-        # ── Assign stagger indices left-to-right ───────────────────────────────
+        # -- Assign stagger indices left-to-right -------------------------------
         for i, t in enumerate(sorted(tiles, key=lambda t: t["x"])):
             t["stagger_index"] = i
 
-        # ── Record used IDs so next batch excludes them ────────────────────────
+        # -- Record used IDs so next batch excludes them ------------------------
         self._used_ids = {t["film_id"] for t in tiles}
         self._current_tiles = tiles
 
@@ -315,14 +315,14 @@ class LandingViewModel(QObject):
         duration_ms = max(10_000, int(actual_w / SCROLL_SPEED_PPS * 1000))
 
         print(
-            f"✅ [LANDING] {len(tiles)} tiles | "
+            f"[OK] [LANDING] {len(tiles)} tiles | "
             f"U_W={U_W:.0f} U_H={U_H:.0f} | "
             f"canvas={actual_w:.0f}px | "
             f"scroll={duration_ms / 1000:.0f}s"
         )
         return json.dumps(tiles), duration_ms
 
-    # ── Public slots ───────────────────────────────────────────────────────────
+    # -- Public slots -----------------------------------------------------------
 
     @Slot(float, float, result=str)
     def build_tile_model(self, viewport_width: float, viewport_height: float) -> str:
@@ -381,7 +381,7 @@ class LandingViewModel(QObject):
         # so existing QML call sites don't break.
         pass
 
-    # ── QML property ───────────────────────────────────────────────────────────
+    # -- QML property -----------------------------------------------------------
 
     @Property(int, notify=scrollDurationChanged)
     def scroll_duration_ms(self) -> int:

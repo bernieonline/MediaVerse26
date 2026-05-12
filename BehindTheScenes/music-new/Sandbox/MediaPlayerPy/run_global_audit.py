@@ -8,12 +8,12 @@ BASE_COLLECTION_PATH = r"W:\Collection"
 VIDEO_EXTS = {'.mp4', '.m2ts', '.ts', '.mkv', '.avi', '.mov', '.m4v', '.iso'}
 
 def run_global_audit():
-    print(f"\n🚀 STARTING GLOBAL MEDIAVERSE AUDIT")
+    print(f"\n[>>] STARTING GLOBAL MEDIAVERSE AUDIT")
     print(f"Comparing: {BASE_COLLECTION_PATH} vs {DNA_BANK_PATH}\n")
 
     # 1. Load the DNA Bank
     if not os.path.exists(DNA_BANK_PATH):
-        print(f"❌ ERROR: DNA Bank not found!")
+        print(f"[ERROR] ERROR: DNA Bank not found!")
         return
     with open(DNA_BANK_PATH, "r", encoding="utf-8") as f:
         collection = json.load(f)
@@ -48,7 +48,7 @@ def run_global_audit():
 
     # 3. PRINT SUMMARY REPORT
     print(f"{'='*60}")
-    print(f"📊 GLOBAL SUMMARY")
+    print(f" GLOBAL SUMMARY")
     print(f"{'='*60}")
     print(f"Total Videos on Drive:   {total_disk_count}")
     print(f"Total Records in JSON:   {len(db_set)}")
@@ -56,13 +56,13 @@ def run_global_audit():
     print(f"{'='*60}\n")
 
     if mismatch_report:
-        print("❌ DETAILED BREAKDOWN OF MISSING MOVIES:")
+        print("[ERROR] DETAILED BREAKDOWN OF MISSING MOVIES:")
         for folder, items in mismatch_report.items():
-            print(f"\n📂 {folder} ({len(items)} missing)")
+            print(f"\n[DIR] {folder} ({len(items)} missing)")
             for movie in sorted(items):
                 print(f"   - {movie}")
     else:
-        print("✅ CLEAN SWEEP: Every file on your drive is accounted for in the DNA Bank.")
+        print("[OK] CLEAN SWEEP: Every file on your drive is accounted for in the DNA Bank.")
 
 if __name__ == "__main__":
     run_global_audit()

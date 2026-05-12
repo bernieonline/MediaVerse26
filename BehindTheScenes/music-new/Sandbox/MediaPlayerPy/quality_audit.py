@@ -30,9 +30,9 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime
 from pathlib import Path
 
-# ──────────────────────────────────────────────────────────────────────────────
-# Configuration — edit these defaults to suit your setup
-# ──────────────────────────────────────────────────────────────────────────────
+# ------------------------------------------------------------------------------
+# Configuration -- edit these defaults to suit your setup
+# ------------------------------------------------------------------------------
 
 DEFAULT_SCAN_DIR    = r"W:\Collection"
 DEFAULT_THRESHOLD   = 25          # minimum score to flag a file
@@ -41,8 +41,8 @@ MAX_WORKERS         = 4           # parallel ffprobe processes
 
 
 def _resolve_ffprobe() -> str | None:
-    """Find ffprobe.exe — local tools folder first, then system PATH."""
-    # tools/ffmpeg/ sits at music-new level — two parents up from this file
+    """Find ffprobe.exe -- local tools folder first, then system PATH."""
+    # tools/ffmpeg/ sits at music-new level -- two parents up from this file
     # (this file is Sandbox/MediaPlayerPy/quality_audit.py)
     local = Path(__file__).resolve().parent.parent.parent / "tools" / "ffmpeg" / "ffprobe.exe"
     if local.exists():
@@ -54,26 +54,26 @@ FFPROBE_EXE = _resolve_ffprobe()    # resolved once at import time
 
 VIDEO_EXTENSIONS = {".mkv", ".mp4", ".avi", ".m2ts", ".ts", ".mov", ".wmv"}
 
-# Bitrate thresholds (Mbps) — codec-aware, since HEVC is ~2× more efficient
+# Bitrate thresholds (Mbps) -- codec-aware, since HEVC is ~2× more efficient
 BITRATE_THRESHOLDS = {
     "AVC":     {"low": 10.0, "very_low": 6.0},
     "HEVC":    {"low":  6.0, "very_low": 3.5},
     "default": {"low": 10.0, "very_low": 6.0},
 }
 
-# CRF thresholds — higher CRF = more lossy
+# CRF thresholds -- higher CRF = more lossy
 CRF_THRESHOLDS = {
-    "AVC":     20,   # x264 CRF ≥ 20 is notably lossy for 1080p
-    "HEVC":    24,   # x265 CRF ≥ 24 is notably lossy for 1080p
+    "AVC":     20,   # x264 CRF >= 20 is notably lossy for 1080p
+    "HEVC":    24,   # x265 CRF >= 24 is notably lossy for 1080p
     "default": 20,
 }
 
 # bits per pixel per frame: bpppf = bitrate_bps / (width × height × fps)
-# A genuine Blu-ray at 25 Mbps / 1080p@24fps ≈ 0.50; good encode ≈ 0.30
+# A genuine Blu-ray at 25 Mbps / 1080p@24fps  0.50; good encode  0.30
 BPPPF_LOW      = 0.12   # flag below this
 BPPPF_VERY_LOW = 0.08   # flag more severely below this
 
-# Standard cinema frame rates (fps) — multiplied to detect interpolation
+# Standard cinema frame rates (fps) -- multiplied to detect interpolation
 CINEMA_RATES = {23.976, 24.0, 25.0, 29.97}
 
 # Audio codecs considered lossless
@@ -82,17 +82,17 @@ LOSSLESS_AUDIO_FORMATS = {"TrueHD", "DTS-HD MA", "DTS-HD", "FLAC", "PCM"}
 # Audio codecs considered poor quality
 POOR_AUDIO_FORMATS = {"AAC", "AC-3", "MP3", "MP2", "WMA"}
 
-# ──────────────────────────────────────────────────────────────────────────────
-# ffprobe extraction  (replaces MediaInfo — works on network files)
-# ──────────────────────────────────────────────────────────────────────────────
+# ------------------------------------------------------------------------------
+# ffprobe extraction  (replaces MediaInfo -- works on network files)
+# ------------------------------------------------------------------------------
 
-# ffprobe codec_name → display label
+# ffprobe codec_name -> display label
 _CODEC_MAP = {
     "h264": "AVC", "hevc": "HEVC", "mpeg2video": "MPEG-2",
     "vc1": "VC-1", "vp9": "VP9", "av1": "AV1", "mpeg4": "MPEG-4",
 }
 
-# ffprobe audio codec_name → display label
+# ffprobe audio codec_name -> display label
 _AUDIO_MAP = {
     "truehd": "TrueHD", "ac3": "AC-3", "eac3": "E-AC-3",
     "aac": "AAC", "mp3": "MP3", "mp2": "MP2", "flac": "FLAC",
@@ -172,7 +172,7 @@ def get_ffprobe(filepath: Path) -> dict | None:
              "-print_format", "json",
              "-show_streams",
              "-show_format",
-             "-probesize", "5000000",   # read at most 5 MB — fast on network
+             "-probesize", "5000000",   # read at most 5 MB -- fast on network
              str(filepath)],
             capture_output=True,
             text=True,
@@ -199,11 +199,11 @@ def extract_info(filepath: Path, probe: dict) -> dict:
     vid   = video_streams[0] if video_streams else {}
     aud   = audio_streams[0] if audio_streams else {}
 
-    # ── Video dimensions ──
+    # -- Video dimensions --
     width  = _int(vid.get("width",  vid.get("coded_width",  0)))
     height = _int(vid.get("height", vid.get("coded_height", 0)))
 
-    # ── Frame rate ──
+    # -- Frame rate --
     # avg_frame_rate is the actual playback rate; r_frame_rate is the container rate
     avg_fps = _parse_fps(vid.get("avg_frame_rate", "0/1"))
     r_fps   = _parse_fps(vid.get("r_frame_rate",   "0/1"))
@@ -213,12 +213,12 @@ def extract_info(filepath: Path, probe: dict) -> dict:
     if avg_fps > 0 and r_fps > 0 and abs(r_fps - avg_fps) > 0.5:
         fps_original = r_fps
 
-    # ── Codec ──
+    # -- Codec --
     codec_name    = vid.get("codec_name", "")
     codec         = _CODEC_MAP.get(codec_name, codec_name.upper())
     codec_profile = vid.get("profile", "")
 
-    # ── Re-encode fingerprints ──
+    # -- Re-encode fingerprints --
     vid_tags  = vid.get("tags", {})
     fmt_tags  = fmt.get("tags", {})
     lib         = vid_tags.get("encoder", vid_tags.get("ENCODER", ""))
@@ -227,30 +227,30 @@ def extract_info(filepath: Path, probe: dict) -> dict:
                    vid_tags.get("encoder_options", ""))
     crf = _extract_crf(lib_settings)
 
-    # ── Scan type ──
+    # -- Scan type --
     field = vid.get("field_order", "progressive").lower()
     scan_type = "Progressive" if field in ("progressive", "unknown", "") else "Interlaced"
 
-    # ── Misc video ──
+    # -- Misc video --
     bit_depth    = _int(vid.get("bits_per_raw_sample", 8)) or 8
     colour_space = vid.get("pix_fmt", "")
 
-    # ── Bitrates ──
+    # -- Bitrates --
     bit_v   = _float(vid.get("bit_rate", 0))
     bit_gen = _float(fmt.get("bit_rate", 0))
     bitrate_bps  = bit_v if bit_v else bit_gen
     bitrate_mbps = bitrate_bps / 1_000_000
 
-    # ── Duration & size ──
+    # -- Duration & size --
     duration_s      = _float(fmt.get("duration", 0))
     file_size_bytes = _int(fmt.get("size", 0))
     file_size_gb    = file_size_bytes / (1024 ** 3)
 
-    # ── bpppf ──
+    # -- bpppf --
     bpppf = (bitrate_bps / (width * height * fps)
              if (width and height and fps) else 0.0)
 
-    # ── Audio ──
+    # -- Audio --
     audio_display_str  = _audio_display(aud) if aud else ""
     all_audio_formats  = [_audio_display(a) for a in audio_streams]
     audio_bitrate_bps  = _float(aud.get("bit_rate", 0))
@@ -284,9 +284,9 @@ def extract_info(filepath: Path, probe: dict) -> dict:
     }
 
 
-# ──────────────────────────────────────────────────────────────────────────────
+# ------------------------------------------------------------------------------
 # Scoring
-# ──────────────────────────────────────────────────────────────────────────────
+# ------------------------------------------------------------------------------
 
 def _fps_multiplier_check(fps: float) -> tuple[float | None, float | None]:
     """Check if fps is an exact ×2 or ×2.5 multiple of a standard cinema rate."""
@@ -307,13 +307,13 @@ def score_file(info: dict) -> tuple[int, list[str]]:
     fps_orig = info["fps_original"]
     codec    = info["codec"]
 
-    # ── Frame rate / interpolation ──────────────────────────────────────────
+    # -- Frame rate / interpolation ------------------------------------------
 
     if fps_orig and abs(fps_orig - fps) > 0.1:
         ratio = fps / fps_orig if fps_orig else 0
         issues.append(
             f"CONFIRMED FRAME-RATE CHANGE: source was {fps_orig:.3f} fps, "
-            f"stream is {fps:.3f} fps (×{ratio:.2f}) — almost certainly interpolated"
+            f"stream is {fps:.3f} fps (×{ratio:.2f}) -- almost certainly interpolated"
         )
         score += 50
 
@@ -322,7 +322,7 @@ def score_file(info: dict) -> tuple[int, list[str]]:
         if cinema_r is not None:
             issues.append(
                 f"SUSPECTED INTERPOLATION: {fps:.3f} fps is {mult:.1f}× the cinema "
-                f"rate {cinema_r} fps — likely artificially increased"
+                f"rate {cinema_r} fps -- likely artificially increased"
             )
             score += 30
         else:
@@ -332,7 +332,7 @@ def score_file(info: dict) -> tuple[int, list[str]]:
             )
             score += 12
 
-    # ── Re-encode detection ──────────────────────────────────────────────────
+    # -- Re-encode detection --------------------------------------------------
 
     if info["lib"]:
         lib_short = info["lib"].split()[0]
@@ -354,17 +354,17 @@ def score_file(info: dict) -> tuple[int, list[str]]:
         if crf >= crf_thresh:
             issues.append(
                 f"High CRF={crf:.0f} used during encode "
-                f"(threshold for {codec}: {crf_thresh} — above this is noticeably lossy)"
+                f"(threshold for {codec}: {crf_thresh} -- above this is noticeably lossy)"
             )
             score += 20
         else:
             issues.append(
-                f"CRF={crf:.0f} (below lossy threshold of {crf_thresh} — "
+                f"CRF={crf:.0f} (below lossy threshold of {crf_thresh} -- "
                 f"moderate quality encode)"
             )
             score += 5
 
-    # ── Bitrate analysis ─────────────────────────────────────────────────────
+    # -- Bitrate analysis -----------------------------------------------------
 
     bitrate = info["bitrate_mbps"]
     bt = BITRATE_THRESHOLDS.get(codec, BITRATE_THRESHOLDS["default"])
@@ -373,35 +373,35 @@ def score_file(info: dict) -> tuple[int, list[str]]:
         if bitrate < bt["very_low"]:
             issues.append(
                 f"Very low bitrate for {codec or 'video'}: {bitrate:.1f} Mbps "
-                f"(below {bt['very_low']} Mbps — significant compression artefacts likely)"
+                f"(below {bt['very_low']} Mbps -- significant compression artefacts likely)"
             )
             score += 25
         elif bitrate < bt["low"]:
             issues.append(
                 f"Low bitrate for {codec or 'video'}: {bitrate:.1f} Mbps "
-                f"(below {bt['low']} Mbps — quality may be compromised)"
+                f"(below {bt['low']} Mbps -- quality may be compromised)"
             )
             score += 10
 
-    # ── Bits per pixel per frame ──────────────────────────────────────────────
+    # -- Bits per pixel per frame ----------------------------------------------
 
     bpppf = info["bpppf"]
     if bpppf > 0:
         if bpppf < BPPPF_VERY_LOW:
             issues.append(
                 f"Very low bits/pixel/frame: {bpppf:.4f} "
-                f"(below {BPPPF_VERY_LOW} — little detail encoded per frame; "
-                f"a genuine Blu-ray remux is typically ≥ 0.30)"
+                f"(below {BPPPF_VERY_LOW} -- little detail encoded per frame; "
+                f"a genuine Blu-ray remux is typically >= 0.30)"
             )
             score += 25
         elif bpppf < BPPPF_LOW:
             issues.append(
                 f"Low bits/pixel/frame: {bpppf:.4f} "
-                f"(below {BPPPF_LOW} — detail per frame below expected for 1080p)"
+                f"(below {BPPPF_LOW} -- detail per frame below expected for 1080p)"
             )
             score += 10
 
-    # ── Audio quality ─────────────────────────────────────────────────────────
+    # -- Audio quality ---------------------------------------------------------
 
     all_formats = " ".join(info["all_audio_formats"]).lower()
     has_lossless = any(la.lower() in all_formats for la in LOSSLESS_AUDIO_FORMATS)
@@ -411,7 +411,7 @@ def score_file(info: dict) -> tuple[int, list[str]]:
         if has_poor:
             fmt_list = ", ".join(info["all_audio_formats"]) or info["audio_format"]
             issues.append(
-                f"Lossy audio only: {fmt_list} — lossless track (TrueHD, DTS-HD MA, "
+                f"Lossy audio only: {fmt_list} -- lossless track (TrueHD, DTS-HD MA, "
                 f"FLAC, PCM) absent, suggesting re-encoded or downgraded audio"
             )
             score += 15
@@ -427,11 +427,11 @@ def score_file(info: dict) -> tuple[int, list[str]]:
             issues.append(
                 f"Lossless audio format claimed but bitrate suspiciously low: "
                 f"{info['audio_bitrate_kbps']:.0f} kbps "
-                f"(genuine TrueHD/DTS-HD MA is typically 1500–5000 kbps)"
+                f"(genuine TrueHD/DTS-HD MA is typically 1500-5000 kbps)"
             )
             score += 15
 
-    # ── File size vs duration cross-check ─────────────────────────────────────
+    # -- File size vs duration cross-check -------------------------------------
 
     if info["duration_s"] > 60 and info["file_size_bytes"] > 0 and bitrate > 0:
         expected_bytes = (bitrate * 1_000_000 / 8) * info["duration_s"]
@@ -440,22 +440,22 @@ def score_file(info: dict) -> tuple[int, list[str]]:
             issues.append(
                 f"File size/bitrate mismatch: actual {info['file_size_gb']:.2f} GB "
                 f"vs expected ~{expected_bytes / (1024**3):.2f} GB from stated bitrate "
-                f"({ratio:.2f}× ratio — metadata may be unreliable)"
+                f"({ratio:.2f}× ratio -- metadata may be unreliable)"
             )
             score += 10
 
     return score, issues
 
 
-# ──────────────────────────────────────────────────────────────────────────────
+# ------------------------------------------------------------------------------
 # Directory scan
-# ──────────────────────────────────────────────────────────────────────────────
+# ------------------------------------------------------------------------------
 
 def is_1080p(info: dict) -> bool:
     """
     Accept 1080-class content.
-    1088 is the coded height of 1080i/p AVC — padded to a 16-line macroblock boundary.
-    1076–1080 covers slight crops (letterbox removal etc.).
+    1088 is the coded height of 1080i/p AVC -- padded to a 16-line macroblock boundary.
+    1076-1080 covers slight crops (letterbox removal etc.).
     """
     return 1076 <= info["height"] <= 1088
 
@@ -516,7 +516,7 @@ def scan_directory(
             if progress_callback is not None:
                 progress_callback(done, total)
             else:
-                print(f"  Processing {done}/{total}…", flush=True)
+                print(f"  Processing {done}/{total}...", flush=True)
 
             try:
                 result = future.result()
@@ -528,9 +528,9 @@ def scan_directory(
     return results, total, errors
 
 
-# ──────────────────────────────────────────────────────────────────────────────
+# ------------------------------------------------------------------------------
 # HTML report
-# ──────────────────────────────────────────────────────────────────────────────
+# ------------------------------------------------------------------------------
 
 def _severity_class(score: int) -> str:
     if score >= 60: return "critical"
@@ -548,7 +548,7 @@ def _severity_label(score: int) -> str:
 
 def _format_duration(secs: float) -> str:
     if secs <= 0:
-        return "—"
+        return "--"
     h = int(secs // 3600)
     m = int((secs % 3600) // 60)
     return f"{h}h {m:02d}m" if h else f"{m}m"
@@ -566,7 +566,7 @@ def _table_row(r: dict, highlight: bool = False) -> str:
     issues_html = "".join(
         f'<div class="issue-line">{iss}</div>'
         for iss in r["issues"]
-    ) if r["issues"] else "—"
+    ) if r["issues"] else "--"
 
     return (
         f'<tr class="row-{sc}{"  top-row" if highlight else ""}">'
@@ -575,7 +575,7 @@ def _table_row(r: dict, highlight: bool = False) -> str:
         f'<td class="num">{r["bitrate_mbps"]:.1f}</td>'
         f'<td class="num">{fps_cell}</td>'
         f'<td>{r["codec"]}</td>'
-        f'<td>{r["audio_format"] or "—"}</td>'
+        f'<td>{r["audio_format"] or "--"}</td>'
         f'<td class="num">{r["file_size_gb"]:.2f}</td>'
         f'<td class="num">{r["bpppf"]:.4f}</td>'
         f'<td class="score-cell score-{sc}">{r["score"]}<br>'
@@ -627,7 +627,7 @@ def generate_html_report(
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Video Quality Audit — {now}</title>
+<title>Video Quality Audit -- {now}</title>
 <style>
 :root {{
   --bg:        #0d0d0d;
@@ -744,7 +744,7 @@ thead th {{
   position: sticky; top: 0;
 }}
 thead th:hover {{ color: var(--text); }}
-thead th[data-sort]::after {{ content: " ↕"; opacity: .35; }}
+thead th[data-sort]::after {{ content: " |"; opacity: .35; }}
 td {{
   padding: 9px 13px;
   border-top: 1px solid var(--border);
@@ -814,9 +814,9 @@ small {{ color: var(--muted); font-size: 11px; }}
 <div class="cards">
   <div class="card c-total">   <div class="lbl">Files Scanned</div> <div class="val">{total_scanned}</div></div>
   <div class="card c-total">   <div class="lbl">1080p Files</div>   <div class="val">{total_1080p}</div></div>
-  <div class="card c-critical"><div class="lbl">Critical ≥60</div>  <div class="val">{bands['critical']}</div></div>
-  <div class="card c-high">    <div class="lbl">High 35–59</div>    <div class="val">{bands['high']}</div></div>
-  <div class="card c-medium">  <div class="lbl">Medium 20–34</div>  <div class="val">{bands['medium']}</div></div>
+  <div class="card c-critical"><div class="lbl">Critical >=60</div>  <div class="val">{bands['critical']}</div></div>
+  <div class="card c-high">    <div class="lbl">High 35-59</div>    <div class="val">{bands['high']}</div></div>
+  <div class="card c-medium">  <div class="lbl">Medium 20-34</div>  <div class="val">{bands['medium']}</div></div>
   <div class="card c-clean">   <div class="lbl">Clean &lt;{threshold}</div> <div class="val">{bands['clean']}</div></div>
 </div>
 
@@ -831,10 +831,10 @@ small {{ color: var(--muted); font-size: 11px; }}
 <div class="guide">
   <h3>Scoring Guide</h3>
   <table>
-    <tr><td><span class="legend-dot" style="background:var(--critical)"></span><strong style="color:var(--critical)">Critical ≥ 60</strong></td><td>Confirmed interpolation or catastrophic bitrate — replace immediately</td></tr>
-    <tr><td><span class="legend-dot" style="background:var(--high)"></span><strong style="color:var(--high)">High 35–59</strong></td><td>Likely genuinely degraded — worth re-ripping if disc is available</td></tr>
-    <tr><td><span class="legend-dot" style="background:var(--medium)"></span><strong style="color:var(--medium)">Medium 20–34</strong></td><td>One or more real concerns — investigate before sourcing a replacement</td></tr>
-    <tr><td><span class="legend-dot" style="background:var(--low)"></span><strong style="color:var(--low)">Low &lt; 20</strong></td><td>Minor concerns only — probably acceptable</td></tr>
+    <tr><td><span class="legend-dot" style="background:var(--critical)"></span><strong style="color:var(--critical)">Critical >= 60</strong></td><td>Confirmed interpolation or catastrophic bitrate -- replace immediately</td></tr>
+    <tr><td><span class="legend-dot" style="background:var(--high)"></span><strong style="color:var(--high)">High 35-59</strong></td><td>Likely genuinely degraded -- worth re-ripping if disc is available</td></tr>
+    <tr><td><span class="legend-dot" style="background:var(--medium)"></span><strong style="color:var(--medium)">Medium 20-34</strong></td><td>One or more real concerns -- investigate before sourcing a replacement</td></tr>
+    <tr><td><span class="legend-dot" style="background:var(--low)"></span><strong style="color:var(--low)">Low &lt; 20</strong></td><td>Minor concerns only -- probably acceptable</td></tr>
     <tr><td><span class="legend-dot" style="background:var(--clean)"></span><strong style="color:var(--clean)">Clean</strong></td><td>No significant issues detected at threshold {threshold}</td></tr>
   </table>
 </div>
@@ -851,18 +851,18 @@ small {{ color: var(--muted); font-size: 11px; }}
 </table>
 </div>
 
-<h2>All Flagged Files — {len(flagged)} file(s) with score ≥ {threshold}</h2>
+<h2>All Flagged Files -- {len(flagged)} file(s) with score >= {threshold}</h2>
 
 <div class="legend">
-  <span><span class="legend-dot" style="background:var(--critical)"></span>Critical ≥ 60</span>
-  <span><span class="legend-dot" style="background:var(--high)"></span>High 35–59</span>
-  <span><span class="legend-dot" style="background:var(--medium)"></span>Medium 20–34</span>
+  <span><span class="legend-dot" style="background:var(--critical)"></span>Critical >= 60</span>
+  <span><span class="legend-dot" style="background:var(--high)"></span>High 35-59</span>
+  <span><span class="legend-dot" style="background:var(--medium)"></span>Medium 20-34</span>
   <span><span class="legend-dot" style="background:var(--low)"></span>Low flagged</span>
 </div>
 
 <div class="filter-bar">
   <label for="fi">Filter:</label>
-  <input id="fi" type="text" placeholder="filename or issue keyword…" oninput="filterTable()">
+  <input id="fi" type="text" placeholder="filename or issue keyword..." oninput="filterTable()">
   <span id="filter-count"></span>
 </div>
 
@@ -922,9 +922,9 @@ function filterTable() {{
     output_path.write_text(html, encoding="utf-8")
 
 
-# ──────────────────────────────────────────────────────────────────────────────
+# ------------------------------------------------------------------------------
 # Entry point (CLI use)
-# ──────────────────────────────────────────────────────────────────────────────
+# ------------------------------------------------------------------------------
 
 def main() -> None:
     parser = argparse.ArgumentParser(
@@ -964,7 +964,7 @@ def main() -> None:
         sys.exit(1)
 
     print(f"Video Quality Audit")
-    print(f"{'─' * 50}")
+    print(f"{'-' * 50}")
     print(f"  Scan directory : {scan_dir}")
     print(f"  Score threshold: {threshold}")
     print(f"  Output file    : {output_path.resolve()}")
@@ -978,10 +978,10 @@ def main() -> None:
         key=lambda r: r["score"], reverse=True,
     )
 
-    print(f"{'─' * 50}")
+    print(f"{'-' * 50}")
     print(f"  Total video files : {total_scanned}")
     print(f"  1080p files       : {len(results)}")
-    print(f"  Flagged (≥ {threshold:2d})    : {len(flagged)}")
+    print(f"  Flagged (>= {threshold:2d})    : {len(flagged)}")
     if errors:
         print(f"  Errors            : {len(errors)}")
     print()
@@ -998,7 +998,7 @@ def main() -> None:
     print(f"  Report saved: {abs_path}")
 
     if not args.no_open:
-        print("  Opening in browser…")
+        print("  Opening in browser...")
         webbrowser.open(abs_path.as_uri())
 
 

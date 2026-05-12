@@ -10,7 +10,7 @@ from ai_controller import AIController
 from BackupSystem import BackupManager # Add this with your other imports
 
 # ------------------------------------------------------------
-# WIN32 HELPER — find JRiver window regardless of title suffix
+# WIN32 HELPER -- find JRiver window regardless of title suffix
 # ------------------------------------------------------------
 def _find_jriver_hwnd(user32):
     """Return the first top-level HWND whose title contains 'JRiver', or None."""
@@ -99,7 +99,7 @@ def main():
         # Core Logic Setup
         # --------------------------------------------------------
         myLibrary    = getLibraryList()
-        db_connection = create_db_connection()   # persistent — available for future modules
+        db_connection = create_db_connection()   # persistent -- available for future modules
         fileSystem   = FileSystem()
 
         # --- Backup System Setup ---
@@ -139,7 +139,7 @@ def main():
                             [jriver_exe, "/MediaCenter", "/Min", "/NoSplash"],
                             creationflags=subprocess.DETACHED_PROCESS
                         )
-                        # /Min is not always respected — hide JRiver the moment its window
+                        # /Min is not always respected -- hide JRiver the moment its window
                         # appears, then keep suppressing it for 5s in case it restores itself.
                         def _suppress_jriver_on_startup():
                             import time
@@ -150,7 +150,7 @@ def main():
                             while time.time() < deadline:
                                 hwnd = _find_jriver_hwnd(_user32)
                                 if hwnd:
-                                    _user32.ShowWindow(hwnd, 7)  # SW_SHOWMINNOACTIVE — taskbar, no focus steal
+                                    _user32.ShowWindow(hwnd, 7)  # SW_SHOWMINNOACTIVE -- taskbar, no focus steal
                                     if not suppressing:
                                         print("[STARTUP] JRiver minimised to taskbar.")
                                         suppressing = True
@@ -200,7 +200,7 @@ def main():
 
         def handle_qml_error(warnings):
             for warning in warnings:
-                print(f"❌ QML ERROR: {warning.toString()}")
+                print(f"[ERROR] QML ERROR: {warning.toString()}")
 
         engine.warnings.connect(handle_qml_error)
 
@@ -229,7 +229,7 @@ def main():
 
         ai_controller = AIController(api_key=gemini_key)
         
-        # Determine startup mode from Config.json → "Tiles" or "Splash"
+        # Determine startup mode from Config.json -> "Tiles" or "Splash"
         _startup_mode = "Tiles"
         try:
             with open(paths["config"], "r", encoding="utf-8") as _f:
@@ -245,7 +245,7 @@ def main():
         ctx.setContextProperty("playbackRouter", router)
         ctx.setContextProperty("splashLayout", generate_splash_layout())
 
-        # ── Workbench cinematic backdrop ──────────────────────────────────────
+        # -- Workbench cinematic backdrop --------------------------------------
         try:
             with open(paths["splash_json"], "r", encoding="utf-8") as _f:
                 _wb_entries = json.load(_f)
@@ -339,7 +339,7 @@ def main():
         root = engine.rootObjects()[0]
         router.launchMiniPlayer.connect(root.openMiniPlayer)
 
-        # Background Manifest Work — server check + startup delegated to ManifestUpdater_v2
+        # Background Manifest Work -- server check + startup delegated to ManifestUpdater_v2
         def start_manifest_work():
             manifest_updater.retry_server_check()
 
@@ -355,7 +355,7 @@ def main():
 
         exit_code = app.exec()
 
-        # Safety timer — if non-daemon background threads (e.g. MySQL pool) stall
+        # Safety timer -- if non-daemon background threads (e.g. MySQL pool) stall
         # Python's normal exit, os._exit() fires after 2 s to force termination.
         # Being daemon, it is killed silently if Python exits normally first.
         _t = threading.Timer(2.0, lambda: os._exit(exit_code))

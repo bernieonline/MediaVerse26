@@ -32,7 +32,7 @@ def main():
     manifest_file = Path(MANIFEST_PATH)
     if not manifest_file.exists():
         print(f"ERROR: Manifest not found at {MANIFEST_PATH}")
-        notifier.post_notification("Manifest not found — cannot build cache", True)
+        notifier.post_notification("Manifest not found -- cannot build cache", True)
         return
 
     with open(manifest_file, "r") as f:
@@ -46,7 +46,7 @@ def main():
     # Optional: connect signals to print progress
     builder.cacheStarted.connect(lambda: print(">>> Cache build started"))
     builder.cacheProgress.connect(lambda d, t: print(f">>> Progress: {d}/{t}"))
-    builder.cacheFinished.connect(lambda result: print(f">>> Cache build finished — {result}"))
+    builder.cacheFinished.connect(lambda result: print(f">>> Cache build finished -- {result}"))
 
     # Run builder
     builder.run()

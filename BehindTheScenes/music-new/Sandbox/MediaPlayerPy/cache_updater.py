@@ -45,7 +45,7 @@ def ensure_cache(img_path: Path):
                 im.save(display_out, "JPEG", quality=90)
 
     except Exception as e:
-        print(f"⚠️ Skipped {img_path}: {e}")
+        print(f"[WARN] Skipped {img_path}: {e}")
 
 def update_cache():
     """Scan NAS and update cache."""
@@ -53,7 +53,7 @@ def update_cache():
     for ext in ("*.jpg", "*.jpeg"):
         for img_path in nas_root.glob(f"**/{ext}"):
             ensure_cache(img_path)
-    print("✅ Cache ready! Images will now load instantly.")
+    print("[OK] Cache ready! Images will now load instantly.")
 
 if __name__ == "__main__":
     update_cache()

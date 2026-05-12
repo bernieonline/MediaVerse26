@@ -21,7 +21,7 @@ try:
         user=os.getenv("MM2_USER"),
         password=os.getenv("MM2_PASSWORD"),
         connect_timeout=5,
-        # No database= — CREATE DATABASE runs first
+        # No database= -- CREATE DATABASE runs first
     )
     cur = conn.cursor()
     for stmt in sql.split(";"):

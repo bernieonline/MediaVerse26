@@ -128,14 +128,14 @@ class CarouselViewWidget(QWidget):
         """Creates the clickable QLabel objects for navigation."""
         
         # Left Arrow Placeholder
-        self.btn_left = QLabel("◀", self)
+        self.btn_left = QLabel("<", self)
         self.btn_left.setAlignment(Qt.AlignCenter)
         self.btn_left.setStyleSheet("background-color: rgba(0, 0, 0, 150); color: white; border-radius: 10px; padding: 10px; font-size: 24pt;")
         self.btn_left.setFixedSize(QSize(50, 80))
         self.btn_left.setVisible(False)
         
         # Right Arrow Placeholder
-        self.btn_right = QLabel("▶", self)
+        self.btn_right = QLabel(">", self)
         self.btn_right.setAlignment(Qt.AlignCenter)
         self.btn_right.setStyleSheet("background-color: rgba(0, 0, 0, 150); color: white; border-radius: 10px; padding: 10px; font-size: 24pt;")
         self.btn_right.setFixedSize(QSize(50, 80))

@@ -110,18 +110,18 @@ class ArchitectController(QObject):
                     # Auto-sync the disk if we had to inject the safety net
                     safe_json_write(paths["categories"], self._categories)
 
-                print(f"🚀 [ARCHITECT] Registry Loaded: {len(self._categories)} items")
+                print(f"[>>] [ARCHITECT] Registry Loaded: {len(self._categories)} items")
                 # PySide6 uses .emit() just like PyQt5
                 self.categoriesChanged.emit()
                 
             else:
-                print(f"⚠️ [ARCHITECT] Registry file not found at {category_path}")
+                print(f"[WARN] [ARCHITECT] Registry file not found at {category_path}")
                 # Fallback initialization
                 self._categories = [{"key": "unassigned", "label": "UNASSIGNED", "locked": True}]
                 self.categoriesChanged.emit()
 
         except Exception as e:
-            print(f"❌ [ARCHITECT] Registry Load Error: {e}")
+            print(f"[ERROR] [ARCHITECT] Registry Load Error: {e}")
     
     
     @Slot(result=list)
@@ -147,7 +147,7 @@ class ArchitectController(QObject):
             else:
                 final_paths.append(item)
 
-        print(f"🎬 [CONTROLLER]: Exporting {len(final_paths)} full paths to QML.")
+        print(f"[MOVIE] [CONTROLLER]: Exporting {len(final_paths)} full paths to QML.")
         return final_paths
     
    
@@ -160,7 +160,7 @@ class ArchitectController(QObject):
     def get_bookshelf_list(self):
         """Standard Slot to return the current spine data to QML."""
         # This print will show up in your terminal whenever the HUD refreshes
-        print(f"📦 [PYTHON] Handing {len(self._bookshelfList)} spines to HUD.")
+        print(f"[PKG] [PYTHON] Handing {len(self._bookshelfList)} spines to HUD.")
         return self._bookshelfList
    
     @Slot(int, str)
@@ -182,8 +182,8 @@ class ArchitectController(QObject):
         self.panels[panel_index]["movies"] = movies
 
         # 4. Print for verification
-        print(f"\n🎬 Panel {panel_index} — Folder Mode: {folder_name}")
-        print(f"📄 {len(movies)} movies found:")
+        print(f"\n[MOVIE] Panel {panel_index} -- Folder Mode: {folder_name}")
+        print(f" {len(movies)} movies found:")
         for m in movies:
             print("   ", m["Filename"])
 
@@ -206,7 +206,7 @@ class ArchitectController(QObject):
         """
 
         if not folder_path:
-            print("⚠ list_folder_content_v2 called with empty path")
+            print("[WARN] list_folder_content_v2 called with empty path")
             self.images_listed.emit([])
             return
 
@@ -216,7 +216,7 @@ class ArchitectController(QObject):
         # Convert to file:/// URL for the FileSystem
         url = "file:///" + full_path.replace("\\", "/")
 
-        print(f"🔗 Controller forwarding to FileSystem.list_folder_content_v2: {url}")
+        print(f"[LINK] Controller forwarding to FileSystem.list_folder_content_v2: {url}")
 
         # Call the FileSystem V2 function
         self.file_system.list_folder_content_v2(url)
@@ -234,17 +234,17 @@ class ArchitectController(QObject):
         """Scan the actual filesystem and list ONLY movie files inside the selected folder."""
 
         if not folder_path:
-            print("⚠ No folder path provided.")
+            print("[WARN] No folder path provided.")
             self.resultsCounted.emit(panel_index, 0)
             return
 
         base_path = "W:\\Collection\\"
         full_path = os.path.join(base_path, folder_path.replace("/", "\\"))
 
-        print(f"📁 Scanning folder: {full_path}")
+        print(f"[DIR] Scanning folder: {full_path}")
 
         if not os.path.exists(full_path):
-            print("❌ Folder does not exist:", full_path)
+            print("[ERROR] Folder does not exist:", full_path)
             self.resultsCounted.emit(panel_index, 0)
             return
 
@@ -255,7 +255,7 @@ class ArchitectController(QObject):
             and os.path.splitext(f)[1].lower() in self.VIDEO_EXTS
         ]
 
-        #print(f"🎬 Movie files found ({len(files)}):")
+        #print(f"[MOVIE] Movie files found ({len(files)}):")
         #for f in files:
             #print("   ", f)
 
@@ -271,7 +271,7 @@ class ArchitectController(QObject):
         """Filter movies by category/value pair, including decade logic and stripped paths."""
         import os  # Ensure os is imported at the top of your file
 
-        print(f"\n🎬 Panel {panel_index} — Category Mode: {category} = {value}")
+        print(f"\n[MOVIE] Panel {panel_index} -- Category Mode: {category} = {value}")
         movies = []
 
         mapping = {
@@ -284,7 +284,7 @@ class ArchitectController(QObject):
 
         # --- 1. FILTERING LOGIC (Preserved) ---
         if category == "Decade":
-            decade = value[:-1]  # "1950s" → "1950"
+            decade = value[:-1]  # "1950s" -> "1950"
             for item in self.collection:
                 if item.get("Media Sub Type") == "TV Show": continue
                 year = item.get("Year")
@@ -309,7 +309,7 @@ class ArchitectController(QObject):
         # Note: Storing full records in 'movies' for logic, but we send 'leafs' to QML
         self.panels[panel_index]["movies"] = movies
 
-        print(f"📄 {len(movies)} movies found for {category}: {value}")
+        print(f" {len(movies)} movies found for {category}: {value}")
 
         # --- 3. EMIT SIGNALS TO QML (With the Strip Join) ---
         self.resultsCounted.emit(panel_index, len(movies))
@@ -330,9 +330,9 @@ class ArchitectController(QObject):
         # Send to ArchitectHUD to open the popup
         if hasattr(self, 'onMovieListReady'):
             self.onMovieListReady.emit(panel_index, mapped_results, display_label)
-            print(f"🚀 Sent {len(mapped_results)} stripped filenames to HUD.")
+            print(f"[>>] Sent {len(mapped_results)} stripped filenames to HUD.")
         else:
-            print("⚠ Signal 'onMovieListReady' not found.")
+            print("[WARN] Signal 'onMovieListReady' not found.")
 
     @Slot(str, str, result=list)
     def get_filtered_keywords(self, category, filter_text):
@@ -352,7 +352,7 @@ class ArchitectController(QObject):
 
             for movie in self.collection:
 
-                # ⭐ FIX: Skip TV shows in the cloud
+                # [STAR] FIX: Skip TV shows in the cloud
                 if movie.get("Media Sub Type") == "TV Show":
                     continue
 
@@ -390,7 +390,7 @@ class ArchitectController(QObject):
         # 3. Tell the bookshelf spines to refresh (which will now be empty)
         self.bookshelfListChanged.emit()
         
-        print("🧹 Python: Logic reset and signals broadcasted.")
+        print("[CLEAN] Python: Logic reset and signals broadcasted.")
     @Slot(str)
     def search_library(self, text):
         """Search movie names only, skip TV shows, dedupe by name."""
@@ -472,25 +472,25 @@ class ArchitectController(QObject):
 
             # Send the clean list back to the HUD
             self.onMovieListReady.emit(panel_index, matches, criteria_str)
-            print(f"📦 Joint Complete: Sent {len(matches)} stripped filenames to HUD.")
+            print(f"[PKG] Joint Complete: Sent {len(matches)} stripped filenames to HUD.")
 
         except Exception as e:
-            print(f"❌ Error in Generate List Join: {e}")
+            print(f"[ERROR] Error in Generate List Join: {e}")
 
     @Slot(int, str)
     def process_commit(self, panel_index, snippet_json):
-        print(f"🆔 DEBUG: Controller ID {id(self)} is processing Panel {panel_index}")
+        print(f"[ID] DEBUG: Controller ID {id(self)} is processing Panel {panel_index}")
 
         try:
             # 1. PARSE THE INCOMING DNA
             snippet = json.loads(snippet_json)
             
             # 2. LOG THE EVENT
-            #print(f"\n📂📂📂📂📂📂📂📂📂📂📂📂📂📂📂")
+            #print(f"\n[DIR][DIR][DIR][DIR][DIR][DIR][DIR][DIR][DIR][DIR][DIR][DIR][DIR][DIR][DIR]")
             #print(f"   PANEL {panel_index} RULE COMMITTED")
-            #print(f"——————————————————————————————")
+            #print(f"------------------------------------------------------------")
             #print(json.dumps(snippet, indent=4))
-            #print(f"——————————————————————————————")
+            #print(f"------------------------------------------------------------")
 
             # 3. EXTRACT AND NORMALIZE DETAILS
             mode = snippet.get("mode", "")
@@ -559,7 +559,7 @@ class ArchitectController(QObject):
                 current_ids = [os.path.basename(f) for f in file_list if f]
 
             # --- THE SURGICAL CHECK ---
-            #print(f"\n🧪 --- NORMALIZATION CHECK (Panel {panel_index}) ---")
+            #print(f"\n --- NORMALIZATION CHECK (Panel {panel_index}) ---")
             #print(f"Panel Selection Found: {len(current_ids)} items")
             
             # 4. PERFORM THE MATH (THE LOGIC ENGINE)
@@ -577,7 +577,7 @@ class ArchitectController(QObject):
                 self._current_ids = current_ids
 
             # 5. EMIT SIGNALS BACK TO HUD
-            print(f"📊 RESULT: Bookshelf now contains {new_total} items.")
+            print(f" RESULT: Bookshelf now contains {new_total} items.")
             self.countChanged.emit(new_total)
             
             # Refresh the bookshelf list in the HUD (the "spines")
@@ -587,14 +587,14 @@ class ArchitectController(QObject):
             sys.stdout.flush()
 
         except Exception as e:
-            print(f"❌ Error in process_commit: {e}")
+            print(f"[ERROR] Error in process_commit: {e}")
             import traceback
             traceback.print_exc()
 
     @Slot(int)
     def handle_shelf_request(self, panel_index):
         # self._current_ids was saved during the 'process_commit'
-        print(f"📚 [SHELF] Baking spines for {len(self._current_ids)} items...")
+        print(f" [SHELF] Baking spines for {len(self._current_ids)} items...")
         
         new_spines = []
         for path in self._current_ids:
@@ -615,7 +615,7 @@ class ArchitectController(QObject):
         self._bookshelfList = new_spines
         self.bookshelfListChanged.emit()
         
-        print(f"✅ [SHELF] {len(new_spines)} spines ready in warehouse.")
+        print(f"[OK] [SHELF] {len(new_spines)} spines ready in warehouse.")
 
 
     @Slot(str)
@@ -653,10 +653,10 @@ class ArchitectController(QObject):
 
             safe_json_write(target_path, collections_db)
 
-            print(f"✅ [DYNAMIC SAVE]: '{new_name}' recorded in category '{final_entry['category']}'.")
+            print(f"[OK] [DYNAMIC SAVE]: '{new_name}' recorded in category '{final_entry['category']}'.")
 
         except Exception as e:
-            print(f"❌ [SAVE ERROR]: {e}")
+            print(f"[ERROR] [SAVE ERROR]: {e}")
 
 
     @Slot(result=list)
@@ -676,11 +676,11 @@ class ArchitectController(QObject):
                     if cat and cat not in ["Keywords", "unassigned", ""]:
                         harvested.add(cat)
         except Exception as e:
-            print(f"⚠️ [CATEOGRY HARVEST ERROR]: {e}")
+            print(f"[WARN] [CATEOGRY HARVEST ERROR]: {e}")
 
         # 2. Return as a sorted list for the ComboBox
         final_list = sorted(list(harvested))
-        print(f"📊 [ARCHITECT] Refreshed {len(final_list)} categories for the UI.")
+        print(f" [ARCHITECT] Refreshed {len(final_list)} categories for the UI.")
         return final_list
     
     @Property(list, notify=categoryModelChanged)
@@ -713,17 +713,17 @@ class ArchitectController(QObject):
                         })
                         existing_keys.add(cat)
         except Exception as e:
-            print(f"❌ [REGISTRY REFRESH ERROR]: {e}")
+            print(f"[ERROR] [REGISTRY REFRESH ERROR]: {e}")
 
         return registry
 
-    # ── Gallery category / collection menu ───────────────────────────────────
+    # -- Gallery category / collection menu -----------------------------------
 
     collectionsForCategoryReady = Signal(list)
 
     @Property("QVariantList", notify=categoryModelChanged)
     def galleryCategoryModel(self):
-        """Unique category values from Architect records only — pure JSON, no defaults."""
+        """Unique category values from Architect records only -- pure JSON, no defaults."""
         try:
             collections = safe_json_read(movies_coll_v2, "collections")
             cats = sorted(set(
@@ -731,10 +731,10 @@ class ArchitectController(QObject):
                 for item in collections
                 if item.get("type") == "Architect" and item.get("category")
             ))
-            print(f"📋 [galleryCategoryModel] {len(cats)} categories: {cats}")
+            print(f"[LIST] [galleryCategoryModel] {len(cats)} categories: {cats}")
             return [{"key": c, "label": c} for c in cats]
         except Exception as e:
-            print(f"❌ [galleryCategoryModel] Error: {e}")
+            print(f"[ERROR] [galleryCategoryModel] Error: {e}")
         return []
 
     @Slot(str)
@@ -749,14 +749,14 @@ class ArchitectController(QObject):
                 and item.get("category") == category
                 and item.get("name")
             )
-            print(f"📋 [getCollectionsForCategory] '{category}' → {len(names)} collections")
+            print(f"[LIST] [getCollectionsForCategory] '{category}' -> {len(names)} collections")
             self.collectionsForCategoryReady.emit([{"name": n} for n in names])
             return
         except Exception as e:
-            print(f"❌ [getCollectionsForCategory] Error: {e}")
+            print(f"[ERROR] [getCollectionsForCategory] Error: {e}")
         self.collectionsForCategoryReady.emit([])
 
-    # ── Collection rule resolver ──────────────────────────────────────────────
+    # -- Collection rule resolver ----------------------------------------------
 
     def _generate_panel_list(self, rule):
         """Return a list of filename basenames for a single panel rule."""
@@ -829,7 +829,7 @@ class ArchitectController(QObject):
             ids       = self._generate_panel_list(rule)
             engine.apply_logic(panel_idx, ids, gate, checked)
             print(f"  Panel {panel_idx} [{rule.get('mode')}] "
-                  f"gate={gate} checked={checked} → "
+                  f"gate={gate} checked={checked} -> "
                   f"{len(ids)} movies | foundation now {len(engine.get_current_result())}")
         return engine.get_current_result()
 
@@ -842,7 +842,7 @@ class ArchitectController(QObject):
         try:
             collections = safe_json_read(movies_coll_v2, "collections")
             if not collections:
-                print("❌ [RESOLVE] Collections file not found or empty")
+                print("[ERROR] [RESOLVE] Collections file not found or empty")
                 return
 
             record = next(
@@ -851,15 +851,15 @@ class ArchitectController(QObject):
                 None
             )
             if not record:
-                print(f"❌ [RESOLVE] '{collection_name}' not found")
+                print(f"[ERROR] [RESOLVE] '{collection_name}' not found")
                 return
 
-            print(f"\n🎬 [RESOLVE] '{collection_name}' — {len(record.get('rules', []))} panel(s)")
+            print(f"\n[MOVIE] [RESOLVE] '{collection_name}' -- {len(record.get('rules', []))} panel(s)")
             final = self._resolve_collection_rules(record.get("rules", []))
-            print(f"\n✅ [RESOLVE] Final list: {len(final)} movies")
+            print(f"\n[OK] [RESOLVE] Final list: {len(final)} movies")
 
             cache_root    = paths.get("local_display_v2")
-            print(f"🗂️  Cache path: {cache_root}")
+            print(f"  Cache path: {cache_root}")
             found_images  = []
             missing_cache = []
             for basename in final:
@@ -869,16 +869,16 @@ class ArchitectController(QObject):
                     found_images.append(img.as_uri())
                 else:
                     missing_cache.append(stem)
-                    print(f"⚠️  Missing — looked for: {img}")
+                    print(f"[WARN]  Missing -- looked for: {img}")
 
-            print(f"🖼️  Images in cache : {len(found_images)}")
+            print(f"  Images in cache : {len(found_images)}")
             if missing_cache:
-                print(f"⚠️  Missing from cache ({len(missing_cache)}): {missing_cache}")
+                print(f"[WARN]  Missing from cache ({len(missing_cache)}): {missing_cache}")
             for i, uri in enumerate(found_images[:10]):
                 print(f"   [{i+1}] {Path(uri).name}")
 
         except Exception as e:
-            print(f"❌ [RESOLVE] Error: {e}")
+            print(f"[ERROR] [RESOLVE] Error: {e}")
             import traceback
             traceback.print_exc()
 
@@ -897,7 +897,7 @@ class ArchitectController(QObject):
         try:
             collections = safe_json_read(movies_coll_v2, "collections")
             if not collections:
-                print("❌ [GRID] Collections file not found or empty")
+                print("[ERROR] [GRID] Collections file not found or empty")
                 self.collectionMoviesReady.emit([])
                 return
 
@@ -907,7 +907,7 @@ class ArchitectController(QObject):
                 None
             )
             if not record:
-                print(f"❌ [GRID] '{collection_name}' not found")
+                print(f"[ERROR] [GRID] '{collection_name}' not found")
                 self.collectionMoviesReady.emit([])
                 return
 
@@ -915,9 +915,9 @@ class ArchitectController(QObject):
             self.collectionFavoriteState.emit(bool(record.get("favorite", False)))
             self.collectionImagePathReady.emit(str(record.get("imagePath", "None")))
 
-            print(f"\n🎬 [GRID] Resolving '{collection_name}'...")
+            print(f"\n[MOVIE] [GRID] Resolving '{collection_name}'...")
             final_basenames = self._resolve_collection_rules(record.get("rules", []))
-            print(f"✅ [GRID] {len(final_basenames)} movies resolved")
+            print(f"[OK] [GRID] {len(final_basenames)} movies resolved")
 
             cache_root = Path(paths.get("local_display_v2"))
             movies = []
@@ -936,13 +936,13 @@ class ArchitectController(QObject):
                 })
 
             found = sum(1 for mv in movies if mv["imageUri"])
-            print(f"🖼️  [GRID] {found}/{len(movies)} images found in cache")
+            print(f"  [GRID] {found}/{len(movies)} images found in cache")
             for mv in movies:
-                print(f"   {'✅' if mv['imageUri'] else '⚠️ '} {mv['title']} ({mv['year']})")
+                print(f"   {'[OK]' if mv['imageUri'] else '[WARN] '} {mv['title']} ({mv['year']})")
             self.collectionMoviesReady.emit(movies)
 
         except Exception as e:
-            print(f"❌ [GRID] Error: {e}")
+            print(f"[ERROR] [GRID] Error: {e}")
             import traceback
             traceback.print_exc()
             self.collectionMoviesReady.emit([])
@@ -951,7 +951,7 @@ class ArchitectController(QObject):
     def getCollectionImage(self, collection_name):
         """
         Finds the Architect collection by name and emits its splash image as a
-        file URI.  Emits "" if imagePath is absent or "None" — the QML will
+        file URI.  Emits "" if imagePath is absent or "None" -- the QML will
         handle that case later (animated scatter from rules).
         """
         try:
@@ -973,16 +973,16 @@ class ArchitectController(QObject):
                             if splash_dir:
                                 p = Path(splash_dir) / p.name
                         if p.exists():
-                            print(f"🖼️  [getCollectionImage] '{collection_name}' → {p}")
+                            print(f"  [getCollectionImage] '{collection_name}' -> {p}")
                             self.collectionImageReady.emit(p.as_uri())
                             return
-                    # imagePath is "None" or file missing — deferred to scatter mode
-                    print(f"ℹ️  [getCollectionImage] '{collection_name}' has no splash image (deferred)")
+                    # imagePath is "None" or file missing -- deferred to scatter mode
+                    print(f"[i]  [getCollectionImage] '{collection_name}' has no splash image (deferred)")
                     self.collectionImageReady.emit("")
                     return
 
         except Exception as e:
-            print(f"❌ [getCollectionImage] Error: {e}")
+            print(f"[ERROR] [getCollectionImage] Error: {e}")
         self.collectionImageReady.emit("")
 
     @Slot()
@@ -1007,11 +1007,11 @@ class ArchitectController(QObject):
 
             if changes_made > 0:
                 safe_json_write(target_path, data)
-                print(f"✅ Backflushed {changes_made} collections to new category: {new_name}")
+                print(f"[OK] Backflushed {changes_made} collections to new category: {new_name}")
                 self.categoryModelChanged.emit() # Refresh the UI list
                 return True
         except Exception as e:
-            print(f"❌ Rename Failed: {e}")
+            print(f"[ERROR] Rename Failed: {e}")
         return False
 
     @Slot(str)
@@ -1019,7 +1019,7 @@ class ArchitectController(QObject):
         """Replaces category with 'Unassigned' for all matching Architect collections."""
         return self.rename_category_global(category_to_remove, "Unassigned")
 
-    # ── Per-collection edit actions ───────────────────────────────────────────
+    # -- Per-collection edit actions -------------------------------------------
 
     @Slot(str)
     def toggle_favorite_architect(self, collection_name):
@@ -1032,11 +1032,11 @@ class ArchitectController(QObject):
             for item in data:
                 if item.get("type") == "Architect" and item.get("name") == collection_name:
                     item["favorite"] = not bool(item.get("favorite", False))
-                    print(f"⭐ [FAVORITE] '{collection_name}' → {item['favorite']}")
+                    print(f"[STAR] [FAVORITE] '{collection_name}' -> {item['favorite']}")
                     break
             safe_json_write(target_path, data)
         except Exception as e:
-            print(f"❌ [toggle_favorite_architect] Error: {e}")
+            print(f"[ERROR] [toggle_favorite_architect] Error: {e}")
 
     @Slot(str)
     def delete_architect_collection(self, collection_name):
@@ -1053,10 +1053,10 @@ class ArchitectController(QObject):
             ]
             if len(data) < before:
                 safe_json_write(target_path, data)
-                print(f"🗑️  [DELETE] '{collection_name}' removed from collections.")
+                print(f"[DEL]  [DELETE] '{collection_name}' removed from collections.")
                 self.categoryModelChanged.emit()
         except Exception as e:
-            print(f"❌ [delete_architect_collection] Error: {e}")
+            print(f"[ERROR] [delete_architect_collection] Error: {e}")
 
     @Slot(str, str)
     def rename_architect_collection(self, old_name, new_name):
@@ -1069,12 +1069,12 @@ class ArchitectController(QObject):
             for item in data:
                 if item.get("type") == "Architect" and item.get("name") == old_name:
                     item["name"] = new_name
-                    print(f"✏️  [RENAME] '{old_name}' → '{new_name}'")
+                    print(f"[EDIT]  [RENAME] '{old_name}' -> '{new_name}'")
                     break
             safe_json_write(target_path, data)
             self.categoryModelChanged.emit()
         except Exception as e:
-            print(f"❌ [rename_architect_collection] Error: {e}")
+            print(f"[ERROR] [rename_architect_collection] Error: {e}")
 
     @Slot(str, str)
     def update_collection_image(self, collection_name, filename):
@@ -1087,9 +1087,9 @@ class ArchitectController(QObject):
             for item in data:
                 if item.get("type") == "Architect" and item.get("name") == collection_name:
                     item["imagePath"] = filename
-                    print(f"🖼️  [IMAGE] '{collection_name}' → '{filename}'")
+                    print(f"  [IMAGE] '{collection_name}' -> '{filename}'")
                     break
             safe_json_write(target_path, data)
             self.collectionImagePathReady.emit(filename)
         except Exception as e:
-            print(f"❌ [update_collection_image] Error: {e}")
+            print(f"[ERROR] [update_collection_image] Error: {e}")

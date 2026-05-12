@@ -1,9 +1,9 @@
 """
-design_preview_fan.py — Fan Card Preview
+design_preview_fan.py -- Fan Card Preview
 Standalone design tool: fan cards inside an accurate Framework-1.qml frame.
 
   Background  : dvds.jpg shelf photo + black veil 0.45 (CategoryMenu style, no blur)
-  Card panels : CollectionsGallery cardRect — #1A1A1A, radius 20, blue border on hover
+  Card panels : CollectionsGallery cardRect -- #1A1A1A, radius 20, blue border on hover
   No outer group panel.
   5 cols × 2 rows, 4 fan posters per card.
 
@@ -15,7 +15,7 @@ import sys
 from pathlib import Path
 
 SCRIPT_DIR    = Path(__file__).parent
-PROJECT_ROOT  = SCRIPT_DIR.parent.parent          # …/music-new
+PROJECT_ROOT  = SCRIPT_DIR.parent.parent          # .../music-new
 DISPLAY_CACHE = PROJECT_ROOT / "cacheV2" / "images" / "display"
 SHELF_BG      = PROJECT_ROOT / "Assets" / "Splash" / "dvds.jpg"
 
@@ -43,7 +43,7 @@ if not SHELF_BG.exists():
     print(f"WARNING: background image not found: {SHELF_BG}")
 bg_uri = SHELF_BG.as_uri() if SHELF_BG.exists() else ""
 
-# ── QML ───────────────────────────────────────────────────────────────────────
+# -- QML -----------------------------------------------------------------------
 QML = """
 import QtQuick 2.15
 import QtQuick.Controls 2.15
@@ -55,18 +55,18 @@ ApplicationWindow {
     visible: true
     title: "Fan Card Preview"
 
-    // ── Full-screen dark base ─────────────────────────────────────────────────
+    // -- Full-screen dark base -------------------------------------------------
     Rectangle { anchors.fill: parent; color: "#111111" }
 
-    // ── Simulated Framework-1.qml top bar ────────────────────────────────────
+    // -- Simulated Framework-1.qml top bar ------------------------------------
     Rectangle {
         anchors.top: parent.top; anchors.left: parent.left; anchors.right: parent.right
         height: parent.height * 0.18; color: "transparent"
-        Text { anchors.centerIn: parent; text: "[ RowButton bar  ·  Search  ]"
+        Text { anchors.centerIn: parent; text: "[ RowButton bar  .  Search  ]"
                color: "#2A2A2A"; font.pixelSize: 18 }
     }
 
-    // ── Content frame — Framework-1.qml proportions + blue border ────────────
+    // -- Content frame -- Framework-1.qml proportions + blue border ------------
     Rectangle {
         id: contentFrame
         anchors.top:          parent.top;    anchors.topMargin:    parent.height * 0.18
@@ -77,7 +77,7 @@ ApplicationWindow {
         border.color: "#2566c2"; border.width: 2
         clip: true
 
-        // ── dvds.jpg background — CategoryMenu style: image + dark veil, no blur ──
+        // -- dvds.jpg background -- CategoryMenu style: image + dark veil, no blur --
         Image {
             anchors.fill: parent
             source: bgImageUri
@@ -88,7 +88,7 @@ ApplicationWindow {
             color: "black"; opacity: 0.45
         }
 
-        // ── Card grid — no outer container panel ─────────────────────────────
+        // -- Card grid -- no outer container panel -----------------------------
         Item {
             id: cardArea
             anchors.centerIn: parent
@@ -122,7 +122,7 @@ ApplicationWindow {
                     x: (ci % cardArea.cols) * (cardArea.cardW + cardArea.gap)
                     y: Math.floor(ci / cardArea.cols) * (cardArea.cardH + cardArea.gap)
 
-                    // ── DropShadow — gold glow on hover ──────────────────────
+                    // -- DropShadow -- gold glow on hover ----------------------
                     DropShadow {
                         anchors.fill: cardRect
                         radius: 18; samples: 24
@@ -132,7 +132,7 @@ ApplicationWindow {
                         Behavior on color { ColorAnimation { duration: 200 } }
                     }
 
-                    // ── Card panel — gold border, thin at rest, glows on hover ─
+                    // -- Card panel -- gold border, thin at rest, glows on hover -
                     Rectangle {
                         id: cardRect
                         anchors.centerIn: parent
@@ -148,7 +148,7 @@ ApplicationWindow {
 
                         HoverHandler { id: cardHover }
 
-                        // ── Fan image area ────────────────────────────────────
+                        // -- Fan image area ------------------------------------
                         Item {
                             id: fanContainer
                             anchors.top: parent.top; anchors.topMargin: 15
@@ -194,7 +194,7 @@ ApplicationWindow {
                             }
                         }
 
-                        // ── Collection name — CollectionsGallery style ────────
+                        // -- Collection name -- CollectionsGallery style --------
                         Text {
                             id: nameLabel
                             anchors.bottom: actionRow.top; anchors.bottomMargin: 6
@@ -207,7 +207,7 @@ ApplicationWindow {
                             elide: Text.ElideRight
                         }
 
-                        // ── Action row — FAV / EDIT / DEL (CollectionsGallery) ─
+                        // -- Action row -- FAV / EDIT / DEL (CollectionsGallery) -
                         Row {
                             id: actionRow
                             anchors.bottom: parent.bottom; anchors.bottomMargin: 14
@@ -227,7 +227,7 @@ ApplicationWindow {
                                 width: 48; height: 26
                                 Row {
                                     anchors.centerIn: parent; spacing: 4
-                                    Text { text: "♥"; font.pixelSize: 14
+                                    Text { text: ""; font.pixelSize: 14
                                            color: favHov.containsMouse ? "#FFE040" : "#BBBBBB"
                                            Behavior on color { ColorAnimation { duration: 100 } } }
                                     Text { text: "FAV"; font.pixelSize: 12; font.bold: true
@@ -242,7 +242,7 @@ ApplicationWindow {
                                 width: 52; height: 26
                                 Row {
                                     anchors.centerIn: parent; spacing: 4
-                                    Text { text: "✏"; font.pixelSize: 14
+                                    Text { text: "[EDIT]"; font.pixelSize: 14
                                            color: editHov.containsMouse ? "#66AAFF" : "#BBBBBB"
                                            Behavior on color { ColorAnimation { duration: 100 } } }
                                     Text { text: "EDIT"; font.pixelSize: 12; font.bold: true
@@ -257,7 +257,7 @@ ApplicationWindow {
                                 width: 46; height: 26
                                 Row {
                                     anchors.centerIn: parent; spacing: 4
-                                    Text { text: "🗑"; font.pixelSize: 14
+                                    Text { text: "[DEL]"; font.pixelSize: 14
                                            color: delHov.containsMouse ? "#FF6060" : "#BBBBBB"
                                            Behavior on color { ColorAnimation { duration: 100 } } }
                                     Text { text: "DEL"; font.pixelSize: 12; font.bold: true
@@ -277,7 +277,7 @@ ApplicationWindow {
 }
 """
 
-# ── Launch ────────────────────────────────────────────────────────────────────
+# -- Launch --------------------------------------------------------------------
 os.environ.setdefault("QT_QUICK_CONTROLS_STYLE", "Material")
 os.environ.setdefault("QT_QUICK_CONTROLS_MATERIAL_THEME", "Dark")
 

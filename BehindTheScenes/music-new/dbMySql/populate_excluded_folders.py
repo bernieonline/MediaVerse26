@@ -47,7 +47,7 @@ FOLDERS = [
     "venv",
     "Volumes",
     "Windows",
-    # originals already in DB — included here so the full list is authoritative
+    # originals already in DB -- included here so the full list is authoritative
     "@eaDir",
     ".@__thumb",
     "System Volume Information",
@@ -75,7 +75,7 @@ try:
         print(f"  + {folder}")
 
     conn.commit()
-    print(f"\nDone — {len(set(FOLDERS))} folders written to excluded_folders.")
+    print(f"\nDone -- {len(set(FOLDERS))} folders written to excluded_folders.")
     cur.close()
     conn.close()
 

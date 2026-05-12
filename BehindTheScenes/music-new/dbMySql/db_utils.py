@@ -5,8 +5,6 @@ from dotenv import load_dotenv
 import logging
 import subprocess
 from datetime import datetime
-import tkinter as tk
-from tkinter import messagebox
 
 from pathlib import Path
 load_dotenv(dotenv_path=Path(__file__).parent.parent / "sqlCreds.env")
@@ -861,18 +859,14 @@ def compareCollections(compareA, compareB, compareType):
 
      # Check if compareA exists in either table
     if myList[0] == 0 and myList[1] == 0:
-        root = tk.Tk()
-        root.withdraw()  # Hide the root window
-        messagebox.showerror("Error", "The first comparison object no longer exists.")
+        logging.error("The first comparison object no longer exists.")
         selection_error = True
         return []
 
-    
+
     # Check if compareB exists in either table
     if myList[2] == 0 and myList[3] == 0:
-        root = tk.Tk()
-        root.withdraw()  # Hide the root window
-        messagebox.showerror("Error", "The second comparison object no longer exists.")
+        logging.error("The second comparison object no longer exists.")
         selection_error = True
         return []
     

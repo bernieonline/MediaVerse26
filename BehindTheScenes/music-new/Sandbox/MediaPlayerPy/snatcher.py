@@ -58,7 +58,7 @@ class MediaVerseSnatcher4K(QDialog):
         top_section.addWidget(self.radio_splash)
         top_section.addWidget(self.radio_temp)
         
-        search_btn = QPushButton("🔍 GOOGLE 4K")
+        search_btn = QPushButton("[SEARCH] GOOGLE 4K")
         search_btn.setFixedSize(150, 45)
         search_btn.clicked.connect(self.search_web)
         top_section.addWidget(search_btn)
@@ -91,7 +91,7 @@ class MediaVerseSnatcher4K(QDialog):
         metrics_layout.addWidget(self.crop_info)
         layout.addLayout(metrics_layout)
 
-        self.save_btn = QPushButton("💾 SAVE SURGICAL CROP (4K UHD)")
+        self.save_btn = QPushButton("[SAVE] SAVE SURGICAL CROP (4K UHD)")
         self.save_btn.setStyleSheet("""
             QPushButton { 
                 background-color: #004D40; color: white; font-size: 24px; font-weight: bold; 
@@ -162,9 +162,9 @@ class MediaVerseSnatcher4K(QDialog):
         save_path = self.target_dir / f"{clean_name}.jpg"
         
         final.save(save_path, "JPEG", quality=95, subsampling=0)
-        print(f"✅ Saved to: {save_path}")
+        print(f"[OK] Saved to: {save_path}")
         self.save_btn.setText("SUCCESSFULLY SAVED!")
-        QTimer.singleShot(2000, lambda: self.save_btn.setText("💾 SAVE SURGICAL CROP (4K UHD)"))
+        QTimer.singleShot(2000, lambda: self.save_btn.setText("[SAVE] SAVE SURGICAL CROP (4K UHD)"))
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

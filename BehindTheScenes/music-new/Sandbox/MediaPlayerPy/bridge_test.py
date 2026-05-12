@@ -15,11 +15,11 @@ def play_with_elite_engine(movie_path):
 
     # 2. Validation
     if not mpc_path.exists():
-        print(f"❌ Error: MPC-BE not found at {mpc_path}")
+        print(f"[ERROR] Error: MPC-BE not found at {mpc_path}")
         return
     
     if not Path(movie_path).exists():
-        print(f"❌ Error: Movie file not found at {movie_path}")
+        print(f"[ERROR] Error: Movie file not found at {movie_path}")
         return
 
     # 3. Execution Command
@@ -34,15 +34,15 @@ def play_with_elite_engine(movie_path):
         "/close"
     ]
 
-    print(f"🚀 Launching via MPC-BE...")
+    print(f"[>>] Launching via MPC-BE...")
     print(f"Settings Check: Ensure MPC-BE is set to use madVR and JRiver Audio.")
     
     try:
         # Launching the process
         subprocess.Popen(cmd)
-        print("✅ Success: Playback started.")
+        print("[OK] Success: Playback started.")
     except Exception as e:
-        print(f"❌ Failed to launch: {e}")
+        print(f"[ERROR] Failed to launch: {e}")
 
 if __name__ == "__main__":
     # The file path you provided

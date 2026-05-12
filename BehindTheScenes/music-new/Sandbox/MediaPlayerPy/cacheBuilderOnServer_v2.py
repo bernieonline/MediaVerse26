@@ -94,7 +94,7 @@ class CacheBuilder_v2(QObject):
     def run(self):
         try:
             #print(">>> CacheBuilder_v2.run() started")
-            notifier.post_notification("Building server cache…", False)
+            notifier.post_notification("Building server cache...", False)
             self.cacheStarted.emit()
 
             items = self.manifest.get("items", [])
@@ -116,12 +116,12 @@ class CacheBuilder_v2(QObject):
 
                 source_str = shared.get("original")
                 if not source_str:
-                    print("    ⚠️ No source image path — skipping")
+                    print("    [WARN] No source image path -- skipping")
                     continue
 
                 source = Path(source_str)
                 if not source.exists():
-                    print(f"    ⚠️ Source file missing: {source}")
+                    print(f"    [WARN] Source file missing: {source}")
                     continue
 
                 # Cache filenames
@@ -131,7 +131,7 @@ class CacheBuilder_v2(QObject):
 
                 # Skip if no cache targets
                 if not any([thumb_rel, display_rel, carousel_rel]):
-                    print("    ⚠️ No cache targets defined — skipping")
+                    print("    [WARN] No cache targets defined -- skipping")
                     continue
 
                 try:
@@ -153,7 +153,7 @@ class CacheBuilder_v2(QObject):
                         thumb_target = self.cache_root / "thumb" / thumb_name
                         os.makedirs(thumb_target.parent, exist_ok=True)
 
-                        #print(f"    [thumb] → {thumb_target}")
+                        #print(f"    [thumb] -> {thumb_target}")
                         thumb_img = self._resize_portrait(img, self.THUMB_HEIGHT)
                         thumb_img.save(thumb_target, quality=85, optimize=True)
 
@@ -162,7 +162,7 @@ class CacheBuilder_v2(QObject):
                         display_target = self.cache_root / "display" / display_name
                         os.makedirs(display_target.parent, exist_ok=True)
 
-                        #print(f"    [display] → {display_target}")
+                        #print(f"    [display] -> {display_target}")
                         display_img = self._resize_portrait(img, self.DISPLAY_HEIGHT)
                         display_img.save(display_target, quality=85, optimize=True)
 
@@ -171,17 +171,17 @@ class CacheBuilder_v2(QObject):
                         carousel_target = self.cache_root / "carousel" / carousel_name
                         os.makedirs(carousel_target.parent, exist_ok=True)
 
-                        #print(f"    [carousel] → {carousel_target}")
+                        #print(f"    [carousel] -> {carousel_target}")
                         carousel_img = self._resize_carousel(img, self.CAROUSEL_WIDTH)
                         carousel_img.save(carousel_target, quality=85, optimize=True)
 
                     done += 1
-                    print(f"    ✅ Cached {done} of {total}")
+                    print(f"    [OK] Cached {done} of {total}")
                     self.cacheProgress.emit(done, total)
                     print("############   after cachProgress emit   ###################")
 
                 except Exception as e:
-                    print(f"    ⚠️ Error processing {source}: {e}")
+                    print(f"    [WARN] Error processing {source}: {e}")
 
            
 
@@ -218,7 +218,7 @@ class CacheBuilder_v2(QObject):
         #each time that the cache on the server is built
         
 
-        print("[CacheBuilder_v2] Syncing server → local...")
+        print("[CacheBuilder_v2] Syncing server -> local...")
         print("[CacheBuilder_v2] Sync complete.")
 
 
@@ -268,7 +268,7 @@ class CacheBuilder_v2(QObject):
             print(f"    Dest Path:   {dst_p} (Exists: {dst_p.exists()})")
 
             if not src_p.exists():
-                print(f"    ⚠️ SKIPPING: {label} source folder not found on server.")
+                print(f"    [WARN] SKIPPING: {label} source folder not found on server.")
                 continue
 
             # Check file counts on server
@@ -294,15 +294,15 @@ class CacheBuilder_v2(QObject):
                 
                 # Verify result
                 new_count = len(list(dst_p.glob("*")))
-                print(f"    ✅ {label} Sync Success! Local count: {new_count}")
+                print(f"    [OK] {label} Sync Success! Local count: {new_count}")
 
             except Exception as e:
-                print(f"    ❌ ERROR syncing {label}:")
+                print(f"    [ERROR] ERROR syncing {label}:")
                 print(f"    Type: {type(e).__name__}")
                 print(f"    Message: {str(e)}")
                 # This is the "God mode" debug info for Windows locks
                 if "PermissionError" in str(type(e)):
-                    print("    💡 ANALYSIS: A file is likely LOCKED by the QML UI or Windows Explorer.")
+                    print("    [INFO] ANALYSIS: A file is likely LOCKED by the QML UI or Windows Explorer.")
 
         print("\n" + "="*50)
         print("[DEBUG] SYNC_TO_LOCAL FINISHED")

@@ -91,8 +91,8 @@ class FileSystem(QObject):
         DIAGNOSTIC STEP 1: Just print the path to the terminal.
         """
         print("\n" + "="*40)
-        print("🎯 CONNECTION SUCCESSFUL")
-        print(f"📂 Folder Clicked: {folder_url}")
+        print("[TARGET] CONNECTION SUCCESSFUL")
+        print(f"[DIR] Folder Clicked: {folder_url}")
         print("="*40 + "\n")
 
         # We must still emit something so the UI doesn't hang, 
@@ -182,8 +182,8 @@ class FileSystem(QObject):
         """
         STEP 3: Fixed to use the internal method of FolderMapper correctly.
         """
-        print("\n" + "—"*60)
-        print(f"🚀 V2 MAPPING STARTING")
+        print("\n" + "--"*60)
+        print(f"[>>] V2 MAPPING STARTING")
         
         try:
             # 1. Clean the path
@@ -196,22 +196,22 @@ class FileSystem(QObject):
             mapped_results = self.mapper.get_items_for_folder(clean_path)
 
             # 3. Print the results to the terminal as requested
-            print(f"📂 Folder: {clean_path}")
-            print(f"🖼️  Mapped {len(mapped_results)} items:")
+            print(f"[DIR] Folder: {clean_path}")
+            print(f"  Mapped {len(mapped_results)} items:")
 
             for item in mapped_results:
                 title = item.get('title')
                 thumb = item.get('filePath') # This is the D:/... path now
-                print(f"  🎬 {title}")
-                print(f"  🖼️  {thumb}")
+                print(f"  [MOVIE] {title}")
+                print(f"    {thumb}")
                 print("-" * 10)
 
-            print(f"✅ Mapping Complete")
-            print("—"*60 + "\n")
+            print(f"[OK] Mapping Complete")
+            print("--"*60 + "\n")
 
             # 4. Hand off to QML
             self.images_listed.emit(mapped_results)
 
         except Exception as e:
             # This is where the "'FolderMapper' object has no attribute 'data'" error was caught
-            print(f"❌ Step 3 Mapping Error: {e}")
+            print(f"[ERROR] Step 3 Mapping Error: {e}")

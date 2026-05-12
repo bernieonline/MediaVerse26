@@ -18,7 +18,7 @@ class SearchController(QObject):
         # Local display base for thumbnails
         self.local_display_base = paths.get("local_display_v2")
 
-        print(f"📦 [Search] Ready. Monitoring {len(self.master_data)} manifest items.")
+        print(f"[PKG] [Search] Ready. Monitoring {len(self.master_data)} manifest items.")
 
     # ------------------------------------------------------------
     # Normalization (shared across search + resolver)
@@ -40,7 +40,7 @@ class SearchController(QObject):
 
         found_items = []
 
-        # Build lookup map: normalized manifest video path → manifest item
+        # Build lookup map: normalized manifest video path -> manifest item
         lookup_map = {
             self.normalize(item.get("shared", {}).get("video")): item
             for item in self.master_data
@@ -84,7 +84,7 @@ class SearchController(QObject):
         self.resultsUpdated.emit(found_items)
 
     # ------------------------------------------------------------
-    # SELECTION → RESOLVE → EMIT DETAIL REQUEST
+    # SELECTION -> RESOLVE -> EMIT DETAIL REQUEST
     # ------------------------------------------------------------
     @Slot(str)
     def confirm_selection(self, movie_path):
@@ -122,9 +122,9 @@ class SearchController(QObject):
         self.detailRequested.emit(result)
 
         # Debug print
-        print(f"✅ RESOLVED PORTABLE URI: {result.get('image')}")
-        print(f"📄 XML PATH:   {result.get('xml')}")
-        print(f"🎬 MOVIE PATH: {result.get('movie')}")
+        print(f"[OK] RESOLVED PORTABLE URI: {result.get('image')}")
+        print(f" XML PATH:   {result.get('xml')}")
+        print(f"[MOVIE] MOVIE PATH: {result.get('movie')}")
         print("--------------------------\n")
 
         return result
@@ -137,7 +137,7 @@ class SearchController(QObject):
         print("Incoming path from QML:", movie_path)
 
         win_path = movie_path.replace("/", "\\")
-        print("🔍 WINDOWS-STYLE SEARCH STRING:", win_path)
+        print("[SEARCH] WINDOWS-STYLE SEARCH STRING:", win_path)
 
         match = None
 
@@ -148,7 +148,7 @@ class SearchController(QObject):
 
             # Debug: show Dr No entries
             if "dr no" in manifest_video.lower():
-                print("📄 FOUND MANIFEST ENTRY FOR DR NO:", repr(manifest_video))
+                print(" FOUND MANIFEST ENTRY FOR DR NO:", repr(manifest_video))
 
             # Normalized comparison
             if self.normalize(manifest_video) == self.normalize(win_path):
@@ -156,15 +156,15 @@ class SearchController(QObject):
                 break
 
         if match:
-            print("🎯 MATCH FOUND IN MANIFEST")
+            print("[TARGET] MATCH FOUND IN MANIFEST")
             return {
                 "movie": match["shared"]["video"],
                 "xml": match["shared"]["xml"],
                 "image": match["cache"]["display"]
             }
 
-        # No match → tell QML to show "No Details Found"
-        print("❌ NO MATCH FOUND FOR:", win_path)
+        # No match -> tell QML to show "No Details Found"
+        print("[ERROR] NO MATCH FOUND FOR:", win_path)
         return {
             "error": "No Details Found",
             "movie": movie_path,
@@ -180,19 +180,19 @@ class SearchController(QObject):
 
         try:
             manifest_path = Path(path)
-            print("📄 Loading manifest directly from:", manifest_path)
+            print(" Loading manifest directly from:", manifest_path)
 
             if not manifest_path.exists():
-                print("❌ Manifest file not found:", manifest_path)
+                print("[ERROR] Manifest file not found:", manifest_path)
                 return []
 
             with manifest_path.open("r", encoding="utf-8") as f:
                 data = json.load(f)
 
             items = data.get("items", [])
-            print(f"📦 Direct manifest load complete. Items: {len(items)}")
+            print(f"[PKG] Direct manifest load complete. Items: {len(items)}")
             return items
 
         except Exception as e:
-            print("❌ Error loading manifest directly:", e)
+            print("[ERROR] Error loading manifest directly:", e)
             return []

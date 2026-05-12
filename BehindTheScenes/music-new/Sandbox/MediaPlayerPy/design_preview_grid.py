@@ -1,15 +1,15 @@
 """
-design_preview_grid.py — Grid Hover Effects Preview
+design_preview_grid.py -- Grid Hover Effects Preview
 Standalone design tool: 6-column poster grid with switchable hover styles.
 
 Run with:
   PYTHONUTF8=1 /d/MediaVerse1.0/BehindTheScenes/venv/Scripts/python.exe design_preview_grid.py
 
 Variants:
-  V1 — white border, no hover effect (current)
-  V2 — MediaVerse blue border on hover only
-  V3 — blue border + scale 1.0->1.05 + DropShadow lift
-  V4 — blue border + scale + DropShadow + year badge enlarges on hover
+  V1 -- white border, no hover effect (current)
+  V2 -- MediaVerse blue border on hover only
+  V3 -- blue border + scale 1.0->1.05 + DropShadow lift
+  V4 -- blue border + scale + DropShadow + year badge enlarges on hover
 """
 import os
 import sys
@@ -162,10 +162,10 @@ ApplicationWindow {
         Row {
             id: btnRow; anchors.centerIn: parent; spacing: 10
             Repeater {
-                model: [{ v: 1, lbl: "V1 — Current"          },
-                        { v: 2, lbl: "V2 — Blue Border"       },
-                        { v: 3, lbl: "V3 — Scale + Shadow"    },
-                        { v: 4, lbl: "V4 — + Year Badge"      }]
+                model: [{ v: 1, lbl: "V1 -- Current"          },
+                        { v: 2, lbl: "V2 -- Blue Border"       },
+                        { v: 3, lbl: "V3 -- Scale + Shadow"    },
+                        { v: 4, lbl: "V4 -- + Year Badge"      }]
                 delegate: Rectangle {
                     width: btnLbl.implicitWidth + 22; height: 36; radius: 6
                     color: root.variant === modelData.v ? "#2566c2" : "#333333"

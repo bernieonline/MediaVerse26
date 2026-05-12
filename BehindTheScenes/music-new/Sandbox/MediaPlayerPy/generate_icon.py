@@ -10,9 +10,9 @@ if root_path not in sys.path:
 try:
     from project_paths import paths
     from PIL import Image, ImageDraw, ImageFont
-    print(f"✅ [DEBUG] project_paths loaded from: {root_path}")
+    print(f"[OK] [DEBUG] project_paths loaded from: {root_path}")
 except ImportError as e:
-    print(f"❌ [DEBUG] Failed to load modules: {e}")
+    print(f"[ERROR] [DEBUG] Failed to load modules: {e}")
     sys.exit(1)
 
 def generate_with_debug():
@@ -20,16 +20,16 @@ def generate_with_debug():
     # We'll try to force it into the "Assets" folder
     target_dir = Path(root_path) / "Assets"
     
-    print(f"🔍 [DEBUG] Target Directory set to: {target_dir}")
+    print(f"[SEARCH] [DEBUG] Target Directory set to: {target_dir}")
     
     if not target_dir.exists():
-        print(f"📂 [DEBUG] Creating missing directory: {target_dir}")
+        print(f"[DIR] [DEBUG] Creating missing directory: {target_dir}")
         target_dir.mkdir(parents=True, exist_ok=True)
     else:
-        print(f"📂 [DEBUG] Target directory already exists.")
+        print(f"[DIR] [DEBUG] Target directory already exists.")
 
     output_path = target_dir / "mediaverse.ico"
-    print(f"📍 [DEBUG] Full intended file path: {output_path}")
+    print(f" [DEBUG] Full intended file path: {output_path}")
 
     # --- 3. Drawing Logic ---
     try:
@@ -48,13 +48,13 @@ def generate_with_debug():
             font = ImageFont.truetype("C:/Windows/Fonts/arialbd.ttf", 260)
         except:
             font = ImageFont.load_default()
-            print("⚠️ [DEBUG] Custom font failed, using default.")
+            print("[WARN] [DEBUG] Custom font failed, using default.")
             
         draw.text((size/2, size/2-20), "MV", font=font, fill="#D4AF37", anchor="mm")
-        print("🎨 [DEBUG] Icon drawing complete in memory.")
+        print(" [DEBUG] Icon drawing complete in memory.")
 
         # --- 4. The Critical Save ---
-        print(f"💾 [DEBUG] Attempting to save to disk...")
+        print(f"[SAVE] [DEBUG] Attempting to save to disk...")
         icon.save(
             str(output_path), 
             format='ICO', 
@@ -64,13 +64,13 @@ def generate_with_debug():
         # --- 5. Physical Confirmation ---
         if os.path.exists(output_path):
             file_size = os.path.getsize(output_path)
-            print(f"🌟 [SUCCESS] File physically exists!")
-            print(f"📏 [DEBUG] File size: {file_size} bytes")
+            print(f"[STAR] [SUCCESS] File physically exists!")
+            print(f" [DEBUG] File size: {file_size} bytes")
         else:
-            print(f"🚫 [FAILURE] Save command finished, but file is NOT on disk.")
+            print(f" [FAILURE] Save command finished, but file is NOT on disk.")
 
     except Exception as e:
-        print(f"💥 [CRASH] An error occurred during generation: {e}")
+        print(f" [CRASH] An error occurred during generation: {e}")
 
 if __name__ == "__main__":
     generate_with_debug()

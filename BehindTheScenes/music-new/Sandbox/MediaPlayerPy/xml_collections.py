@@ -30,7 +30,7 @@ class XMLCollections(QObject):
 
         # 2. SURGICAL SYNC LOGIC
         if not self.manifest_path:
-            print("❌ [INIT] ERROR: 'xmldate' missing from project_paths.py!")
+            print("[ERROR] [INIT] ERROR: 'xmldate' missing from project_paths.py!")
             return
 
         rebuild_reason = None
@@ -43,29 +43,29 @@ class XMLCollections(QObject):
 
         # 3. EXECUTE BUILDER IF NECESSARY
         if rebuild_reason:
-            print(f"🔄 [INIT xml_collection_data] {rebuild_reason}. Triggering XMLCollectionBuilder...")
+            print(f"[SYNC] [INIT xml_collection_data] {rebuild_reason}. Triggering XMLCollectionBuilder...")
             import XMLCollectionBuilder
             build_result = XMLCollectionBuilder.build_dna_bank()
             if not build_result.get("success"):
-                print(f"⚠️ [INIT xml_collection_data] Build failed: {build_result.get('error')} — loading previous data.")
+                print(f"[WARN] [INIT xml_collection_data] Build failed: {build_result.get('error')} -- loading previous data.")
         else:
-            print(f"✅ [INIT] DNA Bank is up to date: {self.manifest_path}")
+            print(f"[OK] [INIT] DNA Bank is up to date: {self.manifest_path}")
 
         # 4. LOAD DATA
         self.load_data()
         self._load_image_map()
-        print(f"🛠️ XMLCollections initialized.")
+        print(f" XMLCollections initialized.")
     def load_data(self):
         """Loads the master movie data."""
         data_path = paths.get("xmldate")
         if not data_path:
-            print(f"❌ [DATA DEBUG] Load aborted: 'xmldate' path not configured.")
+            print(f"[ERROR] [DATA DEBUG] Load aborted: 'xmldate' path not configured.")
             return
         self.master_cache = safe_json_read(data_path, "xml_collection_data")
         if self.master_cache:
-            print(f"🛠️ [DATA DEBUG] Successfully loaded {len(self.master_cache)} movies.")
+            print(f" [DATA DEBUG] Successfully loaded {len(self.master_cache)} movies.")
         else:
-            print(f"❌ [DATA DEBUG] Load failed or empty: {data_path}")
+            print(f"[ERROR] [DATA DEBUG] Load failed or empty: {data_path}")
     # start
     def _load_image_map(self):
         """Links Video Filenames to Thumbnails using relative project paths."""
@@ -99,9 +99,9 @@ class XMLCollections(QObject):
                     if i == 0:
                         print(f"\n--- FIRST ITEM VERIFIED ---")
                         print(f"Target: {thumb_path}")
-                        print(f"Status: {'✅ FOUND' if thumb_path.exists() else '❌ MISSING ON D: DRIVE'}")
+                        print(f"Status: {'[OK] FOUND' if thumb_path.exists() else '[ERROR] MISSING ON D: DRIVE'}")
 
-        print(f"🖼️ Linked {len(self.image_lookup)} videos to local thumbnails.")
+        print(f" Linked {len(self.image_lookup)} videos to local thumbnails.")
 
     @Slot(result='QVariant')
     def load_collections_list(self):
@@ -111,11 +111,11 @@ class XMLCollections(QObject):
             if path.exists():
                 with open(path, 'r', encoding='utf-8') as f:
                     data = json.load(f)
-                    print(f"📂 UI requested Collections List: Found {len(data)} cards.")
+                    print(f"[DIR] UI requested Collections List: Found {len(data)} cards.")
                     return data
             return []
         except Exception as e:
-            print(f"❌ Error loading collections list: {e}")
+            print(f"[ERROR] Error loading collections list: {e}")
             return []
     #START
     @Slot('QVariant', result=list)
@@ -136,7 +136,7 @@ class XMLCollections(QObject):
             return []
 
         random.shuffle(raw_paths)
-        # raw_paths are already correct thumb URIs from image_lookup — return directly
+        # raw_paths are already correct thumb URIs from image_lookup -- return directly
         return raw_paths[:4]
     #start
     @Slot('QVariant', result=list)
@@ -145,7 +145,7 @@ class XMLCollections(QObject):
             criteria = criteria.toVariant()
         
         results = []
-        print(f"\n📂 --- DEEP DATA TRACE ---")
+        print(f"\n[DIR] --- DEEP DATA TRACE ---")
         
         series_mode = "Series" in criteria
         for item in self.master_cache:
@@ -270,7 +270,7 @@ class XMLCollections(QObject):
             safe_json_write(file_path, library)
             return True
         except Exception as e:
-            print(f"❌ Registry Save Error: {e}")
+            print(f"[ERROR] Registry Save Error: {e}")
             return False
 
     @Slot()
@@ -279,12 +279,12 @@ class XMLCollections(QObject):
         Called when the manifest background thread swaps in a new manifest.json.
         Rebuilds xml_collection_data.json from scratch (reads all sidecar XML files),
         then reloads master_cache so search/filter results are current without a restart.
-        Runs in a background thread — does not block the UI.
+        Runs in a background thread -- does not block the UI.
         """
         def _run():
             try:
                 from NotificationManager import notifier
-                print("[XMLCollections] manifest changed — rebuilding xml_collection_data.json...")
+                print("[XMLCollections] manifest changed -- rebuilding xml_collection_data.json...")
                 import XMLCollectionBuilder
                 build_result = XMLCollectionBuilder.build_dna_bank()
                 if build_result.get("success"):
@@ -295,11 +295,11 @@ class XMLCollections(QObject):
                         + (f" | {build_result['blank_metadata_count']} blank metadata" if build_result.get('blank_metadata_count') else "")
                     )
                     notifier.post_notification(msg, False)
-                    print(f"[XMLCollections] rebuild complete — {len(self.master_cache)} movies in cache.")
+                    print(f"[XMLCollections] rebuild complete -- {len(self.master_cache)} movies in cache.")
                 else:
                     err = build_result.get("error", "Unknown error")
                     notifier.post_notification(f"Collection data rebuild failed: {err}", True)
-                    print(f"[XMLCollections] rebuild failed — keeping previous data. Reason: {err}")
+                    print(f"[XMLCollections] rebuild failed -- keeping previous data. Reason: {err}")
             except Exception as e:
                 print(f"[XMLCollections] rebuild_after_manifest_change failed: {e}")
 
@@ -317,17 +317,17 @@ class XMLCollections(QObject):
         once the server is confirmed reachable, we catch any case where the local
         xml_collection_data.json is missing or older than the live manifest.
 
-        Safe to call even when __init__ already built the file — the mtime guard
+        Safe to call even when __init__ already built the file -- the mtime guard
         ensures no duplicate work is done.
         """
         if not self.manifest_path or not self.source_manifest:
             return
         if not self.source_manifest.exists():
-            print("[XMLCollections] check_and_rebuild_if_stale: manifest not accessible — skipping.")
+            print("[XMLCollections] check_and_rebuild_if_stale: manifest not accessible -- skipping.")
             return
 
         if not self.manifest_path.exists():
-            print("[XMLCollections] check_and_rebuild_if_stale: xml file missing — rebuilding.")
+            print("[XMLCollections] check_and_rebuild_if_stale: xml file missing -- rebuilding.")
             self.rebuild_after_manifest_change()
             return
 
@@ -335,14 +335,14 @@ class XMLCollections(QObject):
             manifest_mtime = self.source_manifest.stat().st_mtime
             xml_mtime      = self.manifest_path.stat().st_mtime
         except OSError as e:
-            print(f"[XMLCollections] check_and_rebuild_if_stale: mtime check failed ({e}) — skipping.")
+            print(f"[XMLCollections] check_and_rebuild_if_stale: mtime check failed ({e}) -- skipping.")
             return
 
         if manifest_mtime > xml_mtime:
-            print("[XMLCollections] check_and_rebuild_if_stale: manifest is newer — rebuilding.")
+            print("[XMLCollections] check_and_rebuild_if_stale: manifest is newer -- rebuilding.")
             self.rebuild_after_manifest_change()
         else:
-            print("[XMLCollections] check_and_rebuild_if_stale: xml_collection_data is current — no action needed.")
+            print("[XMLCollections] check_and_rebuild_if_stale: xml_collection_data is current -- no action needed.")
 
     @Slot()
     def force_rebuild_xml_collection_data(self):
@@ -359,10 +359,10 @@ class XMLCollections(QObject):
         Recovery tool: replace a critical JSON file with its most recent backup.
 
         file_key options:
-          "collections"        → Movies_Collections_v2.json  (_bak1 or .bak)
-          "xml_collection_data"→ xml_collection_data.json    (.bak)
-          "config"             → Config.json                 (.bak)
-          "manifest"           → manifest.json               (.bak)
+          "collections"        -> Movies_Collections_v2.json  (_bak1 or .bak)
+          "xml_collection_data"-> xml_collection_data.json    (.bak)
+          "config"             -> Config.json                 (.bak)
+          "manifest"           -> manifest.json               (.bak)
 
         Returns True on success, False on failure.
         """
@@ -384,7 +384,7 @@ class XMLCollections(QObject):
                 try:
                     import shutil
                     shutil.copy2(bak, target)
-                    msg = f"✅ '{target.name}' restored from {bak.name}"
+                    msg = f"[OK] '{target.name}' restored from {bak.name}"
                     print(f"[XMLCollections] {msg}")
                     from NotificationManager import notifier
                     notifier.post_notification(msg, False)
@@ -393,7 +393,7 @@ class XMLCollections(QObject):
                     print(f"[XMLCollections] restore_from_backup failed: {e}")
                     return False
 
-        msg = f"⚠️ No backup found for '{target.name}'"
+        msg = f"[WARN] No backup found for '{target.name}'"
         print(f"[XMLCollections] {msg}")
         from NotificationManager import notifier
         notifier.post_notification(msg, True)
@@ -428,10 +428,10 @@ class XMLCollections(QObject):
             safe_json_write(self.cache_file, self.master_cache)
 
             self.cacheRebuilt.emit()
-            print(f"✅ Master Cache Rebuilt: {len(self.master_cache)} movies.")
+            print(f"[OK] Master Cache Rebuilt: {len(self.master_cache)} movies.")
             
         except Exception as e:
-            print(f"❌ Scan failed: {e}")
+            print(f"[ERROR] Scan failed: {e}")
 
     def _extract_sidecar_metadata(self, video_path, xml_path, cache_info):
         year_match = re.search(r"\((\d{4})\)", video_path.name)
@@ -563,10 +563,10 @@ class XMLCollections(QObject):
             })
 
             safe_json_write(file_path, library)
-            print(f"✅ Collection '{name}' saved to V2 registry.")
+            print(f"[OK] Collection '{name}' saved to V2 registry.")
             return True
         except Exception as e:
-            print(f"❌ V2 Save Error: {e}")
+            print(f"[ERROR] V2 Save Error: {e}")
             return False
         
     @Slot(str, str, result=bool)
@@ -594,11 +594,11 @@ class XMLCollections(QObject):
 
             safe_json_write(file_path, data)
 
-            print(f"✏️ Renamed '{old_name}' → '{new_name}'")
+            print(f"[EDIT] Renamed '{old_name}' -> '{new_name}'")
             return True
 
         except Exception as e:
-            print("❌ rename_collection error:", e)
+            print("[ERROR] rename_collection error:", e)
             return False
         
     @Slot(str)
@@ -609,7 +609,7 @@ class XMLCollections(QObject):
             file_path = Path("W:/MediaVerse/Collections/Movies_Collections_v2.json")
 
             if not file_path.exists():
-                print("⚠️ Delete failed: JSON file does not exist.")
+                print("[WARN] Delete failed: JSON file does not exist.")
                 return False
 
             library = safe_json_read(file_path, "collections")
@@ -620,11 +620,11 @@ class XMLCollections(QObject):
             # Save back
             safe_json_write(file_path, new_library)
 
-            print(f"🗑️ Collection '{name}' deleted successfully.")
+            print(f"[DEL] Collection '{name}' deleted successfully.")
             return True
 
         except Exception as e:
-            print(f"❌ Delete Error: {e}")
+            print(f"[ERROR] Delete Error: {e}")
             return False
 
     @Slot(str)
@@ -635,7 +635,7 @@ class XMLCollections(QObject):
             file_path = Path("W:/MediaVerse/Collections/Movies_Collections_v2.json")
 
             if not file_path.exists():
-                print("⚠️ Favorite toggle failed: JSON file does not exist.")
+                print("[WARN] Favorite toggle failed: JSON file does not exist.")
                 return False
 
             library = safe_json_read(file_path, "collections")
@@ -649,17 +649,17 @@ class XMLCollections(QObject):
                     break
 
             if not updated:
-                print(f"⚠️ Favorite toggle failed: '{name}' not found.")
+                print(f"[WARN] Favorite toggle failed: '{name}' not found.")
                 return False
 
             # Save back
             safe_json_write(file_path, library)
 
-            print(f"⭐ Favorite toggled for '{name}'.")
+            print(f"[STAR] Favorite toggled for '{name}'.")
             return True
 
         except Exception as e:
-            print(f"❌ Favorite Toggle Error: {e}")
+            print(f"[ERROR] Favorite Toggle Error: {e}")
             return False
     @Slot(str, str)
     def rename_collection(self, old_name, new_name):
@@ -669,7 +669,7 @@ class XMLCollections(QObject):
             file_path = Path("W:/MediaVerse/Collections/Movies_Collections_v2.json")
 
             if not file_path.exists():
-                print("⚠️ Rename failed: JSON file does not exist.")
+                print("[WARN] Rename failed: JSON file does not exist.")
                 return False
 
             library = safe_json_read(file_path, "collections")
@@ -682,16 +682,16 @@ class XMLCollections(QObject):
                     break
 
             if not updated:
-                print(f"⚠️ Rename failed: '{old_name}' not found.")
+                print(f"[WARN] Rename failed: '{old_name}' not found.")
                 return False
 
             safe_json_write(file_path, library)
 
-            print(f"✏️ Collection renamed to '{new_name}'.")
+            print(f"[EDIT] Collection renamed to '{new_name}'.")
             return True
 
         except Exception as e:
-            print(f"❌ Rename Error: {e}")
+            print(f"[ERROR] Rename Error: {e}")
             return False
         
 
@@ -707,18 +707,18 @@ class XMLCollections(QObject):
         - Ensures results are always ordered OLDEST FIRST by Year.
         """
         cache_size = len(self.master_cache) if self.master_cache else 0
-        print(f"🔍 [TRACE] Scanning through {cache_size} movies in master_cache")
-        print(f"🔍 [TRACE] Criteria: {criteria}")
+        print(f"[SEARCH] [TRACE] Scanning through {cache_size} movies in master_cache")
+        print(f"[SEARCH] [TRACE] Criteria: {criteria}")
 
 
         # ------------------------------------------------------------
-        # 1. Convert QJSValue → dict if needed
+        # 1. Convert QJSValue -> dict if needed
         # ------------------------------------------------------------
         if hasattr(criteria, 'toVariant'):
             criteria = criteria.toVariant()
 
         if not isinstance(criteria, dict) or not self.master_cache:
-            print(f"⚠️ XMLCollections V2: Invalid criteria type: {type(criteria)}")
+            print(f"[WARN] XMLCollections V2: Invalid criteria type: {type(criteria)}")
             return []
 
         print(f"\n[V2] get_collection_results_v2 called")
@@ -808,7 +808,7 @@ class XMLCollections(QObject):
 
             year_value = safe_year(item)
 
-            #print(f"[V2] Final path → {file_uri} (Year={year_value})")
+            #print(f"[V2] Final path -> {file_uri} (Year={year_value})")
 
             results.append({
                 "filePath": file_uri,

@@ -19,11 +19,11 @@ def _handback_windows():
     """
     Two-phase handback:
 
-    Phase 1  — Cooperative: send MCC 10014 so JRiver minimises itself from
+    Phase 1  -- Cooperative: send MCC 10014 so JRiver minimises itself from
                within its own message loop.  Windows has no objection to this
                and the foreground is voluntarily relinquished.
 
-    Phase 2  — Assertive: with JRiver no longer dominant, use the
+    Phase 2  -- Assertive: with JRiver no longer dominant, use the
                AttachThreadInput + Alt-key spoof to claim the foreground for
                MediaVerse.  Both tricks are now working with the grain of
                Windows focus rules rather than against them.
@@ -34,20 +34,20 @@ def _handback_windows():
         import win32api
         import win32process
 
-        # ── Phase 1: ask JRiver to minimize itself ──────────────────────────
+        # -- Phase 1: ask JRiver to minimize itself --------------------------
         try:
             requests.get(
                 f"{MCWS_BASE}/Control/MCC?Command=10014&Parameter=1",
                 timeout=2,
             )
-            logger.info("MCC 10014 sent — JRiver minimising cooperatively.")
+            logger.info("MCC 10014 sent -- JRiver minimising cooperatively.")
         except Exception as e:
-            logger.warning(f"MCC 10014 failed ({e}) — continuing with forced swap.")
+            logger.warning(f"MCC 10014 failed ({e}) -- continuing with forced swap.")
 
         # Give JRiver's message loop time to process the minimize
         time.sleep(0.4)
 
-        # ── Enumerate windows ────────────────────────────────────────────────
+        # -- Enumerate windows ------------------------------------------------
         hwnd_jriver = None
         hwnd_mv     = None
 
@@ -61,17 +61,17 @@ def _handback_windows():
             return True
 
         win32gui.EnumWindows(_enum, None)
-        logger.info(f"Handback — JRiver hwnd={hwnd_jriver}  MediaVerse hwnd={hwnd_mv}")
+        logger.info(f"Handback -- JRiver hwnd={hwnd_jriver}  MediaVerse hwnd={hwnd_mv}")
 
-        # ── Belt-and-suspenders: hide JRiver in case MCC was slow ───────────
+        # -- Belt-and-suspenders: hide JRiver in case MCC was slow -----------
         if hwnd_jriver:
             win32gui.ShowWindow(hwnd_jriver, win32con.SW_HIDE)
 
         if not hwnd_mv:
-            logger.warning("MediaVerse window not found — cannot complete handback.")
+            logger.warning("MediaVerse window not found -- cannot complete handback.")
             return
 
-        # ── Phase 2: raise MediaVerse ────────────────────────────────────────
+        # -- Phase 2: raise MediaVerse ----------------------------------------
 
         # Alt-key spoof: makes Windows treat our thread as having received
         # keyboard input, which unlocks SetForegroundWindow for non-foreground
@@ -100,7 +100,7 @@ def _handback_windows():
 
         logger.info("MediaVerse raised to front.")
 
-        # ── Suppression loop: hide JRiver if it reasserts within 2 s ────────
+        # -- Suppression loop: hide JRiver if it reasserts within 2 s --------
         suppress_until = time.time() + 2.0
         while time.time() < suppress_until:
             time.sleep(0.15)
@@ -123,7 +123,7 @@ def _handback_windows():
             logger.info("JRiver minimised to taskbar.")
 
     except ImportError:
-        logger.error("pywin32 not available — install with: pip install pywin32")
+        logger.error("pywin32 not available -- install with: pip install pywin32")
     except Exception as e:
         logger.error(f"_handback_windows failed: {e}")
 
@@ -204,11 +204,11 @@ class PlaybackController:
     def _run_watchdog(self):
         """
         Polls JRiver.  On stop:
-          1. _record_progress() — writes position/duration to tv_watch_progress.json
+          1. _record_progress() -- writes position/duration to tv_watch_progress.json
              if a TVWatchProgressStore has been injected.
-          2. _handback_windows() — MCC 10014 cooperative minimize, then
+          2. _handback_windows() -- MCC 10014 cooperative minimize, then
              AttachThreadInput + Alt-key to raise MediaVerse.
-          3. playbackFinished.emit() — QML triggers the cinema fade.
+          3. playbackFinished.emit() -- QML triggers the cinema fade.
         """
         playback_started  = False
         start_time        = time.time()
@@ -251,7 +251,7 @@ class PlaybackController:
                     if state != "0":
                         playback_started = True
                     elif playback_started:
-                        logger.info("Stop detected — recording progress then handback.")
+                        logger.info("Stop detected -- recording progress then handback.")
                         self._record_progress(last_position_ms, last_duration_ms)
                         _handback_windows()
                         self.bridge.playbackFinished.emit()
@@ -269,7 +269,7 @@ class PlaybackController:
         if self.progress_store is None or not self._current_path:
             return
         if duration_ms <= 0:
-            logger.debug("_record_progress: duration unknown — skipping.")
+            logger.debug("_record_progress: duration unknown -- skipping.")
             return
         try:
             self.progress_store.record(
@@ -289,7 +289,7 @@ class MpcBeWatchdog:
     """
     Monitors MPC-BE via its built-in HTTP web interface.
 
-    Prerequisite: Options → Player → Web Interface must be enabled in MPC-BE,
+    Prerequisite: Options -> Player -> Web Interface must be enabled in MPC-BE,
     listening on the port stored in Config.json as "MpcBePort" (default 13579).
 
     Strategy:
@@ -305,7 +305,7 @@ class MpcBeWatchdog:
         self._stop_event    = threading.Event()
         self._thread: threading.Thread | None = None
 
-    # ── Lifecycle ────────────────────────────────────────────────────────────
+    # -- Lifecycle ------------------------------------------------------------
 
     def start(self, path: str, process, port: int = 13579) -> None:
         """Begin monitoring a freshly launched MPC-BE process."""
@@ -320,7 +320,7 @@ class MpcBeWatchdog:
     def shutdown(self) -> None:
         self._stop_event.set()
 
-    # ── Web API helpers ──────────────────────────────────────────────────────
+    # -- Web API helpers ------------------------------------------------------
 
     @staticmethod
     def _parse(html: str) -> dict:
@@ -351,7 +351,7 @@ class MpcBeWatchdog:
             pass
         return {}
 
-    # ── Main loop ────────────────────────────────────────────────────────────
+    # -- Main loop ------------------------------------------------------------
 
     def _run(self, path: str, process, port: int) -> None:
         logger.info(f"MpcBeWatchdog active on port {port} for: {path}")
@@ -362,7 +362,7 @@ class MpcBeWatchdog:
             if self._stop_event.is_set():
                 return
             if process.poll() is not None:
-                logger.info("MPC-BE exited before web API responded — nothing to record.")
+                logger.info("MPC-BE exited before web API responded -- nothing to record.")
                 return
             if self._poll(port):
                 logger.info("MPC-BE web API is responding.")
@@ -376,16 +376,16 @@ class MpcBeWatchdog:
 
         while not self._stop_event.is_set():
 
-            # ── Primary: process has exited ───────────────────────────────
+            # -- Primary: process has exited -------------------------------
             if process.poll() is not None:
-                logger.info("MPC-BE process exited — recording progress.")
+                logger.info("MPC-BE process exited -- recording progress.")
                 if not recorded:
                     recorded = True
                     self._record(path, last_position_ms, last_duration_ms)
                     self.bridge.playbackFinished.emit()
                 break
 
-            # ── Poll web API for current position/state ───────────────────
+            # -- Poll web API for current position/state -------------------
             info = self._poll(port)
             if info:
                 pos = info.get("position_ms", 0)
@@ -399,8 +399,8 @@ class MpcBeWatchdog:
                 if state == 2:   # playing
                     playback_started = True
                 elif state == 0 and playback_started and not recorded:
-                    # ── Secondary: stopped while process still alive ───────
-                    logger.info("MPC-BE state → stopped — recording progress.")
+                    # -- Secondary: stopped while process still alive -------
+                    logger.info("MPC-BE state -> stopped -- recording progress.")
                     recorded = True
                     self._record(path, last_position_ms, last_duration_ms)
                     self.bridge.playbackFinished.emit()
@@ -410,14 +410,14 @@ class MpcBeWatchdog:
 
         logger.info("MpcBeWatchdog finished.")
 
-    # ── Progress recording ───────────────────────────────────────────────────
+    # -- Progress recording ---------------------------------------------------
 
     def _record(self, path: str, position_ms: int, duration_ms: int) -> None:
         if self.progress_store is None:
-            logger.debug("MpcBeWatchdog: no progress_store injected — skipping.")
+            logger.debug("MpcBeWatchdog: no progress_store injected -- skipping.")
             return
         if not path or duration_ms <= 0:
-            logger.debug("MpcBeWatchdog: missing path or duration — skipping.")
+            logger.debug("MpcBeWatchdog: missing path or duration -- skipping.")
             return
         try:
             self.progress_store.record(path, position_ms / 1000.0, duration_ms / 1000.0)

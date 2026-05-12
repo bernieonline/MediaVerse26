@@ -18,7 +18,7 @@ class JRiverController:
         sep = "&" if "?" in path else "?"
         return f"{JRiverController.HOST}/MCWS/v1{path}{sep}Token={JRiverController.TOKEN}"
 
-    # ── MCC helpers ─────────────────────────────────────────────────────────
+    # -- MCC helpers ---------------------------------------------------------
 
     @staticmethod
     def send_mcc(command_id: int, parameter: int = 0):
@@ -41,10 +41,10 @@ class JRiverController:
 
     @staticmethod
     def minimize_window():
-        """MCC_MINIMIZE_WINDOW — parameter 1 toggles minimize/restore."""
+        """MCC_MINIMIZE_WINDOW -- parameter 1 toggles minimize/restore."""
         JRiverController.send_mcc(10014, parameter=1)
 
-    # ── Server ───────────────────────────────────────────────────────────────
+    # -- Server ---------------------------------------------------------------
 
     @staticmethod
     def is_running() -> bool:
@@ -55,7 +55,7 @@ class JRiverController:
         except requests.RequestException:
             return False
 
-    # ── Media ID lookup ──────────────────────────────────────────────────────
+    # -- Media ID lookup ------------------------------------------------------
 
     @staticmethod
     def get_media_id(file_path: str) -> Optional[str]:
@@ -74,7 +74,7 @@ class JRiverController:
             logger.error(f"ID lookup failed: {e}")
             return None
 
-    # ── Watchdog ─────────────────────────────────────────────────────────────
+    # -- Watchdog -------------------------------------------------------------
 
     @staticmethod
     def monitor_playback(bridge):
@@ -82,9 +82,9 @@ class JRiverController:
         Polls JRiver playback state.  On stop, actively prepares the window
         state before signalling QML:
 
-          1.  MCC 10014  — JRiver minimises itself (cooperative; Windows allows it).
-          2.  _handback_windows() — AttachThreadInput + Alt-key to raise MediaVerse.
-          3.  playbackFinished.emit() — QML triggers the cinema fade.
+          1.  MCC 10014  -- JRiver minimises itself (cooperative; Windows allows it).
+          2.  _handback_windows() -- AttachThreadInput + Alt-key to raise MediaVerse.
+          3.  playbackFinished.emit() -- QML triggers the cinema fade.
         """
         # Import here to avoid any circular-import risk at module load time
         from Sandbox.Playback.playback_controller import _handback_windows
@@ -112,7 +112,7 @@ class JRiverController:
                 if state != "0":
                     playback_started = True
                 elif playback_started:
-                    logger.info("Stop detected — preparing window handback.")
+                    logger.info("Stop detected -- preparing window handback.")
                     _handback_windows()
                     bridge.playbackFinished.emit()
                     break
@@ -120,7 +120,7 @@ class JRiverController:
                 time.sleep(poll_interval)
 
             except requests.RequestException as e:
-                logger.debug(f"MCWS poll error: {e} — retrying.")
+                logger.debug(f"MCWS poll error: {e} -- retrying.")
                 time.sleep(0.5)
             except Exception as e:
                 logger.error(f"monitor_playback error: {e}")

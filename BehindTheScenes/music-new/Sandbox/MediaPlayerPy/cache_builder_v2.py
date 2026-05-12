@@ -24,17 +24,17 @@ class CacheBuilder_v2(QObject):
     # ----------------------------------------------------------------
     def run(self):
         """
-        Incremental build — only writes image files that do not yet exist.
+        Incremental build -- only writes image files that do not yet exist.
         Skips carousel tier entirely (not used by any view).
 
         Emits cacheFinished(result) where result contains:
-          written (int)   — files newly written this run
-          skipped (int)   — files already present, no action needed
-          errors  (int)   — items that failed
-          expected_thumb  (int) — manifest items with a thumb path
-          expected_display(int) — manifest items with a display path
-          found_thumb     (int) — files present in thumb folder after run
-          found_display   (int) — files present in display folder after run
+          written (int)   -- files newly written this run
+          skipped (int)   -- files already present, no action needed
+          errors  (int)   -- items that failed
+          expected_thumb  (int) -- manifest items with a thumb path
+          expected_display(int) -- manifest items with a display path
+          found_thumb     (int) -- files present in thumb folder after run
+          found_display   (int) -- files present in display folder after run
         """
         print(">>> CacheBuilder_v2.run() started")
         self.cacheStarted.emit()
@@ -60,7 +60,7 @@ class CacheBuilder_v2(QObject):
             source_str      = shared.get("original")
             thumb_rel_str   = cache_info.get("thumb")
             display_rel_str = cache_info.get("display")
-            # carousel intentionally excluded — no view requests it
+            # carousel intentionally excluded -- no view requests it
 
             if not source_str:
                 continue
@@ -108,7 +108,7 @@ class CacheBuilder_v2(QObject):
 
             except Exception as e:
                 errors += 1
-                print(f"    ⚠️ Exception while processing {source}: {e}")
+                print(f"    [WARN] Exception while processing {source}: {e}")
 
         # ----------------------------------------------------------------
         # Verification: count actual files on disk vs expected
@@ -131,13 +131,13 @@ class CacheBuilder_v2(QObject):
 
         if thumb_ok and display_ok:
             print(
-                f"✅ [CacheBuilder_v2] Build complete — "
+                f"[OK] [CacheBuilder_v2] Build complete -- "
                 f"written:{written} skipped:{skipped} errors:{errors} | "
                 f"thumb:{found_thumb}/{expected_thumb} display:{found_display}/{expected_display}"
             )
         else:
             print(
-                f"⚠️ [CacheBuilder_v2] Build finished with gaps — "
+                f"[WARN] [CacheBuilder_v2] Build finished with gaps -- "
                 f"thumb:{found_thumb}/{expected_thumb} display:{found_display}/{expected_display}"
             )
 

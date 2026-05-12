@@ -42,8 +42,8 @@ if __name__ == "__main__":
 
     # Compare hashes
     if manifest_A["manifest_hash"] == manifest_B["manifest_hash"]:
-        print("✅ Manifests are identical (hashes match).")
+        print("[OK] Manifests are identical (hashes match).")
     else:
-        print("❌ Manifests differ (hashes do not match).")
+        print("[ERROR] Manifests differ (hashes do not match).")
         print(f"Hash A: {manifest_A['manifest_hash']}")
         print(f"Hash B: {manifest_B['manifest_hash']}")

@@ -1,5 +1,5 @@
 """
-media_manager_backend.py — QObject backend for the Physical Collection Management module.
+media_manager_backend.py -- QObject backend for the Physical Collection Management module.
 
 Context property name: mediaManagerBackend
 """
@@ -20,9 +20,9 @@ import media_manager_db as db
 log = logging.getLogger(__name__)
 
 
-# ─────────────────────────────────────────────────────────────────────────────
+# -----------------------------------------------------------------------------
 #  Module-level helpers
-# ─────────────────────────────────────────────────────────────────────────────
+# -----------------------------------------------------------------------------
 
 def _build_collection_name(folder_path: str, device: str) -> str:
     """Build the canonical collection name: device:drive:/subfolder:YYYY-MM-DD HH:MM:SS"""
@@ -66,7 +66,7 @@ def _fast_checksum(fpath: str, chunk: int = 65536) -> str:
 
 
 class MediaManagerBackend(QObject):
-    # ── Signals ──────────────────────────────────────────────────────────────
+    # -- Signals --------------------------------------------------------------
     scanProgress  = Signal(int, int, str)   # current, total, current_file
     scanComplete  = Signal(str, int)        # collection_name, record_count
     scanError     = Signal(str)
@@ -83,17 +83,17 @@ class MediaManagerBackend(QObject):
         super().__init__(parent)
         self._cancel_scan = False
 
-    # ── DB connection test ────────────────────────────────────────────────────
+    # -- DB connection test ----------------------------------------------------
 
     @Slot()
     def test_connection(self):
         result = db.test_connection()
         self.dbConnected.emit(result)
-        msg = "MediaManager2 DB connected ✓" if result else "MediaManager2 DB connection failed ✗"
+        msg = "MediaManager2 DB connected " if result else "MediaManager2 DB connection failed "
         self.statusMessage.emit(msg)
         log.info("[MM] test_connection: %s", result)
 
-    # ── List management ───────────────────────────────────────────────────────
+    # -- List management -------------------------------------------------------
 
     @Slot(str)
     def load_list(self, list_name: str):
@@ -132,7 +132,7 @@ class MediaManagerBackend(QObject):
         self.listSaved.emit(list_name, ok)
         self.statusMessage.emit(f"{'Saved' if ok else 'Save failed:'} {list_name}")
 
-    # ── Search ────────────────────────────────────────────────────────────────
+    # -- Search ----------------------------------------------------------------
 
     @Slot(str)
     def search_collections(self, query: str):
@@ -141,7 +141,7 @@ class MediaManagerBackend(QObject):
             self.searchResults.emit(results)
         threading.Thread(target=_run, daemon=True).start()
 
-    # ── Scan Location ─────────────────────────────────────────────────────────
+    # -- Scan Location ---------------------------------------------------------
 
     @Slot(str)
     def start_scan(self, folder_path: str):
@@ -173,7 +173,7 @@ class MediaManagerBackend(QObject):
             daemon=True,
         ).start()
 
-    # ── Scan Master ───────────────────────────────────────────────────────────
+    # -- Scan Master -----------------------------------------------------------
 
     @Slot(str, str, str)
     def start_master_scan(self, folder_path: str, media_type: str, master_type: str):
@@ -212,7 +212,7 @@ class MediaManagerBackend(QObject):
                     all_files.append((fpath, fname, ext))
 
             total = len(all_files)
-            self.statusMessage.emit(f"Found {total} files, filtering by media type…")
+            self.statusMessage.emit(f"Found {total} files, filtering by media type...")
 
             batch = []
             accepted = 0
@@ -234,8 +234,8 @@ class MediaManagerBackend(QObject):
 
                 category = ext_map.get(ext)  # None if extension not in mediatypes table
 
-                # Filter: master scan → only the selected media type;
-                #         non-master scan → any known media type, reject unknowns
+                # Filter: master scan -> only the selected media type;
+                #         non-master scan -> any known media type, reject unknowns
                 if media_type:
                     if category != media_type:
                         continue
@@ -277,13 +277,13 @@ class MediaManagerBackend(QObject):
             self.scanProgress.emit(accepted, total, "")
             self.scanComplete.emit(collection_name, accepted)
             self.statusMessage.emit(
-                f"Scan complete — {accepted} media files accepted (of {total} found) in '{collection_name}'"
+                f"Scan complete -- {accepted} media files accepted (of {total} found) in '{collection_name}'"
             )
         except Exception as e:
             log.error("[MM] scan_worker: %s", e)
             self.scanError.emit(str(e))
 
-    # ── Reporting ─────────────────────────────────────────────────────────────
+    # -- Reporting -------------------------------------------------------------
 
     @Slot(str, bool)
     def load_report(self, table: str, master_only: bool):
@@ -292,7 +292,7 @@ class MediaManagerBackend(QObject):
             self.reportData.emit(data)
         threading.Thread(target=_run, daemon=True).start()
 
-    # ── Compare ───────────────────────────────────────────────────────────────
+    # -- Compare ---------------------------------------------------------------
 
     @Slot(str, str, str, str)
     def compare_collections(self, table_a: str, coll_a: str,
@@ -310,11 +310,11 @@ class MediaManagerBackend(QObject):
             only_b = [{"file_path": map_b[k]} for k in sorted(keys_b - keys_a)]
             self.compareResult.emit(only_a, only_b)
             self.statusMessage.emit(
-                f"Compare done — {len(only_a)} missing from B, {len(only_b)} missing from A"
+                f"Compare done -- {len(only_a)} missing from B, {len(only_b)} missing from A"
             )
         threading.Thread(target=_run, daemon=True).start()
 
-    # ── Manage ────────────────────────────────────────────────────────────────
+    # -- Manage ----------------------------------------------------------------
 
     @Slot(str, str)
     def remove_collection(self, table: str, collection_name: str):
@@ -342,7 +342,7 @@ class MediaManagerBackend(QObject):
         ok = errors == 0
         self.operationDone.emit("delete", ok)
         self.statusMessage.emit(
-            f"Deleted {deleted_files} files, {errors} errors — '{collection_name}'"
+            f"Deleted {deleted_files} files, {errors} errors -- '{collection_name}'"
         )
 
     @Slot(str, str, str)
@@ -375,7 +375,7 @@ class MediaManagerBackend(QObject):
         ok = errors == 0
         self.operationDone.emit("move", ok)
         self.statusMessage.emit(
-            f"Moved {moved} files, {errors} errors — '{collection_name}'"
+            f"Moved {moved} files, {errors} errors -- '{collection_name}'"
         )
 
     @Slot(str, str, str)
@@ -385,10 +385,10 @@ class MediaManagerBackend(QObject):
         ok = count > 0
         self.operationDone.emit("transfer", ok)
         self.statusMessage.emit(
-            f"Transferred {count} records from {from_table} → {to_table} for '{collection_name}'"
+            f"Transferred {count} records from {from_table} -> {to_table} for '{collection_name}'"
         )
 
-    # ── Helper slots used by QML dropdowns ───────────────────────────────────
+    # -- Helper slots used by QML dropdowns -----------------------------------
 
     @Slot(str, result=list)
     def get_collection_names(self, table: str) -> list:

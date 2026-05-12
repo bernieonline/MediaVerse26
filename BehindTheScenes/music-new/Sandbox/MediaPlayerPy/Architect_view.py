@@ -22,7 +22,7 @@ class ArchitectView(QObject):
         self._fallback = paths.get('fallback_image', "")
         
         # Debugging: Let's see if the paths actually loaded during init
-        print(f"📂 [ARCHITECT INIT] Collections Path: {self._collections_path}")
+        print(f"[DIR] [ARCHITECT INIT] Collections Path: {self._collections_path}")
 
     def _load_manifest(self):
         """Loads the master manifest for random fallbacks."""
@@ -32,19 +32,19 @@ class ArchitectView(QObject):
                 with open(path, "r", encoding="utf-8") as f:
                     self._manifest_data = json.load(f)
         except Exception as e:
-            print(f"❌ [ArchitectView] Manifest Load Error: {e}")
+            print(f"[ERROR] [ArchitectView] Manifest Load Error: {e}")
 
     @Slot()
     def prepare_atmosphere(self):
         """Builds the background image list from the TopTen Architect collection."""
-        print("\n🔍 [ARCHITECT DEBUG] Starting Atmosphere Retrieval...")
+        print("\n[SEARCH] [ARCHITECT DEBUG] Starting Atmosphere Retrieval...")
         try:
             image_list = []
 
             # 1. Try to resolve images from the TopTen Architect collection
             collections_path = str(self._collections_path)
             if os.path.exists(collections_path):
-                print(f"📂 Reading Collections: {collections_path}")
+                print(f"[DIR] Reading Collections: {collections_path}")
                 with open(collections_path, 'r', encoding='utf-8') as f:
                     colls = json.load(f)
 
@@ -55,14 +55,14 @@ class ArchitectView(QObject):
                 )
 
                 if top_ten:
-                    print(f"✅ Found TopTen collection: '{top_ten.get('name')}'")
+                    print(f"[OK] Found TopTen collection: '{top_ten.get('name')}'")
                     image_list = self._resolve_images_from_collection(top_ten)
                 else:
-                    print("⚠️ No TopTen Architect collection found in collections file.")
+                    print("[WARN] No TopTen Architect collection found in collections file.")
 
             # 2. Fallback to random manifest images
             if not image_list:
-                print("⚠️ Falling back to random manifest images.")
+                print("[WARN] Falling back to random manifest images.")
                 image_list = self._get_random_manifest_images(10)
 
             # 3. Format all paths for QML and emit
@@ -70,16 +70,16 @@ class ArchitectView(QObject):
             for raw_p in image_list:
                 formatted = self._format_path(raw_p)
                 final_paths.append(formatted)
-                print(f"🖼️  IMAGE MAPPING: [RAW]: {raw_p}  -->  [QML]: {formatted}")
+                print(f"  IMAGE MAPPING: [RAW]: {raw_p}  -->  [QML]: {formatted}")
 
             if not final_paths:
-                print("❌ CRITICAL: No images found at all. Sending fallback.")
+                print("[ERROR] CRITICAL: No images found at all. Sending fallback.")
                 final_paths = [self._format_path(str(self._fallback))]
 
             self.atmosphereReady.emit(final_paths)
 
         except Exception as e:
-            print(f"❌ ARCHITECT ERROR: {str(e)}")
+            print(f"[ERROR] ARCHITECT ERROR: {str(e)}")
             self.atmosphereReady.emit([self._format_path(str(self._fallback))])
 
     def _resolve_images_from_collection(self, collection):
@@ -87,22 +87,22 @@ class ArchitectView(QObject):
         image_uris = []
         cache_root = paths.get("local_display_v2")
         if not cache_root:
-            print("❌ [ARCHITECT] local_display_v2 path not found in project_paths.")
+            print("[ERROR] [ARCHITECT] local_display_v2 path not found in project_paths.")
             return []
 
         for rule in collection.get("rules", []):
             if rule.get("mode") != "Files":
                 continue
             for file_path in rule.get("data", {}).get("files", []):
-                # "W:\Collection\rocky\Rocky (1976).mp4" → "Rocky (1976)"
+                # "W:\Collection\rocky\Rocky (1976).mp4" -> "Rocky (1976)"
                 stem = Path(file_path).stem
                 img_path = Path(cache_root) / (stem + ".jpg")
                 if img_path.exists():
                     image_uris.append(img_path.as_uri())
                 else:
-                    print(f"⚠️ [ATMOSPHERE] Image not in cache: {img_path}")
+                    print(f"[WARN] [ATMOSPHERE] Image not in cache: {img_path}")
 
-        print(f"✅ [ATMOSPHERE] Resolved {len(image_uris)} images from collection.")
+        print(f"[OK] [ATMOSPHERE] Resolved {len(image_uris)} images from collection.")
         return image_uris
 
     def _get_random_atmosphere(self, count):
@@ -125,12 +125,12 @@ class ArchitectView(QObject):
         if not path: return ""
         path_str = str(path)
 
-        # Already a file URI (e.g. from Path.as_uri()) — return as-is.
+        # Already a file URI (e.g. from Path.as_uri()) -- return as-is.
         # Calling os.path.normpath on a URI corrupts it on Windows.
         if path_str.startswith("file:"):
             return path_str
 
-        # Plain filesystem path — convert slashes then prepend scheme.
+        # Plain filesystem path -- convert slashes then prepend scheme.
         clean_p = path_str.replace("\\", "/")
         if len(clean_p) >= 2 and clean_p[1] == ":":   # Windows drive letter
             return "file:///" + clean_p
@@ -150,7 +150,7 @@ class ArchitectView(QObject):
             cache_root = paths.get("local_display_v2")
 
             if not self._manifest_path or not os.path.exists(self._manifest_path):
-                print(f"⚠️ [ARCHITECT] Manifest missing at: {self._manifest_path}")
+                print(f"[WARN] [ARCHITECT] Manifest missing at: {self._manifest_path}")
                 return []
                 
             with open(self._manifest_path, 'r', encoding='utf-8') as f:
@@ -181,7 +181,7 @@ class ArchitectView(QObject):
                         valid_pool.append(file_uri)
             
             if not valid_pool:
-                print(f"❌ [ARCHITECT] No matching files found in: {cache_root}")
+                print(f"[ERROR] [ARCHITECT] No matching files found in: {cache_root}")
                 return []
 
             # 5. Return a random sample
@@ -189,10 +189,10 @@ class ArchitectView(QObject):
             
             # Debugging to verify the path isn't doubled
             if selection:
-                print(f"🎨 [ATMOSPHERE] Sample Path: {selection[0]}")
+                print(f" [ATMOSPHERE] Sample Path: {selection[0]}")
                 
             return selection
             
         except Exception as e:
-            print(f"💥 [ARCHITECT ERROR] in _get_random_manifest_images: {e}")
+            print(f" [ARCHITECT ERROR] in _get_random_manifest_images: {e}")
             return []

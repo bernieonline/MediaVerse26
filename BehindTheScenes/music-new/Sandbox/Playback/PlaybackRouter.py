@@ -12,7 +12,7 @@ from Sandbox.Playback.playback_qml_bridge import PlaybackQmlBridge
 
 class PlaybackRouter(QObject):
 
-    # Signal → QML MiniPlayer
+    # Signal -> QML MiniPlayer
     launchMiniPlayer = Signal(str)
 
     def __init__(self):
@@ -45,7 +45,7 @@ class PlaybackRouter(QObject):
         # ----------------------------------------------------
         pref = self.config.get("Preferred Player", "JRiver")
         if isinstance(pref, int):
-            # Legacy integer value — map to name for backward compatibility
+            # Legacy integer value -- map to name for backward compatibility
             _legacy_map = {0: "MiniPlayer", 1: "JRiver", 2: "PowerDVD", 3: "vlc"}
             self.preferred_player = _legacy_map.get(pref, "JRiver")
         else:
@@ -73,7 +73,7 @@ class PlaybackRouter(QObject):
         print("==============================\n")
 
     # ------------------------------------------------------------
-    # PUBLIC ENTRY POINT (QML → Python)
+    # PUBLIC ENTRY POINT (QML -> Python)
     # ------------------------------------------------------------
     
     def _play_generic_subprocess(self, exe_path, video_path, extra_args=None):
@@ -86,11 +86,11 @@ class PlaybackRouter(QObject):
         if extra_args:
             cmd.extend(extra_args)
             
-        print(f"🚀 Executing: {cmd}")
+        print(f"[>>] Executing: {cmd}")
         try:
             subprocess.Popen(cmd)
         except Exception as e:
-            print(f"❌ Failed to launch: {e}")
+            print(f"[ERROR] Failed to launch: {e}")
     
     
     
@@ -118,7 +118,7 @@ class PlaybackRouter(QObject):
         # EXTERNAL PLAYERS (Dynamic Lookup)
         # --------------------------------------------------------
         if not player_exe or not os.path.exists(player_exe):
-            print(f"❌ ERROR: Player '{player_name}' has no valid EXE path.")
+            print(f"[ERROR] ERROR: Player '{player_name}' has no valid EXE path.")
             return
 
         # Use specific logic for JRiver (HTTP vs Subprocess)
@@ -165,10 +165,10 @@ class PlaybackRouter(QObject):
         clean_path = os.path.normpath(clean_path)
 
         if not os.path.exists(clean_path):
-            print(f"❌ ERROR: File does NOT exist: {clean_path}")
+            print(f"[ERROR] ERROR: File does NOT exist: {clean_path}")
             return
         if not os.path.exists(exe_path):
-            print(f"❌ ERROR: MPC-BE EXE not found: {exe_path}")
+            print(f"[ERROR] ERROR: MPC-BE EXE not found: {exe_path}")
             return
 
         port    = int(self.config.get("MpcBePort", "13579"))
@@ -202,7 +202,7 @@ class PlaybackRouter(QObject):
             self.http_bridge.playVideo(clean_path)
             print("HTTP request sent via PlaybackQmlBridge.")
         except Exception as e:
-            print("❌ JRiver HTTP playback failed:", e)
+            print("[ERROR] JRiver HTTP playback failed:", e)
             traceback.print_exc()
 
     # ------------------------------------------------------------
@@ -221,21 +221,21 @@ class PlaybackRouter(QObject):
         print("CHECKING JRiver EXE EXISTS:", os.path.exists(self.jriver_exe))
 
         if not os.path.exists(path):
-            print("❌ ERROR: File does NOT exist:", path)
+            print("[ERROR] ERROR: File does NOT exist:", path)
             return
 
         if not os.path.exists(self.jriver_exe):
-            print("❌ ERROR: JRiver EXE not found:", self.jriver_exe)
+            print("[ERROR] ERROR: JRiver EXE not found:", self.jriver_exe)
             return
 
         cmd = [self.jriver_exe, "/Play", path]
 
-        print("\n🚀 LAUNCHING JRiver NOW...\n")
+        print("\n[>>] LAUNCHING JRiver NOW...\n")
         try:
             subprocess.Popen(cmd)
             print("JRiver launched successfully.")
         except Exception as e:
-            print("❌ JRiver Subprocess Launch Failed:", e)
+            print("[ERROR] JRiver Subprocess Launch Failed:", e)
             traceback.print_exc()
 
     # ------------------------------------------------------------
@@ -254,21 +254,21 @@ class PlaybackRouter(QObject):
         print("CHECKING VLC EXE EXISTS:", os.path.exists(self.vlc_exe))
 
         if not os.path.exists(path):
-            print("❌ ERROR: File does NOT exist:", path)
+            print("[ERROR] ERROR: File does NOT exist:", path)
             return
 
         if not os.path.exists(self.vlc_exe):
-            print("❌ ERROR: VLC EXE not found:", self.vlc_exe)
+            print("[ERROR] ERROR: VLC EXE not found:", self.vlc_exe)
             return
 
         cmd = [self.vlc_exe, path]
 
-        print("\n🚀 LAUNCHING VLC NOW...\n")
+        print("\n[>>] LAUNCHING VLC NOW...\n")
         try:
             subprocess.Popen(cmd)
             print("VLC launched successfully.")
         except Exception as e:
-            print("❌ VLC Subprocess Launch Failed:", e)
+            print("[ERROR] VLC Subprocess Launch Failed:", e)
             traceback.print_exc()
 
     # ------------------------------------------------------------
@@ -287,21 +287,21 @@ class PlaybackRouter(QObject):
         print("CHECKING PowerDVD EXE EXISTS:", os.path.exists(self.powerdvd_exe))
 
         if not os.path.exists(path):
-            print("❌ ERROR: File does NOT exist:", path)
+            print("[ERROR] ERROR: File does NOT exist:", path)
             return
 
         if not os.path.exists(self.powerdvd_exe):
-            print("❌ ERROR: PowerDVD EXE not found:", self.powerdvd_exe)
+            print("[ERROR] ERROR: PowerDVD EXE not found:", self.powerdvd_exe)
             return
 
         cmd = [self.powerdvd_exe, path]
 
-        print("\n🚀 LAUNCHING PowerDVD NOW...\n")
+        print("\n[>>] LAUNCHING PowerDVD NOW...\n")
         try:
             subprocess.Popen(cmd)
             print("PowerDVD launched successfully.")
         except Exception as e:
-            print("❌ PowerDVD Subprocess Launch Failed:", e)
+            print("[ERROR] PowerDVD Subprocess Launch Failed:", e)
             traceback.print_exc()
 
     def refresh_config(self):

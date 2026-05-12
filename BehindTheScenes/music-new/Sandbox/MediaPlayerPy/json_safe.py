@@ -1,12 +1,12 @@
 """
-json_safe.py — Atomic JSON write + validated read utility for MediaVerse.
+json_safe.py -- Atomic JSON write + validated read utility for MediaVerse.
 
 safe_json_write(path, data)
     Writes `data` to `path` atomically via a .tmp file.
     Pre-write backup:
       - All files: copies current file to <filename>.bak before swapping.
       - Movies_Collections_v2.json: keeps a rolling 5-deep backup
-        (_bak1 … _bak5), rotated on every save.
+        (_bak1 ... _bak5), rotated on every save.
     The original file is never touched until the write succeeds.
     Raises ValueError if data is empty, OSError on filesystem failure.
 
@@ -29,7 +29,7 @@ from pathlib import Path
 
 log = logging.getLogger(__name__)
 
-# Files that get a rolling multi-depth backup (stem → depth)
+# Files that get a rolling multi-depth backup (stem -> depth)
 _ROLLING_BACKUPS = {
     "Movies_Collections_v2": 5,
 }
@@ -44,7 +44,7 @@ _DEFAULTS = {
 }
 
 
-# ── Validation ────────────────────────────────────────────────────────────────
+# -- Validation ----------------------------------------------------------------
 
 def _validate(data, schema_type):
     """Return True if data passes minimum structure check for schema_type."""
@@ -74,7 +74,7 @@ def _validate(data, schema_type):
     if schema_type == "tv_watch_progress":
         if not isinstance(data, dict):
             return False
-        # Each entry value must be a dict (video_path → progress record)
+        # Each entry value must be a dict (video_path -> progress record)
         for v in list(data.values())[:5]:
             if not isinstance(v, dict):
                 return False
@@ -87,12 +87,12 @@ def _audit_collections(data):
     """
     Soft record-level audit for the collections list.
 
-    Does NOT reject the whole file — only logs and notifies about individual
+    Does NOT reject the whole file -- only logs and notifies about individual
     suspect records. Called after _validate() passes.
 
     Currently detects:
       - Quick collection records (have 'primary_category', no 'type') whose
-        'rules' dict is empty — these will always return zero movies.
+        'rules' dict is empty -- these will always return zero movies.
     """
     suspect = []
     for r in data:
@@ -104,7 +104,7 @@ def _audit_collections(data):
 
     if suspect:
         names = ", ".join(f"'{n}'" for n in suspect)
-        msg = (f"⚠️ Collections with empty rules (will return no movies): {names}. "
+        msg = (f"[WARN] Collections with empty rules (will return no movies): {names}. "
                f"Delete and recreate them to fix.")
         print(f"[json_safe] {msg}")
         log.warning("_audit_collections: %s", msg)
@@ -112,7 +112,7 @@ def _audit_collections(data):
 
 
 def _notify(message, urgent=False):
-    """Post a notification — silently skipped if NotificationManager unavailable."""
+    """Post a notification -- silently skipped if NotificationManager unavailable."""
     try:
         from NotificationManager import notifier
         print(f"[json_safe] _notify called | qml_ready={notifier._qml_ready} | msg={message}")
@@ -121,7 +121,7 @@ def _notify(message, urgent=False):
         print(f"[json_safe] _notify failed: {e}")
 
 
-# ── Backup helpers ────────────────────────────────────────────────────────────
+# -- Backup helpers ------------------------------------------------------------
 
 def _make_backup(path: Path) -> None:
     """
@@ -136,7 +136,7 @@ def _make_backup(path: Path) -> None:
     depth = _ROLLING_BACKUPS.get(path.stem)
 
     if depth:
-        # Rotate: shift bak(N-1)→bakN, …, bak1→bak2, current→bak1
+        # Rotate: shift bak(N-1)->bakN, ..., bak1->bak2, current->bak1
         for n in range(depth, 1, -1):
             src = path.with_name(f"{path.stem}_bak{n - 1}{path.suffix}")
             dst = path.with_name(f"{path.stem}_bak{n}{path.suffix}")
@@ -163,7 +163,7 @@ def _backup_candidates(path: Path):
     return [bak]
 
 
-# ── Public API ────────────────────────────────────────────────────────────────
+# -- Public API ----------------------------------------------------------------
 
 def safe_json_write(path, data):
     """
@@ -173,7 +173,7 @@ def safe_json_write(path, data):
       1. Validate data is a non-empty list or dict.
       2. Back up the current file (rolling 5-deep for collections, .bak for others).
       3. Write to <path>.tmp in the same directory.
-      4. os.replace() swaps .tmp → target (atomic on NTFS).
+      4. os.replace() swaps .tmp -> target (atomic on NTFS).
       5. On any failure: delete .tmp, raise exception, original untouched.
 
     Raises:
@@ -247,7 +247,7 @@ def safe_json_read(path, schema_type=None):
                 continue
 
             if candidate != path:
-                msg = (f"⚠️ '{path.name}' was damaged — "
+                msg = (f"[WARN] '{path.name}' was damaged -- "
                        f"data restored from {candidate.name}")
                 print(f"[json_safe] {msg}")
                 log.warning(msg)
@@ -259,12 +259,12 @@ def safe_json_read(path, schema_type=None):
             return data
 
         except (json.JSONDecodeError, OSError) as exc:
-            print(f"[json_safe] ❌ Failed to load {candidate.name}: {exc}")
+            print(f"[json_safe] [ERROR] Failed to load {candidate.name}: {exc}")
             log.warning("safe_json_read: failed to load %s: %s", candidate.name, exc)
             continue
 
     # All sources exhausted
-    msg = f"❌ All sources failed for '{path.name}' — using empty default"
+    msg = f"[ERROR] All sources failed for '{path.name}' -- using empty default"
     print(f"[json_safe] {msg}")
     log.error(msg)
     _notify(msg, urgent=True)

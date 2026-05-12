@@ -16,7 +16,7 @@ class NotificationManager(QObject):
     @Slot(str, bool)
     def post_notification(self, message, is_urgent=False):
         if not self._qml_ready:
-            # QML not connected yet — buffer for replay
+            # QML not connected yet -- buffer for replay
             self._pending.append((message, is_urgent))
             return
         self.notificationReceived.emit(message, is_urgent)

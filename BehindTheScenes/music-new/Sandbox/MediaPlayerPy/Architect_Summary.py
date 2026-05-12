@@ -16,7 +16,7 @@ class ArchitectSummary:
         # RULE 1: THE NOT GATE (Highest Priority)
         # We ignore 'is_narrowing' here to avoid double negatives.
         if gate == "NOT":
-            print(f"➖ [ENGINE] Excluding {len(new_ids)} items from foundation.")
+            print(f" [ENGINE] Excluding {len(new_ids)} items from foundation.")
             self.working_foundation = self.list_excluding(self.working_foundation, new_ids)
 
         # RULE 2: THE FEATURING LOGIC (Intersection)
@@ -32,12 +32,12 @@ class ArchitectSummary:
     # --- THE MATH OPERATIONS ---
 
     def list_featuring(self, foundation, new_panel):
-        """The 'AND' Gate: Keeps only items present in BOTH lists (A ∩ B)."""
+        """The 'AND' Gate: Keeps only items present in BOTH lists (A AND B)."""
         # This is the '1960s Westerns' logic
         return list(set(foundation) & set(new_panel))
 
     def list_union(self, foundation, new_panel):
-        """The 'OR' Gate: Combines both lists, no duplicates (A ∪ B)."""
+        """The 'OR' Gate: Combines both lists, no duplicates (A OR B)."""
         return list(set(foundation) | set(new_panel))
 
     def list_excluding(self, foundation, new_panel):
@@ -54,12 +54,12 @@ class ArchitectSummary:
         """Clears the bookshelf."""
         self.working_foundation = []
         self.panel_results = {}
-        print("🧹 [ENGINE] Logic Reset.")
+        print("[CLEAN] [ENGINE] Logic Reset.")
 
     def list_excluding(self, foundation, new_panel):
         """
         The 'NOT' Gate: Removes panel items from the foundation.
-        Logic: A - (A ∩ B)
+        Logic: A - (A AND B)
         """
         set_foundation = set(foundation)
         set_panel = set(new_panel)

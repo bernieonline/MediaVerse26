@@ -158,15 +158,15 @@ class prototype_pc_monitor(QWidget):
         and load XML into the detail panel on the right.
         """
 
-        # ✅ Get the selected image path stored by carousel_content
+        # [OK] Get the selected image path stored by carousel_content
         image_file_path = constants.selected_image_path
         print("main Carousel clicked jpg Image:", image_file_path, " XML:", media_file_path)
 
-        # ✅ Load XML in right panel (this one comes from carousel click)
+        # [OK] Load XML in right panel (this one comes from carousel click)
         if media_file_path:
             self.single_image_detail_panel.load_details(media_file_path)
 
-        # ✅ Load image into pixmap and switch page
+        # [OK] Load image into pixmap and switch page
         if os.path.exists(constants.selected_image_path):
             self._single_image_pixmap = QPixmap(constants.selected_image_path)
             self.main_stack.setCurrentWidget(self.single_image_split_page)

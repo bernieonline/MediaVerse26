@@ -26,11 +26,11 @@ class FolderMapper:
                             normalized_key = os.path.normpath(video_path)
                             self.manifest_data[normalized_key] = item
                             
-                print(f"🎯 FolderMapper: Indexed {len(self.manifest_data)} records using 'shared.video' keys.")
+                print(f"[TARGET] FolderMapper: Indexed {len(self.manifest_data)} records using 'shared.video' keys.")
             else:
-                print(f"⚠️ FolderMapper: Manifest not found at {self.manifest_path}")
+                print(f"[WARN] FolderMapper: Manifest not found at {self.manifest_path}")
         except Exception as e:
-            print(f"❌ FolderMapper Error: {e}")
+            print(f"[ERROR] FolderMapper Error: {e}")
 
     def get_items_for_folder(self, folder_path):
         """
@@ -48,7 +48,7 @@ class FolderMapper:
         results = []
         try:
             if not os.path.exists(clean_folder):
-                print(f"⚠️ FolderMapper: Path does not exist: {clean_folder}")
+                print(f"[WARN] FolderMapper: Path does not exist: {clean_folder}")
                 return []
 
             # List every file in the directory
@@ -88,10 +88,10 @@ class FolderMapper:
                         "year": 0
                     })
             
-            print(f"📂 FolderMapper: Processed {len(results)} items in {clean_folder}")
+            print(f"[DIR] FolderMapper: Processed {len(results)} items in {clean_folder}")
             
         except Exception as e:
-            print(f"❌ FolderMapper Scan Error: {e}")
+            print(f"[ERROR] FolderMapper Scan Error: {e}")
             
         return results       
 
