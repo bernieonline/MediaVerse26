@@ -1,3 +1,90 @@
+"""
+Framework.py — MediaVerse Application Core
+
+┌─ INSTALLED VS SOURCE STRUCTURE ──────────────────────────────────────────────┐
+│                                                                               │
+│ SOURCE (Development):                                                         │
+│   D:\MediaVerse1.0\BehindTheScenes\BehindTheScenes\music-new\               │
+│   ├─ Sandbox/MediaPlayerPy/          (this file)                            │
+│   ├─ Sandbox/MediaPlayerQML/         (QML UI files)                         │
+│   ├─ Assets/                         (Config.json, xml_collection_data, etc)│
+│   ├─ cacheV2/images/                 (Local image cache)                    │
+│   └─ venv/                           (Python environment)                   │
+│                                                                               │
+│ INSTALLED (Frozen App):                                                       │
+│   C:\Users\<user>\AppData\Local\MediaVerse\                                 │
+│   ├─ MediaVerse.exe                  (Entry point launcher)                 │
+│   └─ _internal/                      (PyInstaller bundle)                   │
+│      ├─ Sandbox/MediaPlayerPy/       (Python code)                         │
+│      ├─ Sandbox/MediaPlayerQML/      (QML files)                           │
+│      ├─ Assets/                      (Config + data files)                  │
+│      ├─ cacheV2/images/              (Local cache — user-writable)         │
+│      └─ [PySide6, Qt libraries, etc]                                        │
+│                                                                               │
+├─ STARTUP PROCESS FLOW ───────────────────────────────────────────────────────┤
+│                                                                               │
+│ 1. LAUNCHER (MediaVerse.py)                                                  │
+│    • Sets UTF-8 encoding, redirects stdout to log file                      │
+│    • Detects frozen mode (installed vs source)                             │
+│    • Configures sys.path and cwd                                           │
+│    • Calls Framework.main()                                                │
+│                                                                               │
+│ 2. INITIALIZATION (Framework.main)                                          │
+│    • Loads Config.json (library paths, player prefs, etc)                  │
+│    • Connects to MySQL: MediaVerse DB (library info)                       │
+│    • Creates core objects: ArchitectView, LandingViewModel, TV_view        │
+│    • Loads QML engine and UI                                              │
+│    • QTimer schedules manifest check (1ms delay to avoid blocking)         │
+│                                                                               │
+│ 3. MANIFEST CHECK (ManifestUpdater_v2)                                     │
+│    • Runs in background thread                                             │
+│    • Checks server accessibility: W:\MediaVerse\                           │
+│    • If not reachable → show user notification, wait for retry             │
+│    • If reachable → proceed to build_and_compare:                          │
+│                                                                               │
+│ 4. BUILD & COMPARE                                                          │
+│    • Builds new manifest_b.json from W:\Collection\                        │
+│    • Compares with current W:\MediaVerse\manifest\manifest.json            │
+│    • If hashes differ → manifest changed (library updated)                 │
+│                                                                               │
+│ 5. CACHE FRESHNESS CHECK (NEW in v1.1)                                     │
+│    • Reads cache_manifest.json (local tracking file)                       │
+│    • Compares server cache file counts (display/thumb/carousel)            │
+│    • If counts differ → cache is stale (device missed sync)                │
+│    • If no cache_manifest → fresh install                                  │
+│                                                                               │
+│ 6. REBUILD DECISION (THREE SCENARIOS)                                       │
+│    A. Manifest changed:  rebuild server + local cache + xml_collection_data │
+│    B. Cache empty:       fresh install → rebuild everything                │
+│    C. Cache stale:       device was offline → rebuild to sync              │
+│    → After rebuild: write cache_manifest.json with current server state    │
+│                                                                               │
+│ 7. LOAD DATA                                                                │
+│    • Load xml_collection_data.json (movie metadata: actors, genres, etc)   │
+│    • Load Collections (user-created movie groupings from W: drive)         │
+│    • Load TV series cache (episode info + watch progress)                  │
+│                                                                               │
+│ 8. READY FOR USER                                                           │
+│    • UI fully loaded, all data cached locally                              │
+│    • Manifest, caches, metadata synced with server                         │
+│    • App is responsive and functional                                      │
+│                                                                               │
+└─ KEY FILES ──────────────────────────────────────────────────────────────────┘
+
+Server (W:\ drive):
+  W:\MediaVerse\manifest\manifest.json         master manifest (library index)
+  W:\MediaVerse\cache\images\{display,thumb,carousel}/   server image cache
+  W:\Collection\                               source video/image/xml files
+  W:\MediaVerse\Collections\Movies_Collections_v2.json   user collections
+
+Local (installed or source):
+  Assets/Config.json                          app configuration
+  Assets/xml_collection_data.json             movie metadata cache
+  Assets/cache_manifest.json                  v1.1: tracks server cache state
+  cacheV2/images/{display,thumb,carousel}/    local image cache (synced from server)
+  Assets/tv_watch_progress.json               watch progress tracking
+"""
+
 import sys
 import os
 import logging
