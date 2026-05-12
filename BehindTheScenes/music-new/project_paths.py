@@ -107,6 +107,7 @@ splash_json = project_root / "Assets" / "Splash.json"
 category_json = project_root / "Assets" / "Category.json"
 tv_watch_progress  = project_root / "Assets" / "tv_watch_progress.json"
 manifest_build_log = project_root / "Assets" / "manifest_build_log.json"
+cache_manifest = project_root / "Assets" / "cache_manifest.json"
 
 # Collections paths
 collection_bg = project_root / "Assets" / "Collections.jpg"
@@ -182,6 +183,7 @@ paths = {
     "splash_json": splash_json,
     "tv_watch_progress":  tv_watch_progress,
     "manifest_build_log": manifest_build_log,
+    "cache_manifest":     cache_manifest,
     "library_root":       library_root,
 
     # --- QML SPECIFIC STRING OVERRIDES ---

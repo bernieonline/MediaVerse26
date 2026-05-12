@@ -14,7 +14,7 @@ safe_json_read(path, schema_type=None)
     Loads JSON from `path` with automatic backup fallback and structure
     validation. Returns a safe empty default if all sources fail.
     schema_type: "collections" | "xml_collection_data" | "config" |
-                 "manifest" | None (no validation)
+                 "manifest" | "cache_manifest" | None (no validation)
 
     For "collections": after loading, runs a soft record-level audit that
     warns about suspect records (e.g. quick collections with empty rules)
@@ -41,6 +41,7 @@ _DEFAULTS = {
     "config":             {"PreferredPlayer": 0},
     "manifest":           {"items": []},
     "tv_watch_progress":  {},
+    "cache_manifest":     {"last_sync": None, "server_counts": {}, "local_manifest_hash": None},
 }
 
 
@@ -79,6 +80,12 @@ def _validate(data, schema_type):
             if not isinstance(v, dict):
                 return False
         return True
+
+    if schema_type == "cache_manifest":
+        if not isinstance(data, dict):
+            return False
+        # Must have server_counts dict (can be empty on first run)
+        return isinstance(data.get("server_counts", {}), dict)
 
     return True
 
