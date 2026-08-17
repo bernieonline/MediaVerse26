@@ -1,4 +1,4 @@
-"""
+r"""
 Framework.py — MediaVerse Application Core
 
 ┌─ INSTALLED VS SOURCE STRUCTURE ──────────────────────────────────────────────┐
@@ -160,6 +160,7 @@ from TV_view import TVViewModel
 from ffmpeg_backend import FFmpegBackend
 from quality_audit_backend import QualityAuditBackend
 from media_manager_backend import MediaManagerBackend
+from collection_diagnostics import CollectionDiagnostics
 
 from dotenv import load_dotenv
 
@@ -200,6 +201,7 @@ def main():
         ffmpeg_backend         = FFmpegBackend()
         quality_audit_backend  = QualityAuditBackend()
         media_manager_backend  = MediaManagerBackend()
+        collection_diagnostics = CollectionDiagnostics()
 
              # SURGICAL ADDITION: Connect the backup signal to the existing notifier
         # msg is the text, success is the boolean. We use 'not success' because 
@@ -352,6 +354,7 @@ def main():
         ctx.setContextProperty("ffmpegBackend",        ffmpeg_backend)
         ctx.setContextProperty("qualityAuditBackend",  quality_audit_backend)
         ctx.setContextProperty("mediaManagerBackend",  media_manager_backend)
+        ctx.setContextProperty("collectionDiagnostics", collection_diagnostics)
         ctx.setContextProperty("startupMode", _startup_mode)
 
         # --------------------------------------------------------

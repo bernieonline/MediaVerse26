@@ -746,7 +746,7 @@ class XMLCollections(QObject):
         print("============  inside row 613   ============")
         for item in self.master_cache:
             # Skip any TV records that may exist in the current on-disk file
-            if item.get("Media Sub Type", "").lower() == "tv show" or item.get("Season", ""):
+            if item.get("Media Sub Type", "").lower() == "tv show":
                 continue
 
             if series_mode_v2 and self._is_football(item):

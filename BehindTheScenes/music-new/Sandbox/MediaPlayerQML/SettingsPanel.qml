@@ -4,8 +4,8 @@ import QtQuick.Layouts 1.15
 
 Popup {
     id: root
-    width: 900
-    height: 700
+    width: 1100
+    height: 750
     modal: true
     focus: true
     anchors.centerIn: Overlay.overlay
@@ -16,6 +16,13 @@ Popup {
     property string recoveryStatus: ""
     property int    recoveryStatusTimer: 0
     property string videoProcPath:  ""
+
+    // Diagnostics tab state
+    property string diagType: "Quick"
+    property string diagMode: "missing"
+    property var    diagCollectionNames: []
+    property var    diagMovieSuggestions: []
+    property bool   diagUserTyping: false
 
     function refreshToolPaths() {
         var tp = root.settings["ToolPaths"] || {}
@@ -54,7 +61,7 @@ Popup {
         var s = SettingsManager.get_settings()
         var playerPaths = s["PlayerPaths"] || {}
         var preferred = s["Preferred Player"] || 0
-        preferredIndex = preferred
+        preferredIndex = parseInt(preferred) || 0
         var keys = Object.keys(playerPaths)
         for (var i = 0; i < keys.length; i++) {
             playerModel.append({ "playerName": keys[i], "playerPath": playerPaths[keys[i]] })
@@ -138,12 +145,12 @@ Popup {
             background: Rectangle { color: "#111" }
 
             Repeater {
-                model: ["Profile", "Player", "Library", "Startup", "Recovery", "Tools"]
+                model: ["Profile", "Player", "Library", "Startup", "Recovery", "Tools", "Diagnostics"]
                 TabButton {
                     text: modelData
                     font.pixelSize: 18
                     font.bold: tabBar.currentIndex === index
-                    width: root.width / 6
+                    width: root.width / 7
 
                     background: Rectangle {
                         color: tabBar.currentIndex === index ? "#2566c2" : "#1a1a1a"
@@ -683,6 +690,340 @@ Popup {
                             }
                         }
                     }
+                }
+            }
+
+            // ── Tab 7: Diagnostics ───────────────────────────────────
+            Item {
+                id: diagTab
+
+                ColumnLayout {
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.top: parent.top
+                    anchors.bottom: parent.bottom
+                    anchors.margins: 32
+                    spacing: 14
+
+                    Text {
+                        text: "COLLECTION DIAGNOSTICS"
+                        color: "#aaaaaa"
+                        font.pixelSize: 13
+                        font.letterSpacing: 2
+                    }
+
+                    Rectangle { Layout.fillWidth: true; height: 1; color: "#333" }
+
+                    // Search Mode
+                    RowLayout {
+                        spacing: 12
+                        Text { text: "Search Mode:"; color: "#aaaaaa"; font.pixelSize: 16; Layout.preferredWidth: 120 }
+                        RadioButton {
+                            id: rbMissing
+                            checked: true
+                            text: "Missing Movie"
+                            onClicked: root.diagMode = "missing"
+                            indicator: Rectangle {
+                                implicitWidth: 18; implicitHeight: 18
+                                x: 0; y: (parent.height - height) / 2
+                                radius: 9; border.color: "#888"
+                                Rectangle {
+                                    anchors.centerIn: parent
+                                    width: 10; height: 10; radius: 5
+                                    color: "#FFD700"; visible: rbMissing.checked
+                                }
+                            }
+                            contentItem: Text {
+                                text: rbMissing.text; color: "white"; font.pixelSize: 16
+                                leftPadding: 24; verticalAlignment: Text.AlignVCenter
+                            }
+                        }
+                        RadioButton {
+                            id: rbWrongly
+                            text: "Wrongly Included"
+                            onClicked: root.diagMode = "wrongly_included"
+                            indicator: Rectangle {
+                                implicitWidth: 18; implicitHeight: 18
+                                x: 0; y: (parent.height - height) / 2
+                                radius: 9; border.color: "#888"
+                                Rectangle {
+                                    anchors.centerIn: parent
+                                    width: 10; height: 10; radius: 5
+                                    color: "#FFD700"; visible: rbWrongly.checked
+                                }
+                            }
+                            contentItem: Text {
+                                text: rbWrongly.text; color: "white"; font.pixelSize: 16
+                                leftPadding: 24; verticalAlignment: Text.AlignVCenter
+                            }
+                        }
+                    }
+
+                    // Collection Type
+                    RowLayout {
+                        spacing: 12
+                        Text { text: "Collection Type:"; color: "#aaaaaa"; font.pixelSize: 16; Layout.preferredWidth: 120 }
+                        RadioButton {
+                            id: rbQuick
+                            checked: true
+                            text: "Quick"
+                            onClicked: {
+                                root.diagType = "Quick"
+                                root.diagCollectionNames = collectionDiagnostics.get_collection_names("Quick")
+                                diagCollCombo.currentIndex = 0
+                            }
+                            indicator: Rectangle {
+                                implicitWidth: 18; implicitHeight: 18
+                                x: 0; y: (parent.height - height) / 2
+                                radius: 9; border.color: "#888"
+                                Rectangle {
+                                    anchors.centerIn: parent
+                                    width: 10; height: 10; radius: 5
+                                    color: "#FFD700"; visible: rbQuick.checked
+                                }
+                            }
+                            contentItem: Text {
+                                text: rbQuick.text; color: "white"; font.pixelSize: 16
+                                leftPadding: 24; verticalAlignment: Text.AlignVCenter
+                            }
+                        }
+                        RadioButton {
+                            id: rbArchitect
+                            text: "Architect"
+                            onClicked: {
+                                root.diagType = "Architect"
+                                root.diagCollectionNames = collectionDiagnostics.get_collection_names("Architect")
+                                diagCollCombo.currentIndex = 0
+                            }
+                            indicator: Rectangle {
+                                implicitWidth: 18; implicitHeight: 18
+                                x: 0; y: (parent.height - height) / 2
+                                radius: 9; border.color: "#888"
+                                Rectangle {
+                                    anchors.centerIn: parent
+                                    width: 10; height: 10; radius: 5
+                                    color: "#FFD700"; visible: rbArchitect.checked
+                                }
+                            }
+                            contentItem: Text {
+                                text: rbArchitect.text; color: "white"; font.pixelSize: 16
+                                leftPadding: 24; verticalAlignment: Text.AlignVCenter
+                            }
+                        }
+                    }
+
+                    // Collection Name
+                    RowLayout {
+                        spacing: 12
+                        Text { text: "Collection:"; color: "#aaaaaa"; font.pixelSize: 16; Layout.preferredWidth: 120 }
+                        ComboBox {
+                            id: diagCollCombo
+                            Layout.preferredWidth: 450
+                            Layout.preferredHeight: 40
+                            model: root.diagCollectionNames
+                            font.pixelSize: 16
+                            background: Rectangle {
+                                color: "#111"; radius: 6
+                                border.color: diagCollCombo.pressed ? "#FFD700" : "#444"
+                                border.width: 1
+                            }
+                            contentItem: Text {
+                                text: diagCollCombo.displayText || "(select collection)"
+                                color: diagCollCombo.displayText ? "white" : "#555"
+                                font.pixelSize: 16
+                                verticalAlignment: Text.AlignVCenter
+                                leftPadding: 12
+                                elide: Text.ElideRight
+                            }
+                            indicator: Text {
+                                text: "\u25BE"
+                                color: "#888"
+                                font.pixelSize: 18
+                                anchors.right: parent.right
+                                anchors.rightMargin: 12
+                                anchors.verticalCenter: parent.verticalCenter
+                            }
+                            delegate: ItemDelegate {
+                                width: diagCollCombo.width
+                                height: 36
+                                contentItem: Text {
+                                    text: modelData
+                                    color: parent.highlighted ? "#FFD700" : "white"
+                                    font.pixelSize: 15
+                                    verticalAlignment: Text.AlignVCenter
+                                    leftPadding: 8
+                                }
+                                highlighted: diagCollCombo.highlightedIndex === index
+                                background: Rectangle { color: parent.highlighted ? "#333" : "#1a1a1a" }
+                            }
+                            popup: Popup {
+                                y: diagCollCombo.height + 2
+                                width: diagCollCombo.width
+                                implicitHeight: Math.min(contentItem.implicitHeight + 2, 350)
+                                padding: 1
+                                contentItem: ListView {
+                                    clip: true
+                                    implicitHeight: contentHeight
+                                    model: diagCollCombo.delegateModel
+                                    currentIndex: diagCollCombo.highlightedIndex
+                                    ScrollIndicator.vertical: ScrollIndicator {}
+                                }
+                                background: Rectangle { color: "#1a1a1a"; border.color: "#555"; radius: 4 }
+                            }
+                        }
+                    }
+
+                    // Movie Name with autocomplete
+                    RowLayout {
+                        spacing: 12
+                        z: 10
+                        Text { text: "Movie:"; color: "#aaaaaa"; font.pixelSize: 16; Layout.preferredWidth: 120 }
+                        Item {
+                            Layout.preferredWidth: 450
+                            Layout.preferredHeight: 40
+                            clip: false
+
+                            Rectangle {
+                                anchors.fill: parent
+                                color: "#111"; radius: 6
+                                border.color: diagMovieField.activeFocus ? "#FFD700" : "#444"
+                                border.width: 1
+
+                                TextField {
+                                    id: diagMovieField
+                                    anchors.fill: parent
+                                    anchors.leftMargin: 8
+                                    anchors.rightMargin: 8
+                                    verticalAlignment: Text.AlignVCenter
+                                    color: "white"
+                                    font.pixelSize: 16
+                                    placeholderText: "Start typing movie name..."
+                                    placeholderTextColor: "#555"
+                                    background: Rectangle { color: "transparent" }
+                                    onTextChanged: {
+                                        if (root.diagUserTyping) diagDebounce.restart()
+                                    }
+                                    onActiveFocusChanged: {
+                                        if (activeFocus) root.diagUserTyping = true
+                                    }
+                                }
+                            }
+
+                            Timer {
+                                id: diagDebounce
+                                interval: 300
+                                repeat: false
+                                onTriggered: {
+                                    if (diagMovieField.text.length >= 2) {
+                                        root.diagMovieSuggestions = collectionDiagnostics.get_movie_suggestions(diagMovieField.text)
+                                        if (root.diagMovieSuggestions.length > 0) diagSugPopup.open()
+                                        else diagSugPopup.close()
+                                    } else {
+                                        root.diagMovieSuggestions = []
+                                        diagSugPopup.close()
+                                    }
+                                }
+                            }
+
+                            Popup {
+                                id: diagSugPopup
+                                y: parent.height + 4
+                                x: 0
+                                width: parent.width
+                                height: Math.min(diagSugList.contentHeight + 12, 280)
+                                padding: 4
+                                z: 100
+                                closePolicy: Popup.CloseOnPressOutside | Popup.CloseOnEscape
+                                background: Rectangle { color: "#1a1a1a"; border.color: "#FFD700"; radius: 6; border.width: 1 }
+                                contentItem: ListView {
+                                    id: diagSugList
+                                    clip: true
+                                    model: root.diagMovieSuggestions
+                                    delegate: ItemDelegate {
+                                        width: diagSugList.width
+                                        height: 32
+                                        contentItem: Text {
+                                            text: modelData
+                                            color: parent.hovered ? "#FFD700" : "#ddd"
+                                            font.pixelSize: 15
+                                            verticalAlignment: Text.AlignVCenter
+                                            leftPadding: 6
+                                        }
+                                        background: Rectangle { color: parent.hovered ? "#2a2a2a" : "transparent" }
+                                        onClicked: {
+                                            root.diagUserTyping = false
+                                            diagMovieField.text = modelData
+                                            diagSugPopup.close()
+                                            root.diagUserTyping = true
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    // Run button
+                    Item { Layout.preferredHeight: 4 }
+                    Rectangle {
+                        width: 180; height: 44
+                        color: runDiagHover ? "#FFD700" : "#2a2a2a"
+                        radius: 6
+                        border.color: "#FFD700"
+                        border.width: 1
+                        property bool runDiagHover: false
+
+                        Text {
+                            anchors.centerIn: parent
+                            text: "Run Diagnostic"
+                            color: parent.runDiagHover ? "#111" : "white"
+                            font.pixelSize: 18
+                            font.bold: true
+                        }
+                        MouseArea {
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+                            onEntered: parent.runDiagHover = true
+                            onExited: parent.runDiagHover = false
+                            onClicked: {
+                                var collName = root.diagCollectionNames.length > 0 ? root.diagCollectionNames[diagCollCombo.currentIndex] : ""
+                                var result = collectionDiagnostics.diagnose(root.diagType, collName, diagMovieField.text, root.diagMode)
+                                diagReport.text = result
+                            }
+                        }
+                    }
+
+                    // Report area
+                    Rectangle {
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+                        color: "#0d0d0d"
+                        radius: 6
+                        border.color: "#333"
+                        border.width: 1
+
+                        ScrollView {
+                            anchors.fill: parent
+                            anchors.margins: 8
+                            clip: true
+
+                            TextArea {
+                                id: diagReport
+                                readOnly: true
+                                color: "#cccccc"
+                                font.pixelSize: 14
+                                font.family: "Consolas"
+                                wrapMode: Text.WordWrap
+                                text: "Run a diagnostic to see results here."
+                                background: Rectangle { color: "transparent" }
+                            }
+                        }
+                    }
+                }
+
+                // Load collection names when tab becomes visible
+                Component.onCompleted: {
+                    root.diagCollectionNames = collectionDiagnostics.get_collection_names("Quick")
                 }
             }
         }
