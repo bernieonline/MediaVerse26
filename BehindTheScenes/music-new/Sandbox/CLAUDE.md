@@ -107,6 +107,16 @@ The movie collections created by a user are stored in a json file and this is it
         "created": "2026-01-01"  
     },
 
+
+    NOTE: After distribution and installation the json files stored locally are at this location
+    "C:\Users\berna\AppData\Local\MediaVerse"
+
+    XML and Manifest data is rebuild foloowing library changes
+    Tag changes may not be picked up but can be rebuild from settings
+
+    If manually amending tags in JRiver, they may not be picked up, always try to use the load data from movie or tv option as it updates the xml sidecar file
+
+
 Overview
 
 1. To provide a high quality interface to JRiver MC34 software. This software has great technical features for video and audio but the interface is dated. I want something modern and interesting and easy to use, It must be fast and responsive as there is no technical limitation to the required resources.  
@@ -163,4 +173,4 @@ The presentation panel includes a toolbar for editing a collection. You can rena
 
 This is where we use the image snatcher panel It helps to find suitable images, crop them and save them to the splash screen folder . By clicking on the image icon in the edit toolbar you camn then assign the image you saved
 
-All of the above code is operational and requires testing and hardening against certain failures such as server connections and json file damage. The creation of the manifest and the xml_collection_data are critical json files. I need to greatly improve the checks and creation processes to protect the user from unexpected failure. This is my next piece of work
+
