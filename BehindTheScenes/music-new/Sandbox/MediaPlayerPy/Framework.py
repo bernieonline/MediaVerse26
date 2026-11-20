@@ -212,6 +212,7 @@ def main():
 
 
         settings_manager = SettingsManager(paths["config"], fileSystem)
+        settings_manager.env_path = str(env_path)
         settings_manager.load_settings()
         drive_logic = DriveManager()
         

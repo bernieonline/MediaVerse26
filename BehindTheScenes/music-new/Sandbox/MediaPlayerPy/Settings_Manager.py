@@ -1,13 +1,15 @@
 import json
 import subprocess
 import os
+from pathlib import Path
 from PySide6.QtCore import QObject, Slot, Signal
 
 class SettingsManager(QObject):
     # Signals QML can connect to
     settingsChanged = Signal()
     videoLaunchRequested = Signal(str)
-    
+    dbTestResult = Signal(str)
+
     # CHANGED: Now using (str) to pass a JSON string to avoid Shiboken/C++ conversion errors
     playerMenuChanged = Signal(str)
 
@@ -16,6 +18,7 @@ class SettingsManager(QObject):
         self.config_path = config_path
         self.fileSystem = fileSystem
         self._settings = {}
+        self.env_path = None  # Set by Framework.py after construction
         # Assumes menu.json is in the same folder as config.json
         self.menu_path = os.path.join(os.path.dirname(self.config_path), "menu.json")
         self.menu_data = {} # Will be populated by Framework.py at startup
@@ -241,5 +244,97 @@ class SettingsManager(QObject):
         self.playerMenuChanged.emit(json_payload)
         print(f">>> SettingsManager: Menu synced with {len(player_items)} players.")
 
+    # ── Database Credentials ──────────────────────────────────────
 
-   
+    def _resolve_env_path(self):
+        """Return the path to sqlCreds.env, falling back to a relative lookup."""
+        if self.env_path and os.path.exists(self.env_path):
+            return self.env_path
+        # Fallback: same logic as Framework.py
+        fallback = Path(__file__).resolve().parent.parent.parent / "sqlCreds.env"
+        return str(fallback)
+
+    @Slot(result="QVariant")
+    def get_db_credentials(self):
+        """Read sqlCreds.env and return a dict of key/value pairs."""
+        env_file = self._resolve_env_path()
+        creds = {}
+        try:
+            with open(env_file, "r", encoding="utf-8") as f:
+                for line in f:
+                    line = line.strip()
+                    if "=" in line and not line.startswith("#"):
+                        key, value = line.split("=", 1)
+                        creds[key.strip()] = value.strip()
+            print(f"[INFO] Loaded credentials from {env_file}")
+        except Exception as e:
+            print(f"[ERROR] Could not read {env_file}: {e}")
+        return creds
+
+    @Slot(str)
+    def update_db_credentials(self, json_string):
+        """Write updated credentials back to sqlCreds.env."""
+        env_file = self._resolve_env_path()
+        try:
+            creds = json.loads(json_string)
+            with open(env_file, "w", encoding="utf-8") as f:
+                for key, value in creds.items():
+                    f.write(f"{key}={value}\n")
+            print(f"[INFO] Credentials saved to {env_file}")
+            self.dbTestResult.emit("Saved successfully. Restart MediaVerse for changes to take full effect.")
+        except Exception as e:
+            print(f"[ERROR] Could not write {env_file}: {e}")
+            self.dbTestResult.emit(f"Save failed: {e}")
+
+    @Slot()
+    def test_db_connection(self):
+        """Test MySQL connection using the current env file credentials."""
+        env_file = self._resolve_env_path()
+        creds = {}
+        try:
+            with open(env_file, "r", encoding="utf-8") as f:
+                for line in f:
+                    line = line.strip()
+                    if "=" in line and not line.startswith("#"):
+                        key, value = line.split("=", 1)
+                        creds[key.strip()] = value.strip()
+        except Exception as e:
+            self.dbTestResult.emit(f"Could not read credentials file: {e}")
+            return
+
+        import mysql.connector
+        results = []
+
+        # Test primary database
+        try:
+            conn = mysql.connector.connect(
+                host=creds.get("MYSQL_HOST", ""),
+                user=creds.get("MYSQL_USER", ""),
+                password=creds.get("MYSQL_PASSWORD", ""),
+                database=creds.get("MYSQL_DB", ""),
+                connect_timeout=5
+            )
+            if conn.is_connected():
+                info = conn.get_server_info()
+                results.append(f"Primary: Connected (MySQL {info})")
+                conn.close()
+        except mysql.connector.Error as e:
+            results.append(f"Primary: Failed - {e}")
+
+        # Test secondary database
+        try:
+            conn = mysql.connector.connect(
+                host=creds.get("MM2_HOST", ""),
+                user=creds.get("MM2_USER", ""),
+                password=creds.get("MM2_PASSWORD", ""),
+                database=creds.get("MM2_DB", ""),
+                connect_timeout=5
+            )
+            if conn.is_connected():
+                info = conn.get_server_info()
+                results.append(f"Secondary: Connected (MySQL {info})")
+                conn.close()
+        except mysql.connector.Error as e:
+            results.append(f"Secondary: Failed - {e}")
+
+        self.dbTestResult.emit("\n".join(results))

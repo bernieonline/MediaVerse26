@@ -24,6 +24,12 @@ Popup {
     property var    diagMovieSuggestions: []
     property bool   diagUserTyping: false
 
+    // Database tab state
+    property var    dbCreds: ({})
+    property string dbTestStatus: ""
+    property bool   dbShowPw1: false
+    property bool   dbShowPw2: false
+
     function refreshToolPaths() {
         var tp = root.settings["ToolPaths"] || {}
         root.videoProcPath = tp["VideoProc"] || ""
@@ -145,12 +151,12 @@ Popup {
             background: Rectangle { color: "#111" }
 
             Repeater {
-                model: ["Profile", "Player", "Library", "Startup", "Recovery", "Tools", "Diagnostics"]
+                model: ["Profile", "Player", "Library", "Startup", "Recovery", "Tools", "Diagnostics", "Database"]
                 TabButton {
                     text: modelData
                     font.pixelSize: 18
                     font.bold: tabBar.currentIndex === index
-                    width: root.width / 7
+                    width: root.width / 8
 
                     background: Rectangle {
                         color: tabBar.currentIndex === index ? "#2566c2" : "#1a1a1a"
@@ -1024,6 +1030,307 @@ Popup {
                 // Load collection names when tab becomes visible
                 Component.onCompleted: {
                     root.diagCollectionNames = collectionDiagnostics.get_collection_names("Quick")
+                }
+            }
+
+            // ── Tab 8: Database ───────────────────────────────────────────
+            Item {
+                id: dbTab
+
+                // Load credentials when this tab becomes visible
+                Connections {
+                    target: tabBar
+                    function onCurrentIndexChanged() {
+                        if (tabBar.currentIndex === 7) {
+                            root.dbCreds = SettingsManager.get_db_credentials()
+                            dbHost1.text   = root.dbCreds["MYSQL_HOST"]     || ""
+                            dbUser1.text   = root.dbCreds["MYSQL_USER"]     || ""
+                            dbPw1.text     = root.dbCreds["MYSQL_PASSWORD"] || ""
+                            dbName1.text   = root.dbCreds["MYSQL_DB"]       || ""
+                            dbHost2.text   = root.dbCreds["MM2_HOST"]       || ""
+                            dbUser2.text   = root.dbCreds["MM2_USER"]       || ""
+                            dbPw2.text     = root.dbCreds["MM2_PASSWORD"]   || ""
+                            dbName2.text   = root.dbCreds["MM2_DB"]         || ""
+                            root.dbTestStatus = ""
+                        }
+                    }
+                }
+
+                Connections {
+                    target: SettingsManager
+                    function onDbTestResult(msg) { root.dbTestStatus = msg }
+                }
+
+                Flickable {
+                    anchors.fill: parent
+                    anchors.margins: 32
+                    contentHeight: dbCol.implicitHeight
+                    clip: true
+                    boundsBehavior: Flickable.StopAtBounds
+
+                    ColumnLayout {
+                        id: dbCol
+                        width: parent.width
+                        spacing: 16
+
+                        Text {
+                            text: "DATABASE CREDENTIALS"
+                            color: "#aaaaaa"
+                            font.pixelSize: 13
+                            font.letterSpacing: 2
+                        }
+
+                        Rectangle { Layout.fillWidth: true; height: 1; color: "#333" }
+
+                        Text {
+                            text: "Changes require a restart of MediaVerse to take full effect."
+                            color: "#666"
+                            font.pixelSize: 14
+                            font.italic: true
+                            wrapMode: Text.WordWrap
+                            Layout.fillWidth: true
+                        }
+
+                        // ── Primary Database ──
+                        Text {
+                            text: "Primary Database (MediaManager)"
+                            color: "#FFD700"
+                            font.pixelSize: 16
+                            font.bold: true
+                            Layout.topMargin: 8
+                        }
+
+                        GridLayout {
+                            columns: 2
+                            columnSpacing: 16
+                            rowSpacing: 10
+                            Layout.fillWidth: true
+
+                            Text { text: "Host"; color: "#aaaaaa"; font.pixelSize: 16; Layout.preferredWidth: 100 }
+                            TextField {
+                                id: dbHost1
+                                Layout.preferredWidth: 460; Layout.preferredHeight: 40
+                                color: "white"; font.pixelSize: 16
+                                placeholderText: "e.g. 192.168.178.100"
+                                placeholderTextColor: "#444"
+                                background: Rectangle { color: "#111"; radius: 6; border.color: dbHost1.activeFocus ? "#FFD700" : "#333" }
+                            }
+
+                            Text { text: "User"; color: "#aaaaaa"; font.pixelSize: 16; Layout.preferredWidth: 100 }
+                            TextField {
+                                id: dbUser1
+                                Layout.preferredWidth: 460; Layout.preferredHeight: 40
+                                color: "white"; font.pixelSize: 16
+                                placeholderText: "e.g. root"
+                                placeholderTextColor: "#444"
+                                background: Rectangle { color: "#111"; radius: 6; border.color: dbUser1.activeFocus ? "#FFD700" : "#333" }
+                            }
+
+                            Text { text: "Password"; color: "#aaaaaa"; font.pixelSize: 16; Layout.preferredWidth: 100 }
+                            RowLayout {
+                                spacing: 8
+                                TextField {
+                                    id: dbPw1
+                                    Layout.preferredWidth: 410; Layout.preferredHeight: 40
+                                    color: "white"; font.pixelSize: 16
+                                    echoMode: root.dbShowPw1 ? TextInput.Normal : TextInput.Password
+                                    placeholderText: "password"
+                                    placeholderTextColor: "#444"
+                                    background: Rectangle { color: "#111"; radius: 6; border.color: dbPw1.activeFocus ? "#FFD700" : "#333" }
+                                }
+                                Rectangle {
+                                    width: 42; height: 40; radius: 6
+                                    color: root.dbShowPw1 ? "#333" : "#1a1a1a"
+                                    border.color: "#555"
+                                    Text {
+                                        anchors.centerIn: parent
+                                        text: root.dbShowPw1 ? "Hide" : "Show"
+                                        color: "#aaa"; font.pixelSize: 12
+                                    }
+                                    MouseArea {
+                                        anchors.fill: parent
+                                        cursorShape: Qt.PointingHandCursor
+                                        onClicked: root.dbShowPw1 = !root.dbShowPw1
+                                    }
+                                }
+                            }
+
+                            Text { text: "Database"; color: "#aaaaaa"; font.pixelSize: 16; Layout.preferredWidth: 100 }
+                            TextField {
+                                id: dbName1
+                                Layout.preferredWidth: 460; Layout.preferredHeight: 40
+                                color: "white"; font.pixelSize: 16
+                                placeholderText: "e.g. MediaManager"
+                                placeholderTextColor: "#444"
+                                background: Rectangle { color: "#111"; radius: 6; border.color: dbName1.activeFocus ? "#FFD700" : "#333" }
+                            }
+                        }
+
+                        // ── Secondary Database ──
+                        Text {
+                            text: "Secondary Database (MediaManager2)"
+                            color: "#FFD700"
+                            font.pixelSize: 16
+                            font.bold: true
+                            Layout.topMargin: 16
+                        }
+
+                        GridLayout {
+                            columns: 2
+                            columnSpacing: 16
+                            rowSpacing: 10
+                            Layout.fillWidth: true
+
+                            Text { text: "Host"; color: "#aaaaaa"; font.pixelSize: 16; Layout.preferredWidth: 100 }
+                            TextField {
+                                id: dbHost2
+                                Layout.preferredWidth: 460; Layout.preferredHeight: 40
+                                color: "white"; font.pixelSize: 16
+                                placeholderText: "e.g. 192.168.178.100"
+                                placeholderTextColor: "#444"
+                                background: Rectangle { color: "#111"; radius: 6; border.color: dbHost2.activeFocus ? "#FFD700" : "#333" }
+                            }
+
+                            Text { text: "User"; color: "#aaaaaa"; font.pixelSize: 16; Layout.preferredWidth: 100 }
+                            TextField {
+                                id: dbUser2
+                                Layout.preferredWidth: 460; Layout.preferredHeight: 40
+                                color: "white"; font.pixelSize: 16
+                                placeholderText: "e.g. root"
+                                placeholderTextColor: "#444"
+                                background: Rectangle { color: "#111"; radius: 6; border.color: dbUser2.activeFocus ? "#FFD700" : "#333" }
+                            }
+
+                            Text { text: "Password"; color: "#aaaaaa"; font.pixelSize: 16; Layout.preferredWidth: 100 }
+                            RowLayout {
+                                spacing: 8
+                                TextField {
+                                    id: dbPw2
+                                    Layout.preferredWidth: 410; Layout.preferredHeight: 40
+                                    color: "white"; font.pixelSize: 16
+                                    echoMode: root.dbShowPw2 ? TextInput.Normal : TextInput.Password
+                                    placeholderText: "password"
+                                    placeholderTextColor: "#444"
+                                    background: Rectangle { color: "#111"; radius: 6; border.color: dbPw2.activeFocus ? "#FFD700" : "#333" }
+                                }
+                                Rectangle {
+                                    width: 42; height: 40; radius: 6
+                                    color: root.dbShowPw2 ? "#333" : "#1a1a1a"
+                                    border.color: "#555"
+                                    Text {
+                                        anchors.centerIn: parent
+                                        text: root.dbShowPw2 ? "Hide" : "Show"
+                                        color: "#aaa"; font.pixelSize: 12
+                                    }
+                                    MouseArea {
+                                        anchors.fill: parent
+                                        cursorShape: Qt.PointingHandCursor
+                                        onClicked: root.dbShowPw2 = !root.dbShowPw2
+                                    }
+                                }
+                            }
+
+                            Text { text: "Database"; color: "#aaaaaa"; font.pixelSize: 16; Layout.preferredWidth: 100 }
+                            TextField {
+                                id: dbName2
+                                Layout.preferredWidth: 460; Layout.preferredHeight: 40
+                                color: "white"; font.pixelSize: 16
+                                placeholderText: "e.g. MediaManager2"
+                                placeholderTextColor: "#444"
+                                background: Rectangle { color: "#111"; radius: 6; border.color: dbName2.activeFocus ? "#FFD700" : "#333" }
+                            }
+                        }
+
+                        // ── Buttons ──
+                        RowLayout {
+                            spacing: 16
+                            Layout.topMargin: 20
+
+                            // Test Connection button
+                            Rectangle {
+                                width: 180; height: 44
+                                color: testDbHover ? "#FFD700" : "#2a2a2a"
+                                radius: 6
+                                border.color: "#FFD700"; border.width: 1
+                                property bool testDbHover: false
+                                Text {
+                                    anchors.centerIn: parent
+                                    text: "Test Connection"
+                                    color: parent.testDbHover ? "#111" : "white"
+                                    font.pixelSize: 16; font.bold: true
+                                }
+                                MouseArea {
+                                    anchors.fill: parent
+                                    hoverEnabled: true
+                                    cursorShape: Qt.PointingHandCursor
+                                    onEntered: parent.testDbHover = true
+                                    onExited: parent.testDbHover = false
+                                    onClicked: {
+                                        root.dbTestStatus = "Testing..."
+                                        SettingsManager.test_db_connection()
+                                    }
+                                }
+                            }
+
+                            // Save button
+                            Rectangle {
+                                width: 120; height: 44
+                                color: saveDbHover ? "#FFD700" : "#2a2a2a"
+                                radius: 6
+                                border.color: "#FFD700"; border.width: 1
+                                property bool saveDbHover: false
+                                Text {
+                                    anchors.centerIn: parent
+                                    text: "Save"
+                                    color: parent.saveDbHover ? "#111" : "white"
+                                    font.pixelSize: 16; font.bold: true
+                                }
+                                MouseArea {
+                                    anchors.fill: parent
+                                    hoverEnabled: true
+                                    cursorShape: Qt.PointingHandCursor
+                                    onEntered: parent.saveDbHover = true
+                                    onExited: parent.saveDbHover = false
+                                    onClicked: {
+                                        var creds = {
+                                            "MYSQL_HOST":     dbHost1.text,
+                                            "MYSQL_USER":     dbUser1.text,
+                                            "MYSQL_PASSWORD": dbPw1.text,
+                                            "MYSQL_DB":       dbName1.text,
+                                            "GOOGLE_AI_KEY":  root.dbCreds["GOOGLE_AI_KEY"] || "",
+                                            "MM2_HOST":       dbHost2.text,
+                                            "MM2_USER":       dbUser2.text,
+                                            "MM2_PASSWORD":   dbPw2.text,
+                                            "MM2_DB":         dbName2.text
+                                        }
+                                        SettingsManager.update_db_credentials(JSON.stringify(creds))
+                                    }
+                                }
+                            }
+                        }
+
+                        // ── Status area ──
+                        Rectangle {
+                            Layout.fillWidth: true
+                            height: 60
+                            color: "#0d0d0d"
+                            radius: 6
+                            border.color: "#333"
+                            border.width: 1
+                            visible: root.dbTestStatus !== ""
+
+                            Text {
+                                anchors.fill: parent
+                                anchors.margins: 12
+                                text: root.dbTestStatus
+                                color: root.dbTestStatus.indexOf("Failed") >= 0 ? "#ff6666" : "#66ff66"
+                                font.pixelSize: 14
+                                font.family: "Consolas"
+                                wrapMode: Text.WordWrap
+                                verticalAlignment: Text.AlignVCenter
+                            }
+                        }
+                    }
                 }
             }
         }
